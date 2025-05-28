@@ -4,15 +4,16 @@ import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = GeistSans({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
+// Removed the incorrect function calls for GeistSans and GeistMono
+// const geistSans = GeistSans({
+//   variable: '--font-geist-sans',
+//   subsets: ['latin'],
+// });
 
-const geistMono = GeistMono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+// const geistMono = GeistMono({
+//   variable: '--font-geist-mono',
+//   subsets: ['latin'],
+// });
 
 export const metadata: Metadata = {
   title: 'TradeHunter Pro Portal',
@@ -26,7 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+      {/*
+        Use GeistSans.variable and GeistMono.variable directly.
+        These properties provide the necessary CSS class names and/or CSS variables
+        for the fonts to be applied. The globals.css file should already
+        be set up to use --font-geist-sans and --font-geist-mono if needed.
+      */}
+      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}>
         {children}
         <Toaster />
       </body>
