@@ -12,6 +12,7 @@ import { DashboardClientPageContent } from '@/components/dashboard/DashboardClie
 // Defined within a Server Component and passed to a Client Component.
 // Next.js handles making this callable from the client.
 async function addTraderAction(branchId: BranchId, values: z.infer<typeof traderFormSchema>): Promise<Trader | null> {
+  'use server';
   try {
     const newTraderData = {
       ...values,
@@ -26,6 +27,7 @@ async function addTraderAction(branchId: BranchId, values: z.infer<typeof trader
 
 // Server action for updating a trader
 async function updateTraderAction(branchId: BranchId, traderId: string, values: z.infer<typeof traderFormSchema>): Promise<Trader | null> {
+  'use server';
   try {
     const traderToUpdate: Trader = {
       id: traderId,
@@ -45,6 +47,7 @@ async function updateTraderAction(branchId: BranchId, traderId: string, values: 
 
 // Server action for deleting a trader
 async function deleteTraderAction(branchId: BranchId, traderId: string): Promise<boolean> {
+  'use server';
    try {
     return dbDeleteTrader(traderId, branchId);
   } catch (error) {
