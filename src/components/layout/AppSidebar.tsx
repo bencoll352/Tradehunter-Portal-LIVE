@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -71,7 +72,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent asChild>
+      <SidebarContent>
         <ScrollArea className="flex-1">
           <SidebarMenu className="px-3 py-2">
             {navItems.map((item) => (
