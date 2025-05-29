@@ -22,9 +22,9 @@ export interface Trader {
   reviewKeywords?: string; // Storing as a single string
 }
 
-export type BranchId = 'BRANCH_A' | 'BRANCH_B' | 'BRANCH_C';
+export type BranchId = 'BRANCH_A' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D'; // Added BRANCH_D
 
-export const VALID_BRANCH_IDS: BranchId[] = ['BRANCH_A', 'BRANCH_B', 'BRANCH_C'];
+export const VALID_BRANCH_IDS: BranchId[] = ['BRANCH_A', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D']; // Added BRANCH_D
 
 // For bulk upload parsing, reflecting the 14 specific headers
 export type ParsedTraderData = {
@@ -43,4 +43,3 @@ export type ParsedTraderData = {
   address?: string;
   reviewKeywords?: string;
 };
-
