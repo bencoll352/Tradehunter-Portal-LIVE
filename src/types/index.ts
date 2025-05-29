@@ -43,3 +43,4 @@ export type ParsedTraderData = {
   address?: string;
   reviewKeywords?: string;
 };
+
