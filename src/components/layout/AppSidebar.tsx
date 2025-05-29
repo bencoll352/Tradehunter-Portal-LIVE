@@ -75,10 +75,10 @@ export function AppSidebar() {
                     onClick={() => setOpenMobile(false)}
                     className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
                   >
-                    <>
+                    <div> {/* This div can accept props from SidebarMenuButton (Slot) */}
                       <item.icon />
                       <span>{item.label}</span>
-                    </>
+                    </div>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
