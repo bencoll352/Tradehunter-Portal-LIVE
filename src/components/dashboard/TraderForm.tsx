@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,11 +28,24 @@ export const traderFormSchema = z.object({
   totalSales: z.coerce.number().min(0, { message: "Total sales must be a positive number." }),
   tradesMade: z.coerce.number().int().min(0, { message: "Trades made must be a positive integer." }),
   status: z.enum(["Active", "Inactive"]),
+  // Optional fields from Trader that might be part of a more comprehensive form in future
+  description: z.string().optional(),
+  rating: z.coerce.number().optional(),
+  website: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  mainCategory: z.string().optional(),
+  ownerName: z.string().optional(),
+  ownerProfileLink: z.string().optional(),
+  categories: z.string().optional(),
+  workdayTiming: z.string().optional(),
+  closedOn: z.string().optional(),
+  reviewKeywords: z.string().optional(),
 });
 
 interface TraderFormProps {
   onSubmit: (values: z.infer<typeof traderFormSchema>) => void;
-  defaultValues?: Partial<Trader>;
+  defaultValues?: Partial<Trader>; // Use Partial<Trader> for defaultValues
   isLoading?: boolean;
   submitButtonText?: string;
 }
@@ -44,6 +58,18 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
       totalSales: defaultValues?.totalSales || 0,
       tradesMade: defaultValues?.tradesMade || 0,
       status: defaultValues?.status || "Active",
+      description: defaultValues?.description || "",
+      rating: defaultValues?.rating || undefined,
+      website: defaultValues?.website || "",
+      phone: defaultValues?.phone || "",
+      address: defaultValues?.address || "",
+      mainCategory: defaultValues?.mainCategory || "",
+      ownerName: defaultValues?.ownerName || "",
+      ownerProfileLink: defaultValues?.ownerProfileLink || "",
+      categories: defaultValues?.categories || "",
+      workdayTiming: defaultValues?.workdayTiming || "",
+      closedOn: defaultValues?.closedOn || "",
+      reviewKeywords: defaultValues?.reviewKeywords || "",
     },
   });
 
@@ -57,7 +83,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             <FormItem>
               <FormLabel>Trader Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="John Doe Ltd." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -69,7 +95,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             name="totalSales"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Total Sales ($)</FormLabel>
+                <FormLabel>Total Sales (£)</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="50000" {...field} />
                 </FormControl>
@@ -112,6 +138,24 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             </FormItem>
           )}
         />
+        {/* 
+          Optionally, more fields could be added here if the standard form needs to edit them.
+          For now, they are primarily for bulk upload.
+          Example:
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Input placeholder="Trader description" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        */}
         <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
           {isLoading ? "Saving..." : submitButtonText}
         </Button>
@@ -119,3 +163,4 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
     </Form>
   );
 }
+

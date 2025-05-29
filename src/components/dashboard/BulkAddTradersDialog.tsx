@@ -24,18 +24,25 @@ interface BulkAddTradersDialogProps {
   onBulkAddTraders: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
 
-// Expected column indices for parsing (0-indexed)
+// Expected column indices for parsing (0-indexed based on the 14 specific headers)
+// Name (1) Description (2) reviews (3) rating (4) Website (5) Phone (6) Owner_name (7) Owner_profile_link (8) Main_category (9) Categories (10) workday_timing (11) closed_on (12) Address (13) review_keywords (14)
 const COLUMN_INDICES = {
-  NAME: 0,
-  DESCRIPTION: 1,
-  REVIEWS: 3, // This will be 'tradesMade'
-  RATING: 4,
-  WEBSITE: 6,
-  PHONE: 7,
-  MAIN_CATEGORY: 11,
-  ADDRESS: 16,
+  NAME: 0,                // Column 1
+  DESCRIPTION: 1,         // Column 2
+  REVIEWS: 2,             // Column 3 (maps to tradesMade)
+  RATING: 3,              // Column 4
+  WEBSITE: 4,             // Column 5
+  PHONE: 5,               // Column 6
+  OWNER_NAME: 6,          // Column 7
+  OWNER_PROFILE_LINK: 7,  // Column 8
+  MAIN_CATEGORY: 8,       // Column 9
+  CATEGORIES: 9,          // Column 10
+  WORKDAY_TIMING: 10,     // Column 11
+  CLOSED_ON: 11,          // Column 12
+  ADDRESS: 12,            // Column 13
+  REVIEW_KEYWORDS: 13,    // Column 14
 };
-const EXPECTED_COLUMN_COUNT = 18; // Based on the user's header string
+const EXPECTED_COLUMN_COUNT = 14;
 
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
@@ -51,11 +58,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       if (line.trim() === "") continue;
       const values = line.split('\t');
 
-      if (values.length < Math.max(...Object.values(COLUMN_INDICES)) + 1 && values.length !== EXPECTED_COLUMN_COUNT) {
-        // Basic check, could be more sophisticated
-        // For simplicity, we'll try to parse what we can if some optional trailing columns are missing,
-        // but if core columns are missing, it might result in empty strings.
-        console.warn(`Skipping line due to unexpected column count: "${line}" (expected around ${EXPECTED_COLUMN_COUNT}, got ${values.length})`);
+      if (values.length !== EXPECTED_COLUMN_COUNT) {
+         console.warn(`Skipping line due to unexpected column count: "${line}" (expected ${EXPECTED_COLUMN_COUNT}, got ${values.length})`);
+         continue;
       }
 
       const name = values[COLUMN_INDICES.NAME]?.trim() || "";
@@ -67,12 +72,18 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       const trader: ParsedTraderData = {
         name: name,
         description: values[COLUMN_INDICES.DESCRIPTION]?.trim() || undefined,
-        tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0, // from reviews
+        tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0,
         rating: parseFloat(values[COLUMN_INDICES.RATING]?.trim() || "0") || undefined,
         website: values[COLUMN_INDICES.WEBSITE]?.trim() || undefined,
         phone: values[COLUMN_INDICES.PHONE]?.trim() || undefined,
+        ownerName: values[COLUMN_INDICES.OWNER_NAME]?.trim() || undefined,
+        ownerProfileLink: values[COLUMN_INDICES.OWNER_PROFILE_LINK]?.trim() || undefined,
         mainCategory: values[COLUMN_INDICES.MAIN_CATEGORY]?.trim() || undefined,
+        categories: values[COLUMN_INDICES.CATEGORIES]?.trim() || undefined,
+        workdayTiming: values[COLUMN_INDICES.WORKDAY_TIMING]?.trim() || undefined,
+        closedOn: values[COLUMN_INDICES.CLOSED_ON]?.trim() || undefined,
         address: values[COLUMN_INDICES.ADDRESS]?.trim() || undefined,
+        reviewKeywords: values[COLUMN_INDICES.REVIEW_KEYWORDS]?.trim() || undefined,
       };
       traders.push(trader);
     }
@@ -96,7 +107,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       toast({
         variant: "destructive",
         title: "Parsing Error",
-        description: "No valid trader data found to upload. Please check format and ensure names are present.",
+        description: "No valid trader data found. Please check format, ensure names are present, and each line has 14 tab-separated values.",
       });
       setIsLoading(false);
       return;
@@ -119,9 +130,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         });
       } else {
          toast({
-          variant: "destructive",
-          title: "No Traders Added",
-          description: "The bulk add process completed, but no new traders were added. This might be due to a server-side issue or if all parsed traders were invalid.",
+          variant: "warning",
+          title: "No New Traders Added",
+          description: "The process completed, but no new traders were added. This might be due to a server-side issue or if all parsed traders were invalid/duplicates.",
         });
       }
     } catch (error) {
@@ -143,25 +154,25 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders</DialogTitle>
           <DialogDescription>
-            Paste tab-separated data from your Google Maps scraping tool. Each line should represent one trader.
-            The data should follow the expected column order: Name, Description, (ignored), Reviews (as trades made), Rating, (ignored), Website, Phone, (ignored), (ignored), (ignored), Main Category, (ignored), (ignored), (ignored), (ignored), Address, (ignored).
-            Ensure 'Name' is always present.
+            Paste tab-separated data from your Google Maps scraping tool. Each line should represent one trader and contain 14 columns in the following order:
+            <br/>1. Name, 2. Description, 3. Reviews (trades made), 4. Rating, 5. Website, 6. Phone, 7. Owner Name, 8. Owner Profile Link, 9. Main Category, 10. Categories, 11. Workday Timing, 12. Closed On, 13. Address, 14. Review Keywords.
+            <br/>Ensure 'Name' (column 1) is always present.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="bulk-trader-data">Pasted Trader Data</Label>
+            <Label htmlFor="bulk-trader-data">Pasted Trader Data (Tab-Separated)</Label>
             <Textarea
               id="bulk-trader-data"
               placeholder="Paste your data here..."
               value={pastedData}
               onChange={(e) => setPastedData(e.target.value)}
               rows={10}
-              className="min-h-[200px]"
+              className="min-h-[200px] text-xs"
             />
           </div>
         </div>

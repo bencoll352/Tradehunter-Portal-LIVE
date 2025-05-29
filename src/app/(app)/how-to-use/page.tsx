@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, MessageSquareText, Users, Rocket } from "lucide-react"; // Added Rocket
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud } from "lucide-react";
 
 const faqs = [
   {
@@ -24,14 +24,20 @@ const faqs = [
   {
     value: "item-3",
     question: "How do I add, edit, or delete a trader?",
-    answer: "On the dashboard, use the 'Add New Trader' button. To edit or delete, use the respective icons (pencil for edit, trash can for delete) in the 'Actions' column of the trader table. You can also use the 'Bulk Add Traders' button to upload multiple traders at once.",
+    answer: "On the dashboard, use the 'Add New Trader' button. To edit or delete, use the respective icons (pencil for edit, trash can for delete) in the 'Actions' column of the trader table.",
     icon: <Users className="h-5 w-5 text-primary mr-2" />
+  },
+   {
+    value: "item-6",
+    question: "How do I bulk upload traders?",
+    answer: "Use the 'Bulk Add Traders' button on the dashboard. A dialog will appear where you can paste tab-separated data from your scraping tools. Ensure the data follows the 14 specified column headers: Name, Description, Reviews (as trades made), Rating, Website, Phone, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing, Closed On, Address, Review Keywords.",
+    icon: <UploadCloud className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-4",
-    question: "What is the Branch Booster AI?", // Changed name
-    answer: "The Branch Booster AI helps you analyze trader data. Type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box on the dashboard, and the AI will provide an answer based on the current data for your branch.",
-    icon: <Rocket className="h-5 w-5 text-primary mr-2" /> // Changed icon
+    question: "What is the Branch Booster?",
+    answer: "The Branch Booster helps you analyze trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box, or upload a customer data file (e.g., CSV) for deeper insights like upsell opportunities or multi-customer recommendations. The booster will provide an answer based on the current data for your branch and any uploaded file.",
+    icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-5",
@@ -101,17 +107,19 @@ export default function HowToUsePage() {
               <li><strong>Search:</strong> Use the search bar to find traders by name.</li>
               <li><strong>Sort:</strong> Click on table headers (Name, Total Sales, etc.) to sort data.</li>
               <li><strong>Add Trader:</strong> Click "Add New Trader", fill the form, and submit.</li>
-              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders", paste your tab-separated data, and submit.</li>
+              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders", paste your tab-separated data (following the 14 specified headers), and submit.</li>
               <li><strong>Edit Trader:</strong> Click the pencil icon next to a trader, modify details, and save.</li>
               <li><strong>Delete Trader:</strong> Click the trash icon, confirm, and the trader will be removed.</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">3. Using the Branch Booster AI</h3> {/* Changed name */}
+            <h3 className="text-xl font-semibold text-foreground mb-1">3. Using the Branch Booster</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>Locate the "Branch Booster" section on the dashboard.</li> {/* Changed name */}
+              <li>Locate the "Branch Booster" section on the dashboard.</li>
+              <li>Use "Quick Actions" for common pre-defined analyses.</li>
               <li>Type your question about trader performance into the text area.</li>
-              <li>Click "Ask AI". The AI's response will appear below.</li>
+              <li>Optionally, upload a customer data file (e.g., CSV, TXT) for more detailed analysis.</li>
+              <li>Click "Get Insights". The analysis will appear below.</li>
               <li>Example queries: "List all active traders.", "What is the average sales per trader?".</li>
             </ul>
           </div>

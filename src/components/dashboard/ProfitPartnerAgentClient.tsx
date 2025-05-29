@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Rocket, Sparkles } from "lucide-react"; // Changed Bot to Rocket
+import { Input } from "@/components/ui/input"; // For file input
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle } from "lucide-react";
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
 import { formatTraderDataForAI } from "@/lib/mock-data";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 const agentFormSchema = z.object({
   query: z.string().min(5, { message: "Query must be at least 5 characters." }),
@@ -23,19 +25,68 @@ interface ProfitPartnerAgentClientProps {
   traders: Trader[];
 }
 
+const quickActions = [
+  { label: "New Customers", query: "Identify new customers and provide a brief summary." },
+  { label: "High Potential New Customers", query: "Which new customers show the highest potential? Provide reasons." },
+  { label: "Boost Existing Customer Spend", query: "Suggest strategies to boost spending from existing customers." },
+  { label: "High Value Existing Customers", query: "List high-value existing customers and any recent changes in their activity." },
+  { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions." },
+  { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons." },
+];
+
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [analysisResponse, setAnalysisResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof agentFormSchema>>({
     resolver: zodResolver(agentFormSchema),
     defaultValues: { query: "" },
   });
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Basic validation for text-based files (e.g., CSV, TXT)
+      if (file.type.startsWith("text/") || file.name.endsWith(".csv") || file.name.endsWith(".tsv")) {
+        setSelectedFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setFileContent(e.target?.result as string);
+        };
+        reader.readAsText(file);
+         toast({ title: "File Selected", description: `${file.name} is ready for analysis.` });
+      } else {
+        toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a text-based file (e.g., .txt, .csv)." });
+        if(fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+        setSelectedFile(null);
+        setFileContent(null);
+      }
+    }
+  };
+
+  const clearFile = () => {
+    setSelectedFile(null);
+    setFileContent(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    toast({ title: "File Cleared", description: "Uploaded file has been removed." });
+  };
+
+  const handleQuickAction = (query: string) => {
+    form.setValue("query", query);
+    // Optionally, auto-submit or just pre-fill
+    // form.handleSubmit(onSubmit)(); 
+  };
+
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
     setIsLoading(true);
-    setAiResponse(null);
+    setAnalysisResponse(null);
     setError(null);
 
     const traderDataString = formatTraderDataForAI(traders);
@@ -43,14 +94,18 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     const input: ProfitPartnerQueryInput = {
       query: values.query,
       traderData: traderDataString,
+      ...(fileContent && { uploadedFileContent: fileContent }),
     };
 
     try {
       const result = await profitPartnerQuery(input);
-      setAiResponse(result.answer);
+      setAnalysisResponse(result.answer);
+      if (selectedFile) { // Clear file after successful submission with file
+        clearFile();
+      }
     } catch (e) {
-      console.error("AI Query Error:", e);
-      setError("Sorry, I couldn't process that request. Please try again.");
+      console.error("Analysis Error:", e);
+      setError("Sorry, I couldn't process that request. Please try again or check the external service.");
     } finally {
       setIsLoading(false);
     }
@@ -59,26 +114,43 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Rocket className="h-8 w-8 text-primary" /> {/* Changed Bot to Rocket */}
+        <div className="flex items-center gap-3">
+          <Rocket className="h-8 w-8 text-primary" />
           <div>
-            <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle> {/* Changed title */}
-            <CardDescription>Ask questions about your branch's trader performance.</CardDescription>
+            <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle>
+            <CardDescription>Get insights and recommendations for your branch's traders.</CardDescription>
           </div>
         </div>
       </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+      
+      <CardContent className="space-y-4">
+        <div>
+          <h3 className="text-md font-semibold mb-2 text-foreground">Quick Actions</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {quickActions.map(action => (
+              <Button
+                key={action.label}
+                variant="outline"
+                className="w-full justify-start text-left h-auto py-2"
+                onClick={() => handleQuickAction(action.query)}
+              >
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="query"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Question</FormLabel>
+                  <FormLabel>Your Question or Analysis Request</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="e.g., What is the total sales volume? Who are the top 3 traders by sales?"
+                      placeholder="e.g., What is the total sales volume? Who are the top 3 traders by sales? Or use a quick action."
                       className="resize-none"
                       rows={3}
                       {...field}
@@ -88,25 +160,55 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button type="submit" disabled={isLoading} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="mr-2 h-4 w-4" />
+
+            <FormItem>
+              <FormLabel htmlFor="customer-file-upload">Upload Customer Data (Optional .csv, .txt)</FormLabel>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="customer-file-upload"
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="flex-grow"
+                  accept=".csv,.txt,text/plain,text/csv"
+                />
+                {selectedFile && (
+                  <Button variant="ghost" size="icon" onClick={clearFile} aria-label="Clear file">
+                    <XCircle className="h-5 w-5 text-destructive" />
+                  </Button>
+                )}
+              </div>
+              {selectedFile && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  <Paperclip className="inline h-3 w-3 mr-1" />
+                  {selectedFile.name} selected. Its content will be sent for analysis.
+                </p>
               )}
-              Ask AI
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
-      {(aiResponse || error) && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Upload a list of customers or specific customer data for deeper insights (e.g., upsell/cross-sell opportunities, multi-customer recommendations).
+              </p>
+            </FormItem>
+            
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isLoading} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+                )}
+                Get Insights
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+
+      {(analysisResponse || error) && (
         <CardContent className="mt-4 border-t pt-4">
-          <h3 className="text-lg font-semibold mb-2 text-foreground">AI Response:</h3>
-          {aiResponse && (
-            <ScrollArea className="h-[100px] rounded-md border p-3 bg-muted/50">
-              <p className="text-sm text-foreground whitespace-pre-wrap">{aiResponse}</p>
+          <h3 className="text-lg font-semibold mb-2 text-foreground">Analysis Result:</h3>
+          {analysisResponse && (
+            <ScrollArea className="h-[150px] rounded-md border p-3 bg-muted/50">
+              <p className="text-sm text-foreground whitespace-pre-wrap">{analysisResponse}</p>
             </ScrollArea>
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}

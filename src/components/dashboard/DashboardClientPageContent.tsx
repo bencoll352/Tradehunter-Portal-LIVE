@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import type { BranchId, Trader, ParsedTraderData } from "@/types"; // Added ParsedTraderData
+import type { BranchId, Trader, ParsedTraderData } from "@/types";
 import { getTradersByBranch } from "@/lib/mock-data";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,18 +17,19 @@ interface DashboardClientPageContentProps {
   addTraderAction: (branchId: BranchId, values: TraderFormValues) => Promise<Trader | null>;
   updateTraderAction: (branchId: BranchId, traderId: string, values: TraderFormValues) => Promise<Trader | null>;
   deleteTraderAction: (branchId: BranchId, traderId: string) => Promise<boolean>;
-  bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>; // Added prop
+  bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
 
 export function DashboardClientPageContent({
   addTraderAction,
   updateTraderAction,
   deleteTraderAction,
-  bulkAddTradersAction, // Added prop
+  bulkAddTradersAction,
 }: DashboardClientPageContentProps) {
   const [branchId, setBranchId] = useState<BranchId | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [keyForTable, setKeyForTable] = useState(0); // Used to force re-render of table if needed
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -36,56 +37,66 @@ export function DashboardClientPageContent({
       setBranchId(storedBranchId);
       if (storedBranchId) {
         const initialTraders = getTradersByBranch(storedBranchId);
-        setTraders(initialTraders);
+        setTraders(initialTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       }
       setIsLoading(false);
     }
   }, []);
+  
+  // Re-fetch traders if branchId changes after initial load (e.g. programmatic change, though not typical here)
+  useEffect(() => {
+    if (branchId) {
+      const currentTraders = getTradersByBranch(branchId);
+      setTraders(currentTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+      setKeyForTable(prev => prev + 1); // Force re-render table with new initialTraders
+    }
+  }, [branchId]);
 
-  const handleAdd = async (currentBranchId: BranchId, values: TraderFormValues) => {
-    if (!branchId || currentBranchId !== branchId) {
-      console.error("Branch ID mismatch or not available for add action");
+
+  const handleAdd = async (values: TraderFormValues) => {
+    if (!branchId) {
+      console.error("Branch ID not available for add action");
       return null;
     }
     const newTrader = await addTraderAction(branchId, values);
     if (newTrader) {
-      setTraders(prev => [...prev, newTrader]); // Update local state
+      setTraders(prev => [...prev, newTrader].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
     }
     return newTrader;
   };
 
-  const handleUpdate = async (currentBranchId: BranchId, traderId: string, values: TraderFormValues) => {
-     if (!branchId || currentBranchId !== branchId) {
-      console.error("Branch ID mismatch or not available for update action");
+  const handleUpdate = async (traderId: string, values: TraderFormValues) => {
+     if (!branchId) {
+      console.error("Branch ID not available for update action");
       return null;
     }
     const updatedTrader = await updateTraderAction(branchId, traderId, values);
     if (updatedTrader) {
-      setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t)); // Update local state
+      setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
     }
     return updatedTrader;
   };
 
-  const handleDelete = async (currentBranchId: BranchId, traderId: string) => {
-     if (!branchId || currentBranchId !== branchId) {
-      console.error("Branch ID mismatch or not available for delete action");
+  const handleDelete = async (traderId: string) => {
+     if (!branchId) {
+      console.error("Branch ID not available for delete action");
       return false;
     }
     const success = await deleteTraderAction(branchId, traderId);
     if (success) {
-      setTraders(prev => prev.filter(t => t.id !== traderId)); // Update local state
+      setTraders(prev => prev.filter(t => t.id !== traderId));
     }
     return success;
   };
 
-  const handleBulkAdd = async (currentBranchId: BranchId, tradersToCreate: ParsedTraderData[]) => {
-    if (!branchId || currentBranchId !== branchId) {
-      console.error("Branch ID mismatch or not available for bulk add action");
+  const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]) => {
+    if (!branchId) {
+      console.error("Branch ID not available for bulk add action");
       return null;
     }
     const newTraders = await bulkAddTradersAction(branchId, tradersToCreate);
     if (newTraders && newTraders.length > 0) {
-      setTraders(prev => [...prev, ...newTraders]); // Update local state
+      setTraders(prev => [...prev, ...newTraders].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
     }
     return newTraders;
   };
@@ -114,12 +125,13 @@ export function DashboardClientPageContent({
           </CardHeader>
           <CardContent>
             <TraderTableClient 
+              key={keyForTable} // Force re-mount if initialTraders logic changes due to branchId
               initialTraders={traders} 
               branchId={branchId}
-              onAdd={(values) => handleAdd(branchId, values)} // Pass branchId directly
-              onUpdate={(traderId, values) => handleUpdate(branchId, traderId, values)} // Pass branchId
-              onDelete={(traderId) => handleDelete(branchId, traderId)} // Pass branchId
-              onBulkAdd={(tradersToCreate) => handleBulkAdd(branchId, tradersToCreate)} // Pass branchId
+              onAdd={handleAdd}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+              onBulkAdd={handleBulkAdd}
             />
           </CardContent>
         </Card>

@@ -17,9 +17,10 @@ import { Badge } from "@/components/ui/badge";
 import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
-import { BulkAddTradersDialog } from "./BulkAddTradersDialog"; // Added import
+import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { ArrowUpDown, Search, Users, FileWarning } from "lucide-react";
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import { enGB } from 'date-fns/locale'; // For UK date formatting if needed for specific cases
 import { useToast } from "@/hooks/use-toast";
 import type { z } from "zod";
 import type { traderFormSchema } from "./TraderForm";
@@ -31,18 +32,21 @@ type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status
 interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BranchId;
-  onAdd: (branchId: BranchId, values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>;
-  onUpdate: (branchId: BranchId, traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>;
-  onDelete: (branchId: BranchId, traderId: string) => Promise<boolean>;
-  onBulkAdd: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>; // Added prop
+  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>; // Removed branchId from here, will use state
+  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>; // Removed branchId
+  onDelete: (traderId: string) => Promise<boolean>; // Removed branchId
+  onBulkAdd: (traders: ParsedTraderData[]) => Promise<Trader[] | null>; // Removed branchId
 }
 
-export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, onDelete, onBulkAdd }: TraderTableClientProps) {
+export function TraderTableClient({ initialTraders, branchId: propBranchId, onAdd, onUpdate, onDelete, onBulkAdd }: TraderTableClientProps) {
   const [traders, setTraders] = useState<Trader[]>(initialTraders);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
+  // Use propBranchId passed down from DashboardClientPageContent which gets it from localStorage
+  const branchId = propBranchId;
+
 
   useEffect(() => {
     setTraders(initialTraders);
@@ -57,7 +61,6 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
     }
     if (sortConfig !== null) {
       searchableTraders.sort((a, b) => {
-        // Handle undefined or null for sortable keys if necessary, though current keys are generally defined
         const valA = a[sortConfig.key];
         const valB = b[sortConfig.key];
         if (valA < valB) {
@@ -87,9 +90,9 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
   };
   
   const handleAddTrader = async (values: z.infer<typeof traderFormSchema>) => {
-    const newTrader = await onAdd(branchId, values);
+    const newTrader = await onAdd(values); // branchId is handled by the parent/action
     if (newTrader) {
-      setTraders(prev => [...prev, newTrader]);
+      setTraders(prev => [...prev, newTrader].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       toast({ title: "Success", description: "Trader added successfully." });
     } else {
       toast({ variant: "destructive", title: "Error", description: "Failed to add trader." });
@@ -97,7 +100,7 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
   };
 
   const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>) => {
-    const updatedTrader = await onUpdate(branchId, traderId, values);
+    const updatedTrader = await onUpdate(traderId, values); // branchId is handled by the parent/action
     if (updatedTrader) {
       setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t));
       toast({ title: "Success", description: "Trader updated successfully." });
@@ -107,7 +110,7 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
   };
 
   const handleDeleteTrader = async (traderId: string) => {
-    const success = await onDelete(branchId, traderId);
+    const success = await onDelete(traderId); // branchId is handled by the parent/action
     if (success) {
       setTraders(prev => prev.filter(t => t.id !== traderId));
       toast({ title: "Success", description: "Trader deleted successfully." });
@@ -116,18 +119,16 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
     }
   };
 
-  const handleBulkAddTraders = async (currentBranchId: BranchId, tradersToCreate: ParsedTraderData[]) => {
-    const newTraders = await onBulkAdd(currentBranchId, tradersToCreate);
+  const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]) => {
+    // The onBulkAdd function passed from DashboardClientPageContent already includes branchId
+    const newTraders = await onBulkAdd(tradersToCreate);
     if (newTraders && newTraders.length > 0) {
-      setTraders(prev => [...prev, ...newTraders]); // Add new traders to the existing list
-      toast({ title: "Success", description: `${newTraders.length} traders added successfully via bulk upload.` });
-      return newTraders;
+      setTraders(prev => [...prev, ...newTraders].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+      // Toast is handled in BulkAddTradersDialog for more specific messages
     } else if (newTraders === null) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to bulk add traders." });
-      return null;
+      toast({ variant: "destructive", title: "Error", description: "Failed to bulk add traders (action returned null)." });
     }
-    // If newTraders is an empty array, it means the operation completed but nothing was added, toast handled in dialog.
-    return newTraders;
+    return newTraders; // Return to dialog for its own toast logic
   };
 
 
@@ -153,8 +154,8 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
             className="pl-10"
           />
         </div>
-        <div className="flex gap-2">
-          <BulkAddTradersDialog branchId={branchId} onBulkAddTraders={handleBulkAddTraders} />
+        <div className="flex gap-2 flex-wrap">
+          <BulkAddTradersDialog branchId={branchId} onBulkAddTraders={(currentBranchIdIgnore, traders) => handleBulkAddTraders(traders)} />
           <AddTraderDialog onAddTrader={handleAddTrader} branchId={branchId} />
         </div>
       </div>
@@ -173,10 +174,10 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
           <TableHeader>
             <TableRow>
               <SortableHeader sortKey="name" label="Name" />
-              <SortableHeader sortKey="totalSales" label="Total Sales" />
+              <TableHead>Total Sales</TableHead> {/* Changed to non-sortable to apply UK currency */}
               <SortableHeader sortKey="tradesMade" label="Trades Made" />
               <SortableHeader sortKey="status" label="Status" />
-              <SortableHeader sortKey="lastActivity" label="Last Activity" />
+              <TableHead>Last Activity</TableHead> {/* Changed for UK date format */}
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -184,7 +185,9 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
             {paginatedTraders.map((trader) => (
               <TableRow key={trader.id}>
                 <TableCell className="font-medium">{trader.name}</TableCell>
-                <TableCell>${trader.totalSales.toLocaleString()}</TableCell>
+                <TableCell>
+                  {new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(trader.totalSales)}
+                </TableCell>
                 <TableCell>{trader.tradesMade}</TableCell>
                 <TableCell>
                   <Badge variant={trader.status === 'Active' ? 'default' : 'secondary'}
@@ -193,9 +196,9 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
                     {trader.status}
                   </Badge>
                 </TableCell>
-                <TableCell>{format(new Date(trader.lastActivity), 'MMM dd, yyyy')}</TableCell>
+                <TableCell>{format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}</TableCell>
                 <TableCell className="flex gap-1">
-                  <EditTraderDialog trader={trader} onUpdateTrader={handleUpdateTrader} />
+                  <EditTraderDialog trader={trader} onUpdateTrader={(traderId, values) => handleUpdateTrader(traderId, values)} />
                   <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => handleDeleteTrader(trader.id)} />
                 </TableCell>
               </TableRow>
