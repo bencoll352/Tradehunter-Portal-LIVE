@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react"; // Added React import
 import type { Trader, BranchId, ParsedTraderData } from "@/types";
 import { useState, useMemo, useEffect } from "react";
 import type { z } from "zod";
@@ -23,6 +24,8 @@ import { ArrowUpDown, Search, Users, FileWarning, Link as LinkIcon, ExternalLink
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "./TraderForm";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { cn } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -184,7 +187,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="truncate block max-w-[${maxChars}ch]">{stringContent.substring(0, maxChars)}...</span>
+              <span className="truncate block" style={{ maxWidth: `${maxChars}ch` }}>{stringContent.substring(0, maxChars)}...</span>
             </TooltipTrigger>
             <TooltipContent>
               <p className="max-w-xs break-words">{stringContent}</p>
@@ -271,7 +274,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
                 </TableCell>
                 <TableCell className="whitespace-nowrap">{format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}</TableCell>
                 <TableCell>{renderCellContent(trader.description)}</TableCell>
-                <TableCell className="whitespace-nowrap text-center">{trader.tradesMade}</TableCell>
+                <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
                 <TableCell className="whitespace-nowrap">
                   {trader.website ? (
@@ -283,7 +286,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
                 <TableCell className="whitespace-nowrap">
                   {trader.phone ? (
                     <a href={`tel:${trader.phone}`} className="text-primary hover:underline">
-                      {trader.phone}
+                      {renderCellContent(trader.phone, 15)}
                     </a>
                   ) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
@@ -356,13 +359,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-// Ensure TooltipPrimitive is imported if not already (it should be from lucide usually or radix)
-// For this specific case, we'll assume Tooltip related imports are handled if useToast uses it.
-// If not, we might need: import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-// And import cn from "@/lib/utils";
-// For now, this structure should work provided those are available in the scope or via useToast.
-// A cleaner way if not, is to import them directly:
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { cn } from "@/lib/utils";
-
