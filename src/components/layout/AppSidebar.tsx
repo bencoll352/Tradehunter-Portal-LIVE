@@ -58,7 +58,6 @@ export function AppSidebar() {
           <Logo className="text-sidebar-primary"/>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <h1 className="text-xl font-semibold text-sidebar-primary-foreground">TradeHunter Pro</h1>
-            {/* <p className="text-xs text-sidebar-foreground/80">Portal</p> Removed "Portal" part */}
           </div>
         </div>
       </SidebarHeader>
@@ -68,7 +67,7 @@ export function AppSidebar() {
           <SidebarMenu className="px-3 py-2">
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} passHref legacyBehavior>
+                <Link href={item.href}>
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.href}
@@ -76,10 +75,10 @@ export function AppSidebar() {
                     onClick={() => setOpenMobile(false)}
                     className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
                   >
-                    <a>
+                    <>
                       <item.icon />
                       <span>{item.label}</span>
-                    </a>
+                    </>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
