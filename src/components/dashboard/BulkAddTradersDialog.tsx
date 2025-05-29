@@ -130,7 +130,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         });
       } else {
          toast({
-          variant: "warning",
+          variant: "default", // Changed from "warning" to "default"
           title: "No New Traders Added",
           description: "The process completed, but no new traders were added. This might be due to a server-side issue or if all parsed traders were invalid/duplicates.",
         });
