@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useState }
-from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +33,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     defaultValues: { query: "" },
   });
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
     setIsLoading(true);
     setAiResponse(null);
     setError(null);
