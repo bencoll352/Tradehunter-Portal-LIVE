@@ -15,6 +15,10 @@ export const getTradersByBranch = (branchId: BranchId): Trader[] => {
   return MOCK_TRADERS.filter(trader => trader.branchId === branchId);
 };
 
+export const getTraderById = (id: string, branchId: BranchId): Trader | undefined => {
+  return MOCK_TRADERS.find(trader => trader.id === id && trader.branchId === branchId);
+};
+
 export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { lastActivity?: string }): Trader => {
   const newTrader: Trader = {
     id: `trader-${Date.now()}-${Math.random().toString(16).slice(2)}`,

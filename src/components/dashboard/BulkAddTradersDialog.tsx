@@ -82,24 +82,29 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
     if (!csvString) return [];
     const traders: ParsedTraderData[] = [];
-    const lines = csvString.trim().split(/\r\n|\n/).filter(line => line.trim() !== ""); // Handles different line endings
+    // Split lines, handling both \r\n and \n, and filter out empty lines
+    const lines = csvString.trim().split(/\r\n|\n/).filter(line => line.trim() !== "");
 
     if (lines.length === 0) return [];
-
+    
     // More robust header detection and data line extraction
-    const firstLineValues = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
+    // Attempt to detect if the first line is a header
+    // A simple heuristic: check if the first cell of the first line is "Name" (case-insensitive)
+    const firstLineValuesForHeaderCheck = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
       let cleaned = val.trim();
       if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
         cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
       }
       return cleaned;
     });
-    
-    const potentialHeaderContent = firstLineValues[COLUMN_INDICES.NAME]?.trim().toLowerCase();
-    const dataLines = (potentialHeaderContent === 'name') ? lines.slice(1) : lines;
+
+    const potentialHeaderContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME]?.trim().toLowerCase();
+    const dataLines = (potentialHeaderContent === 'name' || potentialHeaderContent === 'name') ? lines.slice(1) : lines;
+
 
     for (const line of dataLines) {
       // Regex to split by comma, but not if it's inside double quotes
+      // This handles fields like "Doe, John" or "123 Main St, Apt 4B"
       const rawValues = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
       
       const values = rawValues.map(val => {
@@ -114,20 +119,20 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       });
 
       if (values.length !== EXPECTED_COLUMN_COUNT) {
-        console.warn(`Skipping line due to unexpected column count: "${line}" (expected ${EXPECTED_COLUMN_COUNT}, got ${values.length}). Parsed values:`, values);
-        continue;
+        console.warn(`Skipping line due to unexpected column count (${values.length} instead of ${EXPECTED_COLUMN_COUNT}): "${line}". Parsed values:`, values);
+        continue; // Skip this line
       }
 
       const name = values[COLUMN_INDICES.NAME]?.trim() || "";
       if (!name) {
         console.warn(`Skipping line due to missing name: "${line}"`);
-        continue;
+        continue; // Skip if name is missing
       }
 
       const trader: ParsedTraderData = {
         name: name,
         description: values[COLUMN_INDICES.DESCRIPTION]?.trim() || undefined,
-        tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0,
+        tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0, // from 'reviews'
         rating: parseFloat(values[COLUMN_INDICES.RATING]?.trim() || "0") || undefined,
         website: values[COLUMN_INDICES.WEBSITE]?.trim() || undefined,
         phone: values[COLUMN_INDICES.PHONE]?.trim() || undefined,
@@ -145,6 +150,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     return traders;
   };
 
+
   const handleSubmit = async () => {
     if (!selectedFile || !fileContent) {
       toast({
@@ -158,11 +164,11 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     setIsLoading(true);
     const parsedTraders = parseCsvData(fileContent);
 
-    if (parsedTraders.length === 0 && fileContent.trim() !== "") { // check if fileContent was not empty
+    if (parsedTraders.length === 0 && fileContent.trim() !== "") { 
       toast({
         variant: "destructive",
         title: "Parsing Issue",
-        description: "No valid trader data could be parsed. Please check the CSV format: ensure it has 14 columns, commas within fields are double-quoted, and 'Name' (column 1) is present. Header row is skipped if detected.",
+        description: `No valid trader data could be parsed. Please check the CSV format: ensure it has ${EXPECTED_COLUMN_COUNT} columns, commas within fields are double-quoted (e.g., "123, Main St"), and 'Name' (column 1) is present. A header row is skipped if "Name" is detected in the first cell.`,
       });
       setIsLoading(false);
       return;
@@ -195,7 +201,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         });
       } else {
          toast({
-          variant: "default", // Changed from "warning"
+          variant: "default", // Changed from "warning" to "default"
           title: "No New Traders Added",
           description: "The process completed, but no new traders were added. This might mean all parsed traders were invalid, duplicates, or the file contained no new data.",
         });
@@ -228,9 +234,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. Each row should represent one trader and contain 14 columns in the following order:
+            Upload a CSV file. Each row should represent one trader and contain {EXPECTED_COLUMN_COUNT} columns in the following order:
             <br/>1. Name, 2. Description, 3. Reviews (trades made), 4. Rating, 5. Website, 6. Phone, 7. Owner Name, 8. Owner Profile Link, 9. Main Category, 10. Categories, 11. Workday Timing, 12. Closed On, 13. Address, 14. Review Keywords.
-            <br/>Ensure 'Name' (column 1) is always present. Commas within fields (e.g., Address) must be enclosed in double quotes. The system will attempt to skip a header row if detected.
+            <br/>Ensure 'Name' (column 1) is always present. Commas within fields (e.g., Address) must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -273,3 +279,4 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
