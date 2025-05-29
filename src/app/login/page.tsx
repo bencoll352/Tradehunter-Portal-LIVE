@@ -1,6 +1,19 @@
-import { LoginForm } from '@/components/auth/LoginForm';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2 } from 'lucide-react';
+import { Building2, Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const DynamicLoginForm = dynamic(
+  () => import('@/components/auth/LoginForm').then(mod => mod.LoginForm),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+);
 
 export default function LoginPage() {
   return (
@@ -16,7 +29,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <LoginForm />
+          <DynamicLoginForm />
         </CardContent>
       </Card>
     </div>
