@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -5,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, MessageSquareText, Users } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, MessageSquareText, Users, Rocket } from "lucide-react"; // Added Rocket
 
 const faqs = [
   {
@@ -23,14 +24,14 @@ const faqs = [
   {
     value: "item-3",
     question: "How do I add, edit, or delete a trader?",
-    answer: "On the dashboard, use the 'Add New Trader' button. To edit or delete, use the respective icons (pencil for edit, trash can for delete) in the 'Actions' column of the trader table.",
+    answer: "On the dashboard, use the 'Add New Trader' button. To edit or delete, use the respective icons (pencil for edit, trash can for delete) in the 'Actions' column of the trader table. You can also use the 'Bulk Add Traders' button to upload multiple traders at once.",
     icon: <Users className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-4",
-    question: "What is the Profit Partner AI Agent?",
-    answer: "The AI agent helps you analyze trader data. Type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box on the dashboard, and the AI will provide an answer based on the current data for your branch.",
-    icon: <MessageSquareText className="h-5 w-5 text-primary mr-2" />
+    question: "What is the Branch Booster AI?", // Changed name
+    answer: "The Branch Booster AI helps you analyze trader data. Type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box on the dashboard, and the AI will provide an answer based on the current data for your branch.",
+    icon: <Rocket className="h-5 w-5 text-primary mr-2" /> // Changed icon
   },
   {
     value: "item-5",
@@ -100,14 +101,15 @@ export default function HowToUsePage() {
               <li><strong>Search:</strong> Use the search bar to find traders by name.</li>
               <li><strong>Sort:</strong> Click on table headers (Name, Total Sales, etc.) to sort data.</li>
               <li><strong>Add Trader:</strong> Click "Add New Trader", fill the form, and submit.</li>
+              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders", paste your tab-separated data, and submit.</li>
               <li><strong>Edit Trader:</strong> Click the pencil icon next to a trader, modify details, and save.</li>
               <li><strong>Delete Trader:</strong> Click the trash icon, confirm, and the trader will be removed.</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">3. Using the AI Agent</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">3. Using the Branch Booster AI</h3> {/* Changed name */}
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>Locate the "Profit Partner AI" section on the dashboard.</li>
+              <li>Locate the "Branch Booster" section on the dashboard.</li> {/* Changed name */}
               <li>Type your question about trader performance into the text area.</li>
               <li>Click "Ask AI". The AI's response will appear below.</li>
               <li>Example queries: "List all active traders.", "What is the average sales per trader?".</li>

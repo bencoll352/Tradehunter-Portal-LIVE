@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState }
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Bot, Sparkles } from "lucide-react";
+import { Loader2, Rocket, Sparkles } from "lucide-react"; // Changed Bot to Rocket
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
 import { formatTraderDataForAI } from "@/lib/mock-data";
@@ -33,7 +34,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     defaultValues: { query: "" },
   });
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
     setIsLoading(true);
     setAiResponse(null);
     setError(null);
@@ -60,9 +61,9 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     <Card className="shadow-lg">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Bot className="h-8 w-8 text-primary" />
+          <Rocket className="h-8 w-8 text-primary" /> {/* Changed Bot to Rocket */}
           <div>
-            <CardTitle className="text-2xl text-primary">Profit Partner AI</CardTitle>
+            <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle> {/* Changed title */}
             <CardDescription>Ask questions about your branch's trader performance.</CardDescription>
           </div>
         </div>

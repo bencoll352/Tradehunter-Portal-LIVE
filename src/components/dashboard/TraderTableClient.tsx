@@ -1,6 +1,7 @@
+
 "use client";
 
-import type { Trader, BranchId } from "@/types";
+import type { Trader, BranchId, ParsedTraderData } from "@/types";
 import { useState, useMemo, useEffect } from "react";
 import {
   Table,
@@ -16,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
+import { BulkAddTradersDialog } from "./BulkAddTradersDialog"; // Added import
 import { ArrowUpDown, Search, Users, FileWarning } from "lucide-react";
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
@@ -32,9 +34,10 @@ interface TraderTableClientProps {
   onAdd: (branchId: BranchId, values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>;
   onUpdate: (branchId: BranchId, traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>;
   onDelete: (branchId: BranchId, traderId: string) => Promise<boolean>;
+  onBulkAdd: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>; // Added prop
 }
 
-export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, onDelete }: TraderTableClientProps) {
+export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, onDelete, onBulkAdd }: TraderTableClientProps) {
   const [traders, setTraders] = useState<Trader[]>(initialTraders);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>(null);
@@ -54,10 +57,13 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
     }
     if (sortConfig !== null) {
       searchableTraders.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        // Handle undefined or null for sortable keys if necessary, though current keys are generally defined
+        const valA = a[sortConfig.key];
+        const valB = b[sortConfig.key];
+        if (valA < valB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (valA > valB) {
           return sortConfig.direction === 'ascending' ? 1 : -1;
         }
         return 0;
@@ -110,6 +116,21 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
     }
   };
 
+  const handleBulkAddTraders = async (currentBranchId: BranchId, tradersToCreate: ParsedTraderData[]) => {
+    const newTraders = await onBulkAdd(currentBranchId, tradersToCreate);
+    if (newTraders && newTraders.length > 0) {
+      setTraders(prev => [...prev, ...newTraders]); // Add new traders to the existing list
+      toast({ title: "Success", description: `${newTraders.length} traders added successfully via bulk upload.` });
+      return newTraders;
+    } else if (newTraders === null) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to bulk add traders." });
+      return null;
+    }
+    // If newTraders is an empty array, it means the operation completed but nothing was added, toast handled in dialog.
+    return newTraders;
+  };
+
+
   const SortableHeader = ({ sortKey, label }: { sortKey: SortKey, label: string }) => (
     <TableHead onClick={() => requestSort(sortKey)} className="cursor-pointer hover:bg-muted/50">
       <div className="flex items-center gap-2">
@@ -132,7 +153,10 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
             className="pl-10"
           />
         </div>
-        <AddTraderDialog onAddTrader={handleAddTrader} branchId={branchId} />
+        <div className="flex gap-2">
+          <BulkAddTradersDialog branchId={branchId} onBulkAddTraders={handleBulkAddTraders} />
+          <AddTraderDialog onAddTrader={handleAddTrader} branchId={branchId} />
+        </div>
       </div>
 
       {paginatedTraders.length === 0 ? (
@@ -140,7 +164,7 @@ export function TraderTableClient({ initialTraders, branchId, onAdd, onUpdate, o
           <FileWarning className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-muted-foreground">No Traders Found</h3>
           <p className="text-muted-foreground">
-            {searchTerm ? "Try adjusting your search or add a new trader." : "Add a new trader to get started."}
+            {searchTerm ? "Try adjusting your search or add a new trader." : "Add a new trader or use bulk upload to get started."}
           </p>
         </div>
       ) : (

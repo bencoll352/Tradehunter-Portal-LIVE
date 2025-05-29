@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import type { BranchId, Trader } from "@/types";
+import type { BranchId, Trader, ParsedTraderData } from "@/types"; // Added ParsedTraderData
 import { getTradersByBranch } from "@/lib/mock-data";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,31 +11,30 @@ import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAg
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 
-// Define the types for the action props passed from the Server Component
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
 interface DashboardClientPageContentProps {
   addTraderAction: (branchId: BranchId, values: TraderFormValues) => Promise<Trader | null>;
   updateTraderAction: (branchId: BranchId, traderId: string, values: TraderFormValues) => Promise<Trader | null>;
   deleteTraderAction: (branchId: BranchId, traderId: string) => Promise<boolean>;
+  bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>; // Added prop
 }
 
 export function DashboardClientPageContent({
   addTraderAction,
   updateTraderAction,
   deleteTraderAction,
+  bulkAddTradersAction, // Added prop
 }: DashboardClientPageContentProps) {
   const [branchId, setBranchId] = useState<BranchId | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This code runs only on the client side
     if (typeof window !== 'undefined') {
       const storedBranchId = localStorage.getItem('branchId') as BranchId | null;
       setBranchId(storedBranchId);
       if (storedBranchId) {
-        // getTradersByBranch is client-side safe as it reads from a simple array
         const initialTraders = getTradersByBranch(storedBranchId);
         setTraders(initialTraders);
       }
@@ -43,15 +42,16 @@ export function DashboardClientPageContent({
     }
   }, []);
 
-  // These handler functions ensure the correct branchId (from client state) is used
-  // when invoking the server actions passed as props.
   const handleAdd = async (currentBranchId: BranchId, values: TraderFormValues) => {
     if (!branchId || currentBranchId !== branchId) {
       console.error("Branch ID mismatch or not available for add action");
-      // Potentially show a toast or error message to the user
       return null;
     }
-    return addTraderAction(branchId, values);
+    const newTrader = await addTraderAction(branchId, values);
+    if (newTrader) {
+      setTraders(prev => [...prev, newTrader]); // Update local state
+    }
+    return newTrader;
   };
 
   const handleUpdate = async (currentBranchId: BranchId, traderId: string, values: TraderFormValues) => {
@@ -59,7 +59,11 @@ export function DashboardClientPageContent({
       console.error("Branch ID mismatch or not available for update action");
       return null;
     }
-    return updateTraderAction(branchId, traderId, values);
+    const updatedTrader = await updateTraderAction(branchId, traderId, values);
+    if (updatedTrader) {
+      setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t)); // Update local state
+    }
+    return updatedTrader;
   };
 
   const handleDelete = async (currentBranchId: BranchId, traderId: string) => {
@@ -67,7 +71,23 @@ export function DashboardClientPageContent({
       console.error("Branch ID mismatch or not available for delete action");
       return false;
     }
-    return deleteTraderAction(branchId, traderId);
+    const success = await deleteTraderAction(branchId, traderId);
+    if (success) {
+      setTraders(prev => prev.filter(t => t.id !== traderId)); // Update local state
+    }
+    return success;
+  };
+
+  const handleBulkAdd = async (currentBranchId: BranchId, tradersToCreate: ParsedTraderData[]) => {
+    if (!branchId || currentBranchId !== branchId) {
+      console.error("Branch ID mismatch or not available for bulk add action");
+      return null;
+    }
+    const newTraders = await bulkAddTradersAction(branchId, tradersToCreate);
+    if (newTraders && newTraders.length > 0) {
+      setTraders(prev => [...prev, ...newTraders]); // Update local state
+    }
+    return newTraders;
   };
 
   if (isLoading) {
@@ -81,7 +101,6 @@ export function DashboardClientPageContent({
   }
 
   if (!branchId) {
-     // This case should ideally be rare if AppLayout redirects unauthenticated users.
     return <p>Error: Branch ID not found. Please ensure you are logged in.</p>;
   }
   
@@ -96,10 +115,11 @@ export function DashboardClientPageContent({
           <CardContent>
             <TraderTableClient 
               initialTraders={traders} 
-              branchId={branchId} // Pass the client-side determined branchId
-              onAdd={handleAdd}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
+              branchId={branchId}
+              onAdd={(values) => handleAdd(branchId, values)} // Pass branchId directly
+              onUpdate={(traderId, values) => handleUpdate(branchId, traderId, values)} // Pass branchId
+              onDelete={(traderId) => handleDelete(branchId, traderId)} // Pass branchId
+              onBulkAdd={(tradersToCreate) => handleBulkAdd(branchId, tradersToCreate)} // Pass branchId
             />
           </CardContent>
         </Card>
