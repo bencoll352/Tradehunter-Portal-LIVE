@@ -67,13 +67,18 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
         const valA = a[sortConfig.key];
         const valB = b[sortConfig.key];
 
+        // Handle undefined values explicitly
+        if (valA === undefined && valB === undefined) return 0;
+        if (valA === undefined) return sortConfig.direction === 'ascending' ? -1 : 1; // Undefined comes first in ascending
+        if (valB === undefined) return sortConfig.direction === 'ascending' ? 1 : -1; // Undefined comes first in ascending
+
         if (typeof valA === 'string' && typeof valB === 'string') {
           return sortConfig.direction === 'ascending' ? valA.localeCompare(valB) : valB.localeCompare(valA);
         }
         if (typeof valA === 'number' && typeof valB === 'number') {
           return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
-        // For dates (lastActivity) or other types, direct comparison might be fine
+        // For dates (lastActivity) or other types (like potentially booleans if status were boolean), direct comparison
         if (valA < valB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -359,3 +364,5 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+    
