@@ -1,19 +1,9 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Loader2 } from 'lucide-react';
-import dynamic from 'next/dynamic';
+"use client"; // LoginPage remains a client component
 
-const DynamicLoginForm = dynamic(
-  () => import('@/components/auth/LoginForm').then(mod => mod.LoginForm),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-);
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Building2 } from 'lucide-react';
+import { DynamicLoginFormWrapper } from '@/components/auth/DynamicLoginFormWrapper'; // Import the new wrapper
 
 export default function LoginPage() {
   return (
@@ -29,7 +19,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DynamicLoginForm />
+          <DynamicLoginFormWrapper /> {/* Use the wrapper */}
         </CardContent>
       </Card>
     </div>
