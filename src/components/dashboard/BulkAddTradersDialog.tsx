@@ -82,21 +82,39 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
     if (!csvString) return [];
     const traders: ParsedTraderData[] = [];
-    // Split by lines, then filter out empty lines and potential header row (simple check)
-    const lines = csvString.trim().split('\n').filter(line => line.trim() !== "");
+    const lines = csvString.trim().split(/\r\n|\n/).filter(line => line.trim() !== ""); // Handles different line endings
+
+    if (lines.length === 0) return [];
+
+    // More robust header detection and data line extraction
+    const firstLineValues = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
+      let cleaned = val.trim();
+      if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+        cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
+      }
+      return cleaned;
+    });
     
-    // Basic heuristic to skip a header row if present, by checking if the first cell of the first line is "Name" (case-insensitive)
-    // This is not foolproof but a common convention.
-    const potentialHeaderLine = lines[0]?.split(',')[COLUMN_INDICES.NAME]?.trim();
-    const dataLines = (potentialHeaderLine?.toLowerCase() === 'name') ? lines.slice(1) : lines;
+    const potentialHeaderContent = firstLineValues[COLUMN_INDICES.NAME]?.trim().toLowerCase();
+    const dataLines = (potentialHeaderContent === 'name') ? lines.slice(1) : lines;
 
     for (const line of dataLines) {
-      // Use a more robust CSV parsing approach if needed, for now, simple split
-      // This basic split won't handle commas within quoted fields correctly.
-      const values = line.split(',');
+      // Regex to split by comma, but not if it's inside double quotes
+      const rawValues = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      
+      const values = rawValues.map(val => {
+        let cleaned = val.trim();
+        // Remove surrounding quotes (if any)
+        if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+          cleaned = cleaned.substring(1, cleaned.length - 1);
+        }
+        // Replace escaped double quotes "" with a single double quote "
+        cleaned = cleaned.replace(/""/g, '"');
+        return cleaned;
+      });
 
       if (values.length !== EXPECTED_COLUMN_COUNT) {
-        console.warn(`Skipping line due to unexpected column count: "${line}" (expected ${EXPECTED_COLUMN_COUNT}, got ${values.length})`);
+        console.warn(`Skipping line due to unexpected column count: "${line}" (expected ${EXPECTED_COLUMN_COUNT}, got ${values.length}). Parsed values:`, values);
         continue;
       }
 
@@ -140,15 +158,25 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     setIsLoading(true);
     const parsedTraders = parseCsvData(fileContent);
 
-    if (parsedTraders.length === 0) {
+    if (parsedTraders.length === 0 && fileContent.trim() !== "") { // check if fileContent was not empty
       toast({
         variant: "destructive",
-        title: "Parsing Error",
-        description: "No valid trader data found in the CSV. Please check the file format, ensure names are present, and each line has 14 comma-separated values (skip header row if present).",
+        title: "Parsing Issue",
+        description: "No valid trader data could be parsed. Please check the CSV format: ensure it has 14 columns, commas within fields are double-quoted, and 'Name' (column 1) is present. Header row is skipped if detected.",
       });
       setIsLoading(false);
       return;
     }
+     if (parsedTraders.length === 0 && fileContent.trim() === "") {
+      toast({
+        variant: "destructive",
+        title: "Empty File",
+        description: "The selected CSV file appears to be empty.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
 
     try {
       const result = await onBulkAddTraders(branchId, parsedTraders);
@@ -166,10 +194,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           description: "Failed to add traders. Server action returned null.",
         });
       } else {
-        toast({
-          variant: "default",
+         toast({
+          variant: "default", // Changed from "warning"
           title: "No New Traders Added",
-          description: "The process completed, but no new traders were added. This might be due to a server-side issue or if all parsed traders were invalid/duplicates.",
+          description: "The process completed, but no new traders were added. This might mean all parsed traders were invalid, duplicates, or the file contained no new data.",
         });
       }
     } catch (error) {
@@ -202,7 +230,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogDescription>
             Upload a CSV file. Each row should represent one trader and contain 14 columns in the following order:
             <br/>1. Name, 2. Description, 3. Reviews (trades made), 4. Rating, 5. Website, 6. Phone, 7. Owner Name, 8. Owner Profile Link, 9. Main Category, 10. Categories, 11. Workday Timing, 12. Closed On, 13. Address, 14. Review Keywords.
-            <br/>Ensure 'Name' (column 1) is always present. The system will attempt to skip a header row if detected.
+            <br/>Ensure 'Name' (column 1) is always present. Commas within fields (e.g., Address) must be enclosed in double quotes. The system will attempt to skip a header row if detected.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
