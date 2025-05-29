@@ -67,10 +67,9 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
         const valA = a[sortConfig.key];
         const valB = b[sortConfig.key];
 
-        // Handle undefined values explicitly
         if (valA === undefined && valB === undefined) return 0;
-        if (valA === undefined) return sortConfig.direction === 'ascending' ? -1 : 1; // Undefined comes first in ascending
-        if (valB === undefined) return sortConfig.direction === 'ascending' ? 1 : -1; // Undefined comes first in ascending
+        if (valA === undefined) return sortConfig.direction === 'ascending' ? -1 : 1; 
+        if (valB === undefined) return sortConfig.direction === 'ascending' ? 1 : -1;
 
         if (typeof valA === 'string' && typeof valB === 'string') {
           return sortConfig.direction === 'ascending' ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -78,7 +77,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
         if (typeof valA === 'number' && typeof valB === 'number') {
           return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
-        // For dates (lastActivity) or other types (like potentially booleans if status were boolean), direct comparison
+        
         if (valA < valB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -106,7 +105,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
     setCurrentPage(1);
   };
   
-  const handleAddTrader = async (values: z.infer<typeof traderFormSchema>) => {
+  const handleAddTrader = async (values: z.infer<typeof traderFormSchema>): Promise<void> => {
     const newTrader = await onAdd(values);
     if (newTrader) {
       setTraders(prev => [...prev, newTrader].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
@@ -116,7 +115,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
     }
   };
 
-  const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>) => {
+  const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>): Promise<void> => {
     const updatedTrader = await onUpdate(traderId, values);
     if (updatedTrader) {
       setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
@@ -127,7 +126,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
     } else {
       toast({ variant: "destructive", title: "Error", description: "Failed to update trader." });
     }
-    return updatedTrader; // Return for chaining if needed
   };
 
   const handleStatusToggle = async (trader: Trader) => {
@@ -138,7 +136,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
       tradesMade: trader.tradesMade,
       status: newStatus,
       description: trader.description || "",
-      rating: trader.rating, // Keep as number | undefined
+      rating: trader.rating, 
       website: trader.website || "",
       phone: trader.phone || "",
       address: trader.address || "",
@@ -150,13 +148,16 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
       closedOn: trader.closedOn || "",
       reviewKeywords: trader.reviewKeywords || "",
     };
-    const updated = await handleUpdateTrader(trader.id, formValues);
+    const updated = await onUpdate(trader.id, formValues); // Call onUpdate directly
     if (updated) {
+        setTraders(prev => prev.map(t => t.id === trader.id ? updated : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
         toast({ title: "Status Updated", description: `${trader.name}'s status changed to ${newStatus}.` });
+    } else {
+        toast({ variant: "destructive", title: "Error", description: "Failed to update trader status." });
     }
   };
 
-  const handleDeleteTrader = async (traderId: string) => {
+  const handleDeleteTrader = async (traderId: string): Promise<void> => {
     const success = await onDelete(traderId);
     if (success) {
       setTraders(prev => prev.filter(t => t.id !== traderId));
