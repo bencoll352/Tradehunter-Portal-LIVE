@@ -11,24 +11,15 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutDashboard,
-  Users,
   HelpCircle,
   LogOut,
-  ChevronDown,
-  Settings,
-  Building2,
-  ChevronsUpDown,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -61,13 +52,13 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon" className="border-r-0"> {/* Remove right border if sidebar is dark and page is light */}
+    <Sidebar variant="sidebar" collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <Logo className="text-sidebar-primary"/>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <h1 className="text-xl font-semibold text-sidebar-primary-foreground">TradeHunter</h1>
-            <p className="text-xs text-sidebar-foreground/80">Pro Portal</p>
+            <h1 className="text-xl font-semibold text-sidebar-primary-foreground">TradeHunter Pro</h1>
+            {/* <p className="text-xs text-sidebar-foreground/80">Portal</p> Removed "Portal" part */}
           </div>
         </div>
       </SidebarHeader>
