@@ -35,6 +35,7 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
 // https://branch-booster-purley-302177537641.us-west1.run.app/query
 // Please verify the exact and full endpoint URL from your service's deployment details.
 const EXTERNAL_AI_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/';
+const API_KEY = process.env.BRANCH_BOOSTER_API_KEY;
 
 const profitPartnerQueryFlow = ai.defineFlow(
   {
@@ -47,6 +48,11 @@ const profitPartnerQueryFlow = ai.defineFlow(
     console.log(`[profitPartnerQueryFlow] Query: "${input.query}"`);
     console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
+    if (API_KEY) {
+      console.log('[profitPartnerQueryFlow] Using API Key for authorization.');
+    } else {
+      console.warn('[profitPartnerQueryFlow] BRANCH_BOOSTER_API_KEY is not set. Request will be made without Authorization header.');
+    }
 
     try {
       const payload = {
@@ -59,11 +65,16 @@ const profitPartnerQueryFlow = ai.defineFlow(
       const payloadSnippet = payloadString.substring(0, 500) + (payloadString.length > 500 ? '...' : '');
       console.log('[profitPartnerQueryFlow] Sending payload (snippet):', payloadSnippet);
 
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      if (API_KEY) {
+        headers['Authorization'] = `Bearer ${API_KEY}`;
+      }
+
       const response = await fetch(EXTERNAL_AI_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: payloadString,
       });
 
@@ -74,9 +85,12 @@ const profitPartnerQueryFlow = ai.defineFlow(
         const errorBodySnippet = errorBody.substring(0, 500) + (errorBody.length > 500 ? '...' : '');
         console.error(`[profitPartnerQueryFlow] External service error: ${response.status} ${response.statusText}. Error Body (snippet):`, errorBodySnippet);
         if (response.status === 404) {
-            throw new Error(`Failed to get response from external service: Status 404 (Not Found). This often means the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") is missing a specific path (e.g., /api/invoke or /query) or the endpoint is not correctly deployed. Check server logs for details.`);
+             throw new Error(`Failed to get response from external service: Status 404 (Not Found). This often means the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") is missing a specific path (e.g., /api/invoke or /query) or the endpoint is not correctly deployed. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Check server logs for details.`);
         }
-        throw new Error(`Failed to get response from external service. Status: ${response.status}. Check server logs for details.`);
+        if (response.status === 401 || response.status === 403) {
+          throw new Error(`Failed to get response from external service: Status ${response.status} (${response.statusText}). This indicates an Authentication/Authorization issue. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Please verify the BRANCH_BOOSTER_API_KEY and ensure the external service accepts it in the 'Authorization: Bearer <key>' header. Check server logs for details.`);
+        }
+        throw new Error(`Failed to get response from external service. Status: ${response.status}. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Check server logs for details.`);
       }
 
       const resultText = await response.text(); // Get text first to avoid JSON parse error if not JSON
