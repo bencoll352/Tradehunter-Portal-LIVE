@@ -29,7 +29,7 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
   return profitPartnerQueryFlow(input);
 }
 
-const EXTERNAL_AI_URL = 'https://copy-of-jewson-branch-booster-302177537641.us-west1.run.app/';
+const EXTERNAL_AI_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/';
 
 const profitPartnerQueryFlow = ai.defineFlow(
   {
