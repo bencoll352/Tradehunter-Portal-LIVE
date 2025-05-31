@@ -169,3 +169,4 @@ export const bulkAddTraders = (
   saveTradersForBranch(branchId, branchTraders);
   return createdTraders;
 };
+
