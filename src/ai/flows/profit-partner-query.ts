@@ -30,7 +30,7 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
 }
 
 // IMPORTANT: If you are receiving 404 errors, this URL might be incomplete.
-// The external service might expect requests to a specific path, e.g.:
+// The external service might expect POST requests to a specific path, e.g.:
 // https://branch-booster-purley-302177537641.us-west1.run.app/api/invoke
 // https://branch-booster-purley-302177537641.us-west1.run.app/query
 // Please verify the exact and full endpoint URL from your service's deployment details.
@@ -73,6 +73,9 @@ const profitPartnerQueryFlow = ai.defineFlow(
         const errorBody = await response.text();
         const errorBodySnippet = errorBody.substring(0, 500) + (errorBody.length > 500 ? '...' : '');
         console.error(`[profitPartnerQueryFlow] External service error: ${response.status} ${response.statusText}. Error Body (snippet):`, errorBodySnippet);
+        if (response.status === 404) {
+            throw new Error(`Failed to get response from external service: Status 404 (Not Found). This often means the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") is missing a specific path (e.g., /api/invoke or /query) or the endpoint is not correctly deployed. Check server logs for details.`);
+        }
         throw new Error(`Failed to get response from external service. Status: ${response.status}. Check server logs for details.`);
       }
 
