@@ -216,10 +216,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         rating: parseNumericValue(getRowValue(row, ["Rating"])),
         website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
         phone: phoneValue || undefined,
-        ownerName: getRowValue(row, ["Owner Name"]) || undefined,
-        mainCategory: getRowValue(row, ["Main Category"]) || undefined,
+        ownerName: getRowValue(row, ["Owner Name", "Owner"]) || undefined,
+        mainCategory: getRowValue(row, ["Main Category", "Category"]) || undefined,
         categories: getRowValue(row, ["Categories"]) || undefined,
-        workdayTiming: getRowValue(row, ["Workday Timing"]) || undefined,
+        workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours"]) || undefined,
         address: getRowValue(row, ["Address"]) || undefined,
         ownerProfileLink: getRowValue(row, ["Link"]) || undefined,
       };
@@ -410,3 +410,4 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
+
