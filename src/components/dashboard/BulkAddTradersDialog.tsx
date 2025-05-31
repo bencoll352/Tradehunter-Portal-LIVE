@@ -16,23 +16,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import type { BranchId, ParsedTraderData, Trader } from "@/types";
-import { UploadCloud, Loader2, FileText, XCircle } from "lucide-react";
+import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Papa from "papaparse";
+import { normalizePhoneNumber } from "@/lib/utils";
 
 interface BulkAddTradersDialogProps {
   branchId: BranchId;
+  existingTraders: Trader[]; // All traders in the current branch
   onBulkAddTraders: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
 
-// Expected headers (case-insensitive matching will be attempted)
 const EXPECTED_HEADERS = [
   "Name", "Total Sales", "Status", "Last Activity", "Description", 
   "Reviews", "Rating", "🌐Website", "📞 Phone", "Owner Name", 
   "Main Category", "Categories", "Workday Timing", "Address", "Link", "Actions"
 ];
 
-export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
+export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -72,17 +73,17 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (rawValue === undefined || rawValue === null || String(rawValue).trim() === "" || String(rawValue).trim() === "-") {
       return undefined;
     }
-    const cleanedValue = String(rawValue).replace(/[^0-9.-]+/g, ""); // Allow negative sign and decimal
+    const cleanedValue = String(rawValue).replace(/[^0-9.-]+/g, "");
     if (cleanedValue === "") return undefined;
     const parsed = parseFloat(cleanedValue);
     return isNaN(parsed) ? undefined : parsed;
   };
   
   const parseIntValue = (rawValue: string | undefined): number | undefined => {
-    if (rawValue === undefined || rawValue === null || String(rawValue).trim() === "" || String(rawValue).trim() === "-") {
+     if (rawValue === undefined || rawValue === null || String(rawValue).trim() === "" || String(rawValue).trim() === "-") {
       return undefined;
     }
-    const cleanedValue = String(rawValue).replace(/[^0-9-]+/g, ""); // Allow negative sign
+    const cleanedValue = String(rawValue).replace(/[^0-9-]+/g, "");
     if (cleanedValue === "") return undefined;
     const parsed = parseInt(cleanedValue, 10);
     return isNaN(parsed) ? undefined : parsed;
@@ -96,22 +97,21 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     let date: Date | null = null;
 
     const formatsToTry = [
-      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/, // DD/MM/YYYY or DD.MM.YYYY or DD-MM-YYYY
-      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2})$/,  // DD/MM/YY or DD.MM.YY or DD-MM-YY
+      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/, 
+      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2})$/,  
     ];
 
     for (const regex of formatsToTry) {
       const parts = val.match(regex);
       if (parts) {
         const day = parseInt(parts[1], 10);
-        const month = parseInt(parts[2], 10) - 1; // JS months are 0-indexed
+        const month = parseInt(parts[2], 10) - 1; 
         let year = parseInt(parts[3], 10);
-        if (year < 100) { // Handle YY
-          year += (year < 70 ? 2000 : 1900); // Pivoting around 1970/2070
+        if (year < 100) { 
+          year += (year < 70 ? 2000 : 1900); 
         }
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
           const tempDate = new Date(year, month, day);
-          // Check if date is valid (e.g. not Feb 30)
           if (tempDate.getFullYear() === year && tempDate.getMonth() === month && tempDate.getDate() === day) {
              date = tempDate;
              break;
@@ -120,7 +120,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       }
     }
     
-    if (!date) { // Fallback to direct parsing if specific formats fail
+    if (!date) { 
         try {
             const parsedFallback = new Date(val);
             if (!isNaN(parsedFallback.getTime())) {
@@ -137,7 +137,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
   };
 
-  // Helper to get value from parsed row, attempting case-insensitive and trimmed header matching
   const getRowValue = (row: any, headerVariations: string[]): string | undefined => {
     for (const variation of headerVariations) {
       const keys = Object.keys(row);
@@ -149,16 +148,15 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     return undefined;
   };
 
-
-  const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
-    if (!csvString) return [];
+  const parseCsvData = (csvString: string | null): { validTraders: ParsedTraderData[], skippedCount: number, duplicatePhonesInCsv: Set<string> } => {
+    if (!csvString) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
     
-    const traders: ParsedTraderData[] = [];
+    let tradersToProcess: ParsedTraderData[] = [];
     
     const parseResults = Papa.parse(csvString, {
       header: true,
       skipEmptyLines: 'greedy',
-      transformHeader: header => header.trim(), // Trim whitespace from headers
+      transformHeader: header => header.trim(),
     });
 
     if (parseResults.errors.length > 0) {
@@ -166,21 +164,18 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       toast({
         variant: "destructive",
         title: "CSV Parsing Error",
-        description: `Problem parsing CSV structure: ${parseResults.errors[0].message}. Please check file.`,
-        duration: 7000,
+        description: `Problem parsing CSV: ${parseResults.errors[0].message}. Please ensure fields with commas are double-quoted.`,
+        duration: 10000,
       });
-      // Return empty if structural errors occur, or try to process data if it's partial
-      // For now, let's be strict on structural errors
-      if (parseResults.errors.some(e => e.type === 'Quotes')) return []; 
+      if (parseResults.errors.some(e => e.type === 'Quotes' || e.code === 'TooManyFields' || e.code === 'TooFewFields')) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
     }
     
     const actualHeaders = parseResults.meta.fields;
     if (!actualHeaders || actualHeaders.length === 0) {
         console.warn("No headers found in CSV by PapaParse.");
-        return [];
+        return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
     }
     
-    // Check for presence of at least 'Name' header
     const hasNameHeader = actualHeaders.some(h => h.trim().toLowerCase() === "name");
     if (!hasNameHeader) {
       toast({
@@ -189,13 +184,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         description: "The CSV file must contain a 'Name' header column.",
         duration: 7000,
       });
-      return [];
+      return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
     }
 
     for (const row of parseResults.data as any[]) {
       const name = getRowValue(row, ["Name"]);
       if (!name) {
-        // console.warn(`Skipping row due to missing or empty name:`, row);
         continue; 
       }
       
@@ -210,6 +204,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       }
 
       const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
+      const phoneValue = getRowValue(row, ["📞 Phone", "Phone"]);
 
       const trader: ParsedTraderData = {
         name: name,
@@ -217,87 +212,138 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         status: parsedStatus,
         lastActivity: lastActivityValue,
         description: getRowValue(row, ["Description"]) || undefined,
-        tradesMade: parseIntValue(getRowValue(row, ["Reviews"])), // Mapped from "Reviews"
+        tradesMade: parseIntValue(getRowValue(row, ["Reviews"])),
         rating: parseNumericValue(getRowValue(row, ["Rating"])),
         website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
-        phone: getRowValue(row, ["📞 Phone", "Phone"]) || undefined,
+        phone: phoneValue || undefined,
         ownerName: getRowValue(row, ["Owner Name"]) || undefined,
         mainCategory: getRowValue(row, ["Main Category"]) || undefined,
         categories: getRowValue(row, ["Categories"]) || undefined,
         workdayTiming: getRowValue(row, ["Workday Timing"]) || undefined,
         address: getRowValue(row, ["Address"]) || undefined,
-        ownerProfileLink: getRowValue(row, ["Link"]) || undefined, // Mapped from "Link"
+        ownerProfileLink: getRowValue(row, ["Link"]) || undefined,
       };
-      traders.push(trader);
+      tradersToProcess.push(trader);
     }
-    return traders;
+
+    // Duplicate checking
+    const validTraders: ParsedTraderData[] = [];
+    const processedPhoneNumbersInCsv = new Set<string>();
+    const duplicatePhonesInCsv = new Set<string>();
+    let skippedCount = 0;
+
+    const existingNormalizedPhones = new Set(
+      existingTraders.map(t => normalizePhoneNumber(t.phone))
+    );
+
+    for (const trader of tradersToProcess) {
+      const normalizedPhone = normalizePhoneNumber(trader.phone);
+      let isDuplicate = false;
+
+      if (normalizedPhone) {
+        if (existingNormalizedPhones.has(normalizedPhone)) {
+          isDuplicate = true; // Duplicate against existing DB traders
+           console.warn(`Trader "${trader.name}" with phone "${trader.phone}" already exists in the database. Skipping.`);
+        } else if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
+          isDuplicate = true; // Duplicate within the current CSV file
+          duplicatePhonesInCsv.add(trader.phone || 'N/A');
+          console.warn(`Trader "${trader.name}" with phone "${trader.phone}" is a duplicate within the CSV. Skipping.`);
+        }
+      }
+
+      if (isDuplicate) {
+        skippedCount++;
+      } else {
+        validTraders.push(trader);
+        if (normalizedPhone) {
+          processedPhoneNumbersInCsv.add(normalizedPhone);
+        }
+      }
+    }
+    return { validTraders, skippedCount, duplicatePhonesInCsv };
   };
 
   const handleSubmit = async () => {
     if (!selectedFile || !fileContent) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select a CSV file to upload.",
-      });
+      toast({ variant: "destructive", title: "Error", description: "Please select a CSV file." });
       return;
     }
-
     setIsLoading(true);
-    const parsedTraders = parseCsvData(fileContent);
 
-    if (parsedTraders.length === 0 && fileContent.trim() !== "") { 
+    const { validTraders, skippedCount, duplicatePhonesInCsv } = parseCsvData(fileContent);
+
+    if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() !== "") { 
       toast({
         variant: "destructive",
         title: "No Traders Parsed",
-        description: `No valid trader data could be parsed. Please ensure your CSV file has the correct headers (e.g., "Name", "Total Sales", etc.) and that data rows contain a 'Name'. Check browser console (View > Developer > JavaScript Console) for more detailed warnings.`,
+        description: `No valid trader data found. Ensure CSV has correct headers (e.g., "Name") and data. Check browser console for warnings. Remember to double-quote fields containing commas (e.g., in "Description" or "Address" or "Categories").`,
         duration: 10000, 
       });
       setIsLoading(false);
       return;
     }
-     if (parsedTraders.length === 0 && fileContent.trim() === "") {
-      toast({
-        variant: "destructive",
-        title: "Empty File",
-        description: "The selected CSV file appears to be empty.",
-      });
+    if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() === "") {
+      toast({ variant: "destructive", title: "Empty File", description: "The selected CSV file is empty." });
       setIsLoading(false);
       return;
     }
 
-    try {
-      const result = await onBulkAddTraders(branchId, parsedTraders);
-      if (result && result.length > 0) {
-        toast({
-          title: "Success",
-          description: `${result.length} trader(s) processed for addition.`,
-        });
-        setOpen(false);
-        clearFile();
-      } else if (result === null) {
+    let newTradersAddedCount = 0;
+    if (validTraders.length > 0) {
+      try {
+        const result = await onBulkAddTraders(branchId, validTraders);
+        if (result) {
+          newTradersAddedCount = result.length;
+        } else {
+           throw new Error("Server action returned null for bulk add.");
+        }
+      } catch (error) {
+        console.error("Failed to bulk add traders:", error);
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Failed to add traders. Server action returned null.",
+          title: "Upload Error",
+          description: `An error occurred: ${error instanceof Error ? error.message : "Unknown error"}`,
         });
-      } else {
-         toast({
-          variant: "default", 
-          title: "Process Completed",
-          description: "The process completed, but no new traders may have been added if all were invalid, duplicates, or the file contained no valid data.",
-        });
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error("Failed to bulk add traders:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: `An error occurred: ${error instanceof Error ? error.message : "Unknown error"}`,
-      });
-    } finally {
-      setIsLoading(false);
     }
+    
+    // Consolidate toast messages
+    let summaryMessages: string[] = [];
+    if (newTradersAddedCount > 0) {
+      summaryMessages.push(`${newTradersAddedCount} new trader(s) successfully added.`);
+    }
+    if (skippedCount > 0) {
+      summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates (already in system or within CSV).`);
+      if (duplicatePhonesInCsv.size > 0) {
+         summaryMessages.push(`Duplicate phone(s) within CSV: ${Array.from(duplicatePhonesInCsv).slice(0,3).join(', ')}${duplicatePhonesInCsv.size > 3 ? '...' : '' }.`);
+      }
+       summaryMessages.push("Check console for more details on skipped traders.");
+    }
+
+    if (summaryMessages.length > 0) {
+        toast({
+            title: newTradersAddedCount > 0 ? "Bulk Upload Processed" : "Bulk Upload Notice",
+            description: (
+            <div className="flex flex-col gap-1">
+                {summaryMessages.map((msg, idx) => <span key={idx}>{msg}</span>)}
+            </div>
+            ),
+            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, // Longer if there are skips
+        });
+    } else if (validTraders.length === 0 && skippedCount === 0) {
+        // This case should have been caught earlier, but as a fallback
+        toast({
+            title: "No Action Taken",
+            description: "No new traders to add and no duplicates found to skip. The file might have been empty or contained no processable data.",
+            variant: "default"
+        });
+    }
+
+    setOpen(false);
+    clearFile();
+    setIsLoading(false);
   };
 
   return (
@@ -316,10 +362,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. The first row should contain headers. Expected headers are:
+            Upload a CSV file. The first row should contain headers. Expected headers are approximately:
             <br/><code>{EXPECTED_HEADERS.join(", ")}</code>.
-            <br/>The 'Name' header is mandatory. 'Actions' column data will be ignored. The system will attempt to match headers case-insensitively.
-            Data parsing is flexible, but ensure essential columns like 'Name' are present and correctly formatted. Check browser console for warnings on specific rows if issues occur.
+            <br/>The 'Name' header is mandatory. 'Actions' column data will be ignored.
+            The system will attempt to match headers case-insensitively. Phone numbers are used for duplicate checking.
+            <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
+            Check browser console (View &gt; Developer &gt; JavaScript Console) for warnings on specific rows if issues occur.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

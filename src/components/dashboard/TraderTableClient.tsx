@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react"; // Added React import
+import * as React from "react"; 
 import type { Trader, BranchId, ParsedTraderData } from "@/types";
 import { useState, useMemo, useEffect } from "react";
 import type { z } from "zod";
@@ -20,27 +20,28 @@ import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
-import { ArrowUpDown, Search, Users, FileWarning, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { ArrowUpDown, Search, FileWarning, ExternalLink } from "lucide-react";
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "./TraderForm";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 
-const ITEMS_PER_PAGE = 20; // Updated from 5 to 20
+const ITEMS_PER_PAGE = 20; 
 
 type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BranchId;
+  allBranchTraders: Trader[]; // All traders in the current branch for duplicate checks
   onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<void>;
   onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>;
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
 
-export function TraderTableClient({ initialTraders, branchId: propBranchId, onAdd, onUpdate, onDelete, onBulkAdd }: TraderTableClientProps) {
+export function TraderTableClient({ initialTraders, branchId: propBranchId, allBranchTraders, onAdd, onUpdate, onDelete, onBulkAdd }: TraderTableClientProps) {
   const [traders, setTraders] = useState<Trader[]>(initialTraders);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>(null);
@@ -78,7 +79,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
           return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
         
-        // For dates (lastActivity) or other types, direct comparison might be fine after undefined checks
         if (valA < valB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -107,16 +107,13 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
   };
   
   const handleAddTrader = async (values: z.infer<typeof traderFormSchema>): Promise<void> => {
+    // onAdd (from DashboardClientPageContent) handles state updates and toasts.
+    // Duplicate check is now within AddTraderDialog itself using allBranchTraders
     await onAdd(values);
-    // The parent component (DashboardClientPageContent) handles state updates and toasts.
-    // The actual state update and toast will be handled by the `onAdd` prop which calls `addTraderAction`
-    // This function in TraderTableClient is now mostly a pass-through.
   };
 
   const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>): Promise<void> => {
-    await onUpdate(traderId, values); // onUpdate from props now returns Promise<void>
-    // State updates and toasts are expected to be handled by the onUpdate prop
-    // from DashboardClientPageContent.
+    await onUpdate(traderId, values);
   };
 
   const handleStatusToggle = async (trader: Trader) => {
@@ -136,12 +133,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
       ownerProfileLink: trader.ownerProfileLink || "",
       categories: trader.categories || "",
       workdayTiming: trader.workdayTiming || "",
-      // closedOn and reviewKeywords are not in the current traderFormSchema by default
-      // If they need to be preserved, they must be part of the Trader object passed in
-      // and traderFormSchema must include them as optional.
-      // For now, assuming trader object has them if they existed.
-      // closedOn: trader.closedOn || "", // Example if these were part of form schema
-      // reviewKeywords: trader.reviewKeywords || "", // Example
     };
     await onUpdate(trader.id, formValues);
   };
@@ -156,9 +147,12 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
   };
 
   const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]) => {
+    // onBulkAdd from DashboardClientPageContent handles actual addition and state update.
+    // Duplicate check is now inside BulkAddTradersDialog using allBranchTraders.
     const newTraders = await onBulkAdd(tradersToCreate);
-    if (newTraders === null) { 
-      toast({ variant: "destructive", title: "Error", description: "Failed to bulk add traders (action returned null)." });
+    if (newTraders === null && tradersToCreate.length > 0) { 
+      // This might indicate a server-side failure if onBulkAdd returns null for non-empty input
+      // Toasting for this case should be handled by BulkAddTradersDialog which has more context
     }
     return newTraders;
   };
@@ -205,8 +199,16 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <BulkAddTradersDialog branchId={branchId} onBulkAddTraders={(currentBranchIdIgnore, traders) => handleBulkAddTraders(traders)} />
-          <AddTraderDialog onAddTrader={handleAddTrader} branchId={branchId} />
+          <BulkAddTradersDialog 
+            branchId={branchId} 
+            existingTraders={allBranchTraders}
+            onBulkAddTraders={(currentBranchIdIgnore, traders) => handleBulkAddTraders(traders)} 
+          />
+          <AddTraderDialog 
+            branchId={branchId} 
+            existingTraders={allBranchTraders}
+            onAddTrader={handleAddTrader} 
+          />
         </div>
       </div>
 
@@ -332,7 +334,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
   );
 }
 
-// Mini Tooltip components for use within the table for truncated text
 const TooltipProvider = TooltipPrimitive.Provider;
 const Tooltip = TooltipPrimitive.Root;
 const TooltipTrigger = TooltipPrimitive.Trigger;
@@ -351,6 +352,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-
-    

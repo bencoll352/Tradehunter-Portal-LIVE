@@ -10,6 +10,7 @@ import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
 import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAgentClient";
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
+import { useToast } from "@/hooks/use-toast"; // Added for potential direct toasts here
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -29,7 +30,8 @@ export function DashboardClientPageContent({
   const [branchId, setBranchId] = useState<BranchId | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [keyForTable, setKeyForTable] = useState(0); // Used to force re-render of table if needed
+  const [keyForTable, setKeyForTable] = useState(0);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -43,12 +45,11 @@ export function DashboardClientPageContent({
     }
   }, []);
   
-  // Re-fetch traders if branchId changes after initial load (e.g. programmatic change, though not typical here)
   useEffect(() => {
     if (branchId) {
       const currentTraders = getTradersByBranch(branchId);
       setTraders(currentTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-      setKeyForTable(prev => prev + 1); // Force re-render table with new initialTraders
+      setKeyForTable(prev => prev + 1); 
     }
   }, [branchId]);
 
@@ -56,33 +57,48 @@ export function DashboardClientPageContent({
   const handleAdd = async (values: TraderFormValues): Promise<void> => {
     if (!branchId) {
       console.error("Branch ID not available for add action");
+      toast({ variant: "destructive", title: "Error", description: "Branch ID not found." });
       return;
     }
+    // Duplicate check is now handled inside AddTraderDialog before this is called
     const newTrader = await addTraderAction(branchId, values);
     if (newTrader) {
       setTraders(prev => [...prev, newTrader].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+      toast({ title: "Success", description: `${newTrader.name} added successfully.`});
+    } else {
+      // Error toast for failed add action if not already handled by duplicate check
+      // This assumes addTraderAction might return null for reasons other than duplicates if checks are server-side
+      // toast({ variant: "destructive", title: "Error", description: "Failed to add trader." });
     }
   };
 
   const handleUpdate = async (traderId: string, values: TraderFormValues): Promise<void> => {
      if (!branchId) {
       console.error("Branch ID not available for update action");
+      toast({ variant: "destructive", title: "Error", description: "Branch ID not found." });
       return;
     }
     const updatedTrader = await updateTraderAction(branchId, traderId, values);
     if (updatedTrader) {
       setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+      toast({ title: "Success", description: `${updatedTrader.name} updated successfully.`});
+    } else {
+      toast({ variant: "destructive", title: "Error", description: "Failed to update trader." });
     }
   };
 
   const handleDelete = async (traderId: string) => {
      if (!branchId) {
       console.error("Branch ID not available for delete action");
+      toast({ variant: "destructive", title: "Error", description: "Branch ID not found." });
       return false;
     }
     const success = await deleteTraderAction(branchId, traderId);
     if (success) {
       setTraders(prev => prev.filter(t => t.id !== traderId));
+      // Toast is handled by DeleteTraderDialog on successful prop call.
+    } else {
+       toast({ variant: "destructive", title: "Error", description: "Failed to delete trader from server." });
     }
     return success;
   };
@@ -90,12 +106,21 @@ export function DashboardClientPageContent({
   const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]) => {
     if (!branchId) {
       console.error("Branch ID not available for bulk add action");
+      toast({ variant: "destructive", title: "Error", description: "Branch ID not found." });
       return null;
     }
+    // Duplicate checks are handled in BulkAddTradersDialog before this is called.
+    // This function now receives a pre-filtered list of non-duplicate new traders.
     const newTraders = await bulkAddTradersAction(branchId, tradersToCreate);
     if (newTraders && newTraders.length > 0) {
       setTraders(prev => [...prev, ...newTraders].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+      // Toast for successful additions is handled in BulkAddTradersDialog
+    } else if (newTraders === null) {
+      // This case might be hit if bulkAddTradersAction itself fails for some reason
+      // toast({ variant: "destructive", title: "Upload Error", description: "Server failed to process bulk add." });
     }
+    // If newTraders is an empty array, it means all uploaded traders were duplicates or invalid,
+    // which is handled by the toast in BulkAddTradersDialog.
     return newTraders;
   };
 
@@ -123,9 +148,10 @@ export function DashboardClientPageContent({
           </CardHeader>
           <CardContent>
             <TraderTableClient 
-              key={keyForTable} // Force re-mount if initialTraders logic changes due to branchId
+              key={keyForTable}
               initialTraders={traders} 
               branchId={branchId}
+              allBranchTraders={traders} // Pass all current traders for duplicate checks
               onAdd={handleAdd}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
@@ -141,4 +167,3 @@ export function DashboardClientPageContent({
     </div>
   );
 }
-

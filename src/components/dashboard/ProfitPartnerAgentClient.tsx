@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input"; // For file input
+import { Input } from "@/components/ui/input";
 import { Loader2, Rocket, Sparkles, Paperclip, XCircle } from "lucide-react";
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
@@ -32,6 +32,7 @@ const quickActions = [
   { label: "High Value Existing Customers", query: "List high-value existing customers and any recent changes in their activity." },
   { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions." },
   { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons." },
+  { label: "List Bricklayers & Sales Campaign", query: "Give me a list of all traders who are 'Bricklayers' or in 'Brickwork' category. Then, suggest a brief sales campaign message to promote our new line of premium mortar to them." },
 ];
 
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
@@ -51,7 +52,6 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Basic validation for text-based files (e.g., CSV, TXT)
       if (file.type.startsWith("text/") || file.name.endsWith(".csv") || file.name.endsWith(".tsv")) {
         setSelectedFile(file);
         const reader = new FileReader();
@@ -62,7 +62,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
          toast({ title: "File Selected", description: `${file.name} is ready for analysis.` });
       } else {
         toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a text-based file (e.g., .txt, .csv)." });
-        if(fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+        if(fileInputRef.current) fileInputRef.current.value = ""; 
         setSelectedFile(null);
         setFileContent(null);
       }
@@ -80,8 +80,6 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
 
   const handleQuickAction = (query: string) => {
     form.setValue("query", query);
-    // Optionally, auto-submit or just pre-fill
-    // form.handleSubmit(onSubmit)(); 
   };
 
   const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
@@ -100,12 +98,13 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     try {
       const result = await profitPartnerQuery(input);
       setAnalysisResponse(result.answer);
-      if (selectedFile) { // Clear file after successful submission with file
+      if (selectedFile) { 
         clearFile();
       }
     } catch (e) {
       console.error("Analysis Error:", e);
       setError("Sorry, I couldn't process that request. Please try again or check the external service.");
+      toast({ variant: "destructive", title: "Analysis Failed", description: "The Branch Booster could not process your request."});
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +117,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
           <Rocket className="h-8 w-8 text-primary" />
           <div>
             <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle>
-            <CardDescription>Get insights and recommendations for your branch's traders.</CardDescription>
+            <CardDescription>Get insights and recommendations for your branch's traders. Current trader data for your branch is automatically included in analyses.</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -162,7 +161,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
             />
 
             <FormItem>
-              <FormLabel htmlFor="customer-file-upload">Upload Customer Data (Optional .csv, .txt)</FormLabel>
+              <FormLabel htmlFor="customer-file-upload">Upload Additional Customer Data (Optional .csv, .txt)</FormLabel>
               <div className="flex items-center gap-2">
                 <Input
                   id="customer-file-upload"

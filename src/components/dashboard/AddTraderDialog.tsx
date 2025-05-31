@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -8,31 +9,55 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { TraderForm, traderFormSchema } from "./TraderForm";
 import type { z } from "zod";
 import { PlusCircle } from "lucide-react";
+import type { Trader } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import { normalizePhoneNumber } from "@/lib/utils";
 
 interface AddTraderDialogProps {
   onAddTrader: (values: z.infer<typeof traderFormSchema>) => Promise<void>;
   branchId: string;
+  existingTraders: Trader[];
 }
 
-export function AddTraderDialog({ onAddTrader, branchId }: AddTraderDialogProps) {
+export function AddTraderDialog({ onAddTrader, branchId, existingTraders }: AddTraderDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (values: z.infer<typeof traderFormSchema>) => {
     setIsLoading(true);
+    const newPhoneNumber = normalizePhoneNumber(values.phone);
+
+    if (newPhoneNumber) {
+      const isDuplicate = existingTraders.some(
+        (trader) => normalizePhoneNumber(trader.phone) === newPhoneNumber
+      );
+      if (isDuplicate) {
+        toast({
+          variant: "destructive",
+          title: "Duplicate Trader",
+          description: `A trader with phone number ${values.phone} already exists.`,
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
     try {
       await onAddTrader(values);
-      setOpen(false); // Close dialog on success
+      // Success toast is handled by DashboardClientPageContent after onAddTrader completes
+      setOpen(false); 
     } catch (error) {
       console.error("Failed to add trader:", error);
-      // Toast notification for error can be added here
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred while adding the trader.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +74,7 @@ export function AddTraderDialog({ onAddTrader, branchId }: AddTraderDialogProps)
         <DialogHeader>
           <DialogTitle>Add New Trader</DialogTitle>
           <DialogDescription>
-            Enter the details for the new trader in branch {branchId}.
+            Enter the details for the new trader in branch {branchId}. Phone number is used for duplicate checking.
           </DialogDescription>
         </DialogHeader>
         <TraderForm onSubmit={handleSubmit} isLoading={isLoading} submitButtonText="Add Trader" />

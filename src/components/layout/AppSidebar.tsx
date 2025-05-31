@@ -33,7 +33,7 @@ const navItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile, state: sidebarState } = useSidebar(); // Get sidebar state
   const [currentBranchId, setCurrentBranchId] = useState<BranchId | null>(null);
 
   useEffect(() => {
@@ -53,12 +53,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="border-r-0">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <Logo className="text-sidebar-primary"/>
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <h1 className="text-xl font-semibold text-sidebar-primary-foreground">TradeHunter Pro</h1>
-          </div>
+      <SidebarHeader className="p-3">
+        <div className="flex items-center gap-2">
+          {/* Adjust Logo props based on sidebar state for better visual appearance */}
+          <Logo 
+            width={sidebarState === 'collapsed' ? 32 : 180} 
+            height={sidebarState === 'collapsed' ? 32 : 47} 
+          />
+          {/* The text "TradeHunter Pro" is now part of the logo image placeholder */}
         </div>
       </SidebarHeader>
 
@@ -75,7 +77,7 @@ export function AppSidebar() {
                     onClick={() => setOpenMobile(false)}
                     className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
                   >
-                    <div> {/* This div can accept props from SidebarMenuButton (Slot) */}
+                    <div> 
                       <item.icon />
                       <span>{item.label}</span>
                     </div>
