@@ -1,3 +1,4 @@
+
 import type { Trader, BranchId, ParsedTraderData } from '@/types';
 import { format, parseISO } from 'date-fns';
 
@@ -37,8 +38,8 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
     ownerProfileLink: traderData.ownerProfileLink,
     categories: traderData.categories,
     workdayTiming: traderData.workdayTiming,
-    closedOn: traderData.closedOn, // Will be undefined if not in traderData
-    reviewKeywords: traderData.reviewKeywords, // Will be undefined if not in traderData
+    closedOn: traderData.closedOn,
+    reviewKeywords: traderData.reviewKeywords,
   };
   MOCK_TRADERS.push(newTrader);
   return newTrader;
@@ -47,7 +48,6 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
 export const updateTrader = (updatedTrader: Trader): Trader | null => {
   const index = MOCK_TRADERS.findIndex(trader => trader.id === updatedTrader.id && trader.branchId === updatedTrader.branchId);
   if (index !== -1) {
-    // Ensure lastActivity is always updated to current time on any update
     MOCK_TRADERS[index] = { ...MOCK_TRADERS[index], ...updatedTrader, lastActivity: new Date().toISOString() };
     return MOCK_TRADERS[index];
   }
@@ -76,7 +76,6 @@ export const formatTraderDataForAI = (traders: Trader[]): string => {
     if (trader.ownerProfileLink) details += `, Owner Profile: ${trader.ownerProfileLink}`;
     if (trader.categories) details += `, Categories: ${trader.categories}`;
     if (trader.workdayTiming) details += `, Hours: ${trader.workdayTiming}`;
-    // closedOn and reviewKeywords are not part of current CSV spec or form, so not typically sent
     return details;
   }).join('; \n');
 };
@@ -87,13 +86,16 @@ export const bulkAddTraders = (
 ): Trader[] => {
   const createdTraders: Trader[] = [];
   tradersToCreate.forEach(parsedData => {
-    const newTraderPayload: Omit<Trader, 'id' | 'lastActivity'> & { lastActivity?: string } = {
+    // Construct the payload for addTrader, ensuring non-optional fields have values.
+    // The addTrader function itself also has defaults, but this satisfies the type checker
+    // for the object being passed to it.
+    const newTraderPayload = {
       name: parsedData.name,
       branchId: branchId,
-      totalSales: parsedData.totalSales, // Will be handled by addTrader's default if undefined
-      tradesMade: parsedData.tradesMade, // Will be handled by addTrader's default if undefined
-      status: parsedData.status, // Will be handled by addTrader's default if undefined
-      lastActivity: parsedData.lastActivity, // Pass as is; addTrader defaults if undefined/invalid
+      totalSales: parsedData.totalSales ?? 0, // Ensure number
+      tradesMade: parsedData.tradesMade ?? 0, // Ensure number
+      status: parsedData.status ?? 'Active',   // Ensure 'Active' | 'Inactive'
+      lastActivity: parsedData.lastActivity,   // string | undefined (addTrader handles default if undefined)
       description: parsedData.description,
       rating: parsedData.rating,
       website: parsedData.website,
@@ -104,11 +106,12 @@ export const bulkAddTraders = (
       ownerProfileLink: parsedData.ownerProfileLink,
       categories: parsedData.categories,
       workdayTiming: parsedData.workdayTiming,
-      // closedOn and reviewKeywords are not in ParsedTraderData
-      // and will result in undefined for those fields in the new Trader object.
+      // closedOn and reviewKeywords are not in ParsedTraderData from the current CSV spec.
+      // They will be undefined here and thus undefined in the resulting Trader object from addTrader.
     };
-    const createdTrader = addTrader(newTraderPayload);
+    const createdTrader = addTrader(newTraderPayload as Omit<Trader, 'id' | 'lastActivity'> & { lastActivity?: string });
     createdTraders.push(createdTrader);
   });
   return createdTraders;
 };
+
