@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { BranchId, Trader, ParsedTraderData } from "@/types";
 import { getTradersByBranch } from "@/lib/mock-data";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -10,7 +10,9 @@ import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
 import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAgentClient";
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
-import { useToast } from "@/hooks/use-toast"; // Added for potential direct toasts here
+import { useToast } from "@/hooks/use-toast";
+import { MiniDashboardStats } from './MiniDashboardStats'; // New import
+import { parseISO } from 'date-fns'; // For date calculations
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -53,6 +55,24 @@ export function DashboardClientPageContent({
     }
   }, [branchId]);
 
+  const liveTradersCount = useMemo(() => {
+    return traders.filter(t => t.status === 'Active').length;
+  }, [traders]);
+
+  const recentlyActiveTradersCount = useMemo(() => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return traders.filter(t => {
+      try {
+        const lastActivityDate = parseISO(t.lastActivity);
+        return lastActivityDate >= thirtyDaysAgo;
+      } catch (e) {
+        // Handle potential invalid date string in lastActivity
+        console.warn(`Invalid date format for trader ID ${t.id}: ${t.lastActivity}`);
+        return false; 
+      }
+    }).length;
+  }, [traders]);
 
   const handleAdd = async (values: TraderFormValues): Promise<void> => {
     if (!branchId) {
@@ -60,15 +80,10 @@ export function DashboardClientPageContent({
       toast({ variant: "destructive", title: "Error", description: "Branch ID not found." });
       return;
     }
-    // Duplicate check is now handled inside AddTraderDialog before this is called
     const newTrader = await addTraderAction(branchId, values);
     if (newTrader) {
       setTraders(prev => [...prev, newTrader].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       toast({ title: "Success", description: `${newTrader.name} added successfully.`});
-    } else {
-      // Error toast for failed add action if not already handled by duplicate check
-      // This assumes addTraderAction might return null for reasons other than duplicates if checks are server-side
-      // toast({ variant: "destructive", title: "Error", description: "Failed to add trader." });
     }
   };
 
@@ -96,7 +111,6 @@ export function DashboardClientPageContent({
     const success = await deleteTraderAction(branchId, traderId);
     if (success) {
       setTraders(prev => prev.filter(t => t.id !== traderId));
-      // Toast is handled by DeleteTraderDialog on successful prop call.
     } else {
        toast({ variant: "destructive", title: "Error", description: "Failed to delete trader from server." });
     }
@@ -109,24 +123,17 @@ export function DashboardClientPageContent({
       toast({ variant: "destructive", title: "Error", description: "Branch ID not found." });
       return null;
     }
-    // Duplicate checks are handled in BulkAddTradersDialog before this is called.
-    // This function now receives a pre-filtered list of non-duplicate new traders.
     const newTraders = await bulkAddTradersAction(branchId, tradersToCreate);
     if (newTraders && newTraders.length > 0) {
       setTraders(prev => [...prev, ...newTraders].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-      // Toast for successful additions is handled in BulkAddTradersDialog
-    } else if (newTraders === null) {
-      // This case might be hit if bulkAddTradersAction itself fails for some reason
-      // toast({ variant: "destructive", title: "Upload Error", description: "Server failed to process bulk add." });
-    }
-    // If newTraders is an empty array, it means all uploaded traders were duplicates or invalid,
-    // which is handled by the toast in BulkAddTradersDialog.
+    } 
     return newTraders;
   };
 
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <Skeleton className="h-24 w-full md:w-1/2 lg:w-1/3" /> {/* Skeleton for mini dashboard */}
         <Skeleton className="h-12 w-1/4" />
         <Skeleton className="h-64 w-full" />
         <Skeleton className="h-48 w-full" />
@@ -139,30 +146,36 @@ export function DashboardClientPageContent({
   }
   
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="lg:col-span-2 space-y-6">
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
-            <CardDescription>Manage traders for branch: {branchId}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TraderTableClient 
-              key={keyForTable}
-              initialTraders={traders} 
-              branchId={branchId}
-              allBranchTraders={traders} // Pass all current traders for duplicate checks
-              onAdd={handleAdd}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-              onBulkAdd={handleBulkAdd}
-            />
-          </CardContent>
-        </Card>
-      </div>
+    <div className="space-y-6"> {/* Outer div to space mini-dashboard and main content */}
+      <MiniDashboardStats 
+        liveTradersCount={liveTradersCount}
+        recentlyActiveTradersCount={recentlyActiveTradersCount}
+      />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
+              <CardDescription>Manage traders for branch: {branchId}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TraderTableClient 
+                key={keyForTable}
+                initialTraders={traders} 
+                branchId={branchId}
+                allBranchTraders={traders}
+                onAdd={handleAdd}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
+                onBulkAdd={handleBulkAdd}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
-      <div className="lg:col-span-1 space-y-6">
-         <ProfitPartnerAgentClient traders={traders} />
+        <div className="lg:col-span-1 space-y-6">
+          <ProfitPartnerAgentClient traders={traders} />
+        </div>
       </div>
     </div>
   );
