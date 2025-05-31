@@ -383,13 +383,16 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <br/>The 'Name' header is mandatory. 'Actions' column data will be ignored.
             The system matches headers case-insensitively and ignores leading/trailing spaces. 
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
-            <br/><strong>If fields like 'Owner Name', 'Main Category', or 'Workday Timing' are not loading:</strong>
-            <ol className="list-decimal list-inside pl-4 text-xs">
+          </DialogDescription>
+          {/* Moved the <strong> and <ol> into a separate div below DialogDescription */}
+          <div className="text-sm text-muted-foreground mt-2 text-left"> 
+            <strong>If fields like 'Owner Name', 'Main Category', or 'Workday Timing' are not loading:</strong>
+            <ol className="list-decimal list-inside pl-4 text-xs mt-1">
               <li>Double-check the exact spelling of these headers in your <strong>raw CSV file</strong> (not just how they appear in Excel or other spreadsheet software).</li>
               <li>After an upload attempt, open your browser's developer console (usually by right-clicking on the page, selecting 'Inspect' or 'Inspect Element', then finding the 'Console' tab). Look for messages starting with "[CSV Parsing Debug]". These messages will show the headers the system actually detected for problematic rows, which you can compare against your CSV.</li>
               <li>Ensure the data cells for these columns are not empty in your CSV.</li>
             </ol>
-          </DialogDescription>
+          </div>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
