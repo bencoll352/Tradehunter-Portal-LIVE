@@ -14,9 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Implemented for manual trader addition with a warning toast.
     - Implemented for bulk CSV upload, skipping duplicates (from DB or within CSV) and providing a summary toast.
 - New "Quick Action" to Branch Booster: "List Bricklayers & Sales Campaign".
-- Enhanced server-side logging in `profit-partner-query.ts` to provide more detailed information when diagnosing Branch Booster "Analysis Failed" errors, including request payload snippets and response status/body snippets.
+- **Mini Dashboard**: Added a statistics section at the top of the dashboard displaying "Live Traders Count" and "Recently Active Traders Count".
+- **Per-Branch Data Persistence**: Trader data is now saved in the browser's `localStorage` on a per-branch basis, ensuring data modifications persist across sessions for each branch.
 
 ### Changed
+- **Branch Booster Refactor**:
+    - The Branch Booster (`profit-partner-query.ts`) now communicates directly with the Google Gemini API using Genkit and the `@google/genai` SDK, instead of relying on an `EXTERNAL_AI_URL`.
+    - The API key for Gemini is now expected via the `GOOGLE_API_KEY` environment variable (updated in `.env` and for Firebase deployment).
+    - Error handling in the Branch Booster flow has been made more specific to Genkit/Gemini API issues (e.g., API key problems, quota errors, model output parsing).
 - **Branch ID Rename**: `BRANCH_A` has been consistently renamed to `PURLEY` throughout the application, including in types, mock data, login form examples, and documentation.
 - **Trader Overview Pagination**: Increased the number of traders displayed per page in the overview table from 5 to 20.
 - **Bulk CSV Trader Upload**:
@@ -26,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Adjusted date parsing for "Last Activity" to better handle common UK formats (dd/MM/yyyy, dd/MM/yy).
     - Adjusted CSV parsing in `BulkAddTradersDialog` to be more flexible with column counts, expecting up to 16 columns based on provided headers and ensuring all traders are uploaded if 'Name' is present.
     - Made CSV header matching more flexible in `BulkAddTradersDialog.tsx` for "Owner Name" (also checks "Owner"), "Main Category" (also checks "Category"), and "Workday Timing" (also checks "Workday Hours", "Working Hours", "Hours", "WorkdayTiming" (no space)).
+    - **Enhanced Debugging for CSV Parsing**: Added detailed console logging in `BulkAddTradersDialog.tsx` to help diagnose issues with "Owner Name", "Main Category", and "Workday Timing" fields not loading, showing detected headers for problematic rows. Updated dialog instructions for these fields.
 - **Logo Update**: Replaced SVG logo with `next/image` component using a placeholder for `TradeHunter Pro` logo. Sidebar adjusts logo size based on collapsed/expanded state.
 - **Wording**: Removed explicit "AI" wording from user-facing text. Renamed features and descriptions to focus on analysis, insights, and system capabilities (e.g., "AI Assistant Capabilities" in sidebar changed to "Insight & Assistance Features", related icon changed from `Brain` to `Lightbulb`). Function `formatTraderDataForAI` renamed to `formatTraderDataForAnalysis`.
 - Resolved various deployment and build issues.
@@ -40,10 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected TypeScript error in `TraderTableClient.tsx` by ensuring `handleAddTrader` and `handleUpdateTrader` functions align with `Promise<void>` return type expected by dialog components.
 - Expanded manual "Add Trader" and "Edit Trader" forms to include more fields, aligning with the trader table overview (Website, Phone, Address, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing).
 - Updated prop type in `src/components/icons/Logo.tsx` from `SVGProps<SVGSVGElement>` to `React.HTMLAttributes<HTMLDivElement>` to match the rendered `div` element, resolving a TypeScript build error.
-- Updated `EXTERNAL_AI_URL` in `src/ai/flows/profit-partner-query.ts` to point to the correct live Branch Booster endpoint.
 
 ### Fixed
 - Fixed runtime error: `DialogTrigger is not defined` in `AddTraderDialog.tsx` by adding the missing import.
+- **DashboardClientPageContent Parsing Error**: Fixed a JavaScript parsing error in `DashboardClientPageContent.tsx` caused by an erroneous backslash in a template literal within a `console.warn` statement.
 
 
 ## [0.2.0] - YYYY-MM-DD (Update with current date)
