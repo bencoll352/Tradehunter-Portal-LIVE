@@ -1,7 +1,8 @@
-import type { SVGProps } from 'react';
+import type { HTMLAttributes } from 'react';
 import Image from 'next/image';
 
-export function Logo(props: SVGProps<SVGSVGElement> & { width?: number, height?: number }) {
+// Combine HTMLAttributes for a div with custom width and height props
+export function Logo(props: HTMLAttributes<HTMLDivElement> & { width?: number, height?: number }) {
   // The props like className might not be directly applicable to next/image in the same way as SVG
   // We'll use explicit width and height, or defaults.
   const { width = 200, height = 52, className, ...rest } = props; // Default aspect ratio based on typical logo
