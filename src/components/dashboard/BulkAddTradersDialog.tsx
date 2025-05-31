@@ -18,31 +18,19 @@ import { useToast } from "@/hooks/use-toast";
 import type { BranchId, ParsedTraderData, Trader } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import Papa from "papaparse";
 
 interface BulkAddTradersDialogProps {
   branchId: BranchId;
   onBulkAddTraders: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
 
-const COLUMN_INDICES = {
-  NAME: 0,
-  TOTAL_SALES: 1,
-  STATUS: 2,
-  LAST_ACTIVITY: 3,
-  DESCRIPTION: 4,
-  REVIEWS: 5,
-  RATING: 6,
-  WEBSITE: 7,
-  PHONE: 8,
-  OWNER_NAME: 9,
-  MAIN_CATEGORY: 10,
-  CATEGORIES: 11,
-  WORKDAY_TIMING: 12,
-  ADDRESS: 13,
-  OWNER_PROFILE_LINK: 14,
-  ACTIONS_COLUMN: 15, 
-};
-const EXPECTED_COLUMN_COUNT = 16;
+// Expected headers (case-insensitive matching will be attempted)
+const EXPECTED_HEADERS = [
+  "Name", "Total Sales", "Status", "Last Activity", "Description", 
+  "Reviews", "Rating", "🌐Website", "📞 Phone", "Owner Name", 
+  "Main Category", "Categories", "Workday Timing", "Address", "Link", "Actions"
+];
 
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
@@ -81,151 +69,164 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   };
 
   const parseNumericValue = (rawValue: string | undefined): number | undefined => {
-    if (rawValue === undefined || rawValue === null || rawValue.trim() === "" || rawValue.trim() === "-") {
+    if (rawValue === undefined || rawValue === null || String(rawValue).trim() === "" || String(rawValue).trim() === "-") {
       return undefined;
     }
-    const cleanedValue = rawValue.replace(/[^0-9.]+/g, "");
+    const cleanedValue = String(rawValue).replace(/[^0-9.-]+/g, ""); // Allow negative sign and decimal
     if (cleanedValue === "") return undefined;
     const parsed = parseFloat(cleanedValue);
     return isNaN(parsed) ? undefined : parsed;
   };
   
   const parseIntValue = (rawValue: string | undefined): number | undefined => {
-    if (rawValue === undefined || rawValue === null || rawValue.trim() === "" || rawValue.trim() === "-") {
+    if (rawValue === undefined || rawValue === null || String(rawValue).trim() === "" || String(rawValue).trim() === "-") {
       return undefined;
     }
-    const cleanedValue = rawValue.replace(/[^0-9]+/g, "");
+    const cleanedValue = String(rawValue).replace(/[^0-9-]+/g, ""); // Allow negative sign
     if (cleanedValue === "") return undefined;
     const parsed = parseInt(cleanedValue, 10);
     return isNaN(parsed) ? undefined : parsed;
   };
 
   const parseDateString = (dateStr: string | undefined, traderNameForWarning: string): string | undefined => {
-    if (!dateStr || dateStr.trim() === "" || dateStr.trim() === "-") {
+    if (!dateStr || String(dateStr).trim() === "" || String(dateStr).trim() === "-") {
       return undefined;
     }
-
+    const val = String(dateStr).trim();
     let date: Date | null = null;
 
-    const partsDMYFull = dateStr.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/);
-    if (partsDMYFull) {
-      const day = parseInt(partsDMYFull[1], 10);
-      const month = parseInt(partsDMYFull[2], 10) - 1;
-      const year = parseInt(partsDMYFull[3], 10);
-      if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
-        date = new Date(year, month, day);
-      }
-    }
+    const formatsToTry = [
+      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/, // DD/MM/YYYY or DD.MM.YYYY or DD-MM-YYYY
+      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2})$/,  // DD/MM/YY or DD.MM.YY or DD-MM-YY
+    ];
 
-    if (!date) {
-      const partsDMYShort = dateStr.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2})$/);
-      if (partsDMYShort) {
-        const day = parseInt(partsDMYShort[1], 10);
-        const month = parseInt(partsDMYShort[2], 10) - 1;
-        let year = parseInt(partsDMYShort[3], 10);
-        year += (year < 70 ? 2000 : 1900); 
+    for (const regex of formatsToTry) {
+      const parts = val.match(regex);
+      if (parts) {
+        const day = parseInt(parts[1], 10);
+        const month = parseInt(parts[2], 10) - 1; // JS months are 0-indexed
+        let year = parseInt(parts[3], 10);
+        if (year < 100) { // Handle YY
+          year += (year < 70 ? 2000 : 1900); // Pivoting around 1970/2070
+        }
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
-          date = new Date(year, month, day);
+          const tempDate = new Date(year, month, day);
+          // Check if date is valid (e.g. not Feb 30)
+          if (tempDate.getFullYear() === year && tempDate.getMonth() === month && tempDate.getDate() === day) {
+             date = tempDate;
+             break;
+          }
         }
       }
     }
     
-    if (!date) {
+    if (!date) { // Fallback to direct parsing if specific formats fail
         try {
-            const parsedFallback = new Date(dateStr);
+            const parsedFallback = new Date(val);
             if (!isNaN(parsedFallback.getTime())) {
                 date = parsedFallback;
             }
-        } catch (e) {
-            // Ignore error
-        }
+        } catch (e) { /* ignore */ }
     }
 
     if (date && !isNaN(date.getTime())) {
       return date.toISOString();
     } else {
-      console.warn(`Invalid date format for Last Activity: "${dateStr}" for trader "${traderNameForWarning}". System will default it.`);
+      console.warn(`Invalid date format for Last Activity: "${val}" for trader "${traderNameForWarning}". System will default it.`);
       return undefined;
     }
   };
 
-  const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
-    if (!csvString) return [];
-    const traders: ParsedTraderData[] = [];
-    const allLines = csvString.trim().split(/\r\n|\n/);
-    const lines = allLines.filter(line => line.trim() !== "");
-
-    if (lines.length === 0) return [];
-    
-    let dataLines = lines; 
-    if (lines.length > 0) {
-      const firstLineValuesForHeaderCheck = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
-        let cleaned = val.trim();
-        if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-          cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
-        }
-        return cleaned;
-      });
-
-      if (firstLineValuesForHeaderCheck.length > COLUMN_INDICES.NAME) {
-          const firstCellContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME];
-          if (firstCellContent && firstCellContent.trim().toLowerCase() === 'name') {
-            dataLines = lines.slice(1);
-          }
+  // Helper to get value from parsed row, attempting case-insensitive and trimmed header matching
+  const getRowValue = (row: any, headerVariations: string[]): string | undefined => {
+    for (const variation of headerVariations) {
+      const keys = Object.keys(row);
+      const foundKey = keys.find(key => key.trim().toLowerCase() === variation.trim().toLowerCase());
+      if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null) {
+        return String(row[foundKey]).trim();
       }
     }
+    return undefined;
+  };
 
-    for (const line of dataLines) {
-      const rawValues = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-      
-      const values = rawValues.map(val => {
-        let cleaned = val.trim();
-        if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-          cleaned = cleaned.substring(1, cleaned.length - 1);
-        }
-        cleaned = cleaned.replace(/""/g, '"');
-        return cleaned === "-" ? "" : cleaned;
+
+  const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
+    if (!csvString) return [];
+    
+    const traders: ParsedTraderData[] = [];
+    
+    const parseResults = Papa.parse(csvString, {
+      header: true,
+      skipEmptyLines: 'greedy',
+      transformHeader: header => header.trim(), // Trim whitespace from headers
+    });
+
+    if (parseResults.errors.length > 0) {
+      parseResults.errors.forEach(err => console.warn("PapaParse Error:", err));
+      toast({
+        variant: "destructive",
+        title: "CSV Parsing Error",
+        description: `Problem parsing CSV structure: ${parseResults.errors[0].message}. Please check file.`,
+        duration: 7000,
       });
+      // Return empty if structural errors occur, or try to process data if it's partial
+      // For now, let's be strict on structural errors
+      if (parseResults.errors.some(e => e.type === 'Quotes')) return []; 
+    }
+    
+    const actualHeaders = parseResults.meta.fields;
+    if (!actualHeaders || actualHeaders.length === 0) {
+        console.warn("No headers found in CSV by PapaParse.");
+        return [];
+    }
+    
+    // Check for presence of at least 'Name' header
+    const hasNameHeader = actualHeaders.some(h => h.trim().toLowerCase() === "name");
+    if (!hasNameHeader) {
+      toast({
+        variant: "destructive",
+        title: "Missing 'Name' Header",
+        description: "The CSV file must contain a 'Name' header column.",
+        duration: 7000,
+      });
+      return [];
+    }
 
-      const name = values[COLUMN_INDICES.NAME]?.trim();
+    for (const row of parseResults.data as any[]) {
+      const name = getRowValue(row, ["Name"]);
       if (!name) {
-        console.warn(`Skipping line due to missing or empty name: "${line}"`);
+        // console.warn(`Skipping row due to missing or empty name:`, row);
         continue; 
       }
-
-      if (values.length > EXPECTED_COLUMN_COUNT) {
-        console.warn(`Row for trader "${name}" produced ${values.length} fields after splitting, but expected up to ${EXPECTED_COLUMN_COUNT}. This often means some fields (like Description, Categories, or Address) contain commas but are NOT enclosed in double quotes in your CSV file. Data for this row may be misaligned. Raw line: "${line}"`);
-      } else if (values.length < 1) { 
-        console.warn(`Skipping line because it resulted in too few fields (${values.length}) to process, even for a Name. Raw line: "${line}"`);
-        continue;
-      }
       
-      let statusValue = values[COLUMN_INDICES.STATUS]?.trim().toLowerCase();
+      let statusValue = getRowValue(row, ["Status"])?.toLowerCase();
       let parsedStatus : 'Active' | 'Inactive' | undefined = undefined;
       if (statusValue === 'active') {
         parsedStatus = 'Active';
       } else if (statusValue === 'inactive') {
         parsedStatus = 'Inactive';
+      } else if (statusValue) {
+        console.warn(`Invalid status "${statusValue}" for trader "${name}". Defaulting to Active.`);
       }
 
-      const lastActivityValue = parseDateString(values[COLUMN_INDICES.LAST_ACTIVITY]?.trim(), name);
+      const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
 
       const trader: ParsedTraderData = {
         name: name,
-        totalSales: parseNumericValue(values[COLUMN_INDICES.TOTAL_SALES]),
+        totalSales: parseNumericValue(getRowValue(row, ["Total Sales"])),
         status: parsedStatus,
         lastActivity: lastActivityValue,
-        description: values[COLUMN_INDICES.DESCRIPTION]?.trim() || undefined,
-        tradesMade: parseIntValue(values[COLUMN_INDICES.REVIEWS]),
-        rating: parseNumericValue(values[COLUMN_INDICES.RATING]),
-        website: values[COLUMN_INDICES.WEBSITE]?.trim() || undefined,
-        phone: values[COLUMN_INDICES.PHONE]?.trim() || undefined,
-        ownerName: values[COLUMN_INDICES.OWNER_NAME]?.trim() || undefined,
-        mainCategory: values[COLUMN_INDICES.MAIN_CATEGORY]?.trim() || undefined,
-        categories: values[COLUMN_INDICES.CATEGORIES]?.trim() || undefined,
-        workdayTiming: values[COLUMN_INDICES.WORKDAY_TIMING]?.trim() || undefined,
-        address: values[COLUMN_INDICES.ADDRESS]?.trim() || undefined,
-        ownerProfileLink: values[COLUMN_INDICES.OWNER_PROFILE_LINK]?.trim() || undefined,
+        description: getRowValue(row, ["Description"]) || undefined,
+        tradesMade: parseIntValue(getRowValue(row, ["Reviews"])), // Mapped from "Reviews"
+        rating: parseNumericValue(getRowValue(row, ["Rating"])),
+        website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
+        phone: getRowValue(row, ["📞 Phone", "Phone"]) || undefined,
+        ownerName: getRowValue(row, ["Owner Name"]) || undefined,
+        mainCategory: getRowValue(row, ["Main Category"]) || undefined,
+        categories: getRowValue(row, ["Categories"]) || undefined,
+        workdayTiming: getRowValue(row, ["Workday Timing"]) || undefined,
+        address: getRowValue(row, ["Address"]) || undefined,
+        ownerProfileLink: getRowValue(row, ["Link"]) || undefined, // Mapped from "Link"
       };
       traders.push(trader);
     }
@@ -248,8 +249,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (parsedTraders.length === 0 && fileContent.trim() !== "") { 
       toast({
         variant: "destructive",
-        title: "Parsing Issue",
-        description: `No valid trader data could be parsed. Please check the CSV format. Crucially, if any field (like Description, Categories, Address) contains commas, that ENTIRE field MUST be enclosed in double quotes (e.g., "123, Main St", or "Category A, Category B"). Ensure 'Name' (column 1) is present for all data rows. The system expects up to ${EXPECTED_COLUMN_COUNT} columns in the specified order. A header row is skipped if "Name" (case-insensitive) is detected in the first cell. Check browser console (View > Developer > JavaScript Console) for more detailed warnings about specific rows.`,
+        title: "No Traders Parsed",
+        description: `No valid trader data could be parsed. Please ensure your CSV file has the correct headers (e.g., "Name", "Total Sales", etc.) and that data rows contain a 'Name'. Check browser console (View > Developer > JavaScript Console) for more detailed warnings.`,
         duration: 10000, 
       });
       setIsLoading(false);
@@ -270,7 +271,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       if (result && result.length > 0) {
         toast({
           title: "Success",
-          description: `${result.length} trader(s) added successfully.`,
+          description: `${result.length} trader(s) processed for addition.`,
         });
         setOpen(false);
         clearFile();
@@ -283,8 +284,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       } else {
          toast({
           variant: "default", 
-          title: "No New Traders Added",
-          description: "The process completed, but no new traders were added. This might mean all parsed traders were invalid, duplicates, or the file contained no new data.",
+          title: "Process Completed",
+          description: "The process completed, but no new traders may have been added if all were invalid, duplicates, or the file contained no valid data.",
         });
       }
     } catch (error) {
@@ -315,9 +316,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. Each row should represent one trader and contain up to {EXPECTED_COLUMN_COUNT} columns in the following order:
-            <br/>1. Name, 2. Total Sales, 3. Status (Active/Inactive), 4. Last Activity (e.g., dd/MM/yyyy or MM/dd/yyyy), 5. Description, 6. Reviews (trades made), 7. Rating (0-5), 8. Website, 9. Phone, 10. Owner Name, 11. Main Category, 12. Categories, 13. Workday Timing, 14. Address, 15. Link (Owner Profile Link), 16. Actions (this column's data will be ignored).
-            <br/><strong>IMPORTANT:</strong> Ensure the file is comma-separated. 'Name' (column 1) must be present in data rows. <strong>If any field's content (e.g., Description, Categories, Address) includes a comma, that entire field MUST be enclosed in double quotes. For example: <code>"123, Main St"</code> or <code>"Category A, Category B"</code>.</strong> The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell of the first line.
+            Upload a CSV file. The first row should contain headers. Expected headers are:
+            <br/><code>{EXPECTED_HEADERS.join(", ")}</code>.
+            <br/>The 'Name' header is mandatory. 'Actions' column data will be ignored. The system will attempt to match headers case-insensitively.
+            Data parsing is flexible, but ensure essential columns like 'Name' are present and correctly formatted. Check browser console for warnings on specific rows if issues occur.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -360,5 +362,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
