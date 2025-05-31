@@ -205,6 +205,24 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
       const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
       const phoneValue = getRowValue(row, ["📞 Phone", "Phone"]);
+      
+      const ownerNameValue = getRowValue(row, ["Owner Name", "Owner"]);
+      const mainCategoryValue = getRowValue(row, ["Main Category", "Category"]);
+      const workdayTimingValue = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
+
+      if (!ownerNameValue && name || !mainCategoryValue && name || !workdayTimingValue && name) {
+        const missingFields = [];
+        if (!ownerNameValue) missingFields.push("Owner Name (expected 'Owner Name' or 'Owner')");
+        if (!mainCategoryValue) missingFields.push("Main Category (expected 'Main Category' or 'Category')");
+        if (!workdayTimingValue) missingFields.push("Workday Timing (expected 'Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', or 'WorkdayTiming')");
+        
+        console.warn(
+          `[CSV Parsing Debug] For trader "${name}": Could not find data for: [${missingFields.join('; ')}]. ` +
+          `This could be due to missing headers or empty cells for these fields in your CSV. ` +
+          `Ensure headers match expected variations (case-insensitive, space-trimmed) and that data is present in the cells. ` +
+          `Detected headers for this row by the system: ${Object.keys(row).join(', ')}`
+        );
+      }
 
       const trader: ParsedTraderData = {
         name: name,
@@ -216,10 +234,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         rating: parseNumericValue(getRowValue(row, ["Rating"])),
         website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
         phone: phoneValue || undefined,
-        ownerName: getRowValue(row, ["Owner Name", "Owner"]) || undefined,
-        mainCategory: getRowValue(row, ["Main Category", "Category"]) || undefined,
+        ownerName: ownerNameValue || undefined,
+        mainCategory: mainCategoryValue || undefined,
         categories: getRowValue(row, ["Categories"]) || undefined,
-        workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]) || undefined,
+        workdayTiming: workdayTimingValue || undefined,
         address: getRowValue(row, ["Address"]) || undefined,
         ownerProfileLink: getRowValue(row, ["Link"]) || undefined,
       };
@@ -242,10 +260,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
       if (normalizedPhone) {
         if (existingNormalizedPhones.has(normalizedPhone)) {
-          isDuplicate = true; // Duplicate against existing DB traders
+          isDuplicate = true; 
            console.warn(`Trader "${trader.name}" with phone "${trader.phone}" already exists in the database. Skipping.`);
         } else if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
-          isDuplicate = true; // Duplicate within the current CSV file
+          isDuplicate = true; 
           duplicatePhonesInCsv.add(trader.phone || 'N/A');
           console.warn(`Trader "${trader.name}" with phone "${trader.phone}" is a duplicate within the CSV. Skipping.`);
         }
@@ -309,7 +327,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }
     
-    // Consolidate toast messages
     let summaryMessages: string[] = [];
     if (newTradersAddedCount > 0) {
       summaryMessages.push(`${newTradersAddedCount} new trader(s) successfully added.`);
@@ -330,10 +347,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 {summaryMessages.map((msg, idx) => <span key={idx}>{msg}</span>)}
             </div>
             ),
-            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, // Longer if there are skips
+            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, 
         });
     } else if (validTraders.length === 0 && skippedCount === 0) {
-        // This case should have been caught earlier, but as a fallback
         toast({
             title: "No Action Taken",
             description: "No new traders to add and no duplicates found to skip. The file might have been empty or contained no processable data.",
@@ -365,9 +381,14 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             Upload a CSV file. The first row should contain headers. Expected headers are approximately:
             <br/><code>{EXPECTED_HEADERS.join(", ")}</code>.
             <br/>The 'Name' header is mandatory. 'Actions' column data will be ignored.
-            The system will attempt to match headers case-insensitively. Phone numbers are used for duplicate checking.
+            The system matches headers case-insensitively and ignores leading/trailing spaces. 
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
-            Check browser console (View &gt; Developer &gt; JavaScript Console) for warnings on specific rows if issues occur.
+            <br/><strong>If fields like 'Owner Name', 'Main Category', or 'Workday Timing' are not loading:</strong>
+            <ol className="list-decimal list-inside pl-4 text-xs">
+              <li>Double-check the exact spelling of these headers in your <strong>raw CSV file</strong> (not just how they appear in Excel or other spreadsheet software).</li>
+              <li>After an upload attempt, open your browser's developer console (usually by right-clicking on the page, selecting 'Inspect' or 'Inspect Element', then finding the 'Console' tab). Look for messages starting with "[CSV Parsing Debug]". These messages will show the headers the system actually detected for problematic rows, which you can compare against your CSV.</li>
+              <li>Ensure the data cells for these columns are not empty in your CSV.</li>
+            </ol>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
