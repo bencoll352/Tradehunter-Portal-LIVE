@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project setup.
-- Core features for trader management.
-- Integration with external analysis service for Branch Booster.
 - `BRANCH_D` added as a valid branch ID for login and testing.
+- Expanded manual "Add Trader" and "Edit Trader" forms to include more fields, aligning with the trader table overview (Website, Phone, Address, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing).
 
 ### Changed
+- **Branch ID Rename**: `BRANCH_A` has been consistently renamed to `PURLEY` throughout the application, including in types, mock data, login form examples, and documentation.
+- **Trader Overview Pagination**: Increased the number of traders displayed per page in the overview table from 5 to 20.
+- **Bulk CSV Trader Upload**:
+    - Updated to parse 16 specific columns in the defined order: Name, Total Sales, Status, Last Activity, Description, Reviews (tradesMade), Rating, Website, Phone, Owner Name, Main Category, Categories, WorkdayTiming, Address, Link (ownerProfileLink), Actions (ignored).
+    - Improved numeric field parsing (Total Sales, Reviews, Rating) to better handle potential currency symbols and formatting.
+    - Adjusted CSV parsing in `BulkAddTradersDialog` to be more flexible with column counts, expecting up to 16 columns based on provided headers and ensuring all traders are uploaded if 'Name' is present.
 - Resolved various deployment and build issues.
 - Stabilized Next.js and React dependencies.
 - Refactored server actions for better clarity and compatibility.
@@ -24,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved CSV parsing in BulkAddTradersDialog to handle quoted fields with internal commas.
 - Fixed data loss issue on trader update by ensuring full existing trader data is fetched.
 - Resolved TypeScript error in TraderTableClient sorting logic by handling undefined values.
-- Adjusted BulkAddTradersDialog CSV parsing to be more flexible with column counts, expecting up to 16 columns based on provided headers (Name, Total Sales, Status, Last Activity, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Actions) and ensuring all traders are uploaded if 'Name' is present.
+- Corrected TypeScript error in `TraderTableClient.tsx` by ensuring `handleAddTrader` and `handleUpdateTrader` functions align with `Promise<void>` return type expected by dialog components.
+
 
 ## [0.2.0] - YYYY-MM-DD (Update with current date)
 ### Changed
