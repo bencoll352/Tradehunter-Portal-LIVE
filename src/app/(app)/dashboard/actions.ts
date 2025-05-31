@@ -1,4 +1,3 @@
-
 'use server';
 
 import type { BranchId, Trader, ParsedTraderData } from "@/types";
@@ -8,25 +7,26 @@ import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 
 export async function addTraderAction(branchId: BranchId, values: z.infer<typeof traderFormSchema>): Promise<Trader | null> {
   try {
-    // All fields from traderFormSchema are expected to be passed to dbAddTrader
+    // All fields from the expanded traderFormSchema are used here
     const newTraderData: Omit<Trader, 'id' | 'lastActivity'> = {
       name: values.name,
       branchId,
       totalSales: values.totalSales,
       tradesMade: values.tradesMade,
       status: values.status,
-      description: values.description,
-      rating: values.rating,
-      website: values.website,
-      phone: values.phone,
-      address: values.address,
-      mainCategory: values.mainCategory,
-      ownerName: values.ownerName,
-      ownerProfileLink: values.ownerProfileLink,
-      categories: values.categories,
-      workdayTiming: values.workdayTiming,
-      closedOn: values.closedOn,
-      reviewKeywords: values.reviewKeywords,
+      description: values.description ?? undefined,
+      rating: values.rating ?? undefined,
+      website: values.website ?? undefined,
+      phone: values.phone ?? undefined,
+      address: values.address ?? undefined,
+      mainCategory: values.mainCategory ?? undefined,
+      ownerName: values.ownerName ?? undefined,
+      ownerProfileLink: values.ownerProfileLink ?? undefined,
+      categories: values.categories ?? undefined,
+      workdayTiming: values.workdayTiming ?? undefined,
+      // closedOn and reviewKeywords are not in the form, will be undefined
+      closedOn: undefined, 
+      reviewKeywords: undefined,
     };
     return dbAddTrader(newTraderData);
   } catch (error) {
@@ -46,14 +46,29 @@ export async function updateTraderAction(branchId: BranchId, traderId: string, v
 
     // Construct the trader to update by taking all existing fields
     // and then overlaying all fields from the form (values).
-    // The traderFormSchema now includes all Trader fields as optional,
-    // so `values` will contain the complete shape.
     const traderToUpdate: Trader = {
       ...existingTrader,
-      ...values, // This will overwrite fields in existingTrader with those from values
-      lastActivity: new Date().toISOString(), // Always update lastActivity
-      branchId: existingTrader.branchId, // Ensure branchId is not changed
-      id: existingTrader.id, // Ensure id is not changed
+      name: values.name,
+      totalSales: values.totalSales,
+      tradesMade: values.tradesMade,
+      status: values.status,
+      description: values.description ?? existingTrader.description,
+      rating: values.rating ?? existingTrader.rating,
+      website: values.website ?? existingTrader.website,
+      phone: values.phone ?? existingTrader.phone,
+      address: values.address ?? existingTrader.address,
+      mainCategory: values.mainCategory ?? existingTrader.mainCategory,
+      ownerName: values.ownerName ?? existingTrader.ownerName,
+      ownerProfileLink: values.ownerProfileLink ?? existingTrader.ownerProfileLink,
+      categories: values.categories ?? existingTrader.categories,
+      workdayTiming: values.workdayTiming ?? existingTrader.workdayTiming,
+      // Ensure branchId and id are not changed by form values, and lastActivity is updated
+      lastActivity: new Date().toISOString(),
+      branchId: existingTrader.branchId, 
+      id: existingTrader.id,
+      // closedOn & reviewKeywords are not in form, keep existing values
+      closedOn: existingTrader.closedOn,
+      reviewKeywords: existingTrader.reviewKeywords,
     };
     return dbUpdateTrader(traderToUpdate);
   } catch (error) {
@@ -79,4 +94,3 @@ export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: 
     return null;
   }
 }
-

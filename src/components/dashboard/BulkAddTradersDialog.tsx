@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -81,6 +80,27 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
   };
 
+  const parseNumericValue = (rawValue: string | undefined): number | undefined => {
+    if (rawValue === undefined || rawValue === null || rawValue.trim() === "" || rawValue.trim() === "-") {
+      return undefined;
+    }
+    const cleanedValue = rawValue.replace(/[^0-9.]+/g, ""); // Allow decimal point
+    if (cleanedValue === "") return undefined;
+    const parsed = parseFloat(cleanedValue);
+    return isNaN(parsed) ? undefined : parsed;
+  };
+  
+  const parseIntValue = (rawValue: string | undefined): number | undefined => {
+    if (rawValue === undefined || rawValue === null || rawValue.trim() === "" || rawValue.trim() === "-") {
+      return undefined;
+    }
+    const cleanedValue = rawValue.replace(/[^0-9]+/g, ""); // Integers only
+    if (cleanedValue === "") return undefined;
+    const parsed = parseInt(cleanedValue, 10);
+    return isNaN(parsed) ? undefined : parsed;
+  };
+
+
   const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
     if (!csvString) return [];
     const traders: ParsedTraderData[] = [];
@@ -90,20 +110,24 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (lines.length === 0) return [];
     
     let dataLines = lines; 
-    const firstLineValuesForHeaderCheck = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
-      let cleaned = val.trim();
-      if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-        cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
-      }
-      return cleaned;
-    });
+    // Improved header check: Split first line and check if 'Name' (case-insensitive) is in the first cell
+    if (lines.length > 0) {
+      const firstLineValuesForHeaderCheck = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
+        let cleaned = val.trim();
+        if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+          cleaned = cleaned.substring(1, cleaned.length - 1).replace(/""/g, '"');
+        }
+        return cleaned;
+      });
 
-    if (firstLineValuesForHeaderCheck.length > COLUMN_INDICES.NAME) {
-      const firstCellContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME];
-      if (firstCellContent && firstCellContent.trim().toLowerCase() === 'name') {
-        dataLines = lines.slice(1); 
+      if (firstLineValuesForHeaderCheck.length > COLUMN_INDICES.NAME) {
+          const firstCellContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME];
+          if (firstCellContent && firstCellContent.trim().toLowerCase() === 'name') {
+            dataLines = lines.slice(1); // Skip header row
+          }
       }
     }
+
 
     for (const line of dataLines) {
       const rawValues = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
@@ -117,10 +141,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         return cleaned;
       });
 
-      // Allow fewer than EXPECTED_COLUMN_COUNT, but must have at least 1 (Name) and not more than expected.
-      // Missing trailing columns will result in 'undefined' when accessed by index, which is fine for optional fields.
       if (values.length < 1 || values.length > EXPECTED_COLUMN_COUNT) {
-        console.warn(`Skipping line due to unexpected column count (${values.length}, expected 1 to ${EXPECTED_COLUMN_COUNT} columns): "${line}". Parsed values:`, values);
+        console.warn(`Skipping line due to unexpected column count (${values.length}, expected 1 up to ${EXPECTED_COLUMN_COUNT} columns): "${line}". Parsed values:`, values);
         continue; 
       }
 
@@ -137,27 +159,37 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       } else if (statusValue === 'inactive') {
         parsedStatus = 'Inactive';
       }
-      // If undefined, it will be defaulted later by addTrader or bulkAddTraders logic
 
       const lastActivityString = values[COLUMN_INDICES.LAST_ACTIVITY]?.trim();
       let lastActivityValue: string | undefined = undefined;
-      if (lastActivityString) {
-        const date = new Date(lastActivityString);
-        if (!isNaN(date.getTime())) {
-          lastActivityValue = date.toISOString();
-        } else {
-            console.warn(`Invalid date format for Last Activity: "${lastActivityString}" for trader "${name}". System will default it.`);
+      if (lastActivityString && lastActivityString !== "-") {
+        try {
+          // Attempt to parse common date formats or direct ISO string
+          const date = new Date(lastActivityString);
+           if (!isNaN(date.getTime())) {
+             // Check if it's a valid date and not "Invalid Date" from something like "UK"
+             // A more robust date parsing might be needed if formats are very varied.
+             // For now, assuming Date.parse can handle it or it's already ISO.
+             // If format is strictly dd/MM/yyyy, you might need to parse manually:
+             // const parts = lastActivityString.split('/');
+             // if (parts.length === 3) date = new Date(+parts[2], +parts[1] - 1, +parts[0]);
+            lastActivityValue = date.toISOString();
+           } else {
+               console.warn(`Invalid date format for Last Activity: "${lastActivityString}" for trader "${name}". System will default it.`);
+           }
+        } catch (e) {
+             console.warn(`Error parsing Last Activity date: "${lastActivityString}" for trader "${name}". System will default it.`, e);
         }
       }
 
       const trader: ParsedTraderData = {
         name: name,
-        totalSales: parseFloat(values[COLUMN_INDICES.TOTAL_SALES]?.trim() || "0") || undefined,
+        totalSales: parseNumericValue(values[COLUMN_INDICES.TOTAL_SALES]),
         status: parsedStatus,
         lastActivity: lastActivityValue,
         description: values[COLUMN_INDICES.DESCRIPTION]?.trim() || undefined,
-        tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0,
-        rating: parseFloat(values[COLUMN_INDICES.RATING]?.trim() || "0") || undefined,
+        tradesMade: parseIntValue(values[COLUMN_INDICES.REVIEWS]),
+        rating: parseNumericValue(values[COLUMN_INDICES.RATING]),
         website: values[COLUMN_INDICES.WEBSITE]?.trim() || undefined,
         phone: values[COLUMN_INDICES.PHONE]?.trim() || undefined,
         ownerName: values[COLUMN_INDICES.OWNER_NAME]?.trim() || undefined,
@@ -255,8 +287,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
             Upload a CSV file. Each row should represent one trader and contain up to {EXPECTED_COLUMN_COUNT} columns in the following order:
-            <br/>1. Name, 2. Total Sales, 3. Status, 4. Last Activity (e.g., yyyy-MM-dd or MM/dd/yyyy), 5. Description, 6. Reviews (trades made), 7. Rating, 8. Website, 9. Phone, 10. Owner Name, 11. Main Category, 12. Categories, 13. Workday Timing, 14. Address, 15. Link (Owner Profile Link), 16. Actions (this column's data will be ignored).
-            <br/>Ensure the file is comma-separated. 'Name' (column 1) must be present in data rows. Commas within fields must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell of the first line. Invalid dates for 'Last Activity' will be defaulted to the current date by the system.
+            <br/>1. Name, 2. Total Sales, 3. Status (Active/Inactive), 4. Last Activity (e.g., yyyy-MM-dd or MM/dd/yyyy), 5. Description, 6. Reviews (trades made), 7. Rating (0-5), 8. Website, 9. Phone, 10. Owner Name, 11. Main Category, 12. Categories, 13. Workday Timing, 14. Address, 15. Link (Owner Profile Link), 16. Actions (this column's data will be ignored).
+            <br/>Ensure the file is comma-separated. 'Name' (column 1) must be present in data rows. Commas within fields must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell of the first line. Invalid dates or numeric formats will be defaulted or ignored by the system.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

@@ -1,11 +1,10 @@
-
 import type { Trader, BranchId, ParsedTraderData } from '@/types';
 import { format, parseISO } from 'date-fns';
 
 let MOCK_TRADERS: Trader[] = [
-  { id: 'trader-1', name: 'Alice Wonderland', branchId: 'BRANCH_A', totalSales: 125000, tradesMade: 150, status: 'Active', lastActivity: new Date(2024, 6, 15).toISOString(), description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming" },
-  { id: 'trader-2', name: 'Bob The Builder', branchId: 'BRANCH_A', totalSales: 98000, tradesMade: 120, status: 'Active', lastActivity: new Date(2024, 6, 10).toISOString(), description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction" },
-  { id: 'trader-3', name: 'Charlie Brown', branchId: 'BRANCH_A', totalSales: 75000, tradesMade: 90, status: 'Inactive', lastActivity: new Date(2024, 3, 5).toISOString(), mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts" },
+  { id: 'trader-1', name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', lastActivity: new Date(2024, 6, 15).toISOString(), description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming" },
+  { id: 'trader-2', name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Active', lastActivity: new Date(2024, 6, 10).toISOString(), description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction" },
+  { id: 'trader-3', name: 'Charlie Brown', branchId: 'PURLEY', totalSales: 75000, tradesMade: 90, status: 'Inactive', lastActivity: new Date(2024, 3, 5).toISOString(), mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts" },
   { id: 'trader-4', name: 'Diana Prince', branchId: 'BRANCH_B', totalSales: 210000, tradesMade: 200, status: 'Active', lastActivity: new Date(2024, 6, 18).toISOString(), address: '789 Amazon Way, Themyscira, THM 001', phone: '01234 567803', mainCategory: 'Consulting', closedOn: 'Weekends', description: "Antiquities expert and diplomatic consultant. Handles sensitive international relations.", rating: 5.0, website: "https://diana.example.com", categories: "Diplomacy, History, Art", reviewKeywords: "wise, strong, expert"},
   { id: 'trader-5', name: 'Edward Scissorhands', branchId: 'BRANCH_B', totalSales: 150000, tradesMade: 180, status: 'Active', lastActivity: new Date(2024, 6, 12).toISOString(), website: 'https://edwardcuts.example.com', description: 'Unique topiary and avant-garde hairdressing services. Gentle and artistic.', rating: 4.9, ownerProfileLink: 'https://example.com/edward', mainCategory: "Personal Care", categories: "Hairdressing, Landscaping, Art", phone: "01234567811", address: "1 Suburbia Drive, Castle Hill, CHL 555", reviewKeywords: "artistic, unique, gentle"},
   { id: 'trader-6', name: 'Fiona Gallagher', branchId: 'BRANCH_C', totalSales: 180000, tradesMade: 165, status: 'Active', lastActivity: new Date(2024, 6, 20).toISOString(), description: 'South Side resilience. Runs a local cafe and diner. Known for hearty meals and a welcoming atmosphere.', mainCategory: 'Cafe', phone: '01234 567804', address: "222 South Side St, Chicago, CHI 606", ownerName: "Fiona Gallagher", categories: "Food, Diner, Coffee", workdayTiming: "Mon-Sun 7am-10pm", reviewKeywords: "family, hearty, local" },
@@ -24,10 +23,10 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
     id: `trader-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     name: traderData.name,
     branchId: traderData.branchId,
-    totalSales: traderData.totalSales, // This now comes from traderData
-    tradesMade: traderData.tradesMade,
-    status: traderData.status, // This now comes from traderData
-    lastActivity: traderData.lastActivity || new Date().toISOString(), // Use provided or default to now
+    totalSales: traderData.totalSales ?? 0,
+    tradesMade: traderData.tradesMade ?? 0,
+    status: traderData.status ?? 'Active',
+    lastActivity: traderData.lastActivity || new Date().toISOString(),
     description: traderData.description,
     rating: traderData.rating,
     website: traderData.website,
@@ -38,12 +37,8 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
     ownerProfileLink: traderData.ownerProfileLink,
     categories: traderData.categories,
     workdayTiming: traderData.workdayTiming,
-    // Fields like closedOn and reviewKeywords are no longer part of ParsedTraderData,
-    // so they won't be in traderData unless the Trader type itself is directly passed.
-    // For consistency, if they are needed, they should be part of TraderForm or explicitly added.
-    // For now, they will be undefined if not part of the input `traderData`.
-    closedOn: traderData.closedOn,
-    reviewKeywords: traderData.reviewKeywords,
+    closedOn: traderData.closedOn, // Will be undefined if not in traderData
+    reviewKeywords: traderData.reviewKeywords, // Will be undefined if not in traderData
   };
   MOCK_TRADERS.push(newTrader);
   return newTrader;
@@ -52,6 +47,7 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
 export const updateTrader = (updatedTrader: Trader): Trader | null => {
   const index = MOCK_TRADERS.findIndex(trader => trader.id === updatedTrader.id && trader.branchId === updatedTrader.branchId);
   if (index !== -1) {
+    // Ensure lastActivity is always updated to current time on any update
     MOCK_TRADERS[index] = { ...MOCK_TRADERS[index], ...updatedTrader, lastActivity: new Date().toISOString() };
     return MOCK_TRADERS[index];
   }
@@ -69,7 +65,7 @@ export const formatTraderDataForAI = (traders: Trader[]): string => {
     return "No trader data available for this branch.";
   }
   return traders.map(trader => {
-    let details = `Trader: ${trader.name}, Sales: £${trader.totalSales.toLocaleString('en-GB')}, Trades: ${trader.tradesMade}, Status: ${trader.status}, Last Activity: ${format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}`;
+    let details = `Trader: ${trader.name}, Sales: £${(trader.totalSales ?? 0).toLocaleString('en-GB')}, Trades: ${trader.tradesMade ?? 0}, Status: ${trader.status}, Last Activity: ${format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}`;
     if (trader.description) details += `, Description: ${trader.description}`;
     if (trader.rating) details += `, Rating: ${trader.rating}`;
     if (trader.website) details += `, Website: ${trader.website}`;
@@ -80,11 +76,7 @@ export const formatTraderDataForAI = (traders: Trader[]): string => {
     if (trader.ownerProfileLink) details += `, Owner Profile: ${trader.ownerProfileLink}`;
     if (trader.categories) details += `, Categories: ${trader.categories}`;
     if (trader.workdayTiming) details += `, Hours: ${trader.workdayTiming}`;
-    // Not including closedOn and reviewKeywords as they are removed from ParsedTraderData for CSV upload.
-    // If they are still part of the general Trader object and need to be sent, they can be added back here.
-    // For now, keeping it consistent with the data likely coming from CSV.
-    // if (trader.closedOn) details += `, Closed: ${trader.closedOn}`;
-    // if (trader.reviewKeywords) details += `, Keywords: ${trader.reviewKeywords}`;
+    // closedOn and reviewKeywords are not part of current CSV spec or form, so not typically sent
     return details;
   }).join('; \n');
 };
@@ -95,14 +87,12 @@ export const bulkAddTraders = (
 ): Trader[] => {
   const createdTraders: Trader[] = [];
   tradersToCreate.forEach(parsedData => {
-    // Map ParsedTraderData to the structure expected by addTrader
-    // addTrader expects all fields of Trader (except id, and lastActivity is optional in input)
-    const newTraderPayload: Omit<Trader, 'id' | 'lastActivity'> & { lastActivity?: string, closedOn?: string, reviewKeywords?: string } = {
+    const newTraderPayload: Omit<Trader, 'id' | 'lastActivity'> & { lastActivity?: string } = {
       name: parsedData.name,
       branchId: branchId,
-      totalSales: parsedData.totalSales ?? 0, // Default to 0 if not provided in CSV
-      tradesMade: parsedData.tradesMade ?? 0, // Default to 0 if not provided
-      status: parsedData.status ?? 'Active', // Default to 'Active' if not provided or invalid in CSV
+      totalSales: parsedData.totalSales, // Will be handled by addTrader's default if undefined
+      tradesMade: parsedData.tradesMade, // Will be handled by addTrader's default if undefined
+      status: parsedData.status, // Will be handled by addTrader's default if undefined
       lastActivity: parsedData.lastActivity, // Pass as is; addTrader defaults if undefined/invalid
       description: parsedData.description,
       rating: parsedData.rating,
@@ -114,15 +104,11 @@ export const bulkAddTraders = (
       ownerProfileLink: parsedData.ownerProfileLink,
       categories: parsedData.categories,
       workdayTiming: parsedData.workdayTiming,
-      // Fields not in the new CSV spec will be undefined here.
-      // addTrader will then set them to undefined in the MOCK_TRADERS array
-      // or handle them if it has internal defaults (which it doesn't for these two specifically).
-      closedOn: undefined, 
-      reviewKeywords: undefined,
+      // closedOn and reviewKeywords are not in ParsedTraderData
+      // and will result in undefined for those fields in the new Trader object.
     };
     const createdTrader = addTrader(newTraderPayload);
     createdTraders.push(createdTrader);
   });
   return createdTraders;
 };
-

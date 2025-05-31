@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -12,7 +11,7 @@ const faqs = [
   {
     value: "item-1",
     question: "How do I log in?",
-    answer: "Navigate to the login page and enter your unique Branch ID. Currently, valid demo IDs are BRANCH_A, BRANCH_B, or BRANCH_C.",
+    answer: "Navigate to the login page and enter your unique Branch ID. Currently, valid demo IDs are PURLEY, BRANCH_B, BRANCH_C, or BRANCH_D.",
     icon: <HelpCircle className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -30,7 +29,7 @@ const faqs = [
    {
     value: "item-6",
     question: "How do I bulk upload traders?",
-    answer: "Use the 'Bulk Add Traders' button on the dashboard. A dialog will appear where you can paste tab-separated data from your scraping tools. Ensure the data follows the 14 specified column headers: Name, Description, Reviews (as trades made), Rating, Website, Phone, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing, Closed On, Address, Review Keywords.",
+    answer: "Use the 'Bulk Add Traders' button on the dashboard. Upload a CSV file. Each row should represent one trader and contain up to 16 columns in the following order: Name, Total Sales, Status (Active/Inactive), Last Activity (e.g., yyyy-MM-dd or MM/dd/yyyy), Description, Reviews (trades made), Rating (0-5), Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link (Owner Profile Link), Actions (this column's data will be ignored).",
     icon: <UploadCloud className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -96,7 +95,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">1. Logging In</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Go to the main page. You will be redirected to the login screen.</li>
-              <li>Enter your assigned Branch ID (e.g., "BRANCH_A").</li>
+              <li>Enter your assigned Branch ID (e.g., "PURLEY").</li>
               <li>Click "Sign In". You will be taken to your branch's dashboard.</li>
             </ul>
           </div>
@@ -107,7 +106,7 @@ export default function HowToUsePage() {
               <li><strong>Search:</strong> Use the search bar to find traders by name.</li>
               <li><strong>Sort:</strong> Click on table headers (Name, Total Sales, etc.) to sort data.</li>
               <li><strong>Add Trader:</strong> Click "Add New Trader", fill the form, and submit.</li>
-              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders", paste your tab-separated data (following the 14 specified headers), and submit.</li>
+              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders", upload your CSV file (following the 16 specified headers), and submit.</li>
               <li><strong>Edit Trader:</strong> Click the pencil icon next to a trader, modify details, and save.</li>
               <li><strong>Delete Trader:</strong> Click the trash icon, confirm, and the trader will be removed.</li>
             </ul>

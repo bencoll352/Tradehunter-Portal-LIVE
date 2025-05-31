@@ -21,7 +21,7 @@ import { LogIn } from "lucide-react";
 const formSchema = z.object({
   branchId: z.string().min(1, { message: "Branch ID is required." })
     .refine(val => VALID_BRANCH_IDS.includes(val as BranchId), {
-      message: "Invalid Branch ID. Try BRANCH_A, BRANCH_B, or BRANCH_C.",
+      message: "Invalid Branch ID. Try PURLEY, BRANCH_B, BRANCH_C, or BRANCH_D.",
     }),
 });
 
@@ -65,7 +65,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel className="text-foreground">Branch ID</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., BRANCH_A" {...field} className="text-base" />
+                <Input placeholder="e.g., PURLEY" {...field} className="text-base" />
               </FormControl>
               <FormMessage />
             </FormItem>

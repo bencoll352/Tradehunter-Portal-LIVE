@@ -1,4 +1,3 @@
-
 export interface Trader {
   id: string;
   name: string;
@@ -13,18 +12,17 @@ export interface Trader {
   phone?: string;
   address?: string;
   mainCategory?: string;
-  // New fields from bulk upload
   ownerName?: string;
   ownerProfileLink?: string;
   categories?: string; // Storing as a single string for simplicity, could be string[]
   workdayTiming?: string;
-  closedOn?: string;
-  reviewKeywords?: string;
+  closedOn?: string; // Not in current CSV spec or form
+  reviewKeywords?: string; // Not in current CSV spec or form
 }
 
-export type BranchId = 'BRANCH_A' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D'; // Added BRANCH_D
+export type BranchId = 'PURLEY' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D'; // Renamed BRANCH_A to PURLEY
 
-export const VALID_BRANCH_IDS: BranchId[] = ['BRANCH_A', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D']; // Added BRANCH_D
+export const VALID_BRANCH_IDS: BranchId[] = ['PURLEY', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D']; // Renamed BRANCH_A to PURLEY
 
 // For bulk upload parsing, reflecting the 16 specified headers
 export type ParsedTraderData = {
@@ -43,7 +41,5 @@ export type ParsedTraderData = {
   workdayTiming?: string;
   address?: string;
   ownerProfileLink?: string; // from 'Link' header
-  // 'Actions' column from CSV is ignored during parsing
-  // 'closedOn' and 'reviewKeywords' are no longer expected from CSV based on new header list.
+  // 'Actions' column from CSV is ignored
 };
-

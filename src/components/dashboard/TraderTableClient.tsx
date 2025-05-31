@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react"; // Added React import
@@ -27,15 +26,15 @@ import type { traderFormSchema } from "./TraderForm";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 20; // Updated from 5 to 20
 
 type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BranchId;
-  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>;
-  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<Trader | null>;
+  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<void>; // Return type Promise<void>
+  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>; // Return type Promise<void>
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
@@ -78,6 +77,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
           return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
         
+        // For dates (lastActivity) or other types, direct comparison might be fine after undefined checks
         if (valA < valB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -106,30 +106,30 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
   };
   
   const handleAddTrader = async (values: z.infer<typeof traderFormSchema>): Promise<void> => {
-    const newTrader = await onAdd(values);
-    if (newTrader) {
-      setTraders(prev => [...prev, newTrader].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-      toast({ title: "Success", description: "Trader added successfully." });
-    } else {
-      toast({ variant: "destructive", title: "Error", description: "Failed to add trader." });
+    const newTrader = await onAdd(values); // onAdd from props now returns Promise<void>
+    // The actual state update and toast will be handled by the `onAdd` prop which calls `addTraderAction`
+    // This function in TraderTableClient is now mostly a pass-through or can be simplified
+    // For now, assuming onAdd prop passed from DashboardClientPageContent handles state updates and toasts
+    if (newTrader) { // This check might be removed if onAdd truly returns void.
+        // If onAdd prop already updates the parent state, this internal setTraders might be redundant or cause issues.
+        // For now, keeping it, but it implies onAdd should return the newTrader if we want to update state here.
+        // Let's assume the `onAdd` prop passed from DashboardClientPageContent will refresh the list.
+        // Or, the onAdd prop itself should be simplified to just call the action.
+        // For now, we will rely on the fact that onAdd in DashboardClientPageContent will update `traders` state
+        // and this component will re-render.
     }
   };
 
   const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>): Promise<void> => {
-    const updatedTrader = await onUpdate(traderId, values);
-    if (updatedTrader) {
-      setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-      // Toast for specific status update handled in handleStatusToggle
-      if (values.name) { // Avoid double toast if only status changed
-          toast({ title: "Success", description: "Trader updated successfully." });
-      }
-    } else {
-      toast({ variant: "destructive", title: "Error", description: "Failed to update trader." });
-    }
+    await onUpdate(traderId, values); // onUpdate from props now returns Promise<void>
+    // Similar to handleAddTrader, state updates and toasts are expected to be handled by the onUpdate prop
+    // from DashboardClientPageContent.
   };
 
   const handleStatusToggle = async (trader: Trader) => {
     const newStatus = trader.status === "Active" ? "Inactive" : "Active";
+    // We need to pass the *full* set of values to onUpdate, even if only status changes
+    // This requires having all fields available in the trader object or form schema
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       totalSales: trader.totalSales,
@@ -145,22 +145,21 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
       ownerProfileLink: trader.ownerProfileLink || "",
       categories: trader.categories || "",
       workdayTiming: trader.workdayTiming || "",
+      // closedOn and reviewKeywords are not in the current traderFormSchema by default
+      // If they need to be preserved, they must be part of the Trader object passed in
+      // and traderFormSchema must include them as optional.
+      // For now, assuming trader object has them if they existed.
       closedOn: trader.closedOn || "",
       reviewKeywords: trader.reviewKeywords || "",
     };
-    const updated = await onUpdate(trader.id, formValues); // Call onUpdate directly
-    if (updated) {
-        setTraders(prev => prev.map(t => t.id === trader.id ? updated : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-        toast({ title: "Status Updated", description: `${trader.name}'s status changed to ${newStatus}.` });
-    } else {
-        toast({ variant: "destructive", title: "Error", description: "Failed to update trader status." });
-    }
+    await onUpdate(trader.id, formValues); // Call onUpdate directly
+    // Toast should be handled by the onUpdate prop logic in DashboardClientPageContent
   };
 
   const handleDeleteTrader = async (traderId: string): Promise<void> => {
     const success = await onDelete(traderId);
     if (success) {
-      setTraders(prev => prev.filter(t => t.id !== traderId));
+      // State update handled by onDelete prop in DashboardClientPageContent
       toast({ title: "Success", description: "Trader deleted successfully." });
     } else {
       toast({ variant: "destructive", title: "Error", description: "Failed to delete trader." });
@@ -169,12 +168,11 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
 
   const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]) => {
     const newTraders = await onBulkAdd(tradersToCreate);
-    if (newTraders && newTraders.length > 0) {
-      setTraders(prev => [...prev, ...newTraders].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-    } else if (newTraders === null) {
+    // State update for `traders` handled by onBulkAdd prop in DashboardClientPageContent
+    if (newTraders === null) { // Check if action itself returned null indicating failure
       toast({ variant: "destructive", title: "Error", description: "Failed to bulk add traders (action returned null)." });
     }
-    return newTraders;
+    return newTraders; // Return value is for the dialog
   };
 
   const SortableHeader = ({ sortKey, label }: { sortKey: SortKey, label: string }) => (
@@ -260,7 +258,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
               <TableRow key={trader.id}>
                 <TableCell className="font-medium whitespace-nowrap">{renderCellContent(trader.name, 20)}</TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(trader.totalSales)}
+                  {typeof trader.totalSales === 'number' ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(trader.totalSales) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
                 <TableCell>
                    <Button
@@ -365,5 +363,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-    
