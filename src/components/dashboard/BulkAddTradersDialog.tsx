@@ -33,8 +33,8 @@ const COLUMN_INDICES = {
   DESCRIPTION: 4,
   REVIEWS: 5,         // (maps to tradesMade)
   RATING: 6,
-  WEBSITE: 7,         // Assumes header is 'Website', not '🌐Website'
-  PHONE: 8,           // Assumes header is 'Phone', not '📞 Phone'
+  WEBSITE: 7,
+  PHONE: 8,
   OWNER_NAME: 9,
   MAIN_CATEGORY: 10,
   CATEGORIES: 11,
@@ -84,10 +84,13 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
     if (!csvString) return [];
     const traders: ParsedTraderData[] = [];
-    const lines = csvString.trim().split(/\r\n|\n/).filter(line => line.trim() !== "");
+    const allLines = csvString.trim().split(/\r\n|\n/);
+    const lines = allLines.filter(line => line.trim() !== "");
+
 
     if (lines.length === 0) return [];
     
+    let dataLines = lines; // Initialize with all lines
     const firstLineValuesForHeaderCheck = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
       let cleaned = val.trim();
       if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
@@ -96,8 +99,13 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       return cleaned;
     });
 
-    const potentialHeaderContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME]?.trim().toLowerCase();
-    const dataLines = (potentialHeaderContent === 'name') ? lines.slice(1) : lines;
+    // Check if the first column of the first line exists and if it's 'name' (case-insensitive)
+    if (firstLineValuesForHeaderCheck.length > COLUMN_INDICES.NAME) {
+      const firstCellContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME];
+      if (firstCellContent && firstCellContent.trim().toLowerCase() === 'name') {
+        dataLines = lines.slice(1); // Skip header row
+      }
+    }
 
 
     for (const line of dataLines) {
@@ -147,9 +155,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
 
       const trader: ParsedTraderData = {
         name: name,
-        totalSales: parseFloat(values[COLUMN_INDICES.TOTAL_SALES]?.trim() || "0") || undefined, // Default to undefined if parsing fails, so mock-data can default to 0
-        status: parsedStatus, // Will be 'Active', 'Inactive', or undefined (for system default)
-        lastActivity: lastActivityValue, // Will be ISO string or undefined (for system default)
+        totalSales: parseFloat(values[COLUMN_INDICES.TOTAL_SALES]?.trim() || "0") || undefined,
+        status: parsedStatus,
+        lastActivity: lastActivityValue,
         description: values[COLUMN_INDICES.DESCRIPTION]?.trim() || undefined,
         tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0,
         rating: parseFloat(values[COLUMN_INDICES.RATING]?.trim() || "0") || undefined,
@@ -186,7 +194,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       toast({
         variant: "destructive",
         title: "Parsing Issue",
-        description: `No valid trader data could be parsed. Please check the CSV format: ensure it has ${EXPECTED_COLUMN_COUNT} columns in the specified order, commas within fields are double-quoted (e.g., "123, Main St"), and 'Name' (column 1) is present. A header row is skipped if "Name" is detected in the first cell.`,
+        description: `No valid trader data could be parsed. Please check the CSV format: ensure it has ${EXPECTED_COLUMN_COUNT} columns in the specified order (comma-separated), commas within fields are double-quoted (e.g., "123, Main St"), and 'Name' (column 1) is present. A header row is skipped if "Name" (case-insensitive) is detected in the first cell.`,
       });
       setIsLoading(false);
       return;
@@ -254,7 +262,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogDescription>
             Upload a CSV file. Each row should represent one trader and contain {EXPECTED_COLUMN_COUNT} columns in the following order:
             <br/>1. Name, 2. Total Sales, 3. Status, 4. Last Activity (e.g., yyyy-MM-dd or MM/dd/yyyy), 5. Description, 6. Reviews (trades made), 7. Rating, 8. Website, 9. Phone, 10. Owner Name, 11. Main Category, 12. Categories, 13. Workday Timing, 14. Address, 15. Link (Owner Profile Link), 16. Actions (this column's data will be ignored).
-            <br/>Ensure 'Name' (column 1) is always present. Commas within fields must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell. Invalid dates for 'Last Activity' will be defaulted to the current date by the system.
+            <br/>Ensure the file is comma-separated. 'Name' (column 1) must be present in data rows. Commas within fields must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell of the first line. Invalid dates for 'Last Activity' will be defaulted to the current date by the system.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
