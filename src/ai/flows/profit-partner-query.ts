@@ -34,7 +34,7 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
 // https://branch-booster-purley-302177537641.us-west1.run.app/api/invoke
 // https://branch-booster-purley-302177537641.us-west1.run.app/query
 // Please verify the exact and full endpoint URL from your service's deployment details.
-const EXTERNAL_AI_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/';
+const EXTERNAL_AI_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/'; 
 const API_KEY = process.env.BRANCH_BOOSTER_API_KEY;
 
 const profitPartnerQueryFlow = ai.defineFlow(
@@ -48,10 +48,11 @@ const profitPartnerQueryFlow = ai.defineFlow(
     console.log(`[profitPartnerQueryFlow] Query: "${input.query}"`);
     console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
+    
     if (API_KEY) {
       console.log('[profitPartnerQueryFlow] Using API Key for authorization.');
     } else {
-      console.warn('[profitPartnerQueryFlow] BRANCH_BOOSTER_API_KEY is not set. Request will be made without Authorization header.');
+      console.warn('[profitPartnerQueryFlow] BRANCH_BOOSTER_API_KEY is not set. Request will be made without Authorization header. If your service requires an API key, this will likely cause 401/403 errors.');
     }
 
     try {
@@ -60,7 +61,6 @@ const profitPartnerQueryFlow = ai.defineFlow(
         traderData: input.traderData,
         ...(input.uploadedFileContent && { customerDataFileContent: input.uploadedFileContent }),
       };
-      // Log a snippet of the payload to avoid overly long log entries
       const payloadString = JSON.stringify(payload);
       const payloadSnippet = payloadString.substring(0, 500) + (payloadString.length > 500 ? '...' : '');
       console.log('[profitPartnerQueryFlow] Sending payload (snippet):', payloadSnippet);
@@ -84,23 +84,24 @@ const profitPartnerQueryFlow = ai.defineFlow(
         const errorBody = await response.text();
         const errorBodySnippet = errorBody.substring(0, 500) + (errorBody.length > 500 ? '...' : '');
         console.error(`[profitPartnerQueryFlow] External service error: ${response.status} ${response.statusText}. Error Body (snippet):`, errorBodySnippet);
+        
         if (response.status === 404) {
-             throw new Error(`Failed to get response from external service: Status 404 (Not Found). This often means the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") is missing a specific path (e.g., /api/invoke or /query) or the endpoint is not correctly deployed. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Check server logs for details.`);
+             throw new Error(`Failed to get response from external service: Status 404 (Not Found). This most often means the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") is missing a specific path (e.g., /api/invoke or /query) or the endpoint itself is not correctly deployed. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Please verify the full URL. Full details in server logs.`);
         }
         if (response.status === 401 || response.status === 403) {
-          throw new Error(`Failed to get response from external service: Status ${response.status} (${response.statusText}). This indicates an Authentication/Authorization issue. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Please verify the BRANCH_BOOSTER_API_KEY and ensure the external service accepts it in the 'Authorization: Bearer <key>' header. Check server logs for details.`);
+          throw new Error(`Failed to get response from external service: Status ${response.status} (${response.statusText}). This indicates an Authentication/Authorization issue. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Please verify the BRANCH_BOOSTER_API_KEY and ensure the external service accepts it in the 'Authorization: Bearer <key>' header. Full details in server logs.`);
         }
-        throw new Error(`Failed to get response from external service. Status: ${response.status}. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Check server logs for details.`);
+        throw new Error(`Failed to get response from external service. Status: ${response.status}. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Full details in server logs.`);
       }
 
-      const resultText = await response.text(); // Get text first to avoid JSON parse error if not JSON
+      const resultText = await response.text();
       let result;
       try {
         result = JSON.parse(resultText);
       } catch (jsonError) {
         const resultTextSnippet = resultText.substring(0, 500) + (resultText.length > 500 ? '...' : '');
         console.error('[profitPartnerQueryFlow] Failed to parse response as JSON. Response text (snippet):', resultTextSnippet, 'Original Error:', jsonError);
-        throw new Error('External service returned a non-JSON response. Check server logs for details.');
+        throw new Error('External service returned a non-JSON response. Expected format: {"answer": "string"}. Full details in server logs.');
       }
       
       const resultString = JSON.stringify(result);
@@ -111,7 +112,7 @@ const profitPartnerQueryFlow = ai.defineFlow(
         return { answer: result.answer };
       } else {
         console.error('[profitPartnerQueryFlow] External service returned an unexpected response format. Expected { answer: string }, Got (snippet):', resultSnippet);
-        throw new Error('External service returned an unexpected response format. Check server logs for details.');
+        throw new Error('External service returned an unexpected response format. Expected format: {"answer": "string"}. Full details in server logs.');
       }
     } catch (error) {
       console.error('[profitPartnerQueryFlow] Error during call to external service:', error);
