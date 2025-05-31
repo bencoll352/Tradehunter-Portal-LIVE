@@ -38,44 +38,66 @@ const profitPartnerQueryFlow = ai.defineFlow(
     outputSchema: ProfitPartnerQueryOutputSchema,
   },
   async (input: ProfitPartnerQueryInput): Promise<ProfitPartnerQueryOutput> => {
+    console.log(`[profitPartnerQueryFlow] Attempting to call external service at URL: ${EXTERNAL_AI_URL}`);
+    console.log(`[profitPartnerQueryFlow] Query: "${input.query}"`);
+    console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
+    console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
+
     try {
-      // The external service needs to be able to handle the `uploadedFileContent` field
-      // if it's present in the payload.
       const payload = {
         query: input.query,
         traderData: input.traderData,
         ...(input.uploadedFileContent && { customerDataFileContent: input.uploadedFileContent }),
       };
+      // Log a snippet of the payload to avoid overly long log entries
+      const payloadString = JSON.stringify(payload);
+      const payloadSnippet = payloadString.substring(0, 500) + (payloadString.length > 500 ? '...' : '');
+      console.log('[profitPartnerQueryFlow] Sending payload (snippet):', payloadSnippet);
 
       const response = await fetch(EXTERNAL_AI_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: payloadString,
       });
+
+      console.log(`[profitPartnerQueryFlow] Received response status: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error(`External service error: ${response.status} ${response.statusText}`, errorBody);
-        throw new Error(`Failed to get response from external service. Status: ${response.status}`);
+        const errorBodySnippet = errorBody.substring(0, 500) + (errorBody.length > 500 ? '...' : '');
+        console.error(`[profitPartnerQueryFlow] External service error: ${response.status} ${response.statusText}. Error Body (snippet):`, errorBodySnippet);
+        throw new Error(`Failed to get response from external service. Status: ${response.status}. Check server logs for details.`);
       }
 
-      const result = await response.json();
+      const resultText = await response.text(); // Get text first to avoid JSON parse error if not JSON
+      let result;
+      try {
+        result = JSON.parse(resultText);
+      } catch (jsonError) {
+        const resultTextSnippet = resultText.substring(0, 500) + (resultText.length > 500 ? '...' : '');
+        console.error('[profitPartnerQueryFlow] Failed to parse response as JSON. Response text (snippet):', resultTextSnippet, 'Original Error:', jsonError);
+        throw new Error('External service returned a non-JSON response. Check server logs for details.');
+      }
+      
+      const resultString = JSON.stringify(result);
+      const resultSnippet = resultString.substring(0, 500) + (resultString.length > 500 ? '...' : '');
+      console.log('[profitPartnerQueryFlow] Received result from external service (snippet):', resultSnippet);
 
-      // Ensure the result matches the expected output schema
-      if (typeof result.answer === 'string') {
+      if (result && typeof result.answer === 'string') {
         return { answer: result.answer };
       } else {
-        console.error('External service returned an unexpected response format:', result);
-        throw new Error('External service returned an unexpected response format.');
+        console.error('[profitPartnerQueryFlow] External service returned an unexpected response format. Expected { answer: string }, Got (snippet):', resultSnippet);
+        throw new Error('External service returned an unexpected response format. Check server logs for details.');
       }
     } catch (error) {
-      console.error('Error calling external service:', error);
+      console.error('[profitPartnerQueryFlow] Error during call to external service:', error);
       if (error instanceof Error) {
-        throw new Error(`Error calling external service: ${error.message}`);
+        throw new Error(`Error calling external service: ${error.message}. Please verify the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") and ensure the service is operational. Full details in server logs.`);
       }
-      throw new Error('An unknown error occurred while calling the external service.');
+      throw new Error(`An unknown error occurred while calling the external service. Please verify the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") and ensure the service is operational. Full details in server logs.`);
     }
   }
 );
+
