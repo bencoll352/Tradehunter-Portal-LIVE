@@ -40,7 +40,7 @@ const COLUMN_INDICES = {
   WORKDAY_TIMING: 12,
   ADDRESS: 13,
   OWNER_PROFILE_LINK: 14,
-  ACTIONS_COLUMN: 15,
+  ACTIONS_COLUMN: 15, 
 };
 const EXPECTED_COLUMN_COUNT = 16;
 
@@ -107,32 +107,29 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
 
     let date: Date | null = null;
 
-    // Try parsing dd/MM/yyyy
     const partsDMYFull = dateStr.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/);
     if (partsDMYFull) {
       const day = parseInt(partsDMYFull[1], 10);
-      const month = parseInt(partsDMYFull[2], 10) - 1; // JS months are 0-indexed
+      const month = parseInt(partsDMYFull[2], 10) - 1;
       const year = parseInt(partsDMYFull[3], 10);
       if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
         date = new Date(year, month, day);
       }
     }
 
-    // Try parsing dd/MM/yy if full year failed
     if (!date) {
       const partsDMYShort = dateStr.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2})$/);
       if (partsDMYShort) {
         const day = parseInt(partsDMYShort[1], 10);
-        const month = parseInt(partsDMYShort[2], 10) - 1; // JS months are 0-indexed
+        const month = parseInt(partsDMYShort[2], 10) - 1;
         let year = parseInt(partsDMYShort[3], 10);
-        year += (year < 70 ? 2000 : 1900); // Heuristic for 2-digit year
+        year += (year < 70 ? 2000 : 1900); 
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
           date = new Date(year, month, day);
         }
       }
     }
     
-    // Fallback to direct parsing if specific formats failed
     if (!date) {
         try {
             const parsedFallback = new Date(dateStr);
@@ -140,7 +137,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
                 date = parsedFallback;
             }
         } catch (e) {
-            // Ignore error, will fall through to warning
+            // Ignore error
         }
     }
 
@@ -151,7 +148,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       return undefined;
     }
   };
-
 
   const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
     if (!csvString) return [];
@@ -179,7 +175,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       }
     }
 
-
     for (const line of dataLines) {
       const rawValues = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
       
@@ -189,18 +184,20 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           cleaned = cleaned.substring(1, cleaned.length - 1);
         }
         cleaned = cleaned.replace(/""/g, '"');
-        return cleaned === "-" ? "" : cleaned; // Treat lone hyphens as empty strings
+        return cleaned === "-" ? "" : cleaned;
       });
 
-      if (values.length < 1 || values.length > EXPECTED_COLUMN_COUNT) {
-        console.warn(`Skipping line due to unexpected column count (found ${values.length}, expected 1 to ${EXPECTED_COLUMN_COUNT}): "${line}". Parsed values:`, values);
+      const name = values[COLUMN_INDICES.NAME]?.trim();
+      if (!name) {
+        console.warn(`Skipping line due to missing or empty name: "${line}"`);
         continue; 
       }
 
-      const name = values[COLUMN_INDICES.NAME]?.trim() || "";
-      if (!name) {
-        console.warn(`Skipping line due to missing name: "${line}"`);
-        continue; 
+      if (values.length > EXPECTED_COLUMN_COUNT) {
+        console.warn(`Row for trader "${name}" produced ${values.length} fields after splitting, but expected up to ${EXPECTED_COLUMN_COUNT}. This often means some fields (like Description, Categories, or Address) contain commas but are NOT enclosed in double quotes in your CSV file. Data for this row may be misaligned. Raw line: "${line}"`);
+      } else if (values.length < 1) { 
+        console.warn(`Skipping line because it resulted in too few fields (${values.length}) to process, even for a Name. Raw line: "${line}"`);
+        continue;
       }
       
       let statusValue = values[COLUMN_INDICES.STATUS]?.trim().toLowerCase();
@@ -252,7 +249,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       toast({
         variant: "destructive",
         title: "Parsing Issue",
-        description: `No valid trader data could be parsed. Please check the CSV format. Ensure it's comma-separated, 'Name' (column 1) is present, and fields with commas are double-quoted (e.g., "123, Main St"). The system expects up to ${EXPECTED_COLUMN_COUNT} columns in the specified order. A header row is skipped if "Name" (case-insensitive) is detected in the first cell. Invalid dates or numeric formats will be defaulted or ignored by the system.`,
+        description: `No valid trader data could be parsed. Please check the CSV format. Crucially, if any field (like Description, Categories, Address) contains commas, that ENTIRE field MUST be enclosed in double quotes (e.g., "123, Main St", or "Category A, Category B"). Ensure 'Name' (column 1) is present for all data rows. The system expects up to ${EXPECTED_COLUMN_COUNT} columns in the specified order. A header row is skipped if "Name" (case-insensitive) is detected in the first cell. Check browser console (View > Developer > JavaScript Console) for more detailed warnings about specific rows.`,
+        duration: 10000, 
       });
       setIsLoading(false);
       return;
@@ -319,7 +317,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogDescription>
             Upload a CSV file. Each row should represent one trader and contain up to {EXPECTED_COLUMN_COUNT} columns in the following order:
             <br/>1. Name, 2. Total Sales, 3. Status (Active/Inactive), 4. Last Activity (e.g., dd/MM/yyyy or MM/dd/yyyy), 5. Description, 6. Reviews (trades made), 7. Rating (0-5), 8. Website, 9. Phone, 10. Owner Name, 11. Main Category, 12. Categories, 13. Workday Timing, 14. Address, 15. Link (Owner Profile Link), 16. Actions (this column's data will be ignored).
-            <br/>Ensure the file is comma-separated. 'Name' (column 1) must be present in data rows. Commas within fields must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell of the first line.
+            <br/><strong>IMPORTANT:</strong> Ensure the file is comma-separated. 'Name' (column 1) must be present in data rows. <strong>If any field's content (e.g., Description, Categories, Address) includes a comma, that entire field MUST be enclosed in double quotes. For example: <code>"123, Main St"</code> or <code>"Category A, Category B"</code>.</strong> The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell of the first line.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -362,6 +360,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
 
     
