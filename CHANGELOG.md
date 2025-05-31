@@ -9,15 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Firebase Firestore Integration**:
+    - Replaced `localStorage`-based mock data with Firebase Firestore for persistent trader data storage.
+    - Trader data is now stored in a "traders" collection, partitioned by `branchId`.
+    - Created `src/lib/firebase.ts` for Firebase app initialization (requires user configuration).
+    - Implemented `src/lib/trader-service.ts` to handle all Firestore CRUD operations for traders.
+    - Server actions in `src/app/(app)/dashboard/actions.ts` now use the new `trader-service.ts`.
+    - Added `getTradersAction` server action for fetching traders.
+    - Implemented automatic one-time data seeding from `INITIAL_SEED_TRADERS_DATA` if a branch's trader collection in Firestore is empty.
 - `BRANCH_D` added as a valid branch ID for login and testing.
 - Duplicate trader detection by phone number:
     - Implemented for manual trader addition with a warning toast.
     - Implemented for bulk CSV upload, skipping duplicates (from DB or within CSV) and providing a summary toast.
 - New "Quick Action" to Branch Booster: "List Bricklayers & Sales Campaign".
 - **Mini Dashboard**: Added a statistics section at the top of the dashboard displaying "Live Traders Count" and "Recently Active Traders Count".
-- **Per-Branch Data Persistence**: Trader data is now saved in the browser's `localStorage` on a per-branch basis, ensuring data modifications persist across sessions for each branch.
+- **Per-Branch Data Persistence**: Trader data is now saved in Firebase Firestore on a per-branch basis, ensuring data modifications persist across sessions and are centrally stored for each branch. (Supersedes previous localStorage implementation).
 
 ### Changed
+- **Data Fetching**: `DashboardClientPageContent.tsx` now asynchronously fetches trader data using `getTradersAction`.
+- **Utility Function**: `formatTraderDataForAnalysis` moved from `mock-data.ts` to `src/lib/utils.ts`.
 - **Branch Booster Refactor**:
     - The Branch Booster (`profit-partner-query.ts`) now communicates directly with the Google Gemini API using Genkit and the `@google/genai` SDK, instead of relying on an `EXTERNAL_AI_URL`.
     - The API key for Gemini is now expected via the `GOOGLE_API_KEY` environment variable (updated in `.env` and for Firebase deployment).
@@ -50,7 +60,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed runtime error: `DialogTrigger is not defined` in `AddTraderDialog.tsx` by adding the missing import.
 - **DashboardClientPageContent Parsing Error**: Fixed a JavaScript parsing error in `DashboardClientPageContent.tsx` caused by an erroneous backslash in a template literal within a `console.warn` statement.
+- **Data Persistence**: The previous localStorage-based persistence for trader data has been replaced by Firebase Firestore integration, ensuring more robust and centralized data storage per branch. (This addresses the intent of "ensure traders are saved to each client portal").
 
+### Removed
+- `src/lib/mock-data.ts`: Replaced by `src/lib/trader-service.ts` for Firestore integration. LocalStorage-based data persistence is removed.
 
 ## [0.2.0] - YYYY-MM-DD (Update with current date)
 ### Changed
@@ -75,4 +88,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Login and branch-specific data views.
 - "How to Use" page.
 - Initial bulk trader upload functionality (later revised).
-
+- Initial per-branch data persistence using browser `localStorage`. (Later superseded by Firestore).

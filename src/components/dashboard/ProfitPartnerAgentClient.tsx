@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb } from "lucide-react";
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
-import { formatTraderDataForAnalysis } from "@/lib/mock-data"; // Changed from formatTraderDataForAI
+import { formatTraderDataForAnalysis } from "@/lib/utils"; // Updated import
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 
@@ -82,12 +82,12 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     form.setValue("query", query);
   };
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);
 
-    const traderDataString = formatTraderDataForAnalysis(traders); // Changed from formatTraderDataForAI
+    const traderDataString = formatTraderDataForAnalysis(traders);
     
     const input: ProfitPartnerQueryInput = {
       query: values.query,
@@ -103,8 +103,12 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
       }
     } catch (e) {
       console.error("Analysis Error:", e);
-      setError("Sorry, I couldn't process that request. Please try again or check the external service.");
-      toast({ variant: "destructive", title: "Analysis Failed", description: "The Branch Booster could not process your request."});
+      let errorMessage = "Sorry, I couldn't process that request. Please try again or check the external service.";
+      if (e instanceof Error) {
+        errorMessage = e.message; // Use the specific error from profitPartnerQueryFlow
+      }
+      setError(errorMessage);
+      toast({ variant: "destructive", title: "Analysis Failed", description: errorMessage });
     } finally {
       setIsLoading(false);
     }
