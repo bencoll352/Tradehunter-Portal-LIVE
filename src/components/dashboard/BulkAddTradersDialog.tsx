@@ -43,7 +43,7 @@ const COLUMN_INDICES = {
   OWNER_PROFILE_LINK: 14, // Mapped from 'Link' header
   ACTIONS_COLUMN: 15, // This column's data will be ignored
 };
-const EXPECTED_COLUMN_COUNT = 16;
+const EXPECTED_COLUMN_COUNT = 16; // Max expected columns
 
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
@@ -87,10 +87,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const allLines = csvString.trim().split(/\r\n|\n/);
     const lines = allLines.filter(line => line.trim() !== "");
 
-
     if (lines.length === 0) return [];
     
-    let dataLines = lines; // Initialize with all lines
+    let dataLines = lines; 
     const firstLineValuesForHeaderCheck = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
       let cleaned = val.trim();
       if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
@@ -99,14 +98,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       return cleaned;
     });
 
-    // Check if the first column of the first line exists and if it's 'name' (case-insensitive)
     if (firstLineValuesForHeaderCheck.length > COLUMN_INDICES.NAME) {
       const firstCellContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME];
       if (firstCellContent && firstCellContent.trim().toLowerCase() === 'name') {
-        dataLines = lines.slice(1); // Skip header row
+        dataLines = lines.slice(1); 
       }
     }
-
 
     for (const line of dataLines) {
       const rawValues = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
@@ -120,8 +117,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         return cleaned;
       });
 
-      if (values.length !== EXPECTED_COLUMN_COUNT) {
-        console.warn(`Skipping line due to unexpected column count (${values.length} instead of ${EXPECTED_COLUMN_COUNT}): "${line}". Parsed values:`, values);
+      // Allow fewer than EXPECTED_COLUMN_COUNT, but must have at least 1 (Name) and not more than expected.
+      // Missing trailing columns will result in 'undefined' when accessed by index, which is fine for optional fields.
+      if (values.length < 1 || values.length > EXPECTED_COLUMN_COUNT) {
+        console.warn(`Skipping line due to unexpected column count (${values.length}, expected 1 to ${EXPECTED_COLUMN_COUNT} columns): "${line}". Parsed values:`, values);
         continue; 
       }
 
@@ -147,11 +146,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         if (!isNaN(date.getTime())) {
           lastActivityValue = date.toISOString();
         } else {
-            // If date is invalid, let it be undefined so system can default it
             console.warn(`Invalid date format for Last Activity: "${lastActivityString}" for trader "${name}". System will default it.`);
         }
       }
-
 
       const trader: ParsedTraderData = {
         name: name,
@@ -169,13 +166,11 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         workdayTiming: values[COLUMN_INDICES.WORKDAY_TIMING]?.trim() || undefined,
         address: values[COLUMN_INDICES.ADDRESS]?.trim() || undefined,
         ownerProfileLink: values[COLUMN_INDICES.OWNER_PROFILE_LINK]?.trim() || undefined,
-        // ACTIONS_COLUMN at index 15 is intentionally ignored
       };
       traders.push(trader);
     }
     return traders;
   };
-
 
   const handleSubmit = async () => {
     if (!selectedFile || !fileContent) {
@@ -194,7 +189,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       toast({
         variant: "destructive",
         title: "Parsing Issue",
-        description: `No valid trader data could be parsed. Please check the CSV format: ensure it has ${EXPECTED_COLUMN_COUNT} columns in the specified order (comma-separated), commas within fields are double-quoted (e.g., "123, Main St"), and 'Name' (column 1) is present. A header row is skipped if "Name" (case-insensitive) is detected in the first cell.`,
+        description: `No valid trader data could be parsed. Please check the CSV format. Ensure it's comma-separated, 'Name' (column 1) is present, and fields with commas are double-quoted (e.g., "123, Main St"). The system expects up to ${EXPECTED_COLUMN_COUNT} columns in the specified order. A header row is skipped if "Name" (case-insensitive) is detected in the first cell.`,
       });
       setIsLoading(false);
       return;
@@ -208,7 +203,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       setIsLoading(false);
       return;
     }
-
 
     try {
       const result = await onBulkAddTraders(branchId, parsedTraders);
@@ -260,7 +254,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. Each row should represent one trader and contain {EXPECTED_COLUMN_COUNT} columns in the following order:
+            Upload a CSV file. Each row should represent one trader and contain up to {EXPECTED_COLUMN_COUNT} columns in the following order:
             <br/>1. Name, 2. Total Sales, 3. Status, 4. Last Activity (e.g., yyyy-MM-dd or MM/dd/yyyy), 5. Description, 6. Reviews (trades made), 7. Rating, 8. Website, 9. Phone, 10. Owner Name, 11. Main Category, 12. Categories, 13. Workday Timing, 14. Address, 15. Link (Owner Profile Link), 16. Actions (this column's data will be ignored).
             <br/>Ensure the file is comma-separated. 'Name' (column 1) must be present in data rows. Commas within fields must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell of the first line. Invalid dates for 'Last Activity' will be defaulted to the current date by the system.
           </DialogDescription>
@@ -305,4 +299,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
