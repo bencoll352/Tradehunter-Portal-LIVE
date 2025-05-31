@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react"; // Added React import
@@ -33,8 +34,8 @@ type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status
 interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BranchId;
-  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<void>; // Return type Promise<void>
-  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>; // Return type Promise<void>
+  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<void>;
+  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>;
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
@@ -67,7 +68,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
         const valB = b[sortConfig.key];
 
         if (valA === undefined && valB === undefined) return 0;
-        if (valA === undefined) return sortConfig.direction === 'ascending' ? -1 : 1; 
+        if (valA === undefined) return sortConfig.direction === 'ascending' ? -1 : 1;
         if (valB === undefined) return sortConfig.direction === 'ascending' ? 1 : -1;
 
         if (typeof valA === 'string' && typeof valB === 'string') {
@@ -106,30 +107,20 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
   };
   
   const handleAddTrader = async (values: z.infer<typeof traderFormSchema>): Promise<void> => {
-    const newTrader = await onAdd(values); // onAdd from props now returns Promise<void>
+    await onAdd(values);
+    // The parent component (DashboardClientPageContent) handles state updates and toasts.
     // The actual state update and toast will be handled by the `onAdd` prop which calls `addTraderAction`
-    // This function in TraderTableClient is now mostly a pass-through or can be simplified
-    // For now, assuming onAdd prop passed from DashboardClientPageContent handles state updates and toasts
-    if (newTrader) { // This check might be removed if onAdd truly returns void.
-        // If onAdd prop already updates the parent state, this internal setTraders might be redundant or cause issues.
-        // For now, keeping it, but it implies onAdd should return the newTrader if we want to update state here.
-        // Let's assume the `onAdd` prop passed from DashboardClientPageContent will refresh the list.
-        // Or, the onAdd prop itself should be simplified to just call the action.
-        // For now, we will rely on the fact that onAdd in DashboardClientPageContent will update `traders` state
-        // and this component will re-render.
-    }
+    // This function in TraderTableClient is now mostly a pass-through.
   };
 
   const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>): Promise<void> => {
     await onUpdate(traderId, values); // onUpdate from props now returns Promise<void>
-    // Similar to handleAddTrader, state updates and toasts are expected to be handled by the onUpdate prop
+    // State updates and toasts are expected to be handled by the onUpdate prop
     // from DashboardClientPageContent.
   };
 
   const handleStatusToggle = async (trader: Trader) => {
     const newStatus = trader.status === "Active" ? "Inactive" : "Active";
-    // We need to pass the *full* set of values to onUpdate, even if only status changes
-    // This requires having all fields available in the trader object or form schema
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       totalSales: trader.totalSales,
@@ -149,17 +140,15 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
       // If they need to be preserved, they must be part of the Trader object passed in
       // and traderFormSchema must include them as optional.
       // For now, assuming trader object has them if they existed.
-      closedOn: trader.closedOn || "",
-      reviewKeywords: trader.reviewKeywords || "",
+      // closedOn: trader.closedOn || "", // Example if these were part of form schema
+      // reviewKeywords: trader.reviewKeywords || "", // Example
     };
-    await onUpdate(trader.id, formValues); // Call onUpdate directly
-    // Toast should be handled by the onUpdate prop logic in DashboardClientPageContent
+    await onUpdate(trader.id, formValues);
   };
 
   const handleDeleteTrader = async (traderId: string): Promise<void> => {
     const success = await onDelete(traderId);
     if (success) {
-      // State update handled by onDelete prop in DashboardClientPageContent
       toast({ title: "Success", description: "Trader deleted successfully." });
     } else {
       toast({ variant: "destructive", title: "Error", description: "Failed to delete trader." });
@@ -168,11 +157,10 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, onAd
 
   const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]) => {
     const newTraders = await onBulkAdd(tradersToCreate);
-    // State update for `traders` handled by onBulkAdd prop in DashboardClientPageContent
-    if (newTraders === null) { // Check if action itself returned null indicating failure
+    if (newTraders === null) { 
       toast({ variant: "destructive", title: "Error", description: "Failed to bulk add traders (action returned null)." });
     }
-    return newTraders; // Return value is for the dialog
+    return newTraders;
   };
 
   const SortableHeader = ({ sortKey, label }: { sortKey: SortKey, label: string }) => (
@@ -363,3 +351,6 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+
+    
