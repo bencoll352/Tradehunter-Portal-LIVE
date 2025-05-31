@@ -20,12 +20,13 @@ import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
-import { ArrowUpDown, Search, FileWarning, ExternalLink } from "lucide-react";
+import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter } from "lucide-react";
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "./TraderForm";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const ITEMS_PER_PAGE = 20; 
 
@@ -34,35 +35,84 @@ type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status
 interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BranchId;
-  allBranchTraders: Trader[]; // All traders in the current branch for duplicate checks
+  allBranchTraders: Trader[]; 
   onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<void>;
   onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>;
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
 
+const CATEGORY_FILTERS = [
+  { label: "All Categories", keywords: [] },
+  { label: "Carpenters & Joiners", keywords: ["carpenter", "joiner"] },
+  { label: "General Builders", keywords: ["builder", "general builder"] },
+  { label: "Groundworkers", keywords: ["groundwork"] },
+  { label: "Bricklayers & Stonemasons", keywords: ["bricklayer", "stonemason"] },
+  { label: "Roofing", keywords: ["roofing", "roofer"] },
+  { label: "Interior Design", keywords: ["interior design", "designer"] },
+  { label: "Property Maintenance", keywords: ["propertymaintenance", "maintenance"] },
+  { label: "Plasterers", keywords: ["plasterer"] },
+  { label: "Landscapers", keywords: ["landscap", "garden design", "gardendesign"] },
+  { label: "Decking & Fencing", keywords: ["decking", "fencing"] },
+  { label: "Patios & Driveways", keywords: ["patio", "driveway", "paving"] },
+  { label: "Drywall Installers", keywords: ["drywall", "dry wall"] },
+  { label: "Flooring Installers", keywords: ["flooring", "floor installer"] },
+  { label: "Residential Construction", keywords: ["residential construction", "house builder"] },
+  { label: "Commercial Construction", keywords: ["commercial construction"] },
+  { label: "Extensions", keywords: ["extension"] },
+  { label: "Handyman / Home Improvements", keywords: ["handyman", "home improvement", "homeimprovement"] },
+  { label: "Modular Construction", keywords: ["modular", "prefabricated"] },
+  { label: "House Developers", keywords: ["house developer", "developer"] },
+  { label: "Painters & Decorators", keywords: ["painter", "decorator"] },
+  { label: "Kitchen & Bathroom (K&B)", keywords: ["k and b", "kitchen", "bathroom", "k&b"] },
+];
+
+
 export function TraderTableClient({ initialTraders, branchId: propBranchId, allBranchTraders, onAdd, onUpdate, onDelete, onBulkAdd }: TraderTableClientProps) {
   const [traders, setTraders] = useState<Trader[]>(initialTraders);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>(CATEGORY_FILTERS[0].label);
   const { toast } = useToast();
   const branchId = propBranchId;
 
   useEffect(() => {
     setTraders(initialTraders);
+    setCurrentPage(1); // Reset page when initial traders change
   }, [initialTraders]);
 
   const filteredTraders = useMemo(() => {
     let searchableTraders = [...traders];
+    
+    // Category Filter
+    if (activeCategoryFilter && activeCategoryFilter !== CATEGORY_FILTERS[0].label) {
+      const selectedFilter = CATEGORY_FILTERS.find(f => f.label === activeCategoryFilter);
+      if (selectedFilter && selectedFilter.keywords.length > 0) {
+        searchableTraders = searchableTraders.filter(trader => {
+          const mainCatLower = trader.mainCategory?.toLowerCase() || '';
+          const categoriesLower = trader.categories?.toLowerCase() || '';
+          return selectedFilter.keywords.some(keyword => 
+            mainCatLower.includes(keyword.toLowerCase()) || categoriesLower.includes(keyword.toLowerCase())
+          );
+        });
+      }
+    }
+
+    // Search Term Filter
     if (searchTerm) {
+      const searchTermLower = searchTerm.toLowerCase();
       searchableTraders = searchableTraders.filter(trader =>
-        trader.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (trader.description && trader.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (trader.mainCategory && trader.mainCategory.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (trader.address && trader.address.toLowerCase().includes(searchTerm.toLowerCase()))
+        trader.name.toLowerCase().includes(searchTermLower) ||
+        (trader.description && trader.description.toLowerCase().includes(searchTermLower)) ||
+        (trader.mainCategory && trader.mainCategory.toLowerCase().includes(searchTermLower)) ||
+        (trader.address && trader.address.toLowerCase().includes(searchTermLower)) ||
+        (trader.categories && trader.categories.toLowerCase().includes(searchTermLower)) ||
+        (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower))
       );
     }
+
+    // Sorting
     if (sortConfig !== null) {
       searchableTraders.sort((a, b) => {
         const valA = a[sortConfig.key];
@@ -78,6 +128,12 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
         if (typeof valA === 'number' && typeof valB === 'number') {
           return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
+        // Date sorting for lastActivity
+        if (sortConfig.key === 'lastActivity') {
+            const dateA = parseISO(valA as string).getTime();
+            const dateB = parseISO(valB as string).getTime();
+            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+        }
         
         if (valA < valB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
@@ -89,7 +145,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
       });
     }
     return searchableTraders;
-  }, [traders, searchTerm, sortConfig]);
+  }, [traders, searchTerm, sortConfig, activeCategoryFilter]);
 
   const totalPages = Math.ceil(filteredTraders.length / ITEMS_PER_PAGE);
   const paginatedTraders = useMemo(() => {
@@ -105,10 +161,13 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     setSortConfig({ key, direction });
     setCurrentPage(1);
   };
+
+  const handleCategoryFilterChange = (categoryLabel: string) => {
+    setActiveCategoryFilter(categoryLabel);
+    setCurrentPage(1);
+  };
   
   const handleAddTrader = async (values: z.infer<typeof traderFormSchema>): Promise<void> => {
-    // onAdd (from DashboardClientPageContent) handles state updates and toasts.
-    // Duplicate check is now within AddTraderDialog itself using allBranchTraders
     await onAdd(values);
   };
 
@@ -147,13 +206,8 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
   };
 
   const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]) => {
-    // onBulkAdd from DashboardClientPageContent handles actual addition and state update.
-    // Duplicate check is now inside BulkAddTradersDialog using allBranchTraders.
     const newTraders = await onBulkAdd(tradersToCreate);
-    if (newTraders === null && tradersToCreate.length > 0) { 
-      // This might indicate a server-side failure if onBulkAdd returns null for non-empty input
-      // Toasting for this case should be handled by BulkAddTradersDialog which has more context
-    }
+    // Toasting handled in BulkAddTradersDialog
     return newTraders;
   };
 
@@ -161,7 +215,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     <TableHead onClick={() => requestSort(sortKey)} className="cursor-pointer hover:bg-muted/50 whitespace-nowrap">
       <div className="flex items-center gap-1">
         {label}
-        <ArrowUpDown className="h-3 w-3 opacity-50" />
+        {sortConfig?.key === sortKey ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : <ArrowUpDown className="h-3 w-3 opacity-50" />}
       </div>
     </TableHead>
   );
@@ -211,13 +265,37 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
           />
         </div>
       </div>
+      
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Filter className="h-4 w-4" />
+          <span>Filter by Category:</span>
+        </div>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-2 pb-2">
+            {CATEGORY_FILTERS.map(filter => (
+              <Button
+                key={filter.label}
+                variant={activeCategoryFilter === filter.label ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleCategoryFilterChange(filter.label)}
+                className="shrink-0"
+              >
+                {filter.label}
+              </Button>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+
 
       {paginatedTraders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
           <FileWarning className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-muted-foreground">No Traders Found</h3>
           <p className="text-muted-foreground">
-            {searchTerm ? "Try adjusting your search or add a new trader." : "Add a new trader or use bulk upload to get started."}
+            {searchTerm || activeCategoryFilter !== CATEGORY_FILTERS[0].label ? "Try adjusting your search or filter, or add a new trader." : "Add a new trader or use bulk upload to get started."}
           </p>
         </div>
       ) : (
@@ -266,7 +344,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
                     </Badge>
                   </Button>
                 </TableCell>
-                <TableCell className="whitespace-nowrap">{format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}</TableCell>
+                <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
                 <TableCell>{renderCellContent(trader.description)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
@@ -352,3 +430,4 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
