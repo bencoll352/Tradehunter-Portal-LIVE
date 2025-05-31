@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Implemented for manual trader addition with a warning toast.
     - Implemented for bulk CSV upload, skipping duplicates (from DB or within CSV) and providing a summary toast.
 - New "Quick Action" to Branch Booster: "List Bricklayers & Sales Campaign".
+- Enhanced server-side logging in `profit-partner-query.ts` to provide more detailed information when diagnosing Branch Booster "Analysis Failed" errors, including request payload snippets and response status/body snippets.
 
 ### Changed
 - **Branch ID Rename**: `BRANCH_A` has been consistently renamed to `PURLEY` throughout the application, including in types, mock data, login form examples, and documentation.
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Improved numeric field parsing (Total Sales, Reviews, Rating) to better handle potential currency symbols and formatting.
     - Adjusted date parsing for "Last Activity" to better handle common UK formats (dd/MM/yyyy, dd/MM/yy).
     - Adjusted CSV parsing in `BulkAddTradersDialog` to be more flexible with column counts, expecting up to 16 columns based on provided headers and ensuring all traders are uploaded if 'Name' is present.
+    - Made CSV header matching more flexible in `BulkAddTradersDialog.tsx` for "Owner Name" (also checks "Owner"), "Main Category" (also checks "Category"), and "Workday Timing" (also checks "Workday Hours", "Working Hours", "Hours").
 - **Logo Update**: Replaced SVG logo with `next/image` component using a placeholder for `TradeHunter Pro` logo. Sidebar adjusts logo size based on collapsed/expanded state.
 - **Wording**: Removed explicit "AI" wording from user-facing text. Renamed features and descriptions to focus on analysis, insights, and system capabilities (e.g., "AI Assistant Capabilities" in sidebar changed to "Insight & Assistance Features", related icon changed from `Brain` to `Lightbulb`). Function `formatTraderDataForAI` renamed to `formatTraderDataForAnalysis`.
 - Resolved various deployment and build issues.
@@ -37,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resolved TypeScript error in TraderTableClient sorting logic by handling undefined values.
 - Corrected TypeScript error in `TraderTableClient.tsx` by ensuring `handleAddTrader` and `handleUpdateTrader` functions align with `Promise<void>` return type expected by dialog components.
 - Expanded manual "Add Trader" and "Edit Trader" forms to include more fields, aligning with the trader table overview (Website, Phone, Address, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing).
+- Updated prop type in `src/components/icons/Logo.tsx` from `SVGProps<SVGSVGElement>` to `React.HTMLAttributes<HTMLDivElement>` to match the rendered `div` element, resolving a TypeScript build error.
 
 ### Fixed
 - Fixed runtime error: `DialogTrigger is not defined` in `AddTraderDialog.tsx` by adding the missing import.
