@@ -219,7 +219,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         ownerName: getRowValue(row, ["Owner Name", "Owner"]) || undefined,
         mainCategory: getRowValue(row, ["Main Category", "Category"]) || undefined,
         categories: getRowValue(row, ["Categories"]) || undefined,
-        workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours"]) || undefined,
+        workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]) || undefined,
         address: getRowValue(row, ["Address"]) || undefined,
         ownerProfileLink: getRowValue(row, ["Link"]) || undefined,
       };
