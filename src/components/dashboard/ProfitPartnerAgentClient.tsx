@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb } from "lucide-react";
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
-import { formatTraderDataForAnalysis } from "@/lib/utils"; // Updated import
+import { formatTraderDataForAnalysis } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 
@@ -82,7 +82,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     form.setValue("query", query);
   };
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);
