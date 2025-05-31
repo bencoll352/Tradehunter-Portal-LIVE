@@ -2,8 +2,8 @@
 // profit-partner-query.ts
 'use server';
 /**
- * @fileOverview An AI agent for answering questions about trader performance within a branch.
- * This agent now forwards queries to an external service and can include uploaded file content.
+ * @fileOverview A tool for providing insights on trader performance within a branch.
+ * This tool forwards queries to an external service and can include uploaded file content.
  *
  * - profitPartnerQuery - A function that handles the query process.
  * - ProfitPartnerQueryInput - The input type for the profitPartnerQuery function.

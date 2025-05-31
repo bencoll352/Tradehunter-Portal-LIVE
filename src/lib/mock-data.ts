@@ -60,7 +60,7 @@ export const deleteTrader = (traderId: string, branchId: BranchId): boolean => {
   return MOCK_TRADERS.length < initialLength;
 };
 
-export const formatTraderDataForAI = (traders: Trader[]): string => {
+export const formatTraderDataForAnalysis = (traders: Trader[]): string => { // Changed from formatTraderDataForAI
   if (!traders || traders.length === 0) {
     return "No trader data available for this branch.";
   }
@@ -86,16 +86,13 @@ export const bulkAddTraders = (
 ): Trader[] => {
   const createdTraders: Trader[] = [];
   tradersToCreate.forEach(parsedData => {
-    // Construct the payload for addTrader, ensuring non-optional fields have values.
-    // The addTrader function itself also has defaults, but this satisfies the type checker
-    // for the object being passed to it.
     const newTraderPayload = {
       name: parsedData.name,
       branchId: branchId,
-      totalSales: parsedData.totalSales ?? 0, // Ensure number
-      tradesMade: parsedData.tradesMade ?? 0, // Ensure number
-      status: parsedData.status ?? 'Active',   // Ensure 'Active' | 'Inactive'
-      lastActivity: parsedData.lastActivity,   // string | undefined (addTrader handles default if undefined)
+      totalSales: parsedData.totalSales ?? 0,
+      tradesMade: parsedData.tradesMade ?? 0,
+      status: parsedData.status ?? 'Active',
+      lastActivity: parsedData.lastActivity,
       description: parsedData.description,
       rating: parsedData.rating,
       website: parsedData.website,
@@ -106,12 +103,9 @@ export const bulkAddTraders = (
       ownerProfileLink: parsedData.ownerProfileLink,
       categories: parsedData.categories,
       workdayTiming: parsedData.workdayTiming,
-      // closedOn and reviewKeywords are not in ParsedTraderData from the current CSV spec.
-      // They will be undefined here and thus undefined in the resulting Trader object from addTrader.
     };
     const createdTrader = addTrader(newTraderPayload as Omit<Trader, 'id' | 'lastActivity'> & { lastActivity?: string });
     createdTraders.push(createdTrader);
   });
   return createdTraders;
 };
-

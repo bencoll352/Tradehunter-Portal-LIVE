@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Adjusted date parsing for "Last Activity" to better handle common UK formats (dd/MM/yyyy, dd/MM/yy).
     - Adjusted CSV parsing in `BulkAddTradersDialog` to be more flexible with column counts, expecting up to 16 columns based on provided headers and ensuring all traders are uploaded if 'Name' is present.
 - **Logo Update**: Replaced SVG logo with `next/image` component using a placeholder for `TradeHunter Pro` logo. Sidebar adjusts logo size based on collapsed/expanded state.
+- **Wording**: Removed explicit "AI" wording from user-facing text. Renamed features and descriptions to focus on analysis, insights, and system capabilities (e.g., "AI Assistant Capabilities" in sidebar changed to "Insight & Assistance Features", related icon changed from `Brain` to `Lightbulb`). Function `formatTraderDataForAI` renamed to `formatTraderDataForAnalysis`.
 - Resolved various deployment and build issues.
 - Stabilized Next.js and React dependencies.
 - Refactored server actions for better clarity and compatibility.

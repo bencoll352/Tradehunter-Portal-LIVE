@@ -23,7 +23,7 @@ import {
   Users,
   BarChart3,
   Megaphone,
-  Brain,
+  Lightbulb, // Changed from Brain
   HardHat,
   ShieldCheck,
   LayoutGrid,
@@ -31,7 +31,6 @@ import {
   Settings2,
   Wrench,
   FileText,
-  ChevronDown,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -42,7 +41,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
@@ -68,7 +66,7 @@ const capabilitiesData = [
     category: "Data Analysis and Insights",
     icon: BarChart3,
     features: [
-      "Query Trader Data: Use the TradeHunter Pro assistant to answer questions about branch-specific trader data via a chat interface on the portal. Examples: “What is my total sales volume?”, “Who are my top 5 traders by sales?”, “What is the average transaction value?”, “Which traders haven’t purchased in 3 months?”",
+      "Query Trader Data: Use the Branch Booster to answer questions about branch-specific trader data via a chat interface on the portal. Examples: “What is my total sales volume?”, “Who are my top 5 traders by sales?”, “What is the average transaction value?”, “Which traders haven’t purchased in 3 months?”",
       "Generate Detailed Analysis: Analyze uploaded trader data to provide insights, such as purchase patterns, project types, or potential upsell opportunities.",
       "Provide Real-Time Analytics: Access live performance dashboards showing metrics like total sales, response rates to campaigns, and dormant account reactivation rates.",
       "Estimate Project Materials: Calculate materials needed for construction projects based on project type (e.g., loft conversion, roofing) using the system’s understanding of UK building processes. Example: For a loft conversion, estimate quantities of insulation, damp-proofing, and timber.",
@@ -88,16 +86,16 @@ const capabilitiesData = [
     ]
   },
   {
-    category: "AI Assistant Capabilities",
-    icon: Brain,
+    category: "Insight & Assistance Features", // Changed from "AI Assistant Capabilities"
+    icon: Lightbulb, // Changed from Brain
     features: [
-      "Answer Trader-Related Questions: Respond to user queries about trader data, sales, or project needs via the chat interface, using natural language processing to understand intent.",
+      "Answer Trader-Related Questions: Respond to user queries about trader data, sales, or project needs via the chat interface, using advanced query understanding to interpret intent.", // Rephrased
       "Provide Contextual Responses: Maintain conversation history within a session to offer relevant follow-ups. Example: After “Who are my top traders?”, respond to “What’s their contact info?” with specific details.",
       "Offer Proactive Suggestions: Suggest actions based on trader data, such as re-engaging lapsed accounts or upselling to high-value customers. Example: “John Smith hasn’t ordered in 3 months—offer a 10% discount?”",
-      "Handle Objections: Detect hesitation in queries (e.g., “That’s expensive”) and suggest solutions like discounts or bulk deals.",
+      "Handle Objections: Provide relevant responses to common objections or hesitations found in queries (e.g., “That’s expensive”) and suggest solutions like discounts or bulk deals.", // Rephrased
       "Escalate Complex Queries: For queries beyond the dataset (e.g., custom pricing), direct users to human support with a message like, “I’ll connect you with a team member—hang tight.”",
       "Support Staff Training: Provide interactive training modules or Q&A sessions to help staff learn about Jewson's products, services, or the TradeHunter Pro system. Example: Answer questions like, “How do I pitch sustainable aggregates to a customer?”",
-      "Customize Assistant Behavior: Adjust the assistant’s tone, response length, or focus (e.g., prioritize upselling or customer retention) via admin settings."
+      "Customize System Behavior: Adjust the system's tone, response length, or focus (e.g., prioritize upselling or customer retention) via admin settings." // Rephrased
     ]
   },
   {
@@ -125,10 +123,10 @@ const capabilitiesData = [
     icon: LayoutGrid,
     features: [
       "Access Admin Dashboard: Admin functionalities are not part of the current branch user prototype but would be needed for system management.",
-      "View Branch Dashboard: Provide each branch with a personalized dashboard showing their trader data, campaign tools, and the TradeHunter Pro assistant.",
+      "View Branch Dashboard: Provide each branch with a personalized dashboard showing their trader data, campaign tools, and the Branch Booster.",
       "Export Trader Data: Download trader data as a CSV file for offline analysis or reporting (functionality to be implemented).",
       "Monitor Usage Analytics: Track portal usage to provide admins with insights into branch activity (functionality to be implemented).",
-      "Access “How to Use” Guide: View a dedicated page with step-by-step instructions for logging in, managing traders, using the assistant, and creating campaigns.",
+      "Access “How to Use” Guide: View a dedicated page with step-by-step instructions for logging in, managing traders, using the Branch Booster, and creating campaigns.",
       "Access Q&A Section: Refer to a Q&A page addressing common questions."
     ]
   },
@@ -137,7 +135,7 @@ const capabilitiesData = [
     icon: Binary,
     features: [
       "Reference Competitor Websites: Functionality for direct competitor website access/database not currently implemented.",
-      "Analyze Competitor Strategies: AI assistant may be guided to consider general competitive factors if relevant data is provided."
+      "Analyze Competitor Strategies: The system may be guided to consider general competitive factors if relevant data is provided." // Rephrased
     ]
   },
   {
@@ -164,7 +162,7 @@ const capabilitiesData = [
     icon: FileText,
     features: [
       "Branch Manager: Uses the portal to identify lapsed traders, launches a re-engagement campaign, and tracks a 15% reactivation rate.",
-      "Sales Staff: Queries the assistant for top traders’ contact details, suggests product bundles, and secures a bulk order.",
+      "Sales Staff: Queries the Branch Booster for top traders’ contact details, suggests product bundles, and secures a bulk order.",
       "Admin: Creates new branch accounts and monitors usage analytics to ensure adoption.",
       "Trader: Receives a targeted campaign for roofing materials, responds to a quote, and places an order via Click & Collect."
     ]

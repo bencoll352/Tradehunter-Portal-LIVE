@@ -10,10 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle } from "lucide-react";
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb } from "lucide-react";
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
-import { formatTraderDataForAI } from "@/lib/mock-data";
+import { formatTraderDataForAnalysis } from "@/lib/mock-data"; // Changed from formatTraderDataForAI
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 
@@ -87,7 +87,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     setAnalysisResponse(null);
     setError(null);
 
-    const traderDataString = formatTraderDataForAI(traders);
+    const traderDataString = formatTraderDataForAnalysis(traders); // Changed from formatTraderDataForAI
     
     const input: ProfitPartnerQueryInput = {
       query: values.query,

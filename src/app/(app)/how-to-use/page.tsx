@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -35,7 +36,7 @@ const faqs = [
   {
     value: "item-4",
     question: "What is the Branch Booster?",
-    answer: "The Branch Booster helps you analyze trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box, or upload a customer data file (e.g., CSV) for deeper insights like upsell opportunities or multi-customer recommendations. The booster will provide an answer based on the current data for your branch and any uploaded file.",
+    answer: "The Branch Booster helps you analyze trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box, or upload a customer data file (e.g., CSV) for deeper insights like upsell opportunities or multi-customer recommendations. The system will provide an answer based on the current data for your branch and any uploaded file.",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
   {
