@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Improved numeric field parsing (Total Sales, Reviews, Rating) to better handle potential currency symbols and formatting.
     - Adjusted date parsing for "Last Activity" to better handle common UK formats (dd/MM/yyyy, dd/MM/yy).
     - Adjusted CSV parsing in `BulkAddTradersDialog` to be more flexible with column counts, expecting up to 16 columns based on provided headers and ensuring all traders are uploaded if 'Name' is present.
-    - Made CSV header matching more flexible in `BulkAddTradersDialog.tsx` for "Owner Name" (also checks "Owner"), "Main Category" (also checks "Category"), and "Workday Timing" (also checks "Workday Hours", "Working Hours", "Hours").
+    - Made CSV header matching more flexible in `BulkAddTradersDialog.tsx` for "Owner Name" (also checks "Owner"), "Main Category" (also checks "Category"), and "Workday Timing" (also checks "Workday Hours", "Working Hours", "Hours", "WorkdayTiming" (no space)).
 - **Logo Update**: Replaced SVG logo with `next/image` component using a placeholder for `TradeHunter Pro` logo. Sidebar adjusts logo size based on collapsed/expanded state.
 - **Wording**: Removed explicit "AI" wording from user-facing text. Renamed features and descriptions to focus on analysis, insights, and system capabilities (e.g., "AI Assistant Capabilities" in sidebar changed to "Insight & Assistance Features", related icon changed from `Brain` to `Lightbulb`). Function `formatTraderDataForAI` renamed to `formatTraderDataForAnalysis`.
 - Resolved various deployment and build issues.
@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected TypeScript error in `TraderTableClient.tsx` by ensuring `handleAddTrader` and `handleUpdateTrader` functions align with `Promise<void>` return type expected by dialog components.
 - Expanded manual "Add Trader" and "Edit Trader" forms to include more fields, aligning with the trader table overview (Website, Phone, Address, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing).
 - Updated prop type in `src/components/icons/Logo.tsx` from `SVGProps<SVGSVGElement>` to `React.HTMLAttributes<HTMLDivElement>` to match the rendered `div` element, resolving a TypeScript build error.
+- Updated `EXTERNAL_AI_URL` in `src/ai/flows/profit-partner-query.ts` to point to the correct live Branch Booster endpoint.
 
 ### Fixed
 - Fixed runtime error: `DialogTrigger is not defined` in `AddTraderDialog.tsx` by adding the missing import.
