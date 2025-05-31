@@ -24,10 +24,10 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
     id: `trader-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     name: traderData.name,
     branchId: traderData.branchId,
-    totalSales: traderData.totalSales,
+    totalSales: traderData.totalSales, // This now comes from traderData
     tradesMade: traderData.tradesMade,
-    status: traderData.status,
-    lastActivity: traderData.lastActivity || new Date().toISOString(),
+    status: traderData.status, // This now comes from traderData
+    lastActivity: traderData.lastActivity || new Date().toISOString(), // Use provided or default to now
     description: traderData.description,
     rating: traderData.rating,
     website: traderData.website,
@@ -38,6 +38,10 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
     ownerProfileLink: traderData.ownerProfileLink,
     categories: traderData.categories,
     workdayTiming: traderData.workdayTiming,
+    // Fields like closedOn and reviewKeywords are no longer part of ParsedTraderData,
+    // so they won't be in traderData unless the Trader type itself is directly passed.
+    // For consistency, if they are needed, they should be part of TraderForm or explicitly added.
+    // For now, they will be undefined if not part of the input `traderData`.
     closedOn: traderData.closedOn,
     reviewKeywords: traderData.reviewKeywords,
   };
@@ -48,7 +52,7 @@ export const addTrader = (traderData: Omit<Trader, 'id' | 'lastActivity'> & { la
 export const updateTrader = (updatedTrader: Trader): Trader | null => {
   const index = MOCK_TRADERS.findIndex(trader => trader.id === updatedTrader.id && trader.branchId === updatedTrader.branchId);
   if (index !== -1) {
-    MOCK_TRADERS[index] = { ...MOCK_TRADERS[index], ...updatedTrader, lastActivity: new Date().toISOString() }; // Always update lastActivity on any update
+    MOCK_TRADERS[index] = { ...MOCK_TRADERS[index], ...updatedTrader, lastActivity: new Date().toISOString() };
     return MOCK_TRADERS[index];
   }
   return null;
@@ -60,7 +64,6 @@ export const deleteTrader = (traderId: string, branchId: BranchId): boolean => {
   return MOCK_TRADERS.length < initialLength;
 };
 
-// Helper to format trader data for the Branch Booster
 export const formatTraderDataForAI = (traders: Trader[]): string => {
   if (!traders || traders.length === 0) {
     return "No trader data available for this branch.";
@@ -77,8 +80,11 @@ export const formatTraderDataForAI = (traders: Trader[]): string => {
     if (trader.ownerProfileLink) details += `, Owner Profile: ${trader.ownerProfileLink}`;
     if (trader.categories) details += `, Categories: ${trader.categories}`;
     if (trader.workdayTiming) details += `, Hours: ${trader.workdayTiming}`;
-    if (trader.closedOn) details += `, Closed: ${trader.closedOn}`;
-    if (trader.reviewKeywords) details += `, Keywords: ${trader.reviewKeywords}`;
+    // Not including closedOn and reviewKeywords as they are removed from ParsedTraderData for CSV upload.
+    // If they are still part of the general Trader object and need to be sent, they can be added back here.
+    // For now, keeping it consistent with the data likely coming from CSV.
+    // if (trader.closedOn) details += `, Closed: ${trader.closedOn}`;
+    // if (trader.reviewKeywords) details += `, Keywords: ${trader.reviewKeywords}`;
     return details;
   }).join('; \n');
 };
@@ -88,27 +94,31 @@ export const bulkAddTraders = (
   branchId: BranchId
 ): Trader[] => {
   const createdTraders: Trader[] = [];
-  tradersToCreate.forEach(traderData => {
-    // Default totalSales to 0 and status to 'Active' for bulk uploaded traders
-    // Ensure all fields from ParsedTraderData are mapped to the Trader creation
-    const newTraderPayload: Omit<Trader, 'id' | 'lastActivity'> = {
-      name: traderData.name,
+  tradersToCreate.forEach(parsedData => {
+    // Map ParsedTraderData to the structure expected by addTrader
+    // addTrader expects all fields of Trader (except id, and lastActivity is optional in input)
+    const newTraderPayload: Omit<Trader, 'id' | 'lastActivity'> & { lastActivity?: string, closedOn?: string, reviewKeywords?: string } = {
+      name: parsedData.name,
       branchId: branchId,
-      totalSales: 0, // Default for new bulk uploads
-      tradesMade: traderData.tradesMade || 0,
-      status: 'Active', // Default for new bulk uploads
-      description: traderData.description,
-      rating: traderData.rating,
-      website: traderData.website,
-      phone: traderData.phone,
-      address: traderData.address,
-      mainCategory: traderData.mainCategory,
-      ownerName: traderData.ownerName,
-      ownerProfileLink: traderData.ownerProfileLink,
-      categories: traderData.categories,
-      workdayTiming: traderData.workdayTiming,
-      closedOn: traderData.closedOn,
-      reviewKeywords: traderData.reviewKeywords,
+      totalSales: parsedData.totalSales ?? 0, // Default to 0 if not provided in CSV
+      tradesMade: parsedData.tradesMade ?? 0, // Default to 0 if not provided
+      status: parsedData.status ?? 'Active', // Default to 'Active' if not provided or invalid in CSV
+      lastActivity: parsedData.lastActivity, // Pass as is; addTrader defaults if undefined/invalid
+      description: parsedData.description,
+      rating: parsedData.rating,
+      website: parsedData.website,
+      phone: parsedData.phone,
+      address: parsedData.address,
+      mainCategory: parsedData.mainCategory,
+      ownerName: parsedData.ownerName,
+      ownerProfileLink: parsedData.ownerProfileLink,
+      categories: parsedData.categories,
+      workdayTiming: parsedData.workdayTiming,
+      // Fields not in the new CSV spec will be undefined here.
+      // addTrader will then set them to undefined in the MOCK_TRADERS array
+      // or handle them if it has internal defaults (which it doesn't for these two specifically).
+      closedOn: undefined, 
+      reviewKeywords: undefined,
     };
     const createdTrader = addTrader(newTraderPayload);
     createdTraders.push(createdTrader);

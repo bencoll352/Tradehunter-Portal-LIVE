@@ -24,24 +24,26 @@ interface BulkAddTradersDialogProps {
   onBulkAddTraders: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>;
 }
 
-// Expected column indices for parsing (0-indexed based on the 14 specific headers)
+// Expected column indices for parsing (0-indexed based on the 16 specific headers)
 const COLUMN_INDICES = {
   NAME: 0,
-  DESCRIPTION: 1,
-  REVIEWS: 2,             // (maps to tradesMade)
-  RATING: 3,
-  WEBSITE: 4,
-  PHONE: 5,
-  OWNER_NAME: 6,
-  OWNER_PROFILE_LINK: 7,
-  MAIN_CATEGORY: 8,
-  CATEGORIES: 9,
-  WORKDAY_TIMING: 10,
-  CLOSED_ON: 11,
-  ADDRESS: 12,
-  REVIEW_KEYWORDS: 13,
+  TOTAL_SALES: 1,
+  STATUS: 2,
+  LAST_ACTIVITY: 3,
+  DESCRIPTION: 4,
+  REVIEWS: 5,         // (maps to tradesMade)
+  RATING: 6,
+  WEBSITE: 7,         // Assumes header is 'Website', not '🌐Website'
+  PHONE: 8,           // Assumes header is 'Phone', not '📞 Phone'
+  OWNER_NAME: 9,
+  MAIN_CATEGORY: 10,
+  CATEGORIES: 11,
+  WORKDAY_TIMING: 12,
+  ADDRESS: 13,
+  OWNER_PROFILE_LINK: 14, // Mapped from 'Link' header
+  ACTIONS_COLUMN: 15, // This column's data will be ignored
 };
-const EXPECTED_COLUMN_COUNT = 14;
+const EXPECTED_COLUMN_COUNT = 16;
 
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
@@ -82,14 +84,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const parseCsvData = (csvString: string | null): ParsedTraderData[] => {
     if (!csvString) return [];
     const traders: ParsedTraderData[] = [];
-    // Split lines, handling both \r\n and \n, and filter out empty lines
     const lines = csvString.trim().split(/\r\n|\n/).filter(line => line.trim() !== "");
 
     if (lines.length === 0) return [];
     
-    // More robust header detection and data line extraction
-    // Attempt to detect if the first line is a header
-    // A simple heuristic: check if the first cell of the first line is "Name" (case-insensitive)
     const firstLineValuesForHeaderCheck = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => {
       let cleaned = val.trim();
       if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
@@ -99,51 +97,71 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     });
 
     const potentialHeaderContent = firstLineValuesForHeaderCheck[COLUMN_INDICES.NAME]?.trim().toLowerCase();
-    const dataLines = (potentialHeaderContent === 'name' || potentialHeaderContent === 'name') ? lines.slice(1) : lines;
+    const dataLines = (potentialHeaderContent === 'name') ? lines.slice(1) : lines;
 
 
     for (const line of dataLines) {
-      // Regex to split by comma, but not if it's inside double quotes
-      // This handles fields like "Doe, John" or "123 Main St, Apt 4B"
       const rawValues = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
       
       const values = rawValues.map(val => {
         let cleaned = val.trim();
-        // Remove surrounding quotes (if any)
         if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
           cleaned = cleaned.substring(1, cleaned.length - 1);
         }
-        // Replace escaped double quotes "" with a single double quote "
         cleaned = cleaned.replace(/""/g, '"');
         return cleaned;
       });
 
       if (values.length !== EXPECTED_COLUMN_COUNT) {
         console.warn(`Skipping line due to unexpected column count (${values.length} instead of ${EXPECTED_COLUMN_COUNT}): "${line}". Parsed values:`, values);
-        continue; // Skip this line
+        continue; 
       }
 
       const name = values[COLUMN_INDICES.NAME]?.trim() || "";
       if (!name) {
         console.warn(`Skipping line due to missing name: "${line}"`);
-        continue; // Skip if name is missing
+        continue; 
       }
+      
+      let statusValue = values[COLUMN_INDICES.STATUS]?.trim().toLowerCase();
+      let parsedStatus : 'Active' | 'Inactive' | undefined = undefined;
+      if (statusValue === 'active') {
+        parsedStatus = 'Active';
+      } else if (statusValue === 'inactive') {
+        parsedStatus = 'Inactive';
+      }
+      // If undefined, it will be defaulted later by addTrader or bulkAddTraders logic
+
+      const lastActivityString = values[COLUMN_INDICES.LAST_ACTIVITY]?.trim();
+      let lastActivityValue: string | undefined = undefined;
+      if (lastActivityString) {
+        const date = new Date(lastActivityString);
+        if (!isNaN(date.getTime())) {
+          lastActivityValue = date.toISOString();
+        } else {
+            // If date is invalid, let it be undefined so system can default it
+            console.warn(`Invalid date format for Last Activity: "${lastActivityString}" for trader "${name}". System will default it.`);
+        }
+      }
+
 
       const trader: ParsedTraderData = {
         name: name,
+        totalSales: parseFloat(values[COLUMN_INDICES.TOTAL_SALES]?.trim() || "0") || undefined, // Default to undefined if parsing fails, so mock-data can default to 0
+        status: parsedStatus, // Will be 'Active', 'Inactive', or undefined (for system default)
+        lastActivity: lastActivityValue, // Will be ISO string or undefined (for system default)
         description: values[COLUMN_INDICES.DESCRIPTION]?.trim() || undefined,
-        tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0, // from 'reviews'
+        tradesMade: parseInt(values[COLUMN_INDICES.REVIEWS]?.trim() || "0", 10) || 0,
         rating: parseFloat(values[COLUMN_INDICES.RATING]?.trim() || "0") || undefined,
         website: values[COLUMN_INDICES.WEBSITE]?.trim() || undefined,
         phone: values[COLUMN_INDICES.PHONE]?.trim() || undefined,
         ownerName: values[COLUMN_INDICES.OWNER_NAME]?.trim() || undefined,
-        ownerProfileLink: values[COLUMN_INDICES.OWNER_PROFILE_LINK]?.trim() || undefined,
         mainCategory: values[COLUMN_INDICES.MAIN_CATEGORY]?.trim() || undefined,
         categories: values[COLUMN_INDICES.CATEGORIES]?.trim() || undefined,
         workdayTiming: values[COLUMN_INDICES.WORKDAY_TIMING]?.trim() || undefined,
-        closedOn: values[COLUMN_INDICES.CLOSED_ON]?.trim() || undefined,
         address: values[COLUMN_INDICES.ADDRESS]?.trim() || undefined,
-        reviewKeywords: values[COLUMN_INDICES.REVIEW_KEYWORDS]?.trim() || undefined,
+        ownerProfileLink: values[COLUMN_INDICES.OWNER_PROFILE_LINK]?.trim() || undefined,
+        // ACTIONS_COLUMN at index 15 is intentionally ignored
       };
       traders.push(trader);
     }
@@ -168,7 +186,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       toast({
         variant: "destructive",
         title: "Parsing Issue",
-        description: `No valid trader data could be parsed. Please check the CSV format: ensure it has ${EXPECTED_COLUMN_COUNT} columns, commas within fields are double-quoted (e.g., "123, Main St"), and 'Name' (column 1) is present. A header row is skipped if "Name" is detected in the first cell.`,
+        description: `No valid trader data could be parsed. Please check the CSV format: ensure it has ${EXPECTED_COLUMN_COUNT} columns in the specified order, commas within fields are double-quoted (e.g., "123, Main St"), and 'Name' (column 1) is present. A header row is skipped if "Name" is detected in the first cell.`,
       });
       setIsLoading(false);
       return;
@@ -201,7 +219,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         });
       } else {
          toast({
-          variant: "default", // Changed from "warning" to "default"
+          variant: "default", 
           title: "No New Traders Added",
           description: "The process completed, but no new traders were added. This might mean all parsed traders were invalid, duplicates, or the file contained no new data.",
         });
@@ -222,7 +240,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     <Dialog open={open} onOpenChange={(isOpen) => {
       setOpen(isOpen);
       if (!isOpen) {
-        clearFile(); // Clear file if dialog is closed
+        clearFile(); 
       }
     }}>
       <DialogTrigger asChild>
@@ -235,8 +253,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
             Upload a CSV file. Each row should represent one trader and contain {EXPECTED_COLUMN_COUNT} columns in the following order:
-            <br/>1. Name, 2. Description, 3. Reviews (trades made), 4. Rating, 5. Website, 6. Phone, 7. Owner Name, 8. Owner Profile Link, 9. Main Category, 10. Categories, 11. Workday Timing, 12. Closed On, 13. Address, 14. Review Keywords.
-            <br/>Ensure 'Name' (column 1) is always present. Commas within fields (e.g., Address) must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell.
+            <br/>1. Name, 2. Total Sales, 3. Status, 4. Last Activity (e.g., yyyy-MM-dd or MM/dd/yyyy), 5. Description, 6. Reviews (trades made), 7. Rating, 8. Website, 9. Phone, 10. Owner Name, 11. Main Category, 12. Categories, 13. Workday Timing, 14. Address, 15. Link (Owner Profile Link), 16. Actions (this column's data will be ignored).
+            <br/>Ensure 'Name' (column 1) is always present. Commas within fields must be enclosed in double quotes (e.g., "123, Main St"). The system will attempt to skip a header row if "Name" (case-insensitive) is detected in the first cell. Invalid dates for 'Last Activity' will be defaulted to the current date by the system.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
