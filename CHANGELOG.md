@@ -12,12 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project setup.
 - Core features for trader management.
 - Integration with external analysis service for Branch Booster.
+- `BRANCH_D` added as a valid branch ID for login and testing.
 
 ### Changed
 - Resolved various deployment and build issues.
 - Stabilized Next.js and React dependencies.
 - Refactored server actions for better clarity and compatibility.
 - Addressed client-side rendering issues for login page.
+- Corrected React Fragment prop issue in AppSidebar.
+- Fixed "React is not defined" error in TraderTableClient.
+- Improved CSV parsing in BulkAddTradersDialog to handle quoted fields with internal commas.
+- Fixed data loss issue on trader update by ensuring full existing trader data is fetched.
+- Resolved TypeScript error in TraderTableClient sorting logic by handling undefined values.
+- Adjusted BulkAddTradersDialog CSV parsing to be more flexible with column counts, expecting up to 16 columns based on provided headers (Name, Total Sales, Status, Last Activity, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Actions) and ensuring all traders are uploaded if 'Name' is present.
 
 ## [0.2.0] - YYYY-MM-DD (Update with current date)
 ### Changed
@@ -42,3 +49,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Login and branch-specific data views.
 - "How to Use" page.
 - Initial bulk trader upload functionality (later revised).
+
