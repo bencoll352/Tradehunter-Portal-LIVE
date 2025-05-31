@@ -53,28 +53,26 @@ export function DashboardClientPageContent({
   }, [branchId]);
 
 
-  const handleAdd = async (values: TraderFormValues) => {
+  const handleAdd = async (values: TraderFormValues): Promise<void> => {
     if (!branchId) {
       console.error("Branch ID not available for add action");
-      return null;
+      return;
     }
     const newTrader = await addTraderAction(branchId, values);
     if (newTrader) {
       setTraders(prev => [...prev, newTrader].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
     }
-    return newTrader;
   };
 
-  const handleUpdate = async (traderId: string, values: TraderFormValues) => {
+  const handleUpdate = async (traderId: string, values: TraderFormValues): Promise<void> => {
      if (!branchId) {
       console.error("Branch ID not available for update action");
-      return null;
+      return;
     }
     const updatedTrader = await updateTraderAction(branchId, traderId, values);
     if (updatedTrader) {
       setTraders(prev => prev.map(t => t.id === traderId ? updatedTrader : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
     }
-    return updatedTrader;
   };
 
   const handleDelete = async (traderId: string) => {
@@ -143,3 +141,4 @@ export function DashboardClientPageContent({
     </div>
   );
 }
+
