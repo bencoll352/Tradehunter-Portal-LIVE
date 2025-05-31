@@ -10,14 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `BRANCH_D` added as a valid branch ID for login and testing.
-- Expanded manual "Add Trader" and "Edit Trader" forms to include more fields, aligning with the trader table overview (Website, Phone, Address, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing).
 
 ### Changed
 - **Branch ID Rename**: `BRANCH_A` has been consistently renamed to `PURLEY` throughout the application, including in types, mock data, login form examples, and documentation.
 - **Trader Overview Pagination**: Increased the number of traders displayed per page in the overview table from 5 to 20.
 - **Bulk CSV Trader Upload**:
-    - Updated to parse 16 specific columns in the defined order: Name, Total Sales, Status, Last Activity, Description, Reviews (tradesMade), Rating, Website, Phone, Owner Name, Main Category, Categories, WorkdayTiming, Address, Link (ownerProfileLink), Actions (ignored).
+    - Integrated `papaparse` library for significantly more robust and flexible CSV parsing in `BulkAddTradersDialog`. This improves handling of quoted fields, various delimiters, and relies on header names for mapping rather than strict column order/count.
+    - Updated to parse 16 specific columns in the defined order (if using older parsing logic, now primarily relies on headers): Name, Total Sales, Status, Last Activity, Description, Reviews (tradesMade), Rating, Website, Phone, Owner Name, Main Category, Categories, WorkdayTiming, Address, Link (ownerProfileLink), Actions (ignored).
     - Improved numeric field parsing (Total Sales, Reviews, Rating) to better handle potential currency symbols and formatting.
+    - Adjusted date parsing for "Last Activity" to better handle common UK formats (dd/MM/yyyy, dd/MM/yy).
     - Adjusted CSV parsing in `BulkAddTradersDialog` to be more flexible with column counts, expecting up to 16 columns based on provided headers and ensuring all traders are uploaded if 'Name' is present.
 - Resolved various deployment and build issues.
 - Stabilized Next.js and React dependencies.
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed data loss issue on trader update by ensuring full existing trader data is fetched.
 - Resolved TypeScript error in TraderTableClient sorting logic by handling undefined values.
 - Corrected TypeScript error in `TraderTableClient.tsx` by ensuring `handleAddTrader` and `handleUpdateTrader` functions align with `Promise<void>` return type expected by dialog components.
+- Expanded manual "Add Trader" and "Edit Trader" forms to include more fields, aligning with the trader table overview (Website, Phone, Address, Owner Name, Owner Profile Link, Main Category, Categories, Workday Timing).
 
 
 ## [0.2.0] - YYYY-MM-DD (Update with current date)
