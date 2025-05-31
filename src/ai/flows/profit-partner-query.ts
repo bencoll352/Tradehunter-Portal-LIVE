@@ -29,6 +29,11 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
   return profitPartnerQueryFlow(input);
 }
 
+// IMPORTANT: If you are receiving 404 errors, this URL might be incomplete.
+// The external service might expect requests to a specific path, e.g.:
+// https://branch-booster-purley-302177537641.us-west1.run.app/api/invoke
+// https://branch-booster-purley-302177537641.us-west1.run.app/query
+// Please verify the exact and full endpoint URL from your service's deployment details.
 const EXTERNAL_AI_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/';
 
 const profitPartnerQueryFlow = ai.defineFlow(
