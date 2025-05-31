@@ -2,8 +2,7 @@
 // profit-partner-query.ts
 'use server';
 /**
- * @fileOverview A tool for providing insights on trader performance within a branch.
- * This tool forwards queries to an external service and can include uploaded file content.
+ * @fileOverview A tool for providing insights on trader performance by querying the Gemini API directly.
  *
  * - profitPartnerQuery - A function that handles the query process.
  * - ProfitPartnerQueryInput - The input type for the profitPartnerQuery function.
@@ -29,14 +28,6 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
   return profitPartnerQueryFlow(input);
 }
 
-// IMPORTANT: If you are receiving 404 errors, this URL might be incomplete.
-// The external service might expect POST requests to a specific path, e.g.:
-// https://branch-booster-purley-302177537641.us-west1.run.app/api/invoke
-// https://branch-booster-purley-302177537641.us-west1.run.app/query
-// Please verify the exact and full endpoint URL from your service's deployment details.
-const EXTERNAL_AI_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/'; 
-const API_KEY = process.env.BRANCH_BOOSTER_API_KEY;
-
 const profitPartnerQueryFlow = ai.defineFlow(
   {
     name: 'profitPartnerQueryFlow',
@@ -44,83 +35,74 @@ const profitPartnerQueryFlow = ai.defineFlow(
     outputSchema: ProfitPartnerQueryOutputSchema,
   },
   async (input: ProfitPartnerQueryInput): Promise<ProfitPartnerQueryOutput> => {
-    console.log(`[profitPartnerQueryFlow] Attempting to call external service at URL: ${EXTERNAL_AI_URL}`);
-    console.log(`[profitPartnerQueryFlow] Query: "${input.query}"`);
+    console.log(`[profitPartnerQueryFlow] Received query: "${input.query}"`);
     console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
-    
-    if (API_KEY) {
-      console.log('[profitPartnerQueryFlow] Using API Key for authorization.');
-    } else {
-      console.warn('[profitPartnerQueryFlow] BRANCH_BOOSTER_API_KEY is not set. Request will be made without Authorization header. If your service requires an API key, this will likely cause 401/403 errors.');
+
+    // Construct a prompt for Gemini
+    let promptText = `You are a helpful assistant for a branch manager.
+Your task is to analyze trader data and answer questions.
+The primary trader data for the branch is as follows:
+--- TRADER DATA START ---
+${input.traderData}
+--- TRADER DATA END ---
+
+Based on this trader data, please answer the following question: "${input.query}"`;
+
+    if (input.uploadedFileContent) {
+      promptText += `
+
+Additionally, consider the following uploaded customer data for context:
+--- UPLOADED CUSTOMER DATA START ---
+${input.uploadedFileContent}
+--- UPLOADED CUSTOMER DATA END ---`;
     }
 
+    promptText += `
+
+Provide a concise, informative, and helpful answer.`;
+
+    console.log('[profitPartnerQueryFlow] Sending constructed prompt to Gemini via Genkit.');
+    // console.debug('[profitPartnerQueryFlow] Prompt (snippet):', promptText.substring(0, 500) + (promptText.length > 500 ? '...' : '')); // For debugging if needed
+
     try {
-      const payload = {
-        query: input.query,
-        traderData: input.traderData,
-        ...(input.uploadedFileContent && { customerDataFileContent: input.uploadedFileContent }),
-      };
-      const payloadString = JSON.stringify(payload);
-      const payloadSnippet = payloadString.substring(0, 500) + (payloadString.length > 500 ? '...' : '');
-      console.log('[profitPartnerQueryFlow] Sending payload (snippet):', payloadSnippet);
-
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (API_KEY) {
-        headers['Authorization'] = `Bearer ${API_KEY}`;
-      }
-
-      const response = await fetch(EXTERNAL_AI_URL, {
-        method: 'POST',
-        headers: headers,
-        body: payloadString,
+      // The 'ai' object from src/ai/genkit.ts is configured with googleAI() plugin
+      // and a default model (e.g., gemini-2.0-flash).
+      // The GOOGLE_API_KEY from the environment will be used by the plugin.
+      const response = await ai.generate({
+        prompt: promptText,
+        // You can add model configuration here if needed, e.g.,
+        // model: 'googleai/gemini-pro', // To use a different model than default
+        // config: {
+        //   temperature: 0.7,
+        //   safetySettings: [
+        //     { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+        //   ],
+        // }
       });
 
-      console.log(`[profitPartnerQueryFlow] Received response status: ${response.status} ${response.statusText}`);
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        const errorBodySnippet = errorBody.substring(0, 500) + (errorBody.length > 500 ? '...' : '');
-        console.error(`[profitPartnerQueryFlow] External service error: ${response.status} ${response.statusText}. Error Body (snippet):`, errorBodySnippet);
-        
-        if (response.status === 404) {
-             throw new Error(`Failed to get response from external service: Status 404 (Not Found). This most often means the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") is missing a specific path (e.g., /api/invoke or /query) or the endpoint itself is not correctly deployed. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Please verify the full URL. Full details in server logs.`);
-        }
-        if (response.status === 401 || response.status === 403) {
-          throw new Error(`Failed to get response from external service: Status ${response.status} (${response.statusText}). This indicates an Authentication/Authorization issue. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Please verify the BRANCH_BOOSTER_API_KEY and ensure the external service accepts it in the 'Authorization: Bearer <key>' header. Full details in server logs.`);
-        }
-        throw new Error(`Failed to get response from external service. Status: ${response.status}. An API key was ${API_KEY ? 'sent' : 'NOT sent'}. Full details in server logs.`);
+      const answer = response.text; // Correct 1.x syntax
+      if (answer === undefined || answer === null || answer.trim() === "") {
+        console.error('[profitPartnerQueryFlow] Gemini response was empty or undefined.');
+        throw new Error('Received an empty or undefined response from the analysis service.');
       }
+      console.log('[profitPartnerQueryFlow] Successfully received answer from Gemini.');
+      return { answer };
 
-      const resultText = await response.text();
-      let result;
-      try {
-        result = JSON.parse(resultText);
-      } catch (jsonError) {
-        const resultTextSnippet = resultText.substring(0, 500) + (resultText.length > 500 ? '...' : '');
-        console.error('[profitPartnerQueryFlow] Failed to parse response as JSON. Response text (snippet):', resultTextSnippet, 'Original Error:', jsonError);
-        throw new Error('External service returned a non-JSON response. Expected format: {"answer": "string"}. Full details in server logs.');
-      }
-      
-      const resultString = JSON.stringify(result);
-      const resultSnippet = resultString.substring(0, 500) + (resultString.length > 500 ? '...' : '');
-      console.log('[profitPartnerQueryFlow] Received result from external service (snippet):', resultSnippet);
-
-      if (result && typeof result.answer === 'string') {
-        return { answer: result.answer };
-      } else {
-        console.error('[profitPartnerQueryFlow] External service returned an unexpected response format. Expected { answer: string }, Got (snippet):', resultSnippet);
-        throw new Error('External service returned an unexpected response format. Expected format: {"answer": "string"}. Full details in server logs.');
-      }
     } catch (error) {
-      console.error('[profitPartnerQueryFlow] Error during call to external service:', error);
+      console.error('[profitPartnerQueryFlow] Error during call to Gemini via Genkit:', error);
+      let errorMessage = 'An error occurred while calling the analysis service.';
       if (error instanceof Error) {
-        throw new Error(`Error calling external service: ${error.message}. Please verify the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") and ensure the service is operational. Full details in server logs.`);
+        if (error.message.toLowerCase().includes('api key') || error.message.toLowerCase().includes('permission denied') || error.message.toLowerCase().includes('forbidden')) {
+          errorMessage = `Analysis service API key or permission issue: ${error.message}. Ensure GOOGLE_API_KEY is correctly set and valid in the environment.`;
+        } else if (error.message.toLowerCase().includes('quota')) {
+          errorMessage = `Analysis service quota exceeded: ${error.message}. Please check your API quota.`;
+        } else {
+          errorMessage = `Error calling analysis service: ${error.message}.`;
+        }
       }
-      throw new Error(`An unknown error occurred while calling the external service. Please verify the EXTERNAL_AI_URL ("${EXTERNAL_AI_URL}") and ensure the service is operational. Full details in server logs.`);
+      // Ensure a new error is thrown to propagate it, or handle as needed
+      throw new Error(`${errorMessage} Full details in server logs.`);
     }
   }
 );
-
