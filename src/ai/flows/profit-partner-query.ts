@@ -2,7 +2,7 @@
 // profit-partner-query.ts
 'use server';
 /**
- * @fileOverview A tool for providing insights on trader performance by querying the Gemini API directly.
+ * @fileOverview A tool for providing insights on trader performance by querying the Gemini API directly using Genkit.
  *
  * - profitPartnerQuery - A function that handles the query process.
  * - ProfitPartnerQueryInput - The input type for the profitPartnerQuery function.
@@ -28,6 +28,32 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
   return profitPartnerQueryFlow(input);
 }
 
+const profitPartnerAnalysisPrompt = ai.definePrompt({
+  name: 'profitPartnerAnalysisPrompt',
+  input: { schema: ProfitPartnerQueryInputSchema },
+  output: { schema: ProfitPartnerQueryOutputSchema },
+  prompt: `You are a helpful assistant for a branch manager.
+Your task is to analyze trader data and answer questions based on the information provided.
+
+The primary trader data for the branch is as follows:
+--- TRADER DATA START ---
+{{{traderData}}}
+--- TRADER DATA END ---
+
+Based on this trader data, please answer the following question: "{{{query}}}"
+{{#if uploadedFileContent}}
+
+Additionally, consider the following uploaded customer data for context:
+--- UPLOADED CUSTOMER DATA START ---
+{{{uploadedFileContent}}}
+--- UPLOADED CUSTOMER DATA END ---
+{{/if}}
+
+Provide a concise, informative, and helpful answer.
+Your response MUST be a JSON object with a single key "answer" that holds your textual response. For example: {"answer": "Your analysis results here."}
+`,
+});
+
 const profitPartnerQueryFlow = ai.defineFlow(
   {
     name: 'profitPartnerQueryFlow',
@@ -39,70 +65,46 @@ const profitPartnerQueryFlow = ai.defineFlow(
     console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
 
-    // Construct a prompt for Gemini
-    let promptText = `You are a helpful assistant for a branch manager.
-Your task is to analyze trader data and answer questions.
-The primary trader data for the branch is as follows:
---- TRADER DATA START ---
-${input.traderData}
---- TRADER DATA END ---
-
-Based on this trader data, please answer the following question: "${input.query}"`;
-
+    // The GOOGLE_API_KEY from .env (or Firebase environment variables) will be used by the googleAI() plugin.
+    console.log('[profitPartnerQueryFlow] Calling profitPartnerAnalysisPrompt with Genkit.');
+    // For debugging, log snippets of the input being passed to the prompt
+    console.debug('[profitPartnerQueryFlow] Prompt input (query snippet):', input.query ? input.query.substring(0,100) + (input.query.length > 100 ? '...' : '') : "N/A");
+    console.debug('[profitPartnerQueryFlow] Prompt input (traderData snippet):', input.traderData ? input.traderData.substring(0,100) + (input.traderData.length > 100 ? '...' : '') : "N/A");
     if (input.uploadedFileContent) {
-      promptText += `
-
-Additionally, consider the following uploaded customer data for context:
---- UPLOADED CUSTOMER DATA START ---
-${input.uploadedFileContent}
---- UPLOADED CUSTOMER DATA END ---`;
+      console.debug('[profitPartnerQueryFlow] Prompt input (uploadedFileContent snippet):', input.uploadedFileContent.substring(0,100) + (input.uploadedFileContent.length > 100 ? '...' : ''));
     }
 
-    promptText += `
-
-Provide a concise, informative, and helpful answer.`;
-
-    console.log('[profitPartnerQueryFlow] Sending constructed prompt to Gemini via Genkit.');
-    // console.debug('[profitPartnerQueryFlow] Prompt (snippet):', promptText.substring(0, 500) + (promptText.length > 500 ? '...' : '')); // For debugging if needed
 
     try {
-      // The 'ai' object from src/ai/genkit.ts is configured with googleAI() plugin
-      // and a default model (e.g., gemini-2.0-flash).
-      // The GOOGLE_API_KEY from the environment will be used by the plugin.
-      const response = await ai.generate({
-        prompt: promptText,
-        // You can add model configuration here if needed, e.g.,
-        // model: 'googleai/gemini-pro', // To use a different model than default
-        // config: {
-        //   temperature: 0.7,
-        //   safetySettings: [
-        //     { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-        //   ],
-        // }
-      });
+      const { output } = await profitPartnerAnalysisPrompt(input);
 
-      const answer = response.text; // Correct 1.x syntax
-      if (answer === undefined || answer === null || answer.trim() === "") {
-        console.error('[profitPartnerQueryFlow] Gemini response was empty or undefined.');
-        throw new Error('Received an empty or undefined response from the analysis service.');
+      if (!output || !output.answer || output.answer.trim() === "") {
+        console.error('[profitPartnerQueryFlow] Gemini response via prompt was empty, undefined, or answer field missing/empty.');
+        throw new Error('Received an empty or undefined answer from the analysis service.');
       }
-      console.log('[profitPartnerQueryFlow] Successfully received answer from Gemini.');
-      return { answer };
+      console.log('[profitPartnerQueryFlow] Successfully received answer from Gemini via prompt.');
+      return output;
 
     } catch (error) {
-      console.error('[profitPartnerQueryFlow] Error during call to Gemini via Genkit:', error);
-      let errorMessage = 'An error occurred while calling the analysis service.';
+      console.error('[profitPartnerQueryFlow] Error during call to Gemini via Genkit prompt:', error);
+      let detailedErrorMessage = 'An unexpected error occurred with the analysis service.';
       if (error instanceof Error) {
-        if (error.message.toLowerCase().includes('api key') || error.message.toLowerCase().includes('permission denied') || error.message.toLowerCase().includes('forbidden')) {
-          errorMessage = `Analysis service API key or permission issue: ${error.message}. Ensure GOOGLE_API_KEY is correctly set and valid in the environment.`;
+        if (error.message.toLowerCase().includes('api key not found') || error.message.toLowerCase().includes('permission denied') || error.message.toLowerCase().includes('api key invalid') || error.message.toLowerCase().includes('invalid api key')) {
+          detailedErrorMessage = `API Key Issue: ${error.message}. Ensure GOOGLE_API_KEY is correctly set in environment variables and is valid.`;
         } else if (error.message.toLowerCase().includes('quota')) {
-          errorMessage = `Analysis service quota exceeded: ${error.message}. Please check your API quota.`;
-        } else {
-          errorMessage = `Error calling analysis service: ${error.message}.`;
+          detailedErrorMessage = `Quota Exceeded: ${error.message}. Please check your Google AI/Gemini API quota.`;
+        } else if (error.message.toLowerCase().includes('model not found')) {
+           detailedErrorMessage = `Model Not Found: ${error.message}. The configured Gemini model might be unavailable or incorrect.`;
+        } else if (error.message.includes('failed to parse model output') || error.message.includes('output_schema')) {
+            detailedErrorMessage = `Model Output Parsing Error: ${error.message}. The model's response might not match the expected JSON format (e.g., {"answer": "..."}). Check the prompt instructions.`;
+        } else if (error.message.toLowerCase().includes('400') && error.message.toLowerCase().includes('candidate was blocked due to safety')) {
+            detailedErrorMessage = `Content Moderation: ${error.message}. The request or response was blocked by safety filters.`;
+        }
+         else {
+          detailedErrorMessage = error.message;
         }
       }
-      // Ensure a new error is thrown to propagate it, or handle as needed
-      throw new Error(`${errorMessage} Full details in server logs.`);
+      throw new Error(`Branch Booster analysis failed: ${detailedErrorMessage} Check server logs for full details.`);
     }
   }
 );
