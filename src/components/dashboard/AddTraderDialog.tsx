@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { TraderForm, traderFormSchema } from "./TraderForm";
 import type { z } from "zod";
