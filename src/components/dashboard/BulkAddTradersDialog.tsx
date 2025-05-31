@@ -310,27 +310,45 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     if (validTraders.length > 0) {
       try {
         const result = await onBulkAddTraders(branchId, validTraders);
-        if (result) {
+        if (result !== null) { // Server action might return empty array on success (e.g. all duplicates already in DB)
           newTradersAddedCount = result.length;
         } else {
-           throw new Error("Server action returned null for bulk add.");
+          // result is null, indicating a server-side failure.
+          // The server action (bulkAddTradersAction) should have logged the specific Firestore error.
+          console.error("Bulk add traders action returned null, indicating a server-side failure.");
+          toast({
+            variant: "destructive",
+            title: "Bulk Upload Failed",
+            description: "The server encountered an error during the bulk upload. Some or all traders may not have been added. Please check server logs for details.",
+            duration: 8000,
+          });
+          setIsLoading(false);
+          // Do not close the dialog or clear the file, to allow user to retry or inspect.
+          return; 
         }
       } catch (error) {
-        console.error("Failed to bulk add traders:", error);
+        // This catch is for truly unexpected errors during the call to onBulkAddTraders itself
+        // (e.g. network issue before server action is reached, or unhandled client-side issue)
+        console.error("Unexpected error during bulk add traders operation:", error);
         toast({
           variant: "destructive",
           title: "Upload Error",
-          description: `An error occurred: ${error instanceof Error ? error.message : "Unknown error"}`,
+          description: `An unexpected client error occurred: ${error instanceof Error ? error.message : "Unknown error"}`,
         });
         setIsLoading(false);
         return;
       }
     }
     
+    // Proceed with summary toast if we haven't returned due to an error
     let summaryMessages: string[] = [];
     if (newTradersAddedCount > 0) {
       summaryMessages.push(`${newTradersAddedCount} new trader(s) successfully added.`);
+    } else if (validTraders.length > 0 && newTradersAddedCount === 0) {
+      // This case means valid traders were sent, but none were added (e.g., all were duplicates handled by DB)
+      summaryMessages.push(`No new traders were added. They might already exist in the database.`);
     }
+    
     if (skippedCount > 0) {
       summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates (already in system or within CSV).`);
       if (duplicatePhonesInCsv.size > 0) {
@@ -350,6 +368,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, 
         });
     } else if (validTraders.length === 0 && skippedCount === 0) {
+        // This case should have been caught earlier if fileContent was not empty
         toast({
             title: "No Action Taken",
             description: "No new traders to add and no duplicates found to skip. The file might have been empty or contained no processable data.",
@@ -384,7 +403,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             The system matches headers case-insensitively and ignores leading/trailing spaces. 
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
           </DialogDescription>
-          {/* Moved the <strong> and <ol> into a separate div below DialogDescription */}
           <div className="text-sm text-muted-foreground mt-2 text-left"> 
             <strong>If fields like 'Owner Name', 'Main Category', or 'Workday Timing' are not loading:</strong>
             <ol className="list-decimal list-inside pl-4 text-xs mt-1">
