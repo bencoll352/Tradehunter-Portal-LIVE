@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,18 +30,16 @@ export const traderFormSchema = z.object({
   totalSales: z.coerce.number().min(0, { message: "Total sales must be a positive number." }),
   tradesMade: z.coerce.number().int().min(0, { message: "Trades made (Reviews) must be a positive integer." }),
   status: z.enum(["Active", "Inactive"]),
-  description: z.string().optional(),
-  rating: z.coerce.number().min(0).max(5).optional().nullable(), // Allow 0-5, and allow null for unrated
+  description: z.string().optional().nullable(),
+  rating: z.coerce.number().min(0).max(5).optional().nullable(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')).nullable(),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   mainCategory: z.string().optional().nullable(),
   ownerName: z.string().optional().nullable(),
   ownerProfileLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')).nullable(),
-  categories: z.string().optional().nullable(), // Storing as single string
+  categories: z.string().optional().nullable(), 
   workdayTiming: z.string().optional().nullable(),
-  // lastActivity is typically system-managed, not part of user form
-  // closedOn and reviewKeywords are not in the table overview, so not added here for now
 });
 
 interface TraderFormProps {
@@ -58,16 +57,16 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
       totalSales: defaultValues?.totalSales || 0,
       tradesMade: defaultValues?.tradesMade || 0,
       status: defaultValues?.status || "Active",
-      description: defaultValues?.description || "",
-      rating: defaultValues?.rating ?? null, // Use null for empty optional number
-      website: defaultValues?.website || "",
-      phone: defaultValues?.phone || "",
-      address: defaultValues?.address || "",
-      mainCategory: defaultValues?.mainCategory || "",
-      ownerName: defaultValues?.ownerName || "",
-      ownerProfileLink: defaultValues?.ownerProfileLink || "",
-      categories: defaultValues?.categories || "",
-      workdayTiming: defaultValues?.workdayTiming || "",
+      description: defaultValues?.description ?? null,
+      rating: defaultValues?.rating ?? null, 
+      website: defaultValues?.website ?? null,
+      phone: defaultValues?.phone ?? null,
+      address: defaultValues?.address ?? null,
+      mainCategory: defaultValues?.mainCategory ?? null,
+      ownerName: defaultValues?.ownerName ?? null,
+      ownerProfileLink: defaultValues?.ownerProfileLink ?? null,
+      categories: defaultValues?.categories ?? null,
+      workdayTiming: defaultValues?.workdayTiming ?? null,
     },
   });
 
@@ -288,3 +287,4 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
     </Form>
   );
 }
+
