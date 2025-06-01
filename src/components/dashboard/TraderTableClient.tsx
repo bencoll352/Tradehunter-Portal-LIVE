@@ -39,7 +39,7 @@ interface TraderTableClientProps {
   onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<void>;
   onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>;
   onDelete: (traderId: string) => Promise<boolean>;
-  onBulkAdd: (traders: ParsedTraderData[]) => Promise<Trader[] | null>;
+  onBulkAdd: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
 }
 
 const CATEGORY_FILTERS = [
@@ -79,13 +79,12 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
 
   useEffect(() => {
     setTraders(initialTraders);
-    setCurrentPage(1); // Reset page when initial traders change
+    setCurrentPage(1); 
   }, [initialTraders]);
 
   const filteredTraders = useMemo(() => {
     let searchableTraders = [...traders];
     
-    // Category Filter
     if (activeCategoryFilter && activeCategoryFilter !== CATEGORY_FILTERS[0].label) {
       const selectedFilter = CATEGORY_FILTERS.find(f => f.label === activeCategoryFilter);
       if (selectedFilter && selectedFilter.keywords.length > 0) {
@@ -99,7 +98,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
       }
     }
 
-    // Search Term Filter
     if (searchTerm) {
       const searchTermLower = searchTerm.toLowerCase();
       searchableTraders = searchableTraders.filter(trader =>
@@ -112,7 +110,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
       );
     }
 
-    // Sorting
     if (sortConfig !== null) {
       searchableTraders.sort((a, b) => {
         const valA = a[sortConfig.key];
@@ -128,7 +125,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
         if (typeof valA === 'number' && typeof valB === 'number') {
           return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
-        // Date sorting for lastActivity
         if (sortConfig.key === 'lastActivity') {
             const dateA = parseISO(valA as string).getTime();
             const dateB = parseISO(valB as string).getTime();
@@ -205,10 +201,11 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     }
   };
 
-  const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]) => {
-    const newTraders = await onBulkAdd(tradersToCreate);
-    // Toasting handled in BulkAddTradersDialog
-    return newTraders;
+  const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
+    const result = await onBulkAdd(tradersToCreate);
+    // Toasting and success/failure handling (like reloading table) is now primarily managed by BulkAddTradersDialog
+    // and DashboardClientPageContent based on the full result object.
+    return result;
   };
 
   const SortableHeader = ({ sortKey, label }: { sortKey: SortKey, label: string }) => (
@@ -430,4 +427,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-

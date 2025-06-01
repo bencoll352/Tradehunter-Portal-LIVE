@@ -3,8 +3,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import type { BranchId, Trader, ParsedTraderData } from "@/types";
-import { VALID_BRANCH_IDS } from "@/types"; // Import VALID_BRANCH_IDS
-// Removed direct import of getTradersByBranch from mock-data
+import { VALID_BRANCH_IDS } from "@/types"; 
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
@@ -14,7 +13,7 @@ import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { MiniDashboardStats } from './MiniDashboardStats';
 import { parseISO } from 'date-fns';
-import { getTradersAction } from '@/app/(app)/dashboard/actions'; // Import the new action
+import { getTradersAction } from '@/app/(app)/dashboard/actions'; 
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -22,7 +21,7 @@ interface DashboardClientPageContentProps {
   addTraderAction: (branchId: BranchId, values: TraderFormValues) => Promise<Trader | null>;
   updateTraderAction: (branchId: BranchId, traderId: string, values: TraderFormValues) => Promise<Trader | null>;
   deleteTraderAction: (branchId: BranchId, traderId: string) => Promise<boolean>;
-  bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>;
+  bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
 }
 
 export function DashboardClientPageContent({
@@ -34,7 +33,7 @@ export function DashboardClientPageContent({
   const [branchId, setBranchId] = useState<BranchId | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [keyForTable, setKeyForTable] = useState(0); // Used to force re-render of table
+  const [keyForTable, setKeyForTable] = useState(0); 
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,9 +46,8 @@ export function DashboardClientPageContent({
             variant: "destructive",
             title: "Invalid Branch ID Detected",
             description: `The Branch ID "${storedBranchId}" stored in your browser is no longer valid. This may cause errors. Please log out and log back in using a current valid ID (e.g., PURLEY, BRANCH_B, BRANCH_C, BRANCH_D).`,
-            duration: 15000 // Longer duration for this important message
+            duration: 15000 
           });
-          // Continue to set branchId to allow dashboard to load, but operations might fail
         }
         setBranchId(storedBranchId);
 
@@ -60,7 +58,6 @@ export function DashboardClientPageContent({
             if (fetchedTraders) {
               setTraders(fetchedTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
             } else {
-              // Only show "Could not load" if branch ID was considered valid or no specific invalid ID toast was shown
               if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
                 setTraders([]);
                 toast({ variant: "destructive", title: "Error", description: "Could not load trader data." });
@@ -76,24 +73,22 @@ export function DashboardClientPageContent({
             setIsLoading(false);
           }
         } else {
-          setIsLoading(false); // No branchId, not loading
+          setIsLoading(false); 
         }
       }
     };
     initializeDashboard();
-  }, [toast]); // Added toast to dependency array as it's used in the effect
+  }, [toast]); 
   
-  // This useEffect is to refresh traders if branchId somehow changes after initial load,
-  // or if we need a general re-fetch mechanism later.
   useEffect(() => {
     const refreshTradersForBranch = async () => {
-      if (branchId && VALID_BRANCH_IDS.includes(branchId)) { // Only refresh if branchId is valid
+      if (branchId && VALID_BRANCH_IDS.includes(branchId)) { 
         setIsLoading(true);
         try {
           const fetchedTraders = await getTradersAction(branchId);
           if (fetchedTraders) {
             setTraders(fetchedTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-            setKeyForTable(prev => prev + 1); 
+            // setKeyForTable(prev => prev + 1); // keyForTable is incremented by operations now
           } else {
              toast({ variant: "destructive", title: "Error", description: `Could not refresh traders for ${branchId}.` });
           }
@@ -104,14 +99,16 @@ export function DashboardClientPageContent({
           setIsLoading(false);
         }
       } else if (branchId && !VALID_BRANCH_IDS.includes(branchId)) {
-        // If branchId is set but invalid, don't attempt to refresh, rely on the initial toast.
-        // Clear traders if an invalid ID is present to avoid operating on stale/wrong data.
         setTraders([]);
         setIsLoading(false);
       }
     };
-    refreshTradersForBranch();
-  }, [branchId, keyForTable, toast]); // Added toast to dependency array
+    // No, this refreshTradersForBranch should be triggered by keyForTable, not branchId, to avoid loop
+    // if (keyForTable > 0) refreshTradersForBranch(); // Only call if keyForTable changed
+    // The above comment is wrong. It should depend on branchId to reload if branchId changes,
+    // and keyForTable is explicitly used to trigger re-fetches after mutations.
+     refreshTradersForBranch();
+  }, [branchId, keyForTable, toast]); 
 
   const liveTradersCount = useMemo(() => {
     return traders.filter(t => t.status === 'Active').length;
@@ -173,16 +170,17 @@ export function DashboardClientPageContent({
     return success;
   };
 
-  const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]) => {
+  const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
     if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
       toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk add traders due to an invalid or missing Branch ID. Please re-login." });
-      return null;
+      return { data: null, error: "Invalid or missing Branch ID." };
     }
-    const newTraders = await bulkAddTradersAction(branchId, tradersToCreate);
-    if (newTraders && newTraders.length > 0) {
+    const result = await bulkAddTradersAction(branchId, tradersToCreate);
+    if (result.data && result.data.length > 0) { // Check result.data
       setKeyForTable(prev => prev + 1);
     } 
-    return newTraders;
+    // Toasting for success/failure/partial will be handled by BulkAddTradersDialog based on the full result object
+    return result;
   };
 
   if (isLoading && !traders.length && (!branchId || VALID_BRANCH_IDS.includes(branchId))) { 
@@ -225,7 +223,7 @@ export function DashboardClientPageContent({
                   onAdd={handleAdd}
                   onUpdate={handleUpdate}
                   onDelete={handleDelete}
-                  onBulkAdd={handleBulkAdd}
+                  onBulkAdd={handleBulkAdd} 
                 />
               )}
             </CardContent>
@@ -239,4 +237,3 @@ export function DashboardClientPageContent({
     </div>
   );
 }
-

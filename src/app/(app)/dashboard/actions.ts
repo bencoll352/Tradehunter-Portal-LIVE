@@ -27,7 +27,7 @@ export async function addTraderAction(branchId: BranchId, values: z.infer<typeof
   try {
     const newTraderData: Omit<Trader, 'id' | 'lastActivity'> = {
       name: values.name,
-      branchId, // branchId is already part of the type Omit<Trader, 'id' | 'lastActivity'>
+      branchId, 
       totalSales: values.totalSales,
       tradesMade: values.tradesMade,
       status: values.status,
@@ -44,18 +44,15 @@ export async function addTraderAction(branchId: BranchId, values: z.infer<typeof
       closedOn: undefined, 
       reviewKeywords: undefined,
     };
-    // addTraderToDb now expects branchId as a separate argument if not already in traderData
     return await addTraderToDb(newTraderData, branchId);
   } catch (error) {
     console.error("Failed to add trader:", error);
-    // Consider re-throwing or returning a more specific error object
     return null;
   }
 }
 
 export async function updateTraderAction(branchId: BranchId, traderId: string, values: z.infer<typeof traderFormSchema>): Promise<Trader | null> {
   try {
-    // Fetch the existing trader to ensure we have all fields, especially branchId and id
     const existingTrader = await dbGetTraderById(traderId, branchId);
     
     if (!existingTrader) {
@@ -64,7 +61,7 @@ export async function updateTraderAction(branchId: BranchId, traderId: string, v
     }
 
     const traderToUpdate: Trader = {
-      ...existingTrader, // Start with existing data
+      ...existingTrader, 
       name: values.name,
       totalSales: values.totalSales,
       tradesMade: values.tradesMade,
@@ -79,10 +76,9 @@ export async function updateTraderAction(branchId: BranchId, traderId: string, v
       ownerProfileLink: values.ownerProfileLink ?? existingTrader.ownerProfileLink,
       categories: values.categories ?? existingTrader.categories,
       workdayTiming: values.workdayTiming ?? existingTrader.workdayTiming,
-      // id and branchId come from existingTrader, lastActivity will be set by updateTraderInDb
       id: existingTrader.id,
       branchId: existingTrader.branchId,
-      lastActivity: existingTrader.lastActivity, // This will be overridden by the service
+      lastActivity: existingTrader.lastActivity, 
     };
     return await updateTraderInDb(traderToUpdate);
   } catch (error) {
@@ -100,11 +96,13 @@ export async function deleteTraderAction(branchId: BranchId, traderId: string): 
   }
 }
 
-export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: ParsedTraderData[]): Promise<Trader[] | null> {
+export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> {
   try {
-    return await bulkAddTradersToDb(tradersToCreate, branchId);
+    const data = await bulkAddTradersToDb(tradersToCreate, branchId);
+    return { data, error: null };
   } catch (error) {
-    console.error("Failed to bulk add traders:", error);
-    return null;
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error during bulk add.";
+    console.error("Failed to bulk add traders:", errorMessage, error); // Keep detailed server log
+    return { data: null, error: errorMessage };
   }
 }

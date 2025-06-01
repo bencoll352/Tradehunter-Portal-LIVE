@@ -23,8 +23,8 @@ import { normalizePhoneNumber } from "@/lib/utils";
 
 interface BulkAddTradersDialogProps {
   branchId: BranchId;
-  existingTraders: Trader[]; // All traders in the current branch
-  onBulkAddTraders: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<Trader[] | null>;
+  existingTraders: Trader[];
+  onBulkAddTraders: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
 }
 
 const EXPECTED_HEADERS = [
@@ -268,7 +268,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       tradersToProcess.push(trader);
     }
 
-    // Duplicate checking
     const validTraders: ParsedTraderData[] = [];
     const processedPhoneNumbersInCsv = new Set<string>();
     const duplicatePhonesInCsv = new Set<string>();
@@ -338,29 +337,28 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     if (validTraders.length > 0) {
       try {
         const result = await onBulkAddTraders(branchId, validTraders);
-        if (result !== null) { 
-          newTradersAddedCount = result.length;
-        } else {
-          // result is null, indicating a server-side failure.
-          // The server action (bulkAddTradersAction) should have logged the specific Firestore error.
-          console.error("Bulk add traders action returned null, indicating a server-side failure.");
+        
+        if (result.error) {
+          // Server action returned an error
+          console.error("Server action failed during bulk add:", result.error);
           toast({
             variant: "destructive",
             title: "Bulk Upload Failed",
-            description: "The server encountered an error during the bulk upload. Some or all traders may not have been added. Please check server logs for details.",
+            description: `Server error: ${result.error}. Check server logs for more details.`,
             duration: 8000,
           });
           setIsLoading(false);
-          // Do not close the dialog or clear the file, to allow user to retry or inspect.
           return; 
         }
+        
+        if (result.data) { 
+          newTradersAddedCount = result.data.length;
+        }
       } catch (error) {
-        // This catch is for truly unexpected errors during the call to onBulkAddTraders itself
-        // (e.g. network issue before server action is reached, or unhandled client-side issue)
-        console.error("Unexpected error during bulk add traders operation:", error);
+        console.error("Unexpected client error during bulk add traders operation:", error);
         toast({
           variant: "destructive",
-          title: "Upload Error",
+          title: "Client Upload Error",
           description: `An unexpected client error occurred: ${error instanceof Error ? error.message : "Unknown error"}`,
         });
         setIsLoading(false);
@@ -368,13 +366,11 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }
     
-    // Proceed with summary toast if we haven't returned due to an error
     let summaryMessages: string[] = [];
     if (newTradersAddedCount > 0) {
       summaryMessages.push(`${newTradersAddedCount} new trader(s) successfully added.`);
     } else if (validTraders.length > 0 && newTradersAddedCount === 0) {
-      // This case means valid traders were sent, but none were added (e.g., all were duplicates handled by DB)
-      summaryMessages.push(`No new traders were added. They might already exist in the database.`);
+      summaryMessages.push(`No new traders were added. They might already exist in the database or the list was empty after filtering.`);
     }
     
     if (skippedCount > 0) {
@@ -396,7 +392,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, 
         });
     } else if (validTraders.length === 0 && skippedCount === 0) {
-        // This case should have been caught earlier if fileContent was not empty
         toast({
             title: "No Action Taken",
             description: "No new traders to add and no duplicates found to skip. The file might have been empty or contained no processable data.",
@@ -480,4 +475,3 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
-
