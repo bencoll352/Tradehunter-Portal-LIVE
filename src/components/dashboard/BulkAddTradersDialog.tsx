@@ -351,7 +351,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
               <p>No valid trader data found after parsing.</p>
               <ul className="list-disc list-inside text-xs mt-1">
                 <li>Ensure CSV has a 'Name' header and data for each trader.</li>
-                <li>Check browser console (F12 > Console) for specific parsing warnings (e.g., invalid dates, numbers).</li>
+                <li>Check browser console (F12 &gt; Console) for specific parsing warnings (e.g., invalid dates, numbers).</li>
                 <li>Remember to double-quote fields containing commas (e.g., in Description, Address, Categories).</li>
               </ul>
             </div>
