@@ -59,16 +59,19 @@ const determineLastActivityString = (activity: any): string => {
   }
   if (typeof activity === 'string') {
     try {
-      // Attempt to parse to ensure it's a valid date string, then re-format to ISO
-      // This helps normalize various string date formats if they sneak in, though ISO is preferred.
       return new Date(activity).toISOString();
     } catch (e) {
-      // If parsing fails, default
       console.warn(`Invalid date string for lastActivity: ${activity}. Defaulting.`);
       return new Date(0).toISOString();
     }
   }
-  // Default for null, undefined, or other unexpected types from Firestore
+  if (activity && typeof activity.toDate === 'function') { // Fallback for Firestore-like timestamp objects
+    try {
+      return activity.toDate().toISOString();
+    } catch(e) {
+       // ignore
+    }
+  }
   console.warn(`Unexpected lastActivity type: ${typeof activity}, value: ${activity}. Defaulting.`);
   return new Date(0).toISOString(); 
 };
@@ -83,7 +86,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
     branchId: data.branchId ?? 'UNKNOWN_BRANCH',
     totalSales: data.totalSales ?? 0,
     tradesMade: data.tradesMade ?? 0,
-    status: data.status ?? 'New Lead', // Default to New Lead if status is missing
+    status: data.status ?? 'New Lead', 
     lastActivity: determineLastActivityString(data.lastActivity),
     description: data.description ?? null,
     rating: data.rating ?? null,
@@ -108,17 +111,24 @@ export async function getTradersByBranch(branchId: BranchId): Promise<Trader[]> 
     let querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
+      // If the branch is 'PURLEY' and it's empty, do not seed.
+      // This is to protect live data that might have been manually added.
+      if (branchId === 'PURLEY') {
+        console.log(`No traders found for branch PURLEY. Seeding is intentionally skipped for this branch to preserve any manually added live data. If data is expected, please check Firestore directly.`);
+        return []; // Return empty, do not proceed to seed for PURLEY.
+      }
+
       console.log(`No traders found for branch ${branchId}, seeding initial data...`);
       const seedDataForBranch = INITIAL_SEED_TRADERS_DATA.filter(t => t.branchId === branchId);
       if (seedDataForBranch.length > 0) {
         const batch = writeBatch(db);
         seedDataForBranch.forEach(traderSeedData => {
           const traderDocRef = doc(tradersCollectionRef); 
-          batch.set(traderDocRef, traderSeedData); // traderSeedData is already cleaned
+          batch.set(traderDocRef, traderSeedData); 
         });
         await batch.commit();
         console.log(`Seeded ${seedDataForBranch.length} traders for branch ${branchId}.`);
-        querySnapshot = await getDocs(q);
+        querySnapshot = await getDocs(q); // Re-fetch after seeding
       } else {
         console.log(`No seed data configured for branch ${branchId}.`);
         return [];
@@ -221,7 +231,7 @@ export async function bulkAddTradersToDb(
       branchId: branchId,
       totalSales: parsedData.totalSales ?? 0,
       tradesMade: parsedData.tradesMade ?? 0,
-      status: parsedData.status ?? 'New Lead', // Default to New Lead
+      status: parsedData.status ?? 'New Lead', 
       lastActivity: parsedData.lastActivity || new Date().toISOString(),
       description: parsedData.description,
       rating: parsedData.rating,
@@ -250,4 +260,3 @@ export async function bulkAddTradersToDb(
     throw error; 
   }
 }
-
