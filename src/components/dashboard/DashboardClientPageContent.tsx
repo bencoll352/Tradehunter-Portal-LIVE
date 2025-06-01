@@ -18,9 +18,9 @@ import { getTradersAction } from '@/app/(app)/dashboard/actions';
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
 interface DashboardClientPageContentProps {
-  addTraderAction: (branchId: BranchId, values: TraderFormValues) => Promise<Trader | null>;
-  updateTraderAction: (branchId: BranchId, traderId: string, values: TraderFormValues) => Promise<Trader | null>;
-  deleteTraderAction: (branchId: BranchId, traderId: string) => Promise<boolean>;
+  addTraderAction: (branchId: BranchId, values: TraderFormValues) => Promise<{ data: Trader | null; error: string | null }>;
+  updateTraderAction: (branchId: BranchId, traderId: string, values: TraderFormValues) => Promise<{ data: Trader | null; error: string | null }>;
+  deleteTraderAction: (branchId: BranchId, traderId: string) => Promise<{ success: boolean; error: string | null }>;
   bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
 }
 
@@ -60,14 +60,14 @@ export function DashboardClientPageContent({
             } else {
               if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
                 setTraders([]);
-                toast({ variant: "destructive", title: "Error", description: "Could not load trader data." });
+                toast({ variant: "destructive", title: "Error Loading Data", description: "Could not load trader data. The server might be busy or there's a configuration issue." });
               }
             }
           } catch (error) {
             console.error("Error fetching initial traders:", error);
             setTraders([]);
              if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
-              toast({ variant: "destructive", title: "Error", description: "Failed to load trader data." });
+              toast({ variant: "destructive", title: "Error Loading Data", description: "Failed to load trader data due to an unexpected error." });
             }
           } finally {
             setIsLoading(false);
@@ -88,13 +88,12 @@ export function DashboardClientPageContent({
           const fetchedTraders = await getTradersAction(branchId);
           if (fetchedTraders) {
             setTraders(fetchedTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
-            // setKeyForTable(prev => prev + 1); // keyForTable is incremented by operations now
           } else {
-             toast({ variant: "destructive", title: "Error", description: `Could not refresh traders for ${branchId}.` });
+             toast({ variant: "destructive", title: "Error Refreshing Data", description: `Could not refresh traders for ${branchId}.` });
           }
         } catch (error) {
           console.error(`Error refreshing traders for ${branchId}:`, error);
-          toast({ variant: "destructive", title: "Error", description: "Failed to refresh trader data." });
+          toast({ variant: "destructive", title: "Error Refreshing Data", description: "Failed to refresh trader data." });
         } finally {
           setIsLoading(false);
         }
@@ -103,10 +102,6 @@ export function DashboardClientPageContent({
         setIsLoading(false);
       }
     };
-    // No, this refreshTradersForBranch should be triggered by keyForTable, not branchId, to avoid loop
-    // if (keyForTable > 0) refreshTradersForBranch(); // Only call if keyForTable changed
-    // The above comment is wrong. It should depend on branchId to reload if branchId changes,
-    // and keyForTable is explicitly used to trigger re-fetches after mutations.
      refreshTradersForBranch();
   }, [branchId, keyForTable, toast]); 
 
@@ -128,46 +123,52 @@ export function DashboardClientPageContent({
     }).length;
   }, [traders]);
 
-  const handleAdd = async (values: TraderFormValues): Promise<void> => {
+  const handleAdd = async (values: TraderFormValues): Promise<boolean> => {
     if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
       toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot add trader due to an invalid or missing Branch ID. Please re-login." });
-      return;
+      return false;
     }
-    const newTrader = await addTraderAction(branchId, values);
-    if (newTrader) {
+    const result = await addTraderAction(branchId, values);
+    if (result.data) {
       setKeyForTable(prev => prev + 1); 
-      toast({ title: "Success", description: `${newTrader.name} added successfully.`});
+      toast({ title: "Success", description: `${result.data.name} added successfully.`});
+      return true;
     } else {
-      toast({ variant: "destructive", title: "Error", description: "Failed to add trader." });
+      toast({ variant: "destructive", title: "Error Adding Trader", description: result.error || "Failed to add trader." });
+      return false;
     }
   };
 
-  const handleUpdate = async (traderId: string, values: TraderFormValues): Promise<void> => {
+  const handleUpdate = async (traderId: string, values: TraderFormValues): Promise<boolean> => {
      if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
       toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot update trader due to an invalid or missing Branch ID. Please re-login." });
-      return;
+      return false;
     }
-    const updatedTrader = await updateTraderAction(branchId, traderId, values);
-    if (updatedTrader) {
+    const result = await updateTraderAction(branchId, traderId, values);
+    if (result.data) {
       setKeyForTable(prev => prev + 1);
-      toast({ title: "Success", description: `${updatedTrader.name} updated successfully.`});
+      toast({ title: "Success", description: `${result.data.name} updated successfully.`});
+      return true;
     } else {
-      toast({ variant: "destructive", title: "Error", description: "Failed to update trader." });
+      toast({ variant: "destructive", title: "Error Updating Trader", description: result.error || "Failed to update trader." });
+      return false;
     }
   };
 
-  const handleDelete = async (traderId: string) => {
+  const handleDelete = async (traderId: string): Promise<boolean> => {
      if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
       toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot delete trader due to an invalid or missing Branch ID. Please re-login." });
       return false;
     }
-    const success = await deleteTraderAction(branchId, traderId);
-    if (success) {
+    const result = await deleteTraderAction(branchId, traderId);
+    if (result.success) {
       setKeyForTable(prev => prev + 1);
+      // Toast for delete success/failure is handled by DeleteTraderDialog based on the return value.
+      // Toasting here would be redundant.
     } else {
-       toast({ variant: "destructive", title: "Error", description: "Failed to delete trader from server." });
+       toast({ variant: "destructive", title: "Error Deleting Trader", description: result.error || "Failed to delete trader from server." });
     }
-    return success;
+    return result.success;
   };
 
   const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
@@ -176,10 +177,9 @@ export function DashboardClientPageContent({
       return { data: null, error: "Invalid or missing Branch ID." };
     }
     const result = await bulkAddTradersAction(branchId, tradersToCreate);
-    if (result.data && result.data.length > 0) { // Check result.data
+    if (result.data && result.data.length > 0) { 
       setKeyForTable(prev => prev + 1);
     } 
-    // Toasting for success/failure/partial will be handled by BulkAddTradersDialog based on the full result object
     return result;
   };
 

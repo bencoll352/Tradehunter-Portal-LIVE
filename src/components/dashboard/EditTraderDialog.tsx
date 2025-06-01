@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,23 +15,35 @@ import { TraderForm, traderFormSchema } from "./TraderForm";
 import type { z } from "zod";
 import type { Trader } from "@/types";
 import { Pencil } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditTraderDialogProps {
   trader: Trader;
-  onUpdateTrader: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>;
+  onUpdateTrader: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>; // Changed from Promise<void>
 }
 
 export function EditTraderDialog({ trader, onUpdateTrader }: EditTraderDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (values: z.infer<typeof traderFormSchema>) => {
     setIsLoading(true);
     try {
-      await onUpdateTrader(trader.id, values);
-      setOpen(false); // Close dialog on success
+      const success = await onUpdateTrader(trader.id, values);
+      if (success) {
+        // Success toast is handled by DashboardClientPageContent
+        setOpen(false); 
+      } else {
+        // Error toast is handled by DashboardClientPageContent, dialog remains open
+      }
     } catch (error) {
-      console.error("Failed to update trader:", error);
+      console.error("Unexpected error in EditTraderDialog submit:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected client-side error occurred while updating the trader.",
+      });
     } finally {
       setIsLoading(false);
     }

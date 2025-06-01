@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { normalizePhoneNumber } from "@/lib/utils";
 
 interface AddTraderDialogProps {
-  onAddTrader: (values: z.infer<typeof traderFormSchema>) => Promise<void>;
+  onAddTrader: (values: z.infer<typeof traderFormSchema>) => Promise<boolean>; // Changed from Promise<void>
   branchId: string;
   existingTraders: Trader[];
 }
@@ -49,15 +49,21 @@ export function AddTraderDialog({ onAddTrader, branchId, existingTraders }: AddT
     }
 
     try {
-      await onAddTrader(values);
-      // Success toast is handled by DashboardClientPageContent after onAddTrader completes
-      setOpen(false); 
+      const success = await onAddTrader(values);
+      if (success) {
+        // Success toast is handled by DashboardClientPageContent
+        setOpen(false); 
+      } else {
+        // Error toast is handled by DashboardClientPageContent, dialog remains open
+      }
     } catch (error) {
-      console.error("Failed to add trader:", error);
+      // This catch block might not be strictly necessary if DashboardClientPageContent handles all errors
+      // from onAddTrader, but kept for robustness.
+      console.error("Unexpected error in AddTraderDialog submit:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An unexpected error occurred while adding the trader.",
+        description: "An unexpected client-side error occurred while adding the trader.",
       });
     } finally {
       setIsLoading(false);

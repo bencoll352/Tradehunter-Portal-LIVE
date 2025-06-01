@@ -36,8 +36,8 @@ interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BranchId;
   allBranchTraders: Trader[]; 
-  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<void>;
-  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<void>;
+  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<boolean>; // Changed from Promise<void>
+  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>; // Changed from Promise<void>
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
 }
@@ -118,6 +118,10 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
         if (valA === undefined && valB === undefined) return 0;
         if (valA === undefined) return sortConfig.direction === 'ascending' ? -1 : 1;
         if (valB === undefined) return sortConfig.direction === 'ascending' ? 1 : -1;
+        
+        if (valA === null && valB === null) return 0;
+        if (valA === null) return sortConfig.direction === 'ascending' ? -1 : 1;
+        if (valB === null) return sortConfig.direction === 'ascending' ? 1 : -1;
 
         if (typeof valA === 'string' && typeof valB === 'string') {
           return sortConfig.direction === 'ascending' ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -131,6 +135,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
             return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
         }
         
+        // Fallback for other types, though primarily string/number/date are sorted
         if (valA < valB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -163,12 +168,12 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     setCurrentPage(1);
   };
   
-  const handleAddTrader = async (values: z.infer<typeof traderFormSchema>): Promise<void> => {
-    await onAdd(values);
+  const handleAddTrader = async (values: z.infer<typeof traderFormSchema>): Promise<boolean> => {
+    return await onAdd(values);
   };
 
-  const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>): Promise<void> => {
-    await onUpdate(traderId, values);
+  const handleUpdateTrader = async (traderId: string, values: z.infer<typeof traderFormSchema>): Promise<boolean> => {
+    return await onUpdate(traderId, values);
   };
 
   const handleStatusToggle = async (trader: Trader) => {
@@ -189,22 +194,23 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
       categories: trader.categories || "",
       workdayTiming: trader.workdayTiming || "",
     };
+    // onUpdate now returns boolean, but this specific toggle doesn't directly use the boolean for UI change
+    // The page content component handles the toast and refresh upon successful onUpdate.
     await onUpdate(trader.id, formValues);
   };
 
-  const handleDeleteTrader = async (traderId: string): Promise<void> => {
+  const handleDeleteTrader = async (traderId: string): Promise<boolean> => {
     const success = await onDelete(traderId);
     if (success) {
       toast({ title: "Success", description: "Trader deleted successfully." });
     } else {
-      toast({ variant: "destructive", title: "Error", description: "Failed to delete trader." });
+      // Error toast is handled by DashboardClientPageContent or DeleteTraderDialog
     }
+    return success; 
   };
 
   const handleBulkAddTraders = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
     const result = await onBulkAdd(tradersToCreate);
-    // Toasting and success/failure handling (like reloading table) is now primarily managed by BulkAddTradersDialog
-    // and DashboardClientPageContent based on the full result object.
     return result;
   };
 

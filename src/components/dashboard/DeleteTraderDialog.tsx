@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,23 +15,36 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface DeleteTraderDialogProps {
   traderName: string;
-  onDeleteTrader: () => Promise<void>;
+  onDeleteTrader: () => Promise<boolean>; // Changed from Promise<void>
 }
 
 export function DeleteTraderDialog({ traderName, onDeleteTrader }: DeleteTraderDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleDelete = async () => {
     setIsLoading(true);
     try {
-      await onDeleteTrader();
-      setOpen(false);
+      const success = await onDeleteTrader();
+      if (success) {
+        // Success toast is handled by TraderTableClient (which calls onDelete from DashboardClientPageContent)
+        setOpen(false);
+      } else {
+        // Error toast handled by DashboardClientPageContent, dialog might remain open or user retries.
+        // No specific toast here to avoid duplicates if parent handles it.
+      }
     } catch (error) {
-      console.error("Failed to delete trader:", error);
+      console.error("Unexpected error in DeleteTraderDialog handleDelete:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected client-side error occurred while deleting the trader.",
+      });
     } finally {
       setIsLoading(false);
     }
