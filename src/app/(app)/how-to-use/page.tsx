@@ -6,44 +6,49 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Fingerprint } from "lucide-react";
 
 const faqs = [
   {
     value: "item-1",
     question: "How do I log in?",
-    answer: "Navigate to the login page and enter your unique Branch ID. Currently, valid demo IDs are PURLEY, BRANCH_B, BRANCH_C, or BRANCH_D.",
+    answer: "Navigate to the login page and enter your unique Branch ID. Valid demo IDs are PURLEY, BRANCH_B, BRANCH_C, or BRANCH_D.",
     icon: <HelpCircle className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-2",
     question: "How can I view trader data?",
-    answer: "Once logged in, the dashboard will display a table of traders specific to your branch. You can sort columns by clicking on their headers and paginate through the data if there are many entries.",
+    answer: "Once logged in, the dashboard will display a table of traders specific to your branch. You can sort columns by clicking on their headers, search by keywords, filter by category, and paginate through the data (20 traders per page). The dashboard also shows mini-stats like Live and Recently Active traders.",
     icon: <BarChart2 className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-3",
     question: "How do I add, edit, or delete a trader?",
-    answer: "On the dashboard, use the 'Add New Trader' button. To edit or delete, use the respective icons (pencil for edit, trash can for delete) in the 'Actions' column of the trader table.",
+    answer: "On the dashboard, use the 'Add New Trader' button. The form includes comprehensive fields. To edit or delete, use the respective icons (pencil for edit, trash can for delete) in the 'Actions' column of the trader table. When adding manually, the system will warn you if a trader with the same phone number already exists.",
     icon: <Users className="h-5 w-5 text-primary mr-2" />
   },
    {
     value: "item-6",
-    question: "How do I bulk upload traders?",
-    answer: "Use the 'Bulk Add Traders' button on the dashboard. Upload a CSV file. Each row should represent one trader and contain up to 16 columns in the following order: Name, Total Sales, Status (Active/Inactive), Last Activity (e.g., yyyy-MM-dd or MM/dd/yyyy), Description, Reviews (trades made), Rating (0-5), Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link (Owner Profile Link), Actions (this column's data will be ignored).",
+    question: "How do I bulk upload traders using a CSV file?",
+    answer: "Use the 'Bulk Add Traders' button on the dashboard. Upload a CSV file. The system uses flexible parsing: \n" +
+            "• **Headers are Key**: It primarily relies on matching header names (case-insensitive, space-trimmed), though a general column order is good practice (e.g., Name, Total Sales, Status, etc., up to 16 common fields). \n" +
+            "• **Mandatory 'Name'**: The 'Name' header and corresponding data for each trader are mandatory. \n" +
+            "• **Expected Headers (approximate)**: Name, Total Sales, Status, Last Activity, Description, Reviews, Rating, 🌐Website, 📞 Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Actions (Actions column data ignored). Some headers have alternative names (e.g., 'Owner Name' or 'Owner'). Refer to the dialog for specific examples and more details. \n" +
+            "• **Quoted Fields**: Fields containing commas (e.g., in Description, Address, Categories) MUST be enclosed in double quotes (e.g., \"Main St, Suite 100\"). \n" +
+            "• **Duplicate Handling**: Traders with phone numbers already existing in the database or duplicated within the CSV will be automatically skipped. A summary of additions and skips will be provided.",
     icon: <UploadCloud className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-4",
     question: "What is the Branch Booster?",
-    answer: "The Branch Booster helps you analyze trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box, or upload a customer data file (e.g., CSV) for deeper insights like upsell opportunities or multi-customer recommendations. The system will provide an answer based on the current data for your branch and any uploaded file.",
+    answer: "The Branch Booster helps you analyze trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-5",
-    question: "Is my branch data secure?",
-    answer: "Yes, the system is designed for data isolation. Each branch can only access its own trader data. Authentication is tied to your Branch ID.",
-    icon: <ListChecks className="h-5 w-5 text-primary mr-2" />
+    question: "Is my branch data secure and persistent?",
+    answer: "Yes, the system is designed for data isolation. Each branch can only access its own trader data, authenticated by your Branch ID. Trader data is persistently stored in Firebase Firestore, ensuring it's saved across sessions and centrally managed for your branch.",
+    icon: <Database className="h-5 w-5 text-primary mr-2" />
   },
 ];
 
@@ -78,7 +83,7 @@ export default function HowToUsePage() {
                     {faq.question}
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="text-base text-muted-foreground pb-4 pl-9">
+                <AccordionContent className="text-base text-muted-foreground pb-4 pl-9 whitespace-pre-line">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -96,20 +101,27 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">1. Logging In</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Go to the main page. You will be redirected to the login screen.</li>
-              <li>Enter your assigned Branch ID (e.g., "PURLEY").</li>
+              <li>Enter your assigned Branch ID (e.g., "PURLEY", "BRANCH_B", "BRANCH_C", "BRANCH_D").</li>
               <li>Click "Sign In". You will be taken to your branch's dashboard.</li>
             </ul>
           </div>
           <div>
             <h3 className="text-xl font-semibold text-foreground mb-1">2. Managing Traders</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li><strong>View Traders:</strong> Traders for your branch are listed on the dashboard.</li>
-              <li><strong>Search:</strong> Use the search bar to find traders by name.</li>
+              <li><strong>View Traders:</strong> Traders for your branch are listed on the dashboard (20 per page). View mini-stats at the top for a quick overview.</li>
+              <li><strong>Search & Filter:</strong> Use the search bar to find traders by keyword. Use category filters for targeted views.</li>
               <li><strong>Sort:</strong> Click on table headers (Name, Total Sales, etc.) to sort data.</li>
-              <li><strong>Add Trader:</strong> Click "Add New Trader", fill the form, and submit.</li>
-              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders", upload your CSV file (following the 16 specified headers), and submit.</li>
-              <li><strong>Edit Trader:</strong> Click the pencil icon next to a trader, modify details, and save.</li>
-              <li><strong>Delete Trader:</strong> Click the trash icon, confirm, and the trader will be removed.</li>
+              <li><strong>Add Trader:</strong> Click "Add New Trader", fill the comprehensive form, and submit. You'll be warned about duplicate phone numbers.</li>
+              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders". Upload your CSV file. 
+                <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-6 text-sm">
+                    <li>Ensure it has a mandatory 'Name' header.</li>
+                    <li>The system uses flexible header matching (see dialog instructions for details and expected headers).</li>
+                    <li>Fields with commas (e.g., in addresses or categories) must be double-quoted.</li>
+                    <li>Duplicate traders (by phone number, compared to existing data or within the CSV) are automatically skipped.</li>
+                </ul>
+              </li>
+              <li><strong>Edit Trader:</strong> Click the pencil icon next to a trader, modify details in the form, and save.</li>
+              <li><strong>Delete Trader:</strong> Click the trash icon, confirm, and the trader will be removed from Firestore.</li>
             </ul>
           </div>
           <div>
@@ -118,9 +130,17 @@ export default function HowToUsePage() {
               <li>Locate the "Branch Booster" section on the dashboard.</li>
               <li>Use "Quick Actions" for common pre-defined analyses.</li>
               <li>Type your question about trader performance into the text area.</li>
-              <li>Optionally, upload a customer data file (e.g., CSV, TXT) for more detailed analysis.</li>
+              <li>Optionally, upload a customer data file (e.g., .csv, .txt) for more detailed, context-aware analysis.</li>
               <li>Click "Get Insights". The analysis will appear below.</li>
               <li>Example queries: "List all active traders.", "What is the average sales per trader?".</li>
+            </ul>
+          </div>
+           <div>
+            <h3 className="text-xl font-semibold text-foreground mb-1">4. Data Persistence</h3>
+            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
+              <li>All your trader data is stored securely in Firebase Firestore and is specific to your branch.</li>
+              <li>Changes you make (add, edit, delete) are persistent and will be available across your sessions.</li>
+              <li>If your branch's trader data is empty in Firestore, it will be automatically seeded with initial sample data on first load.</li>
             </ul>
           </div>
         </CardContent>
@@ -128,3 +148,5 @@ export default function HowToUsePage() {
     </div>
   );
 }
+
+    
