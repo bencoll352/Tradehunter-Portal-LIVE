@@ -33,6 +33,8 @@ const EXPECTED_HEADERS = [
   "Main Category", "Categories", "Workday Timing", "Address", "Link", "Actions"
 ];
 
+const FIRESTORE_BATCH_LIMIT = 500;
+
 export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,23 +71,37 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }
   };
 
-  const parseNumericValue = (rawValue: string | undefined): number | undefined => {
+  const parseNumericValue = (rawValue: string | undefined, fieldName: string, traderNameForWarning: string): number | undefined => {
     if (rawValue === undefined || rawValue === null || String(rawValue).trim() === "" || String(rawValue).trim() === "-") {
       return undefined;
     }
     const cleanedValue = String(rawValue).replace(/[^0-9.-]+/g, "");
-    if (cleanedValue === "") return undefined;
+    if (cleanedValue === "" || cleanedValue === "." || cleanedValue === "-") { // Check for effectively empty strings post-cleaning
+        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which is not a valid number. Field will be undefined.`);
+        return undefined;
+    }
     const parsed = parseFloat(cleanedValue);
-    return isNaN(parsed) ? undefined : parsed;
+    if (isNaN(parsed)) {
+        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which parsed to NaN. Field will be undefined.`);
+        return undefined;
+    }
+    return parsed;
   };
   
-  const parseIntValue = (rawValue: string | undefined): number | undefined => {
+  const parseIntValue = (rawValue: string | undefined, fieldName: string, traderNameForWarning: string): number | undefined => {
      if (rawValue === undefined || rawValue === null || String(rawValue).trim() === "" || String(rawValue).trim() === "-") {
       return undefined;
     }
     const cleanedValue = String(rawValue).replace(/[^0-9-]+/g, "");
-    if (cleanedValue === "") return undefined;
+    if (cleanedValue === "" || cleanedValue === "-") { // Check for effectively empty strings post-cleaning
+        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which is not a valid integer. Field will be undefined.`);
+        return undefined;
+    }
     const parsed = parseInt(cleanedValue, 10);
+    if (isNaN(parsed)) {
+        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which parsed to NaN for integer. Field will be undefined.`);
+        return undefined;
+    }
     return isNaN(parsed) ? undefined : parsed;
   };
 
@@ -111,8 +127,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           year += (year < 70 ? 2000 : 1900); 
         }
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
-          const tempDate = new Date(year, month, day);
-          if (tempDate.getFullYear() === year && tempDate.getMonth() === month && tempDate.getDate() === day) {
+          const tempDate = new Date(Date.UTC(year, month, day)); // Use UTC to avoid timezone shifts converting to ISO string
+          if (tempDate.getUTCFullYear() === year && tempDate.getUTCMonth() === month && tempDate.getUTCDate() === day) {
              date = tempDate;
              break;
           }
@@ -124,7 +140,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         try {
             const parsedFallback = new Date(val);
             if (!isNaN(parsedFallback.getTime())) {
-                date = parsedFallback;
+                // Ensure the parsed date is reasonable (e.g., not epoch 0 if val is non-standard)
+                if (parsedFallback.getUTCFullYear() > 1900) { // Basic sanity check
+                    date = parsedFallback;
+                }
             }
         } catch (e) { /* ignore */ }
     }
@@ -132,7 +151,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     if (date && !isNaN(date.getTime())) {
       return date.toISOString();
     } else {
-      console.warn(`Invalid date format for Last Activity: "${val}" for trader "${traderNameForWarning}". System will default it.`);
+      console.warn(`[CSV Parsing Debug] Invalid date format for Last Activity: "${val}" for trader "${traderNameForWarning}". System will default it or leave it undefined for the server to handle.`);
       return undefined;
     }
   };
@@ -166,7 +185,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       toast({
         variant: "destructive",
         title: "CSV Parsing Error",
-        description: `Problem parsing CSV: ${parseResults.errors[0].message}. Please ensure fields with commas are double-quoted.`,
+        description: (
+            <div>
+              <p>Problem parsing CSV: {parseResults.errors[0].message}.</p>
+              <p className="text-xs mt-1">Ensure fields with commas are double-quoted (e.g., "123 Main St, Anytown"). Check console for more details.</p>
+            </div>
+          ),
         duration: 10000,
       });
       if (parseResults.errors.some(e => e.type === 'Quotes' || e.code === 'TooManyFields' || e.code === 'TooFewFields')) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
@@ -189,7 +213,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       toast({
         variant: "destructive",
         title: "Missing 'Name' Header",
-        description: "The CSV file must contain a 'Name' header column.",
+        description: "The CSV file must contain a 'Name' header column for each trader.",
         duration: 7000,
       });
       return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
@@ -200,7 +224,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
     ).length;
 
-    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.length < 5) { 
+    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.length < 5 && actualHeaders.some(h => h.trim().toLowerCase() === "name")) { 
         console.warn(`[CSV Parsing Debug] Few common headers found. Expected some of: ${commonExpectedHeadersForHeuristicCheck.join(', ')}. Detected headers: ${actualHeaders.join(', ')}`);
         toast({
             variant: "default", 
@@ -214,6 +238,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     for (const row of parseResults.data as any[]) {
       const name = getRowValue(row, ["Name"]);
       if (!name) {
+        console.warn("[CSV Parsing Debug] Skipping row due to missing 'Name'. Row data:", row);
         continue; 
       }
       
@@ -224,7 +249,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       } else if (statusValue === 'inactive') {
         parsedStatus = 'Inactive';
       } else if (statusValue) {
-        console.warn(`Invalid status "${statusValue}" for trader "${name}". Defaulting to Active.`);
+        console.warn(`[CSV Parsing Debug] Trader "${name}": Invalid status "${statusValue}". Defaulting to Active if not set otherwise by server.`);
       }
 
       const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
@@ -250,12 +275,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
       const trader: ParsedTraderData = {
         name: name,
-        totalSales: parseNumericValue(getRowValue(row, ["Total Sales"])),
+        totalSales: parseNumericValue(getRowValue(row, ["Total Sales"]), "Total Sales", name),
         status: parsedStatus,
         lastActivity: lastActivityValue,
         description: getRowValue(row, ["Description"]) || undefined,
-        tradesMade: parseIntValue(getRowValue(row, ["Reviews"])),
-        rating: parseNumericValue(getRowValue(row, ["Rating"])),
+        tradesMade: parseIntValue(getRowValue(row, ["Reviews"]), "Reviews", name),
+        rating: parseNumericValue(getRowValue(row, ["Rating"]), "Rating", name),
         website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
         phone: phoneValue || undefined,
         ownerName: ownerNameValue || undefined,
@@ -284,11 +309,11 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       if (normalizedPhone) {
         if (existingNormalizedPhones.has(normalizedPhone)) {
           isDuplicate = true; 
-           console.warn(`Trader "${trader.name}" with phone "${trader.phone}" already exists in the database. Skipping.`);
+           console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" already exists in the database (based on existing traders passed to dialog). Skipping.`);
         } else if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
           isDuplicate = true; 
           duplicatePhonesInCsv.add(trader.phone || 'N/A');
-          console.warn(`Trader "${trader.name}" with phone "${trader.phone}" is a duplicate within the CSV. Skipping.`);
+          console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" is a duplicate within the CSV file itself. Skipping.`);
         }
       }
 
@@ -321,8 +346,17 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       toast({
         variant: "destructive",
         title: "No Traders Parsed",
-        description: `No valid trader data found. Ensure CSV has correct headers (e.g., "Name") and data. Check browser console for warnings. Remember to double-quote fields containing commas (e.g., in "Description" or "Address" or "Categories").`,
-        duration: 10000, 
+        description: (
+            <div>
+              <p>No valid trader data found after parsing.</p>
+              <ul className="list-disc list-inside text-xs mt-1">
+                <li>Ensure CSV has a 'Name' header and data for each trader.</li>
+                <li>Check browser console (F12 > Console) for specific parsing warnings (e.g., invalid dates, numbers).</li>
+                <li>Remember to double-quote fields containing commas (e.g., in Description, Address, Categories).</li>
+              </ul>
+            </div>
+          ),
+        duration: 15000, 
       });
       setIsLoading(false);
       return;
@@ -333,19 +367,41 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return;
     }
 
+    if (validTraders.length > FIRESTORE_BATCH_LIMIT) {
+      toast({
+        variant: "destructive",
+        title: "File Too Large for Single Upload",
+        description: `Your CSV contains ${validTraders.length} traders to add, exceeding the recommended limit of ${FIRESTORE_BATCH_LIMIT} for a single operation. Please split your file into smaller chunks and upload them separately.`,
+        duration: 10000,
+      });
+      setIsLoading(false);
+      return;
+    }
+
     let newTradersAddedCount = 0;
     if (validTraders.length > 0) {
       try {
         const result = await onBulkAddTraders(branchId, validTraders);
         
         if (result.error) {
-          // Server action returned an error
-          console.error("Server action failed during bulk add:", result.error);
+          console.error("Server action failed during bulk add with error message from server:", result.error);
           toast({
             variant: "destructive",
-            title: "Bulk Upload Failed",
-            description: `Server error: ${result.error}. Check server logs for more details.`,
-            duration: 8000,
+            title: "Bulk Upload Failed on Server",
+            description: (
+              <div className="text-sm">
+                <p className="font-semibold">Server error: {result.error}</p>
+                <p className="mt-2 text-xs">
+                  This often means an issue with the data in your CSV (e.g., very long text, invalid characters not caught by parsing),
+                  or a problem with the Firestore database setup (like security rules or quotas).
+                </p>
+                <p className="mt-1 text-xs">
+                  Please <strong>check your server logs</strong> (Firebase console if deployed, or your local Next.js terminal) for detailed Firestore error messages.
+                  Also, review your CSV data for the traders being uploaded.
+                </p>
+              </div>
+            ),
+            duration: 15000,
           });
           setIsLoading(false);
           return; 
@@ -355,11 +411,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           newTradersAddedCount = result.data.length;
         }
       } catch (error) {
+        const clientErrorMessage = error instanceof Error ? error.message : "Unknown client error";
         console.error("Unexpected client error during bulk add traders operation:", error);
         toast({
           variant: "destructive",
           title: "Client Upload Error",
-          description: `An unexpected client error occurred: ${error instanceof Error ? error.message : "Unknown error"}`,
+          description: `An unexpected client error occurred: ${clientErrorMessage}. Check console.`,
         });
         setIsLoading(false);
         return;
@@ -370,22 +427,22 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     if (newTradersAddedCount > 0) {
       summaryMessages.push(`${newTradersAddedCount} new trader(s) successfully added.`);
     } else if (validTraders.length > 0 && newTradersAddedCount === 0) {
-      summaryMessages.push(`No new traders were added. They might already exist in the database or the list was empty after filtering.`);
+      summaryMessages.push(`No new traders were added by the server. This could be due to all of them already existing (if server performs its own duplicate checks beyond what the client knows), or another server-side issue. Check server logs.`);
     }
     
     if (skippedCount > 0) {
-      summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates (already in system or within CSV).`);
+      summaryMessages.push(`${skippedCount} trader(s) were skipped by the client as duplicates (already in current view or within CSV).`);
       if (duplicatePhonesInCsv.size > 0) {
-         summaryMessages.push(`Duplicate phone(s) within CSV: ${Array.from(duplicatePhonesInCsv).slice(0,3).join(', ')}${duplicatePhonesInCsv.size > 3 ? '...' : '' }.`);
+         summaryMessages.push(`Duplicate phone(s) found within the CSV file: ${Array.from(duplicatePhonesInCsv).slice(0,3).join(', ')}${duplicatePhonesInCsv.size > 3 ? '...' : '' }.`);
       }
-       summaryMessages.push("Check console for more details on skipped traders.");
+       summaryMessages.push("Check browser console for more details on client-skipped traders.");
     }
 
     if (summaryMessages.length > 0) {
         toast({
             title: newTradersAddedCount > 0 ? "Bulk Upload Processed" : "Bulk Upload Notice",
             description: (
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 text-sm">
                 {summaryMessages.map((msg, idx) => <span key={idx}>{msg}</span>)}
             </div>
             ),
@@ -394,7 +451,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     } else if (validTraders.length === 0 && skippedCount === 0) {
         toast({
             title: "No Action Taken",
-            description: "No new traders to add and no duplicates found to skip. The file might have been empty or contained no processable data.",
+            description: "No new traders to add and no duplicates found to skip by the client. The file might have been empty or contained no processable data according to client-side parsing.",
             variant: "default"
         });
     }
@@ -425,12 +482,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <br/>The 'Name' header is mandatory. 'Actions' column data will be ignored.
             The system matches headers case-insensitively and ignores leading/trailing spaces. 
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
+            Max {FIRESTORE_BATCH_LIMIT} traders per file.
           </DialogDescription>
           <div className="text-sm text-muted-foreground mt-2 text-left"> 
             <strong>If fields like 'Owner Name', 'Main Category', or 'Workday Timing' are not loading:</strong>
             <ol className="list-decimal list-inside pl-4 text-xs mt-1">
               <li>Double-check the exact spelling of these headers in your <strong>raw CSV file</strong> (not just how they appear in Excel or other spreadsheet software).</li>
-              <li>After an upload attempt, open your browser's developer console (usually by right-clicking on the page, selecting 'Inspect' or 'Inspect Element', then finding the 'Console' tab). Look for messages starting with "[CSV Parsing Debug]". These messages will show the headers the system actually detected for problematic rows, which you can compare against your CSV.</li>
+              <li>After an upload attempt, open your browser's developer console (usually by right-clicking on the page, selecting 'Inspect' or 'Inspect Element', then finding the 'Console' tab). Look for messages starting with "[CSV Parsing Debug]". These messages will show the headers the system actually detected for problematic rows, and any specific parsing issues for values.</li>
               <li>Ensure the data cells for these columns are not empty in your CSV.</li>
             </ol>
           </div>
@@ -475,3 +533,4 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
+

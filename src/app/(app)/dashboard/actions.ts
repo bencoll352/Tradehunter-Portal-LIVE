@@ -101,8 +101,30 @@ export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: 
     const data = await bulkAddTradersToDb(tradersToCreate, branchId);
     return { data, error: null };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error during bulk add.";
-    console.error("Failed to bulk add traders:", errorMessage, error); // Keep detailed server log
+    let errorMessage = "An unknown server error occurred during bulk add.";
+    if (error instanceof Error && error.message) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string' && error) {
+      errorMessage = error;
+    } else if (error && typeof error === 'object' && 'toString' in error) {
+        const errorString = error.toString();
+        if (errorString !== '[object Object]') {
+            errorMessage = errorString;
+        } else {
+            try {
+                // Attempt to get more detail from common error structures
+                if ('code' in error && 'message' in error) {
+                  errorMessage = `Error Code: ${error.code} - ${error.message}`;
+                } else {
+                  errorMessage = JSON.stringify(error);
+                }
+            } catch (e) {
+                errorMessage = "Complex server error object encountered during bulk add.";
+            }
+        }
+    }
+    // Log the original error object for full details on the server
+    console.error("Failed to bulk add traders (action level):", { originalError: error, processedMessage: errorMessage });
     return { data: null, error: errorMessage };
   }
 }
