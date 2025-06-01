@@ -1,3 +1,4 @@
+
 import type { HTMLAttributes } from 'react';
 import Image from 'next/image';
 
@@ -8,7 +9,7 @@ export function Logo(props: HTMLAttributes<HTMLDivElement> & { width?: number, h
   const { width = 200, height = 52, className, ...rest } = props; // Default aspect ratio based on typical logo
 
   return (
-    <div className={className} {...rest} style={{ display: 'flex', alignItems: 'center' }}>
+    <div className={cn("flex flex-col items-center", className)} {...rest}>
       <Image
         src="https://placehold.co/400x104.png?text=TradeHunter+Pro" // Placeholder reflecting a wide logo
         alt="TradeHunter Pro Logo"
@@ -17,6 +18,9 @@ export function Logo(props: HTMLAttributes<HTMLDivElement> & { width?: number, h
         data-ai-hint="trade hunter pro logo"
         priority // If it's LCP (Largest Contentful Paint)
       />
+      <p className="text-xs text-sidebar-foreground/80 -mt-1 group-data-[collapsible=icon]:hidden">
+        Dominate Your Territory
+      </p>
     </div>
   );
 }

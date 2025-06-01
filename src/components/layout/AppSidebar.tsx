@@ -45,6 +45,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
@@ -201,10 +202,14 @@ export function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-3">
-        <div className="flex items-center gap-2">
+        <div className={cn(
+            "flex items-center gap-2",
+            sidebarState === 'collapsed' ? "justify-center" : ""
+          )}
+        >
           <Logo 
-            width={sidebarState === 'collapsed' ? 32 : 180} 
-            height={sidebarState === 'collapsed' ? 32 : 47} 
+            width={sidebarState === 'collapsed' ? 40 : 180} 
+            height={sidebarState === 'collapsed' ? 20 : 47} 
           />
         </div>
       </SidebarHeader>
