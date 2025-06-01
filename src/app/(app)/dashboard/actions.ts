@@ -102,29 +102,40 @@ export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: 
     return { data, error: null };
   } catch (error) {
     let errorMessage = "An unknown server error occurred during bulk add.";
-    if (error instanceof Error && error.message) {
+    
+    if (error instanceof Error) {
       errorMessage = error.message;
-    } else if (typeof error === 'string' && error) {
+    } else if (typeof error === 'string') {
       errorMessage = error;
-    } else if (error && typeof error === 'object' && 'toString' in error) {
-        const errorString = error.toString();
-        if (errorString !== '[object Object]') {
-            errorMessage = errorString;
-        } else {
-            try {
-                // Attempt to get more detail from common error structures
-                if ('code' in error && 'message' in error) {
-                  errorMessage = `Error Code: ${error.code} - ${error.message}`;
-                } else {
-                  errorMessage = JSON.stringify(error);
-                }
-            } catch (e) {
-                errorMessage = "Complex server error object encountered during bulk add.";
-            }
+    } else if (error && typeof error === 'object') {
+      // Attempt to get a message property, common in error-like objects
+      if ('message' in error && typeof (error as any).message === 'string') {
+        errorMessage = (error as any).message;
+        // Optionally append a code if it exists
+        if ('code' in error) {
+          errorMessage = `Error Code: ${(error as any).code} - ${errorMessage}`;
         }
+      } else {
+        // Fallback: try to stringify, but this can fail for complex objects or throw
+        try {
+          const errorString = JSON.stringify(error);
+          // Avoid vague "[object Object]" or empty "{}" if that's what stringify produces
+          if (errorString && errorString !== '{}' && errorString !== '[object Object]') {
+            errorMessage = errorString;
+          } else {
+            errorMessage = "A non-standard error object was thrown on the server.";
+          }
+        } catch (stringifyError) {
+          // If JSON.stringify fails (e.g., circular references)
+          errorMessage = "A complex, non-serializable error object was encountered on the server.";
+          // Log the original error on the server for better debugging if stringification fails
+          console.error("Original error object from bulk add (failed to stringify):", error);
+        }
+      }
     }
-    // Log the original error object for full details on the server
-    console.error("Failed to bulk add traders (action level):", { originalError: error, processedMessage: errorMessage });
+    // Log the processed error message and the original error object for full context on the server
+    console.error("Failed to bulk add traders (action level). Processed Error Message:", errorMessage, "Original Error Object:", error);
     return { data: null, error: errorMessage };
   }
 }
+
