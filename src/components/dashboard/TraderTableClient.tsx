@@ -20,7 +20,7 @@ import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
-import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter } from "lucide-react";
+import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon } from "lucide-react"; // Added NotesIcon
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "./TraderForm";
@@ -30,7 +30,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const ITEMS_PER_PAGE = 20; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address'>;
+type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -106,7 +106,8 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
         (trader.mainCategory && trader.mainCategory.toLowerCase().includes(searchTermLower)) ||
         (trader.address && trader.address.toLowerCase().includes(searchTermLower)) ||
         (trader.categories && trader.categories.toLowerCase().includes(searchTermLower)) ||
-        (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower))
+        (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower)) ||
+        (trader.notes && trader.notes.toLowerCase().includes(searchTermLower))
       );
     }
 
@@ -210,6 +211,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
       ownerProfileLink: trader.ownerProfileLink || "",
       categories: trader.categories || "",
       workdayTiming: trader.workdayTiming || "",
+      notes: trader.notes || "", // Include notes
     };
     await onUpdate(trader.id, formValues);
   };
@@ -236,20 +238,31 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     </TableHead>
   );
 
-  const renderCellContent = (content: string | number | undefined | null, maxChars = 30) => {
+  const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false) => {
     const stringContent = String(content || '');
     if (stringContent.length > maxChars) {
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="truncate block" style={{ maxWidth: `${maxChars}ch` }}>{stringContent.substring(0, maxChars)}...</span>
+              <div className="flex items-center gap-1 truncate" style={{ maxWidth: `${maxChars + (isNote ? 2 : 0)}ch` }}>
+                {isNote && <NotesIcon className="h-3 w-3 shrink-0 text-muted-foreground" />}
+                <span className="truncate">{stringContent.substring(0, maxChars)}...</span>
+              </div>
             </TooltipTrigger>
-            <TooltipContent>
-              <p className="max-w-xs break-words">{stringContent}</p>
+            <TooltipContent className="max-w-md break-words">
+              <p>{stringContent}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      );
+    }
+     if (isNote && stringContent) {
+      return (
+         <div className="flex items-center gap-1">
+            <NotesIcon className="h-3 w-3 shrink-0 text-muted-foreground" />
+            <span>{stringContent}</span>
+        </div>
       );
     }
     return stringContent || <span className="text-muted-foreground/50">-</span>;
@@ -340,6 +353,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
               <SortableHeader sortKey="status" label="Status" />
               <SortableHeader sortKey="lastActivity" label="Last Activity" />
               <SortableHeader sortKey="description" label="Description" />
+              <TableHead>Notes</TableHead>
               <SortableHeader sortKey="tradesMade" label="Reviews" />
               <SortableHeader sortKey="rating" label="Rating" />
               <TableHead className="whitespace-nowrap">🌐Website</TableHead>
@@ -376,6 +390,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
                 </TableCell>
                 <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
                 <TableCell>{renderCellContent(trader.description)}</TableCell>
+                <TableCell>{renderCellContent(trader.notes, 25, true)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
                 <TableCell className="whitespace-nowrap">
@@ -460,4 +475,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-

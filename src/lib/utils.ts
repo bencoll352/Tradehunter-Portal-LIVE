@@ -33,6 +33,7 @@ export const formatTraderDataForAnalysis = (traders: Trader[]): string => {
     if (trader.ownerProfileLink) details += `, Owner Profile: ${trader.ownerProfileLink}`;
     if (trader.categories) details += `, Categories: ${trader.categories}`;
     if (trader.workdayTiming) details += `, Hours: ${trader.workdayTiming}`;
+    if (trader.notes) details += `, Notes: ${trader.notes}`; // Include notes
     return details;
   }).join('; \n');
 };

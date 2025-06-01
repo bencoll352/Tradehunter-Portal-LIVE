@@ -35,13 +35,13 @@ function cleanDataForFirestoreWrite<T extends Record<string, any>>(data: T): Rec
 
 // Initial seed data for traders. Used if Firestore is empty for a branch.
 const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
-  { name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5 },
-  { name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Call-Back', description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction", website: null },
-  { name: 'Charlie Brown', branchId: 'PURLEY', totalSales: 75000, tradesMade: 90, status: 'Inactive', mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts", rating: 3.0, website: null, ownerProfileLink: null, categories: null, closedOn: null },
-  { name: 'Diana Prince', branchId: 'BRANCH_B', totalSales: 210000, tradesMade: 200, status: 'Active', address: '789 Amazon Way, Themyscira, THM 001', phone: '01234 567803', mainCategory: 'Consulting', closedOn: 'Weekends', description: "Antiquities expert and diplomatic consultant. Handles sensitive international relations.", rating: 5.0, website: "https://diana.example.com", categories: "Diplomacy, History, Art", reviewKeywords: "wise, strong, expert", ownerName: "Diana Prince", ownerProfileLink: null, workdayTiming: "By Appointment"},
-  { name: 'Edward Scissorhands', branchId: 'BRANCH_B', totalSales: 150000, tradesMade: 180, status: 'New Lead', website: 'https://edwardcuts.example.com', description: 'Unique topiary and avant-garde hairdressing services. Gentle and artistic.', rating: 4.9, ownerProfileLink: 'https://example.com/edward', mainCategory: "Personal Care", categories: "Hairdressing, Landscaping, Art", phone: "01234567811", address: "1 Suburbia Drive, Castle Hill, CHL 555", reviewKeywords: "artistic, unique, gentle", ownerName: "Edward", workdayTiming: "Varies", closedOn: null },
-  { name: 'Fiona Gallagher', branchId: 'BRANCH_C', totalSales: 180000, tradesMade: 165, status: 'Active', description: 'South Side resilience. Runs a local cafe and diner. Known for hearty meals and a welcoming atmosphere.', mainCategory: 'Cafe', phone: '01234 567804', address: "222 South Side St, Chicago, CHI 606", ownerName: "Fiona Gallagher", categories: "Food, Diner, Coffee", workdayTiming: "Mon-Sun 7am-10pm", reviewKeywords: "family, hearty, local", rating: 4.2, website: null, ownerProfileLink: null, closedOn: null },
-  { name: 'George Jetson', branchId: 'BRANCH_D', totalSales: 300000, tradesMade: 250, status: 'New Lead', description: 'Digital Indexer at Spacely Space Sprockets. Future-proof solutions.', rating: 4.0, phone: '01234 567805', mainCategory: 'Technology', categories: 'Automation, IT, Future Tech', address: "Orbit City Apartments", ownerName: "George Jetson", workdayTiming: "Mon-Fri 9am-5pm (21st Century Time)", website: null, ownerProfileLink: null, closedOn: null },
+  { name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5, notes: "Prefers Earl Grey tea for meetings. Important client for seasonal events." },
+  { name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Call-Back', description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction", website: null, notes: "Needs follow-up on new concrete mixer availability." },
+  { name: 'Charlie Brown', branchId: 'PURLEY', totalSales: 75000, tradesMade: 90, status: 'Inactive', mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts", rating: 3.0, website: null, ownerProfileLink: null, categories: null, closedOn: null, notes: "Account inactive for 6+ months." },
+  { name: 'Diana Prince', branchId: 'BRANCH_B', totalSales: 210000, tradesMade: 200, status: 'Active', address: '789 Amazon Way, Themyscira, THM 001', phone: '01234 567803', mainCategory: 'Consulting', closedOn: 'Weekends', description: "Antiquities expert and diplomatic consultant. Handles sensitive international relations.", rating: 5.0, website: "https://diana.example.com", categories: "Diplomacy, History, Art", reviewKeywords: "wise, strong, expert", ownerName: "Diana Prince", ownerProfileLink: null, workdayTiming: "By Appointment", notes: "High profile client, requires discreet handling." },
+  { name: 'Edward Scissorhands', branchId: 'BRANCH_B', totalSales: 150000, tradesMade: 180, status: 'New Lead', website: 'https://edwardcuts.example.com', description: 'Unique topiary and avant-garde hairdressing services. Gentle and artistic.', rating: 4.9, ownerProfileLink: 'https://example.com/edward', mainCategory: "Personal Care", categories: "Hairdressing, Landscaping, Art", phone: "01234567811", address: "1 Suburbia Drive, Castle Hill, CHL 555", reviewKeywords: "artistic, unique, gentle", ownerName: "Edward", workdayTiming: "Varies", closedOn: null, notes: "Potential for large landscaping projects." },
+  { name: 'Fiona Gallagher', branchId: 'BRANCH_C', totalSales: 180000, tradesMade: 165, status: 'Active', description: 'South Side resilience. Runs a local cafe and diner. Known for hearty meals and a welcoming atmosphere.', mainCategory: 'Cafe', phone: '01234 567804', address: "222 South Side St, Chicago, CHI 606", ownerName: "Fiona Gallagher", categories: "Food, Diner, Coffee", workdayTiming: "Mon-Sun 7am-10pm", reviewKeywords: "family, hearty, local", rating: 4.2, website: null, ownerProfileLink: null, closedOn: null, notes: "Always orders supplies on Tuesdays." },
+  { name: 'George Jetson', branchId: 'BRANCH_D', totalSales: 300000, tradesMade: 250, status: 'New Lead', description: 'Digital Indexer at Spacely Space Sprockets. Future-proof solutions.', rating: 4.0, phone: '01234 567805', mainCategory: 'Technology', categories: 'Automation, IT, Future Tech', address: "Orbit City Apartments", ownerName: "George Jetson", workdayTiming: "Mon-Fri 9am-5pm (21st Century Time)", website: null, ownerProfileLink: null, closedOn: null, notes: "Interested in our latest robotic tools." },
 ];
 
 // Add lastActivity to seed data and clean it
@@ -54,25 +54,34 @@ const INITIAL_SEED_TRADERS_DATA: Omit<Trader, 'id'>[] = INITIAL_SEED_TRADERS_DAT
 });
 
 const determineLastActivityString = (activity: any): string => {
+  if (!activity) return new Date(0).toISOString(); // Handle null or undefined early
+
   if (activity instanceof Timestamp) {
     return activity.toDate().toISOString();
   }
   if (typeof activity === 'string') {
     try {
-      return new Date(activity).toISOString();
+      const parsedDate = new Date(activity);
+      if (isNaN(parsedDate.getTime())) { // Check if date is invalid
+        console.warn(`Invalid date string for lastActivity: ${activity}. Defaulting.`);
+        return new Date(0).toISOString();
+      }
+      return parsedDate.toISOString();
     } catch (e) {
-      console.warn(`Invalid date string for lastActivity: ${activity}. Defaulting.`);
+      console.warn(`Error parsing date string for lastActivity: ${activity}. Defaulting.`, e);
       return new Date(0).toISOString();
     }
   }
-  if (activity && typeof activity.toDate === 'function') { // Fallback for Firestore-like timestamp objects
+  // Fallback for Firestore-like timestamp objects that might not be actual Timestamp instances
+  if (activity && typeof activity.toDate === 'function') { 
     try {
       return activity.toDate().toISOString();
     } catch(e) {
-       // ignore
+       console.warn(`Error converting object with toDate method for lastActivity: ${activity}. Defaulting.`, e);
+       return new Date(0).toISOString();
     }
   }
-  console.warn(`Unexpected lastActivity type: ${typeof activity}, value: ${activity}. Defaulting.`);
+  console.warn(`Unexpected lastActivity type: ${typeof activity}, value: ${JSON.stringify(activity)}. Defaulting.`);
   return new Date(0).toISOString(); 
 };
 
@@ -100,6 +109,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
     workdayTiming: data.workdayTiming ?? null,
     closedOn: data.closedOn ?? null,
     reviewKeywords: data.reviewKeywords ?? null,
+    notes: data.notes ?? null, // Map notes field
   };
 };
 
@@ -111,11 +121,9 @@ export async function getTradersByBranch(branchId: BranchId): Promise<Trader[]> 
     let querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      // If the branch is 'PURLEY' and it's empty, do not seed.
-      // This is to protect live data that might have been manually added.
       if (branchId === 'PURLEY') {
         console.log(`No traders found for branch PURLEY. Seeding is intentionally skipped for this branch to preserve any manually added live data. If data is expected, please check Firestore directly.`);
-        return []; // Return empty, do not proceed to seed for PURLEY.
+        return []; 
       }
 
       console.log(`No traders found for branch ${branchId}, seeding initial data...`);
@@ -128,7 +136,7 @@ export async function getTradersByBranch(branchId: BranchId): Promise<Trader[]> 
         });
         await batch.commit();
         console.log(`Seeded ${seedDataForBranch.length} traders for branch ${branchId}.`);
-        querySnapshot = await getDocs(q); // Re-fetch after seeding
+        querySnapshot = await getDocs(q); 
       } else {
         console.log(`No seed data configured for branch ${branchId}.`);
         return [];
@@ -243,6 +251,7 @@ export async function bulkAddTradersToDb(
       ownerProfileLink: parsedData.ownerProfileLink,
       categories: parsedData.categories,
       workdayTiming: parsedData.workdayTiming,
+      notes: parsedData.notes, // Include notes
       closedOn: null, 
       reviewKeywords: null,
     };

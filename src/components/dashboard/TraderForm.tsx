@@ -29,7 +29,7 @@ export const traderFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   totalSales: z.coerce.number().min(0, { message: "Total sales must be a positive number." }),
   tradesMade: z.coerce.number().int().min(0, { message: "Trades made (Reviews) must be a positive integer." }),
-  status: z.enum(["Active", "Inactive", "Call-Back", "New Lead"]), // Updated status
+  status: z.enum(["Active", "Inactive", "Call-Back", "New Lead"]),
   description: z.string().optional().nullable(),
   rating: z.coerce.number().min(0).max(5).optional().nullable(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')).nullable(),
@@ -40,6 +40,7 @@ export const traderFormSchema = z.object({
   ownerProfileLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')).nullable(),
   categories: z.string().optional().nullable(), 
   workdayTiming: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(), // Added notes field
 });
 
 interface TraderFormProps {
@@ -67,6 +68,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
       ownerProfileLink: defaultValues?.ownerProfileLink ?? null,
       categories: defaultValues?.categories ?? null,
       workdayTiming: defaultValues?.workdayTiming ?? null,
+      notes: defaultValues?.notes ?? null, // Default value for notes
     },
   });
 
@@ -282,6 +284,20 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             )}
         />
 
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Internal notes about this trader..." {...field} value={field.value ?? ''} rows={3} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
           {isLoading ? "Saving..." : submitButtonText}
         </Button>
@@ -289,4 +305,3 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
     </Form>
   );
 }
-

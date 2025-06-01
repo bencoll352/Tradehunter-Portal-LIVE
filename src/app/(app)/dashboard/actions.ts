@@ -70,6 +70,7 @@ export async function addTraderAction(branchId: BranchId, values: z.infer<typeof
       ownerProfileLink: values.ownerProfileLink === undefined ? null : values.ownerProfileLink,
       categories: values.categories === undefined ? null : values.categories,
       workdayTiming: values.workdayTiming === undefined ? null : values.workdayTiming,
+      notes: values.notes === undefined ? null : values.notes, // Include notes
       closedOn: null, 
       reviewKeywords: null, 
     };
@@ -108,6 +109,7 @@ export async function updateTraderAction(branchId: BranchId, traderId: string, v
       ownerProfileLink: values.ownerProfileLink === undefined ? null : values.ownerProfileLink,
       categories: values.categories === undefined ? null : values.categories,
       workdayTiming: values.workdayTiming === undefined ? null : values.workdayTiming,
+      notes: values.notes === undefined ? null : values.notes, // Include notes
     };
     const updatedTrader = await updateTraderInDb(traderToUpdate);
     return { data: updatedTrader, error: null };
