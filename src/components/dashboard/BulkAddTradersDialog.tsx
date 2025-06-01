@@ -114,21 +114,23 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     let date: Date | null = null;
 
     const formatsToTry = [
-      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/,
-      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2})$/,
+      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/, // dd/MM/yyyy or dd-MM-yyyy or dd.MM.yyyy
+      /^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2})$/, // dd/MM/yy or dd-MM-yy or dd.MM.yy
     ];
 
     for (const regex of formatsToTry) {
       const parts = val.match(regex);
       if (parts) {
         const day = parseInt(parts[1], 10);
-        const month = parseInt(parts[2], 10) - 1;
+        const month = parseInt(parts[2], 10) - 1; // Month is 0-indexed in JS Date
         let year = parseInt(parts[3], 10);
-        if (year < 100) {
-          year += (year < 70 ? 2000 : 1900);
+        if (year < 100) { // Handle yy format
+          year += (year < 70 ? 2000 : 1900); // Arbitrary cutoff for 20th/21st century
         }
+        // Basic validation of date parts
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
           const tempDate = new Date(Date.UTC(year, month, day));
+          // Verify that creating the date didn't roll over (e.g. 31st Feb -> 3rd Mar)
           if (tempDate.getUTCFullYear() === year && tempDate.getUTCMonth() === month && tempDate.getUTCDate() === day) {
              date = tempDate;
              break;
@@ -137,31 +139,34 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }
 
+    // Fallback attempt if primary formats fail
     if (!date) {
         try {
-            const parsedFallback = new Date(val);
-            if (!isNaN(parsedFallback.getTime())) {
-                if (parsedFallback.getUTCFullYear() > 1900) {
+            const parsedFallback = new Date(val); // Attempt direct parsing
+            if (!isNaN(parsedFallback.getTime())) { // Check if it's a valid date object
+                // Add a sanity check for year, e.g., to avoid misinterpreting things like "1-2-3" as a valid date in 1903
+                if (parsedFallback.getUTCFullYear() > 1900) { 
                     date = parsedFallback;
                 }
             }
-        } catch (e) { /* ignore */ }
+        } catch (e) { /* ignore parsing errors for fallback */ }
     }
 
     if (date && !isNaN(date.getTime())) {
       return date.toISOString();
     } else {
       console.warn(`[CSV Parsing Debug] Invalid date format for Last Activity: "${val}" for trader "${traderNameForWarning}". System will default it or leave it undefined for the server to handle.`);
-      return undefined;
+      return undefined; // Or handle as an error / default date if required
     }
   };
 
   const getRowValue = (row: any, headerVariations: string[]): string | undefined => {
     for (const variation of headerVariations) {
       const keys = Object.keys(row);
+      // Find a key in the row that matches a variation (case-insensitive, space-trimmed)
       const foundKey = keys.find(key => key.trim().toLowerCase() === variation.trim().toLowerCase());
       if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null) {
-        return String(row[foundKey]).trim();
+        return String(row[foundKey]).trim(); // Trim the value as well
       }
     }
     return undefined;
@@ -173,9 +178,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     let tradersToProcess: ParsedTraderData[] = [];
 
     const parseResults = Papa.parse(csvString, {
-      header: true,
-      skipEmptyLines: 'greedy',
-      transformHeader: header => header.trim(),
+      header: true, // Automatically uses the first row as headers
+      skipEmptyLines: 'greedy', // Skips lines that are empty or only contain whitespace
+      transformHeader: header => header.trim(), // Trim whitespace from headers
+      // dynamicTyping: true, // PapaParse attempts to convert numbers and booleans
     });
 
     console.log("[CSV Parsing Debug] Detected headers by PapaParse:", parseResults.meta.fields);
@@ -193,6 +199,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           ),
         duration: 10000,
       });
+      // If there are fundamental parsing errors (like unclosed quotes), it might not make sense to proceed further.
+      // You might want to return early if specific error types are encountered.
       if (parseResults.errors.some(e => e.type === 'Quotes' || e.code === 'TooManyFields' || e.code === 'TooFewFields')) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
@@ -208,6 +216,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
+    // Check for mandatory 'Name' header (case-insensitive)
     const hasNameHeader = actualHeaders.some(h => h.trim().toLowerCase() === "name");
     if (!hasNameHeader) {
       toast({
@@ -219,15 +228,17 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
+    // Heuristic check for common headers to warn if the CSV seems very different
     const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "total sales", "owner name", "main category", "reviews", "rating", "website", "notes"];
     const foundCommonHeadersCount = actualHeaders.filter(h =>
         commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
     ).length;
 
-    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.some(h => h.trim().toLowerCase() === "name")) {
+    // Warn if "Name" is present but very few other common headers are found.
+    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.some(h => h.trim().toLowerCase() === "name")) { // Ensure there's more than just 'Name' to avoid warning on single-column name lists
         console.warn(`[CSV Parsing Debug] Few common headers found. Expected some of: ${commonExpectedHeadersForHeuristicCheck.join(', ')}. Detected headers: ${actualHeaders.join(', ')}`);
         toast({
-            variant: "default",
+            variant: "default", // Not destructive, just a notice
             title: "Unusual CSV Headers Detected",
             description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Total Sales, Notes). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
             duration: 10000,
@@ -235,18 +246,20 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }
 
 
-    for (const row of parseResults.data as any[]) {
+    for (const row of parseResults.data as any[]) { // Type cast to any[] as PapaParse.data can be unknown[]
       const name = getRowValue(row, ["Name"]);
       if (!name) {
+        // If a row has no name, skip it. This can happen with trailing empty lines not caught by skipEmptyLines if they have commas.
         console.warn("[CSV Parsing Debug] Skipping row due to missing 'Name'. Row data:", row);
         continue;
       }
 
       const statusValueRaw = getRowValue(row, ["Status"]);
-      let parsedStatus : ParsedTraderData['status'] = 'New Lead';
+      let parsedStatus : ParsedTraderData['status'] = 'New Lead'; // Default if status is invalid or missing
       if (statusValueRaw) {
         const statusValueLower = statusValueRaw.toLowerCase();
         if (VALID_STATUSES_LOWER.includes(statusValueLower)) {
+            // Map to capitalized version
             if (statusValueLower === 'active') parsedStatus = 'Active';
             else if (statusValueLower === 'inactive') parsedStatus = 'Inactive';
             else if (statusValueLower === 'call-back') parsedStatus = 'Call-Back';
@@ -260,22 +273,24 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
       const phoneValue = getRowValue(row, ["📞 Phone", "Phone"]);
 
+      // Specific debug for potentially problematic fields
       const ownerNameValue = getRowValue(row, ["Owner Name", "Owner"]);
       const mainCategoryValue = getRowValue(row, ["Main Category", "Category"]);
-      const workdayTimingValue = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
+      const workdayTimingValue = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]); // Added "WorkdayTiming" (no space)
 
+      // Log if any of these specific fields are missing for a trader with a name
       if (!ownerNameValue && name || !mainCategoryValue && name || !workdayTimingValue && name) {
         const missingFields = [];
         if (!ownerNameValue) missingFields.push("Owner Name (expected 'Owner Name' or 'Owner')");
         if (!mainCategoryValue) missingFields.push("Main Category (expected 'Main Category' or 'Category')");
         if (!workdayTimingValue) missingFields.push("Workday Timing (expected 'Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', or 'WorkdayTiming')");
-
-        if (missingFields.length > 0) {
+        
+        if (missingFields.length > 0) { // Only log if there are actually fields missing from this specific list
             console.warn(
             `[CSV Parsing Debug] For trader "${name}": Could not find data for: [${missingFields.join('; ')}]. ` +
             `This could be due to missing headers or empty cells for these fields in your CSV. ` +
             `Ensure headers match expected variations (case-insensitive, space-trimmed) and that data is present in the cells. ` +
-            `Detected headers for this row by the system: ${Object.keys(row).join(', ')}`
+            `Detected headers for this row by the system: ${Object.keys(row).join(', ')}` // Shows headers available for *this specific row*
             );
         }
       }
@@ -285,7 +300,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         totalSales: parseNumericValue(getRowValue(row, ["Total Sales"]), "Total Sales", name),
         status: parsedStatus,
         lastActivity: lastActivityValue,
-        description: getRowValue(row, ["Description"]) || undefined,
+        description: getRowValue(row, ["Description"]) || undefined, // Ensure undefined if empty
         tradesMade: parseIntValue(getRowValue(row, ["Reviews"]), "Reviews", name),
         rating: parseNumericValue(getRowValue(row, ["Rating"]), "Rating", name),
         website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
@@ -301,11 +316,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       tradersToProcess.push(trader);
     }
 
+    // Post-processing for duplicates (client-side check)
     const validTraders: ParsedTraderData[] = [];
-    const processedPhoneNumbersInCsv = new Set<string>();
-    const duplicatePhonesInCsv = new Set<string>();
+    const processedPhoneNumbersInCsv = new Set<string>(); // To track duplicates *within* the CSV
+    const duplicatePhonesInCsv = new Set<string>(); // Store actual phone numbers that were CSV duplicates
     let skippedCount = 0;
 
+    // Create a set of normalized phone numbers from existing traders for efficient lookup
     const existingNormalizedPhones = new Set(
       existingTraders.map(t => normalizePhoneNumber(t.phone))
     );
@@ -314,13 +331,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       const normalizedPhone = normalizePhoneNumber(trader.phone);
       let isDuplicate = false;
 
-      if (normalizedPhone) {
+      if (normalizedPhone) { // Only check for duplicates if a phone number exists
         if (existingNormalizedPhones.has(normalizedPhone)) {
           isDuplicate = true;
            console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" already exists in the database (based on existing traders passed to dialog). Skipping.`);
         } else if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
           isDuplicate = true;
-          duplicatePhonesInCsv.add(trader.phone || 'N/A');
+          duplicatePhonesInCsv.add(trader.phone || 'N/A'); // Store the original phone for reporting
           console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" is a duplicate within the CSV file itself. Skipping.`);
         }
       }
@@ -337,6 +354,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     return { validTraders, skippedCount, duplicatePhonesInCsv, rawParseResults: parseResults };
   };
 
+
   const handleSubmit = async () => {
     if (!selectedFile || !fileContent) {
       toast({ variant: "destructive", title: "Error", description: "Please select a CSV file." });
@@ -346,11 +364,14 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
     const { validTraders, skippedCount, duplicatePhonesInCsv, rawParseResults } = parseCsvData(fileContent);
 
+    // Condition for "No Traders Parsed"
     if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() !== "") {
+      // This means the file was not empty, but nothing processable came out of parseCsvData.
+      // This usually means no 'Name' header or no rows with 'Name' data.
       console.warn(`[CSV Parsing Debug] No valid traders parsed from a non-empty file.
         Raw parsed data length (PapaParse): ${rawParseResults?.data?.length ?? 'N/A'}.
         This could mean rows were present but lacked a 'Name', or failed other validations.
-        First few raw data rows (if any):`, rawParseResults?.data?.slice(0,3) ?? "N/A");
+        First few raw data rows (if any):`, rawParseResults?.data?.slice(0,3) ?? "N/A"); // Log first few raw rows from PapaParse
       toast({
         variant: "destructive",
         title: "No Traders Parsed",
@@ -365,12 +386,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
               </ul>
             </div>
           ),
-        duration: 20000,
+        duration: 20000, // Increased duration for this detailed toast
       });
       setIsLoading(false);
       return;
     }
-    if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() === "") {
+    if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() === "") { // File was genuinely empty
       toast({ variant: "destructive", title: "Empty File", description: "The selected CSV file is empty." });
       setIsLoading(false);
       return;
@@ -413,13 +434,14 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             duration: 15000,
           });
           setIsLoading(false);
-          return;
+          return; // Stop further processing
         }
 
+        // Assuming result.data contains the array of successfully added traders from the server
         if (result.data) {
           newTradersAddedCount = result.data.length;
         }
-      } catch (error) {
+      } catch (error) { // Catch unexpected client-side errors during the onBulkAddTraders call
         const clientErrorMessage = error instanceof Error ? error.message : "Unknown client error";
         console.error("Unexpected client error during bulk add traders operation:", error);
         toast({
@@ -428,16 +450,22 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           description: `An unexpected client-error occurred: ${clientErrorMessage}. Check console.`,
         });
         setIsLoading(false);
-        return;
+        return; // Stop further processing
       }
     }
 
+    // Construct summary message
     let summaryMessages: string[] = [];
     if (newTradersAddedCount > 0) {
       summaryMessages.push(`${newTradersAddedCount} new trader(s) successfully added.`);
     } else if (validTraders.length > 0 && newTradersAddedCount === 0) {
+      // This case means client sent valid traders, but server added none.
       summaryMessages.push(`No new traders were added by the server. This could be due to all of them already existing (if server performs its own duplicate checks beyond what the client knows), or another server-side issue. Check server logs.`);
     }
+    // else if (validTraders.length === 0 && skippedCount === 0) {
+      // This is handled by the "No Traders Parsed" or "Empty File" toasts earlier.
+    // }
+
 
     if (skippedCount > 0) {
       summaryMessages.push(`${skippedCount} trader(s) were skipped by the client as duplicates (already in current view or within CSV).`);
@@ -455,9 +483,11 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 {summaryMessages.map((msg, idx) => <span key={idx}>{msg}</span>)}
             </div>
             ),
-            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000,
+            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, // Shorter if all good, longer if there are skips/warnings
         });
     } else if (validTraders.length === 0 && skippedCount === 0) {
+        // This case should ideally be caught by the "No Traders Parsed" or "Empty File" toasts.
+        // If it still reaches here, it means the file was likely empty and no warnings were generated before.
         toast({
             title: "No Action Taken",
             description: "No new traders to add and no duplicates found to skip by the client. The file might have been empty or contained no processable data according to client-side parsing.",
@@ -473,7 +503,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       setOpen(isOpen);
-      if (!isOpen) {
+      if (!isOpen) { // Clear file if dialog is closed
         clearFile();
       }
     }}>
@@ -486,9 +516,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. <strong>The first row MUST be a header row.</strong> The system uses these header names to identify data columns.
+            Upload a CSV file. <strong>The first row MUST be a header row.</strong> The system uses these header names (case-insensitive, flexible column order) to identify data columns.
             <br/>The <strong>'Name'</strong> header is mandatory and its column must contain data for each trader.
-            <br/>Other common headers (case-insensitive, spaces trimmed, column order is flexible):
+            <br/>Other common headers (examples):
             <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ...etc.</code>
             <br/>(See full list of expected headers by expanding this dialog or checking "How to Use").
             <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back', or 'New Lead'.
