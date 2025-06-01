@@ -1,6 +1,7 @@
 
 import type { HTMLAttributes } from 'react';
 import Image from 'next/image';
+import { cn } from "@/lib/utils"; // Added this import
 
 // Combine HTMLAttributes for a div with custom width and height props
 export function Logo(props: HTMLAttributes<HTMLDivElement> & { width?: number, height?: number }) {
