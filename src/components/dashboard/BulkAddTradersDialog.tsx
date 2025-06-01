@@ -148,7 +148,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     return undefined;
   };
 
-  const parseCsvData = (csvString: string | null): { validTraders: ParsedTraderData[], skippedCount: number, duplicatePhonesInCsv: Set<string> } => {
+  const parseCsvData = (csvString: string | null): { validTraders: ParsedTraderData[], skippedCount: number, duplicatePhonesInCsv: Set<string>, rawParseResults?: Papa.ParseResult<any> } => {
     if (!csvString) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
     
     let tradersToProcess: ParsedTraderData[] = [];
@@ -159,6 +159,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       transformHeader: header => header.trim(),
     });
 
+    console.log("[CSV Parsing Debug] Detected headers by PapaParse:", parseResults.meta.fields);
+
     if (parseResults.errors.length > 0) {
       parseResults.errors.forEach(err => console.warn("PapaParse Error:", err));
       toast({
@@ -167,13 +169,19 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         description: `Problem parsing CSV: ${parseResults.errors[0].message}. Please ensure fields with commas are double-quoted.`,
         duration: 10000,
       });
-      if (parseResults.errors.some(e => e.type === 'Quotes' || e.code === 'TooManyFields' || e.code === 'TooFewFields')) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
+      if (parseResults.errors.some(e => e.type === 'Quotes' || e.code === 'TooManyFields' || e.code === 'TooFewFields')) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
     
     const actualHeaders = parseResults.meta.fields;
     if (!actualHeaders || actualHeaders.length === 0) {
         console.warn("No headers found in CSV by PapaParse.");
-        return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
+        toast({
+            variant: "destructive",
+            title: "CSV Parsing Problem",
+            description: "Could not detect any headers in the CSV file. Please ensure it's a valid CSV with a header row.",
+            duration: 7000,
+        });
+        return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
     
     const hasNameHeader = actualHeaders.some(h => h.trim().toLowerCase() === "name");
@@ -184,8 +192,24 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         description: "The CSV file must contain a 'Name' header column.",
         duration: 7000,
       });
-      return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
+      return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
+
+    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "total sales", "owner name", "main category", "reviews", "rating", "website"];
+    const foundCommonHeadersCount = actualHeaders.filter(h => 
+        commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
+    ).length;
+
+    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.length < 5) { 
+        console.warn(`[CSV Parsing Debug] Few common headers found. Expected some of: ${commonExpectedHeadersForHeuristicCheck.join(', ')}. Detected headers: ${actualHeaders.join(', ')}`);
+        toast({
+            variant: "default", 
+            title: "Unusual CSV Headers Detected",
+            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Total Sales). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
+            duration: 10000,
+        });
+    }
+
 
     for (const row of parseResults.data as any[]) {
       const name = getRowValue(row, ["Name"]);
@@ -278,7 +302,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         }
       }
     }
-    return { validTraders, skippedCount, duplicatePhonesInCsv };
+    return { validTraders, skippedCount, duplicatePhonesInCsv, rawParseResults: parseResults };
   };
 
   const handleSubmit = async () => {
@@ -288,9 +312,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }
     setIsLoading(true);
 
-    const { validTraders, skippedCount, duplicatePhonesInCsv } = parseCsvData(fileContent);
+    const { validTraders, skippedCount, duplicatePhonesInCsv, rawParseResults } = parseCsvData(fileContent);
 
     if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() !== "") { 
+      console.warn(`[CSV Parsing Debug] No valid traders parsed from a non-empty file.
+        Raw parsed data length (PapaParse): ${rawParseResults?.data?.length ?? 'N/A'}.
+        This could mean rows were present but lacked a 'Name', or failed other validations.
+        First few raw data rows (if any):`, rawParseResults?.data?.slice(0,3) ?? "N/A");
       toast({
         variant: "destructive",
         title: "No Traders Parsed",
@@ -310,7 +338,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     if (validTraders.length > 0) {
       try {
         const result = await onBulkAddTraders(branchId, validTraders);
-        if (result !== null) { // Server action might return empty array on success (e.g. all duplicates already in DB)
+        if (result !== null) { 
           newTradersAddedCount = result.length;
         } else {
           // result is null, indicating a server-side failure.
