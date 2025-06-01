@@ -12,7 +12,6 @@ import {
   updateDoc,
   deleteDoc,
   writeBatch,
-  // serverTimestamp, // Not used currently, using ISO string for lastActivity
   setDoc,
   Timestamp,
   getDoc
@@ -53,15 +52,20 @@ const INITIAL_SEED_TRADERS_DATA: Omit<Trader, 'id'>[] = INITIAL_SEED_TRADERS_DAT
   }) as Omit<Trader, 'id'>;
 });
 
+const determineLastActivityString = (activity: any): string => {
+  if (activity instanceof Timestamp) {
+    return activity.toDate().toISOString();
+  }
+  if (typeof activity === 'string') {
+    // Could add validation here if needed, e.g., isISO8601, but assuming valid if string for now
+    return activity;
+  }
+  // Default for null, undefined, or other unexpected types from Firestore
+  console.warn(`Unexpected lastActivity type: ${typeof activity}, value: ${activity}. Defaulting.`);
+  return new Date(0).toISOString(); 
+};
 
 const mapDocToTrader = (docData: any, id: string): Trader => {
-  // Ensure all fields from Trader type are present, defaulting to null if not in docData
-  // This handles cases where fields might have been omitted in Firestore if they were null
-  const traderShell: Partial<Trader> = {};
-  // Not strictly necessary to prefill with nulls if type is `field?: type | null`
-  // as missing fields from Firestore will be `undefined` on `docData.field`,
-  // and `undefined` is compatible with `type | null | undefined`.
-
   const data = docData as Partial<Omit<Trader, 'id'>>;
 
   return {
@@ -71,7 +75,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
     totalSales: data.totalSales ?? 0,
     tradesMade: data.tradesMade ?? 0,
     status: data.status ?? 'Inactive',
-    lastActivity: typeof data.lastActivity === 'string' ? data.lastActivity : (data.lastActivity instanceof Timestamp ? data.lastActivity.toDate().toISOString() : new Date(0).toISOString()),
+    lastActivity: determineLastActivityString(data.lastActivity),
     description: data.description ?? null,
     rating: data.rating ?? null,
     website: data.website ?? null,
@@ -149,13 +153,15 @@ export async function addTraderToDb(
     const dataWithSystemFields = {
       ...traderData,
       branchId: branchId, 
-      lastActivity: new Date().toISOString(),
+      lastActivity: new Date().toISOString(), // Will be string
     };
     const cleanedData = cleanDataForFirestoreWrite(dataWithSystemFields);
     
     const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
     const docRef = await addDoc(tradersCollectionRef, cleanedData);
-    // Construct the returned Trader object based on what was cleaned and saved
+    
+    // Re-fetch or construct the full Trader object carefully
+    // The `cleanedData` has string `lastActivity`, which matches Trader type
     return { ...cleanedData, id: docRef.id } as Trader;
   } catch (error) {
     console.error('Error adding trader to Firestore:', error);
@@ -169,13 +175,13 @@ export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trade
     
     const dataToPrepareForUpdate = {
       ...updatedTraderData,
-      lastActivity: new Date().toISOString(),
+      lastActivity: new Date().toISOString(), // Update lastActivity to current time string
     };
-    // Remove id from the data to update as it's the document key
     const { id, ...dataWithoutId } = dataToPrepareForUpdate;
     const cleanedData = cleanDataForFirestoreWrite(dataWithoutId);
 
     await updateDoc(traderDocRef, cleanedData);
+    // The `cleanedData` has string `lastActivity`
     return { ...cleanedData, id: updatedTraderData.id } as Trader;
   } catch (error) {
     console.error(`Error updating trader ${updatedTraderData.id}:`, error);
@@ -186,6 +192,11 @@ export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trade
 export async function deleteTraderFromDb(traderId: string, branchId: BranchId): Promise<boolean> {
   try {
     const traderDocRef = doc(db, TRADERS_COLLECTION, traderId);
+    // Optional: Could add a check here to ensure the trader belongs to the branchId before deleting, if needed.
+    // const docSnap = await getDoc(traderDocRef);
+    // if (docSnap.exists() && docSnap.data().branchId !== branchId) {
+    //   throw new Error(`Trader ${traderId} does not belong to branch ${branchId}. Deletion denied.`);
+    // }
     await deleteDoc(traderDocRef);
     return true;
   } catch (error) {
@@ -211,25 +222,24 @@ export async function bulkAddTradersToDb(
       totalSales: parsedData.totalSales ?? 0,
       tradesMade: parsedData.tradesMade ?? 0,
       status: parsedData.status ?? 'Active',
-      lastActivity: parsedData.lastActivity || new Date().toISOString(),
-      description: parsedData.description, // Will be cleaned
-      rating: parsedData.rating, // Will be cleaned
-      website: parsedData.website, // Will be cleaned
-      phone: parsedData.phone, // Will be cleaned
-      address: parsedData.address, // Will be cleaned
-      mainCategory: parsedData.mainCategory, // Will be cleaned
-      ownerName: parsedData.ownerName, // Will be cleaned
-      ownerProfileLink: parsedData.ownerProfileLink, // Will be cleaned
-      categories: parsedData.categories, // Will be cleaned
-      workdayTiming: parsedData.workdayTiming, // Will be cleaned
-      // These fields are not in ParsedTraderData, so they'll be undefined here.
-      // cleanDataForFirestoreWrite will turn them to null.
-      closedOn: undefined, 
-      reviewKeywords: undefined,
+      lastActivity: parsedData.lastActivity || new Date().toISOString(), // Will be string
+      description: parsedData.description,
+      rating: parsedData.rating,
+      website: parsedData.website,
+      phone: parsedData.phone,
+      address: parsedData.address,
+      mainCategory: parsedData.mainCategory,
+      ownerName: parsedData.ownerName,
+      ownerProfileLink: parsedData.ownerProfileLink,
+      categories: parsedData.categories,
+      workdayTiming: parsedData.workdayTiming,
+      closedOn: null, // Explicitly null as ParsedTraderData doesn't include it
+      reviewKeywords: null, // Explicitly null
     };
     
     const finalTraderDataForDb = cleanDataForFirestoreWrite(newTraderObject);
     batch.set(newTraderDocRef, finalTraderDataForDb);
+    // `finalTraderDataForDb` has string `lastActivity`
     createdTraders.push({ ...(finalTraderDataForDb as Omit<Trader, 'id'>), id: newTraderDocRef.id });
   });
 
@@ -238,7 +248,6 @@ export async function bulkAddTradersToDb(
     return createdTraders;
   } catch (error) {
     console.error(`Error bulk adding traders for branch ${branchId}:`, error);
-    throw error;
+    throw error; // Re-throw to be caught by the server action
   }
 }
-
