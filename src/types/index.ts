@@ -5,7 +5,7 @@ export interface Trader {
   branchId: string;
   totalSales: number; // Will be £
   tradesMade: number;
-  status: 'Active' | 'Inactive';
+  status: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead'; // Updated status
   lastActivity: string; // ISO Date string e.g. "2023-10-26T10:00:00.000Z"
   description?: string | null;
   rating?: number | null;
@@ -29,7 +29,7 @@ export const VALID_BRANCH_IDS: BranchId[] = ['PURLEY', 'BRANCH_B', 'BRANCH_C', '
 export type ParsedTraderData = {
   name: string; // Mandatory
   totalSales?: number;
-  status?: 'Active' | 'Inactive';
+  status?: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead'; // Updated status
   lastActivity?: string; // Expected as ISO string or a format Date.parse() can handle
   description?: string | null;
   tradesMade?: number; // from 'Reviews' header

@@ -36,8 +36,8 @@ interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BranchId;
   allBranchTraders: Trader[]; 
-  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<boolean>; // Changed from Promise<void>
-  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>; // Changed from Promise<void>
+  onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
+  onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
 }
@@ -177,7 +177,24 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
   };
 
   const handleStatusToggle = async (trader: Trader) => {
-    const newStatus = trader.status === "Active" ? "Inactive" : "Active";
+    let newStatus: Trader['status'];
+    switch (trader.status) {
+      case 'Active':
+        newStatus = 'Inactive';
+        break;
+      case 'Inactive':
+        newStatus = 'Active';
+        break;
+      case 'Call-Back':
+        newStatus = 'Active';
+        break;
+      case 'New Lead':
+        newStatus = 'Active';
+        break;
+      default:
+        newStatus = 'Active'; 
+    }
+
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       totalSales: trader.totalSales,
@@ -194,8 +211,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
       categories: trader.categories || "",
       workdayTiming: trader.workdayTiming || "",
     };
-    // onUpdate now returns boolean, but this specific toggle doesn't directly use the boolean for UI change
-    // The page content component handles the toast and refresh upon successful onUpdate.
     await onUpdate(trader.id, formValues);
   };
 
@@ -203,8 +218,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     const success = await onDelete(traderId);
     if (success) {
       toast({ title: "Success", description: "Trader deleted successfully." });
-    } else {
-      // Error toast is handled by DashboardClientPageContent or DeleteTraderDialog
     }
     return success; 
   };
@@ -241,6 +254,22 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     }
     return stringContent || <span className="text-muted-foreground/50">-</span>;
   };
+
+  const getStatusBadgeClass = (status: Trader['status']) => {
+    switch (status) {
+      case 'Active':
+        return 'bg-green-500/20 text-green-700 border-green-500/30 hover:bg-green-500/30';
+      case 'Inactive':
+        return 'bg-red-500/10 text-red-700 border-red-500/20 hover:bg-red-500/30';
+      case 'Call-Back':
+        return 'bg-amber-500/20 text-amber-700 border-amber-500/30 hover:bg-amber-500/30';
+      case 'New Lead':
+        return 'bg-blue-500/20 text-blue-700 border-blue-500/30 hover:bg-blue-500/30';
+      default:
+        return 'bg-secondary text-secondary-foreground hover:bg-secondary/80';
+    }
+  };
+
 
   return (
     <div className="space-y-4">
@@ -335,13 +364,11 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
                    <Button
                       variant="ghost"
                       size="sm"
-                      className={`p-1 h-auto hover:opacity-80 ${
-                        trader.status === 'Active' ? 'hover:bg-green-500/30' : 'hover:bg-red-500/30'
-                      }`}
+                      className={`p-1 h-auto hover:opacity-80 ${getStatusBadgeClass(trader.status).split(' ').find(c => c.startsWith('hover:bg-'))}`}
                       onClick={() => handleStatusToggle(trader)}
                     >
-                    <Badge variant={trader.status === 'Active' ? 'default' : 'secondary'}
-                      className={`${trader.status === 'Active' ? 'bg-green-500/20 text-green-700 border-green-500/30' : 'bg-red-500/10 text-red-700 border-red-500/20'} cursor-pointer`}
+                    <Badge variant={'outline'}
+                      className={`${getStatusBadgeClass(trader.status)} cursor-pointer`}
                     >
                       {trader.status}
                     </Badge>
@@ -433,3 +460,4 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+

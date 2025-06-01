@@ -105,8 +105,16 @@ export function DashboardClientPageContent({
      refreshTradersForBranch();
   }, [branchId, keyForTable, toast]); 
 
-  const liveTradersCount = useMemo(() => {
+  const activeTradersCount = useMemo(() => {
     return traders.filter(t => t.status === 'Active').length;
+  }, [traders]);
+
+  const callBackTradersCount = useMemo(() => {
+    return traders.filter(t => t.status === 'Call-Back').length;
+  }, [traders]);
+
+  const newLeadTradersCount = useMemo(() => {
+    return traders.filter(t => t.status === 'New Lead').length;
   }, [traders]);
 
   const recentlyActiveTradersCount = useMemo(() => {
@@ -201,7 +209,9 @@ export function DashboardClientPageContent({
   return (
     <div className="space-y-6">
       <MiniDashboardStats 
-        liveTradersCount={liveTradersCount}
+        liveTradersCount={activeTradersCount} // Renamed from liveTradersCount
+        callBackTradersCount={callBackTradersCount}
+        newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
       <div className="grid gap-6 lg:grid-cols-3">
@@ -237,3 +247,4 @@ export function DashboardClientPageContent({
     </div>
   );
 }
+

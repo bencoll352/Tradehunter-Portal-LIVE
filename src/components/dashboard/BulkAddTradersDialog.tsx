@@ -34,6 +34,7 @@ const EXPECTED_HEADERS = [
 ];
 
 const FIRESTORE_BATCH_LIMIT = 500;
+const VALID_STATUSES_LOWER = ["active", "inactive", "call-back", "new lead"];
 
 export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
@@ -76,7 +77,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return undefined;
     }
     const cleanedValue = String(rawValue).replace(/[^0-9.-]+/g, "");
-    if (cleanedValue === "" || cleanedValue === "." || cleanedValue === "-") { // Check for effectively empty strings post-cleaning
+    if (cleanedValue === "" || cleanedValue === "." || cleanedValue === "-") { 
         console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which is not a valid number. Field will be undefined.`);
         return undefined;
     }
@@ -93,7 +94,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return undefined;
     }
     const cleanedValue = String(rawValue).replace(/[^0-9-]+/g, "");
-    if (cleanedValue === "" || cleanedValue === "-") { // Check for effectively empty strings post-cleaning
+    if (cleanedValue === "" || cleanedValue === "-") { 
         console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which is not a valid integer. Field will be undefined.`);
         return undefined;
     }
@@ -127,7 +128,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           year += (year < 70 ? 2000 : 1900); 
         }
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
-          const tempDate = new Date(Date.UTC(year, month, day)); // Use UTC to avoid timezone shifts converting to ISO string
+          const tempDate = new Date(Date.UTC(year, month, day)); 
           if (tempDate.getUTCFullYear() === year && tempDate.getUTCMonth() === month && tempDate.getUTCDate() === day) {
              date = tempDate;
              break;
@@ -140,8 +141,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         try {
             const parsedFallback = new Date(val);
             if (!isNaN(parsedFallback.getTime())) {
-                // Ensure the parsed date is reasonable (e.g., not epoch 0 if val is non-standard)
-                if (parsedFallback.getUTCFullYear() > 1900) { // Basic sanity check
+                if (parsedFallback.getUTCFullYear() > 1900) { 
                     date = parsedFallback;
                 }
             }
@@ -242,15 +242,20 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         continue; 
       }
       
-      let statusValue = getRowValue(row, ["Status"])?.toLowerCase();
-      let parsedStatus : 'Active' | 'Inactive' | undefined = undefined;
-      if (statusValue === 'active') {
-        parsedStatus = 'Active';
-      } else if (statusValue === 'inactive') {
-        parsedStatus = 'Inactive';
-      } else if (statusValue) {
-        console.warn(`[CSV Parsing Debug] Trader "${name}": Invalid status "${statusValue}". Defaulting to Active if not set otherwise by server.`);
+      const statusValueRaw = getRowValue(row, ["Status"]);
+      let parsedStatus : ParsedTraderData['status'] = 'New Lead'; // Default if not matched
+      if (statusValueRaw) {
+        const statusValueLower = statusValueRaw.toLowerCase();
+        if (VALID_STATUSES_LOWER.includes(statusValueLower)) {
+            if (statusValueLower === 'active') parsedStatus = 'Active';
+            else if (statusValueLower === 'inactive') parsedStatus = 'Inactive';
+            else if (statusValueLower === 'call-back') parsedStatus = 'Call-Back';
+            else if (statusValueLower === 'new lead') parsedStatus = 'New Lead';
+        } else {
+            console.warn(`[CSV Parsing Debug] Trader "${name}": Invalid status "${statusValueRaw}". Defaulting to 'New Lead'.`);
+        }
       }
+
 
       const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
       const phoneValue = getRowValue(row, ["📞 Phone", "Phone"]);
@@ -479,7 +484,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogDescription>
             Upload a CSV file. The first row should contain headers. Expected headers are approximately:
             <br/><code>{EXPECTED_HEADERS.join(", ")}</code>.
-            <br/>The 'Name' header is mandatory. 'Actions' column data will be ignored.
+            <br/>The 'Name' header is mandatory. Status can be 'Active', 'Inactive', 'Call-Back', or 'New Lead'. 'Actions' column data will be ignored.
             The system matches headers case-insensitively and ignores leading/trailing spaces. 
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
             Max {FIRESTORE_BATCH_LIMIT} traders per file.

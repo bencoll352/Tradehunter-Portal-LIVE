@@ -36,11 +36,12 @@ function cleanDataForFirestoreWrite<T extends Record<string, any>>(data: T): Rec
 // Initial seed data for traders. Used if Firestore is empty for a branch.
 const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
   { name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5 },
-  { name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Active', description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction", website: null },
+  { name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Call-Back', description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction", website: null },
   { name: 'Charlie Brown', branchId: 'PURLEY', totalSales: 75000, tradesMade: 90, status: 'Inactive', mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts", rating: 3.0, website: null, ownerProfileLink: null, categories: null, closedOn: null },
   { name: 'Diana Prince', branchId: 'BRANCH_B', totalSales: 210000, tradesMade: 200, status: 'Active', address: '789 Amazon Way, Themyscira, THM 001', phone: '01234 567803', mainCategory: 'Consulting', closedOn: 'Weekends', description: "Antiquities expert and diplomatic consultant. Handles sensitive international relations.", rating: 5.0, website: "https://diana.example.com", categories: "Diplomacy, History, Art", reviewKeywords: "wise, strong, expert", ownerName: "Diana Prince", ownerProfileLink: null, workdayTiming: "By Appointment"},
-  { name: 'Edward Scissorhands', branchId: 'BRANCH_B', totalSales: 150000, tradesMade: 180, status: 'Active', website: 'https://edwardcuts.example.com', description: 'Unique topiary and avant-garde hairdressing services. Gentle and artistic.', rating: 4.9, ownerProfileLink: 'https://example.com/edward', mainCategory: "Personal Care", categories: "Hairdressing, Landscaping, Art", phone: "01234567811", address: "1 Suburbia Drive, Castle Hill, CHL 555", reviewKeywords: "artistic, unique, gentle", ownerName: "Edward", workdayTiming: "Varies", closedOn: null },
+  { name: 'Edward Scissorhands', branchId: 'BRANCH_B', totalSales: 150000, tradesMade: 180, status: 'New Lead', website: 'https://edwardcuts.example.com', description: 'Unique topiary and avant-garde hairdressing services. Gentle and artistic.', rating: 4.9, ownerProfileLink: 'https://example.com/edward', mainCategory: "Personal Care", categories: "Hairdressing, Landscaping, Art", phone: "01234567811", address: "1 Suburbia Drive, Castle Hill, CHL 555", reviewKeywords: "artistic, unique, gentle", ownerName: "Edward", workdayTiming: "Varies", closedOn: null },
   { name: 'Fiona Gallagher', branchId: 'BRANCH_C', totalSales: 180000, tradesMade: 165, status: 'Active', description: 'South Side resilience. Runs a local cafe and diner. Known for hearty meals and a welcoming atmosphere.', mainCategory: 'Cafe', phone: '01234 567804', address: "222 South Side St, Chicago, CHI 606", ownerName: "Fiona Gallagher", categories: "Food, Diner, Coffee", workdayTiming: "Mon-Sun 7am-10pm", reviewKeywords: "family, hearty, local", rating: 4.2, website: null, ownerProfileLink: null, closedOn: null },
+  { name: 'George Jetson', branchId: 'BRANCH_D', totalSales: 300000, tradesMade: 250, status: 'New Lead', description: 'Digital Indexer at Spacely Space Sprockets. Future-proof solutions.', rating: 4.0, phone: '01234 567805', mainCategory: 'Technology', categories: 'Automation, IT, Future Tech', address: "Orbit City Apartments", ownerName: "George Jetson", workdayTiming: "Mon-Fri 9am-5pm (21st Century Time)", website: null, ownerProfileLink: null, closedOn: null },
 ];
 
 // Add lastActivity to seed data and clean it
@@ -57,13 +58,21 @@ const determineLastActivityString = (activity: any): string => {
     return activity.toDate().toISOString();
   }
   if (typeof activity === 'string') {
-    // Could add validation here if needed, e.g., isISO8601, but assuming valid if string for now
-    return activity;
+    try {
+      // Attempt to parse to ensure it's a valid date string, then re-format to ISO
+      // This helps normalize various string date formats if they sneak in, though ISO is preferred.
+      return new Date(activity).toISOString();
+    } catch (e) {
+      // If parsing fails, default
+      console.warn(`Invalid date string for lastActivity: ${activity}. Defaulting.`);
+      return new Date(0).toISOString();
+    }
   }
   // Default for null, undefined, or other unexpected types from Firestore
   console.warn(`Unexpected lastActivity type: ${typeof activity}, value: ${activity}. Defaulting.`);
   return new Date(0).toISOString(); 
 };
+
 
 const mapDocToTrader = (docData: any, id: string): Trader => {
   const data = docData as Partial<Omit<Trader, 'id'>>;
@@ -74,7 +83,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
     branchId: data.branchId ?? 'UNKNOWN_BRANCH',
     totalSales: data.totalSales ?? 0,
     tradesMade: data.tradesMade ?? 0,
-    status: data.status ?? 'Inactive',
+    status: data.status ?? 'New Lead', // Default to New Lead if status is missing
     lastActivity: determineLastActivityString(data.lastActivity),
     description: data.description ?? null,
     rating: data.rating ?? null,
@@ -105,8 +114,7 @@ export async function getTradersByBranch(branchId: BranchId): Promise<Trader[]> 
         const batch = writeBatch(db);
         seedDataForBranch.forEach(traderSeedData => {
           const traderDocRef = doc(tradersCollectionRef); 
-          // traderSeedData is already cleaned by cleanDataForFirestoreWrite
-          batch.set(traderDocRef, traderSeedData);
+          batch.set(traderDocRef, traderSeedData); // traderSeedData is already cleaned
         });
         await batch.commit();
         console.log(`Seeded ${seedDataForBranch.length} traders for branch ${branchId}.`);
@@ -153,15 +161,13 @@ export async function addTraderToDb(
     const dataWithSystemFields = {
       ...traderData,
       branchId: branchId, 
-      lastActivity: new Date().toISOString(), // Will be string
+      lastActivity: new Date().toISOString(),
     };
     const cleanedData = cleanDataForFirestoreWrite(dataWithSystemFields);
     
     const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
     const docRef = await addDoc(tradersCollectionRef, cleanedData);
     
-    // Re-fetch or construct the full Trader object carefully
-    // The `cleanedData` has string `lastActivity`, which matches Trader type
     return { ...cleanedData, id: docRef.id } as Trader;
   } catch (error) {
     console.error('Error adding trader to Firestore:', error);
@@ -175,13 +181,12 @@ export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trade
     
     const dataToPrepareForUpdate = {
       ...updatedTraderData,
-      lastActivity: new Date().toISOString(), // Update lastActivity to current time string
+      lastActivity: new Date().toISOString(),
     };
     const { id, ...dataWithoutId } = dataToPrepareForUpdate;
     const cleanedData = cleanDataForFirestoreWrite(dataWithoutId);
 
     await updateDoc(traderDocRef, cleanedData);
-    // The `cleanedData` has string `lastActivity`
     return { ...cleanedData, id: updatedTraderData.id } as Trader;
   } catch (error) {
     console.error(`Error updating trader ${updatedTraderData.id}:`, error);
@@ -192,11 +197,6 @@ export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trade
 export async function deleteTraderFromDb(traderId: string, branchId: BranchId): Promise<boolean> {
   try {
     const traderDocRef = doc(db, TRADERS_COLLECTION, traderId);
-    // Optional: Could add a check here to ensure the trader belongs to the branchId before deleting, if needed.
-    // const docSnap = await getDoc(traderDocRef);
-    // if (docSnap.exists() && docSnap.data().branchId !== branchId) {
-    //   throw new Error(`Trader ${traderId} does not belong to branch ${branchId}. Deletion denied.`);
-    // }
     await deleteDoc(traderDocRef);
     return true;
   } catch (error) {
@@ -221,8 +221,8 @@ export async function bulkAddTradersToDb(
       branchId: branchId,
       totalSales: parsedData.totalSales ?? 0,
       tradesMade: parsedData.tradesMade ?? 0,
-      status: parsedData.status ?? 'Active',
-      lastActivity: parsedData.lastActivity || new Date().toISOString(), // Will be string
+      status: parsedData.status ?? 'New Lead', // Default to New Lead
+      lastActivity: parsedData.lastActivity || new Date().toISOString(),
       description: parsedData.description,
       rating: parsedData.rating,
       website: parsedData.website,
@@ -233,13 +233,12 @@ export async function bulkAddTradersToDb(
       ownerProfileLink: parsedData.ownerProfileLink,
       categories: parsedData.categories,
       workdayTiming: parsedData.workdayTiming,
-      closedOn: null, // Explicitly null as ParsedTraderData doesn't include it
-      reviewKeywords: null, // Explicitly null
+      closedOn: null, 
+      reviewKeywords: null,
     };
     
     const finalTraderDataForDb = cleanDataForFirestoreWrite(newTraderObject);
     batch.set(newTraderDocRef, finalTraderDataForDb);
-    // `finalTraderDataForDb` has string `lastActivity`
     createdTraders.push({ ...(finalTraderDataForDb as Omit<Trader, 'id'>), id: newTraderDocRef.id });
   });
 
@@ -248,6 +247,7 @@ export async function bulkAddTradersToDb(
     return createdTraders;
   } catch (error) {
     console.error(`Error bulk adding traders for branch ${branchId}:`, error);
-    throw error; // Re-throw to be caught by the server action
+    throw error; 
   }
 }
+

@@ -29,7 +29,7 @@ export const traderFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   totalSales: z.coerce.number().min(0, { message: "Total sales must be a positive number." }),
   tradesMade: z.coerce.number().int().min(0, { message: "Trades made (Reviews) must be a positive integer." }),
-  status: z.enum(["Active", "Inactive"]),
+  status: z.enum(["Active", "Inactive", "Call-Back", "New Lead"]), // Updated status
   description: z.string().optional().nullable(),
   rating: z.coerce.number().min(0).max(5).optional().nullable(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')).nullable(),
@@ -130,6 +130,8 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
                     <SelectContent>
                     <SelectItem value="Active">Active</SelectItem>
                     <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Call-Back">Call-Back</SelectItem>
+                    <SelectItem value="New Lead">New Lead</SelectItem>
                     </SelectContent>
                 </Select>
                 <FormMessage />
