@@ -41,13 +41,14 @@ function extractErrorMessage(error: unknown, defaultMessage: string): string {
 }
 
 
-export async function getTradersAction(branchId: BranchId): Promise<Trader[] | null> {
+export async function getTradersAction(branchId: BranchId): Promise<{ data: Trader[] | null; error: string | null }> {
   try {
     const traders = await dbGetTradersByBranch(branchId);
-    return traders;
+    return { data: traders, error: null };
   } catch (error) {
-    console.error("Failed to get traders:", error);
-    return null;
+    const errorMessage = extractErrorMessage(error, `Failed to get traders for branch ${branchId}.`);
+    console.error(`getTradersAction for ${branchId} failed:`, errorMessage, "Original error:", error);
+    return { data: null, error: errorMessage };
   }
 }
 

@@ -54,20 +54,21 @@ export function DashboardClientPageContent({
         if (storedBranchId) {
           setIsLoading(true);
           try {
-            const fetchedTraders = await getTradersAction(storedBranchId);
-            if (fetchedTraders) {
-              setTraders(fetchedTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+            const result = await getTradersAction(storedBranchId);
+            if (result.data) {
+              setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
             } else {
               if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
                 setTraders([]);
-                toast({ variant: "destructive", title: "Error Loading Data", description: "Could not load trader data. The server might be busy or there's a configuration issue." });
+                toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data. The server might be busy or there's a configuration issue." });
               }
             }
           } catch (error) {
-            console.error("Error fetching initial traders:", error);
+            // This catch is for unexpected errors during the getTradersAction call itself, though it should be handled within the action.
+            console.error("Error fetching initial traders (client catch):", error);
             setTraders([]);
              if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
-              toast({ variant: "destructive", title: "Error Loading Data", description: "Failed to load trader data due to an unexpected error." });
+              toast({ variant: "destructive", title: "Error Loading Data", description: "Failed to load trader data due to an unexpected client-side error." });
             }
           } finally {
             setIsLoading(false);
@@ -85,15 +86,15 @@ export function DashboardClientPageContent({
       if (branchId && VALID_BRANCH_IDS.includes(branchId)) { 
         setIsLoading(true);
         try {
-          const fetchedTraders = await getTradersAction(branchId);
-          if (fetchedTraders) {
-            setTraders(fetchedTraders.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+          const result = await getTradersAction(branchId);
+          if (result.data) {
+            setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
           } else {
-             toast({ variant: "destructive", title: "Error Refreshing Data", description: `Could not refresh traders for ${branchId}.` });
+             toast({ variant: "destructive", title: "Error Refreshing Data", description: result.error || `Could not refresh traders for ${branchId}.` });
           }
         } catch (error) {
-          console.error(`Error refreshing traders for ${branchId}:`, error);
-          toast({ variant: "destructive", title: "Error Refreshing Data", description: "Failed to refresh trader data." });
+          console.error(`Error refreshing traders for ${branchId} (client catch):`, error);
+          toast({ variant: "destructive", title: "Error Refreshing Data", description: "Failed to refresh trader data due to an unexpected client-side error." });
         } finally {
           setIsLoading(false);
         }
@@ -247,4 +248,3 @@ export function DashboardClientPageContent({
     </div>
   );
 }
-
