@@ -381,7 +381,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
               <ul className="list-disc list-inside text-xs mt-1 space-y-0.5">
                 <li><strong>Mandatory 'Name' Header:</strong> Your CSV file MUST have a header row, and one of the headers MUST be 'Name' (case-insensitive). Each trader row must also have data in the 'Name' column.</li>
                 <li><strong>Header-Based Parsing:</strong> The system uses header names to find data, not a strict column order or count.</li>
-                <li><strong>Check Console:</strong> Open your browser's developer console (F12 &gt; Console) for specific parsing warnings (e.g., invalid dates, numbers, detected headers).</li>
+                <li><strong>Check Console:</strong> Open your browser's developer console (F12 then Console tab) for specific parsing warnings (e.g., invalid dates, numbers, detected headers).</li>
                 <li><strong>Quoted Fields:</strong> Fields with commas (e.g., in Description, Address, Categories) must be enclosed in double quotes (e.g., "123 Main St, Anytown").</li>
               </ul>
             </div>
@@ -436,7 +436,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                   The server connected to Firestore, but was denied permission to write data. This is likely due to your Firestore Security Rules.
                 </p>
                 <p className="mt-1 text-xs">
-                  <strong>Action:</strong> Go to your Firebase Console -> Firestore Database -> Rules tab. For development, you can temporarily set them to allow all reads/writes:
+                  <strong>Action:</strong> Go to your Firebase Console, then to Firestore Database, and then to the Rules tab. For development, you can temporarily set them to allow all reads/writes:
                   <pre className="mt-1 p-1.5 bg-muted text-xs rounded-sm overflow-x-auto">
                     {`rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}`}
                   </pre>
@@ -598,4 +598,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
+    
+
     
