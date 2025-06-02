@@ -415,10 +415,22 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
         if (result.error) {
           console.error("Server action failed during bulk add with error message from server:", result.error);
-          toast({
-            variant: "destructive",
-            title: "Bulk Upload Failed on Server",
-            description: (
+          let toastDescription: React.ReactNode;
+          if (result.error.toLowerCase().includes("firestore not initialized")) {
+            toastDescription = (
+              <div className="text-sm">
+                <p className="font-semibold">Server error: {result.error}</p>
+                <p className="mt-2 text-xs">
+                  This indicates a problem with the Firebase configuration on the server.
+                  Please ensure Firebase environment variables (e.g., `NEXT_PUBLIC_FIREBASE_PROJECT_ID`) are correctly set and accessible by the server.
+                </p>
+                <p className="mt-1 text-xs">
+                  Check your **server logs** (Firebase console if deployed, or your local Next.js terminal) for `[Firebase Setup]` messages and detailed errors.
+                </p>
+              </div>
+            );
+          } else {
+            toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server error: {result.error}</p>
                 <p className="mt-2 text-xs">
@@ -426,11 +438,16 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                   or a problem with the Firestore database setup (like security rules or quotas).
                 </p>
                 <p className="mt-1 text-xs">
-                  Please <strong>check your server logs</strong> (Firebase console if deployed, or your local Next.js terminal) for detailed Firestore error messages.
+                  Please <strong>check your server logs</strong> for detailed Firestore error messages.
                   Also, review your CSV data for the traders being uploaded.
                 </p>
               </div>
-            ),
+            );
+          }
+          toast({
+            variant: "destructive",
+            title: "Bulk Upload Failed on Server",
+            description: toastDescription,
             duration: 15000,
           });
           setIsLoading(false);
