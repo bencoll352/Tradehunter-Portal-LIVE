@@ -419,17 +419,33 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           if (result.error.toLowerCase().includes("firestore not initialized")) {
             toastDescription = (
               <div className="text-sm">
-                <p className="font-semibold">Server error: {result.error}</p>
+                <p className="font-semibold">Server error: Firestore Not Initialized</p>
                 <p className="mt-2 text-xs">
-                  This indicates a problem with the Firebase configuration on the server.
-                  Please ensure Firebase environment variables (e.g., `NEXT_PUBLIC_FIREBASE_PROJECT_ID`) are correctly set in your `.env.local` file (and restart your dev server) or in your hosting environment.
+                  The application's backend couldn't connect to Firebase. This is usually due to missing or incorrect Firebase configuration environment variables.
                 </p>
                 <p className="mt-1 text-xs">
-                  Check your **server logs** (your local Next.js terminal, or Firebase console for deployed apps) for `[Firebase Setup]` messages and detailed errors.
+                  <strong>Action:</strong> Please check your <strong>server logs</strong> (your local Next.js terminal, or Firebase console for deployed apps) for `[Firebase Setup]` messages. Ensure `NEXT_PUBLIC_FIREBASE_PROJECT_ID` and other Firebase variables are correctly set in your `.env.local` file (and restart your dev server) or in your hosting environment.
                 </p>
               </div>
             );
-          } else {
+          } else if (result.error.toLowerCase().includes("permission_denied") || result.error.toLowerCase().includes("missing or insufficient permissions")) {
+            toastDescription = (
+              <div className="text-sm">
+                <p className="font-semibold">Server error: Firestore Permission Denied</p>
+                 <p className="mt-2 text-xs">
+                  The server connected to Firestore, but was denied permission to write data. This is likely due to your Firestore Security Rules.
+                </p>
+                <p className="mt-1 text-xs">
+                  <strong>Action:</strong> Go to your Firebase Console -> Firestore Database -> Rules tab. For development, you can temporarily set them to allow all reads/writes:
+                  <pre className="mt-1 p-1.5 bg-muted text-xs rounded-sm overflow-x-auto">
+                    {`rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}`}
+                  </pre>
+                   <p className="mt-1 text-xs font-semibold text-destructive-foreground bg-destructive p-1 rounded-sm">Warning: These permissive rules are NOT for production.</p>
+                </p>
+              </div>
+            );
+          }
+          else {
             toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server error: {result.error}</p>
@@ -448,17 +464,16 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             variant: "destructive",
             title: "Bulk Upload Failed on Server",
             description: toastDescription,
-            duration: 15000,
+            duration: 20000, 
           });
           setIsLoading(false);
-          return; // Stop further processing
+          return; 
         }
 
-        // Assuming result.data contains the array of successfully added traders from the server
         if (result.data) {
           newTradersAddedCount = result.data.length;
         }
-      } catch (error) { // Catch unexpected client-side errors during the onBulkAddTraders call
+      } catch (error) { 
         const clientErrorMessage = error instanceof Error ? error.message : "Unknown client error";
         console.error("Unexpected client error during bulk add traders operation:", error);
         toast({
@@ -467,22 +482,16 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           description: `An unexpected client-error occurred: ${clientErrorMessage}. Check console.`,
         });
         setIsLoading(false);
-        return; // Stop further processing
+        return; 
       }
     }
 
-    // Construct summary message
     let summaryMessages: string[] = [];
     if (newTradersAddedCount > 0) {
       summaryMessages.push(`${newTradersAddedCount} new trader(s) successfully added.`);
     } else if (validTraders.length > 0 && newTradersAddedCount === 0) {
-      // This case means client sent valid traders, but server added none.
       summaryMessages.push(`No new traders were added by the server. This could be due to all of them already existing (if server performs its own duplicate checks beyond what the client knows), or another server-side issue. Check server logs.`);
     }
-    // else if (validTraders.length === 0 && skippedCount === 0) {
-      // This is handled by the "No Traders Parsed" or "Empty File" toasts earlier.
-    // }
-
 
     if (skippedCount > 0) {
       summaryMessages.push(`${skippedCount} trader(s) were skipped by the client as duplicates (already in current view or within CSV).`);
@@ -500,11 +509,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 {summaryMessages.map((msg, idx) => <span key={idx}>{msg}</span>)}
             </div>
             ),
-            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, // Shorter if all good, longer if there are skips/warnings
+            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, 
         });
     } else if (validTraders.length === 0 && skippedCount === 0) {
-        // This case should ideally be caught by the "No Traders Parsed" or "Empty File" toasts.
-        // If it still reaches here, it means the file was likely empty and no warnings were generated before.
         toast({
             title: "No Action Taken",
             description: "No new traders to add and no duplicates found to skip by the client. The file might have been empty or contained no processable data according to client-side parsing.",
@@ -520,7 +527,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       setOpen(isOpen);
-      if (!isOpen) { // Clear file if dialog is closed
+      if (!isOpen) { 
         clearFile();
       }
     }}>
