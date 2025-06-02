@@ -422,10 +422,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 <p className="font-semibold">Server error: {result.error}</p>
                 <p className="mt-2 text-xs">
                   This indicates a problem with the Firebase configuration on the server.
-                  Please ensure Firebase environment variables (e.g., `NEXT_PUBLIC_FIREBASE_PROJECT_ID`) are correctly set and accessible by the server.
+                  Please ensure Firebase environment variables (e.g., `NEXT_PUBLIC_FIREBASE_PROJECT_ID`) are correctly set in your `.env.local` file (and restart your dev server) or in your hosting environment.
                 </p>
                 <p className="mt-1 text-xs">
-                  Check your **server logs** (Firebase console if deployed, or your local Next.js terminal) for `[Firebase Setup]` messages and detailed errors.
+                  Check your **server logs** (your local Next.js terminal, or Firebase console for deployed apps) for `[Firebase Setup]` messages and detailed errors.
                 </p>
               </div>
             );
@@ -591,4 +591,4 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
-
+    

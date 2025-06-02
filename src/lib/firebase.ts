@@ -10,18 +10,25 @@ let configSource = ""; // To track where the config came from
 if (process.env.FIREBASE_WEBAPP_CONFIG) {
   try {
     firebaseConfig = JSON.parse(process.env.FIREBASE_WEBAPP_CONFIG);
-    configSource = "FIREBASE_WEBAPP_CONFIG";
-    console.log("[Firebase Setup] SERVER-SIDE: Attempting to use FIREBASE_WEBAPP_CONFIG from environment. Check SERVER-SIDE console for details.");
+    configSource = "FIREBASE_WEBAPP_CONFIG (from Firebase Hosting)";
+    // SERVER-SIDE log: Indicates attempt to use App Hosting's specific env var.
+    console.log("[Firebase Setup] SERVER-SIDE: Attempting to use FIREBASE_WEBAPP_CONFIG environment variable.");
   } catch (e) {
-    console.error("[Firebase Setup Error] SERVER-SIDE: Failed to parse FIREBASE_WEBAPP_CONFIG. Falling back to NEXT_PUBLIC_ variables. Check SERVER-SIDE console for details.", e);
+    // SERVER-SIDE log: Parsing FIREBASE_WEBAPP_CONFIG failed.
+    console.error("[Firebase Setup Error] SERVER-SIDE: Failed to parse FIREBASE_WEBAPP_CONFIG. Falling back to NEXT_PUBLIC_ variables if available. Error:", e);
     firebaseConfig = null; // Ensure fallback if parsing fails
   }
 }
 
 // If FIREBASE_WEBAPP_CONFIG wasn't available or failed to parse, use individual NEXT_PUBLIC_ variables
 if (!firebaseConfig) {
-  configSource = "NEXT_PUBLIC_FIREBASE_ variables";
-  console.log("[Firebase Setup] SERVER-SIDE: FIREBASE_WEBAPP_CONFIG not found or failed to parse. Attempting to use individual NEXT_PUBLIC_FIREBASE_ variables. Check SERVER-SIDE console for details if issues persist.");
+  configSource = "NEXT_PUBLIC_FIREBASE_... variables (from .env.local or hosting env)";
+  // SERVER-SIDE log: Indicates fallback to individual NEXT_PUBLIC vars.
+  if (process.env.FIREBASE_WEBAPP_CONFIG) { // Only log this specific message if the previous attempt failed
+     console.log("[Firebase Setup] SERVER-SIDE: Continuing to use individual NEXT_PUBLIC_FIREBASE_... variables as FIREBASE_WEBAPP_CONFIG parsing failed.");
+  } else {
+    console.log("[Firebase Setup] SERVER-SIDE: FIREBASE_WEBAPP_CONFIG not found. Attempting to use individual NEXT_PUBLIC_FIREBASE_... variables.");
+  }
   firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -29,12 +36,10 @@ if (!firebaseConfig) {
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL, // Optional but can be included
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
   };
 }
 
-// Keys generally required by initializeApp for most services to function correctly.
-// Firestore specifically needs projectId to be correct.
 const requiredConfigKeysForInit: (keyof FirebaseOptions)[] = [
   'apiKey',
   'authDomain',
@@ -49,48 +54,54 @@ if (!getApps().length) {
   if (firebaseConfig) {
     for (const key of requiredConfigKeysForInit) {
       if (!firebaseConfig[key]) {
-        const envVarSourceDetail = configSource === "FIREBASE_WEBAPP_CONFIG"
-          ? `Expected in the JSON of ${configSource}.`
-          : `Expected as NEXT_PUBLIC_FIREBASE_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}.`;
+        const envVarSourceDetail = configSource.startsWith("FIREBASE_WEBAPP_CONFIG")
+          ? `Expected in the JSON of FIREBASE_WEBAPP_CONFIG.`
+          : `Expected as NEXT_PUBLIC_FIREBASE_${key.replace(/([A-Z])/g, '_$1').toUpperCase()} in .env.local or your hosting environment variables.`;
 
-        console.error( // This log will appear in the SERVER-SIDE console (e.g., Next.js terminal during `npm run dev` or Firebase App Hosting logs)
-`[Firebase Setup Error] SERVER-SIDE: Missing Firebase configuration for: ${key}.
-Attempted to source from: ${configSource}. ${envVarSourceDetail}
-Please ensure this and other Firebase config variables are correctly set in your .env.local file (for local development AND RESTART DEV SERVER) or environment variables (for deployment/App Hosting).
-Trader data will NOT be saved or loaded correctly without these. CHECK SERVER-SIDE LOGS.`
+        // SERVER-SIDE log: Critical missing key identified.
+        console.error(
+`[Firebase Setup Error] SERVER-SIDE: Missing Firebase configuration for: '${key}'.
+Sourced from: ${configSource}.
+Detail: ${envVarSourceDetail}
+Ensure this is correctly set. If using .env.local, YOU MUST RESTART YOUR DEV SERVER after changes.
+Trader data will NOT be saved or loaded correctly. CHECK SERVER-SIDE LOGS.`
         );
         missingKeys = true;
       }
     }
     // Explicitly re-check projectId as it's absolutely critical for Firestore.
     if (!firebaseConfig.projectId) {
-        console.error( // This log will appear in the SERVER-SIDE console
-`[Firebase Setup Error] SERVER-SIDE: Critical: Missing Firebase configuration for projectId. This is essential for Firestore.
-Attempted to source from: ${configSource}.
-Please ensure this is set in your environment variables or .env.local file (AND RESTART DEV SERVER). CHECK SERVER-SIDE LOGS.`
+        // SERVER-SIDE log: Critical missing projectId.
+        console.error(
+`[Firebase Setup Error] SERVER-SIDE: Critical: Missing Firebase configuration for 'projectId'. This is essential for Firestore.
+Sourced from: ${configSource}.
+Ensure this is correctly set. If using .env.local, YOU MUST RESTART YOUR DEV SERVER after changes. CHECK SERVER-SIDE LOGS.`
         );
-        missingKeys = true; // Ensure this flags as missing if not caught by the loop.
+        missingKeys = true;
     }
 
   } else {
-    // This should only happen if process.env.FIREBASE_WEBAPP_CONFIG was ill-formatted JSON AND no NEXT_PUBLIC_ vars were set.
-    console.error("[Firebase Setup Error] SERVER-SIDE: Firebase configuration object could not be constructed from any source. Cannot initialize. CHECK SERVER-SIDE LOGS.");
+    // SERVER-SIDE log: FirebaseConfig object is null, this is a major issue.
+    console.error("[Firebase Setup Error] SERVER-SIDE: Firebase configuration object could not be constructed from any source (FIREBASE_WEBAPP_CONFIG or NEXT_PUBLIC_ variables). Cannot initialize. CHECK SERVER-SIDE LOGS.");
     missingKeys = true;
   }
 
   if (missingKeys) {
-    console.error("[Firebase Setup Error] SERVER-SIDE: Firebase initialization failed due to missing critical configuration. Firestore operations will not work. CHECK SERVER-SIDE LOGS for previous detailed errors.");
+    // SERVER-SIDE log: Overall initialization failure.
+    console.error("[Firebase Setup Error] SERVER-SIDE: Firebase initialization FAILED due to missing critical configuration. Firestore operations will NOT work. Review previous error messages in SERVER-SIDE LOGS carefully.");
     // db remains undefined, operations will fail with "Firestore not initialized"
   } else {
     try {
-      // Non-null assertion used because if firebaseConfig were null, missingKeys would be true.
-      console.log("[Firebase Setup] SERVER-SIDE: Attempting to initialize Firebase with Project ID:", firebaseConfig!.projectId, "from source:", configSource, ". Check SERVER-SIDE console for details.");
-      app = initializeApp(firebaseConfig!);
+      // SERVER-SIDE log: Attempting initialization.
+      console.log(`[Firebase Setup] SERVER-SIDE: Attempting to initialize Firebase with Project ID: '${firebaseConfig!.projectId}' from source: ${configSource}.`);
+      app = initializeApp(firebaseConfig!); // Non-null assertion because if firebaseConfig were null, missingKeys would be true.
       db = getFirestore(app);
-      console.log("[Firebase Setup] SERVER-SIDE: Firebase initialized successfully using config from", configSource, "with Project ID:", firebaseConfig!.projectId, ". CHECK SERVER-SIDE LOGS if issues persist.");
+      // SERVER-SIDE log: Successful initialization.
+      console.log(`[Firebase Setup] SERVER-SIDE: Firebase initialized SUCCESSFULLY using config from ${configSource} with Project ID: '${firebaseConfig!.projectId}'. Firestore should be operational.`);
     } catch (error) {
-      console.error("[Firebase Setup Error] SERVER-SIDE: Error initializing Firebase app with the derived config:", error, ". CHECK SERVER-SIDE LOGS.");
-      console.error("[Firebase Setup Error] SERVER-SIDE: Config used for initialization attempt:", JSON.stringify(firebaseConfig), ". Check SERVER-SIDE console for details.");
+      // SERVER-SIDE log: Exception during initializeApp.
+      console.error("[Firebase Setup Error] SERVER-SIDE: Error during Firebase initializeApp() call with the derived config:", error);
+      console.error("[Firebase Setup Error] SERVER-SIDE: Config used for initialization attempt:", JSON.stringify(firebaseConfig));
       // db remains undefined
     }
   }
@@ -98,14 +109,16 @@ Please ensure this is set in your environment variables or .env.local file (AND 
   app = getApp();
   db = getFirestore(app); // Ensure db is assigned if app already exists
   const existingAppProjectId = getApp().options.projectId;
+  // SERVER-SIDE log: App already initialized.
   if (existingAppProjectId) {
-    console.log("[Firebase Setup] SERVER-SIDE: Firebase app already initialized. Using existing instance for Project ID:", existingAppProjectId, ". CHECK SERVER-SIDE LOGS if issues persist.");
+    console.log(`[Firebase Setup] SERVER-SIDE: Firebase app already initialized. Using existing instance for Project ID: '${existingAppProjectId}'.`);
   } else {
-     console.warn("[Firebase Setup] SERVER-SIDE: Firebase app already initialized, but its Project ID is undefined. This is unexpected. CHECK SERVER-SIDE LOGS.");
+     console.warn("[Firebase Setup] SERVER-SIDE: Firebase app already initialized, but its Project ID is undefined. This is unexpected.");
   }
   // Log a warning if the config derived from env vars differs from the already initialized app's config
   if (firebaseConfig && firebaseConfig.projectId && existingAppProjectId !== firebaseConfig.projectId) {
-    console.warn(`[Firebase Setup] SERVER-SIDE: Warning: An existing Firebase app's projectId ('${existingAppProjectId}') does not match the projectId derived from environment variables ('${firebaseConfig.projectId}'). This could lead to unexpected behavior. CHECK SERVER-SIDE LOGS.`);
+    // SERVER-SIDE log: Potential mismatch warning.
+    console.warn(`[Firebase Setup] SERVER-SIDE: Warning: An existing Firebase app's projectId ('${existingAppProjectId}') does not match the projectId derived from current environment variables ('${firebaseConfig.projectId}'). This could lead to unexpected behavior if a new initialization was intended.`);
   }
 }
 
