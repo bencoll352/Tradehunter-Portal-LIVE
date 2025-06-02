@@ -136,11 +136,13 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
             return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
         }
         
-        // Fallback for other types, though primarily string/number/date are sorted
-        if (valA < valB) {
+        // Fallback: convert to string for comparison if types are mixed or not directly comparable
+        const stringA = String(valA);
+        const stringB = String(valB);
+        if (stringA < stringB) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
-        if (valA > valB) {
+        if (stringA > stringB) {
           return sortConfig.direction === 'ascending' ? 1 : -1;
         }
         return 0;
@@ -475,3 +477,6 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+
+    
