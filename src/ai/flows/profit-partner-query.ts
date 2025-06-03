@@ -2,7 +2,7 @@
 // profit-partner-query.ts
 'use server';
 /**
- * @fileOverview A tool for providing insights on trader performance by querying the Gemini API directly using Genkit.
+ * @fileOverview A tool for providing insights on trader performance by making a request to an external analysis service.
  *
  * - profitPartnerQuery - A function that handles the query process.
  * - ProfitPartnerQueryInput - The input type for the profitPartnerQuery function.
@@ -28,31 +28,7 @@ export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promis
   return profitPartnerQueryFlow(input);
 }
 
-const profitPartnerAnalysisPrompt = ai.definePrompt({
-  name: 'profitPartnerAnalysisPrompt',
-  input: { schema: ProfitPartnerQueryInputSchema },
-  output: { schema: ProfitPartnerQueryOutputSchema },
-  prompt: `You are a helpful assistant for a branch manager.
-Your task is to analyze trader data and answer questions based on the information provided.
-
-The primary trader data for the branch is as follows:
---- TRADER DATA START ---
-{{{traderData}}}
---- TRADER DATA END ---
-
-Based on this trader data, please answer the following question: "{{{query}}}"
-{{#if uploadedFileContent}}
-
-Additionally, consider the following uploaded customer data for context:
---- UPLOADED CUSTOMER DATA START ---
-{{{uploadedFileContent}}}
---- UPLOADED CUSTOMER DATA END ---
-{{/if}}
-
-Provide a concise, informative, and helpful answer.
-Your response MUST be a JSON object with a single key "answer" that holds your textual response. For example: {"answer": "Your analysis results here."}
-`,
-});
+const EXTERNAL_ANALYSIS_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/';
 
 const profitPartnerQueryFlow = ai.defineFlow(
   {
@@ -61,50 +37,55 @@ const profitPartnerQueryFlow = ai.defineFlow(
     outputSchema: ProfitPartnerQueryOutputSchema,
   },
   async (input: ProfitPartnerQueryInput): Promise<ProfitPartnerQueryOutput> => {
-    console.log(`[profitPartnerQueryFlow] Received query: "${input.query}"`);
+    console.log(`[profitPartnerQueryFlow] Received query: "${input.query}" for external service.`);
     console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
-
-    // The GOOGLE_API_KEY from .env (or Firebase environment variables) will be used by the googleAI() plugin.
-    console.log('[profitPartnerQueryFlow] Calling profitPartnerAnalysisPrompt with Genkit.');
-    // For debugging, log snippets of the input being passed to the prompt
-    console.debug('[profitPartnerQueryFlow] Prompt input (query snippet):', input.query ? input.query.substring(0,100) + (input.query.length > 100 ? '...' : '') : "N/A");
-    console.debug('[profitPartnerQueryFlow] Prompt input (traderData snippet):', input.traderData ? input.traderData.substring(0,100) + (input.traderData.length > 100 ? '...' : '') : "N/A");
-    if (input.uploadedFileContent) {
-      console.debug('[profitPartnerQueryFlow] Prompt input (uploadedFileContent snippet):', input.uploadedFileContent.substring(0,100) + (input.uploadedFileContent.length > 100 ? '...' : ''));
-    }
-
+    console.log(`[profitPartnerQueryFlow] Calling external analysis service at: ${EXTERNAL_ANALYSIS_URL}`);
 
     try {
-      const { output } = await profitPartnerAnalysisPrompt(input);
+      const response = await fetch(EXTERNAL_ANALYSIS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
 
-      if (!output || !output.answer || output.answer.trim() === "") {
-        console.error('[profitPartnerQueryFlow] Gemini response via prompt was empty, undefined, or answer field missing/empty.');
-        throw new Error('Received an empty or undefined answer from the analysis service.');
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`[profitPartnerQueryFlow] External service returned error: ${response.status} ${response.statusText}. Body: ${errorBody}`);
+        throw new Error(`External analysis service failed with status ${response.status}: ${response.statusText}. Details: ${errorBody.substring(0, 200)}...`);
       }
-      console.log('[profitPartnerQueryFlow] Successfully received answer from Gemini via prompt.');
-      return output;
+
+      const responseData = await response.json();
+
+      // Validate the response structure (at least check for the answer field)
+      if (!responseData || typeof responseData.answer !== 'string' || responseData.answer.trim() === "") {
+        console.error('[profitPartnerQueryFlow] External service response was empty, undefined, or answer field missing/empty/not a string.');
+        console.debug('[profitPartnerQueryFlow] Raw response data from external service:', responseData);
+        throw new Error('Received an invalid or empty answer from the external analysis service.');
+      }
+
+      console.log('[profitPartnerQueryFlow] Successfully received answer from external analysis service.');
+      return { answer: responseData.answer };
 
     } catch (error) {
-      console.error('[profitPartnerQueryFlow] Error during call to Gemini via Genkit prompt:', error);
-      let detailedErrorMessage = 'An unexpected error occurred with the analysis service.';
+      console.error('[profitPartnerQueryFlow] Error during call to external analysis service:', error);
+      let detailedErrorMessage = 'An unexpected error occurred while communicating with the external analysis service.';
       if (error instanceof Error) {
-        if (error.message.toLowerCase().includes('api key not found') || error.message.toLowerCase().includes('permission denied') || error.message.toLowerCase().includes('api key invalid') || error.message.toLowerCase().includes('invalid api key')) {
-          detailedErrorMessage = `API Key Issue: ${error.message}. Ensure GOOGLE_API_KEY is correctly set in environment variables and is valid.`;
-        } else if (error.message.toLowerCase().includes('quota')) {
-          detailedErrorMessage = `Quota Exceeded: ${error.message}. Please check your Google AI/Gemini API quota.`;
-        } else if (error.message.toLowerCase().includes('model not found')) {
-           detailedErrorMessage = `Model Not Found: ${error.message}. The configured Gemini model might be unavailable or incorrect.`;
-        } else if (error.message.includes('failed to parse model output') || error.message.includes('output_schema')) {
-            detailedErrorMessage = `Model Output Parsing Error: ${error.message}. The model's response might not match the expected JSON format (e.g., {"answer": "..."}). Check the prompt instructions.`;
-        } else if (error.message.toLowerCase().includes('400') && error.message.toLowerCase().includes('candidate was blocked due to safety')) {
-            detailedErrorMessage = `Content Moderation: ${error.message}. The request or response was blocked by safety filters.`;
+        if (error.message.includes('fetch failed') || error.message.includes('ECONNREFUSED')) {
+            detailedErrorMessage = `Network Error: Could not connect to the external service at ${EXTERNAL_ANALYSIS_URL}. Please ensure the service is running and accessible.`;
+        } else if (error.message.startsWith('External analysis service failed with status')) {
+            detailedErrorMessage = error.message; // Use the more specific error from the !response.ok block
+        } else if (error.message.startsWith('Received an invalid or empty answer')) {
+            detailedErrorMessage = error.message; // Use the specific error for bad response structure
         }
          else {
           detailedErrorMessage = error.message;
         }
       }
-      throw new Error(`Branch Booster analysis failed: ${detailedErrorMessage} Check server logs for full details.`);
+      // Ensure the error message passed to the client is concise but informative
+      throw new Error(`Branch Booster analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}. Check server logs for full details.`);
     }
   }
 );
