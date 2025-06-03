@@ -2,7 +2,7 @@
 // profit-partner-query.ts
 'use server';
 /**
- * @fileOverview A tool for providing insights on trader performance by making a request to an external analysis service.
+ * @fileOverview A Branch Booster tool for providing insights on trader performance using Genkit and Google Gemini.
  *
  * - profitPartnerQuery - A function that handles the query process.
  * - ProfitPartnerQueryInput - The input type for the profitPartnerQuery function.
@@ -25,10 +25,51 @@ const ProfitPartnerQueryOutputSchema = z.object({
 export type ProfitPartnerQueryOutput = z.infer<typeof ProfitPartnerQueryOutputSchema>;
 
 export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promise<ProfitPartnerQueryOutput> {
+  // The Genkit flow will handle API key issues if GOOGLE_API_KEY is missing or invalid.
   return profitPartnerQueryFlow(input);
 }
 
-const EXTERNAL_ANALYSIS_URL = 'https://branch-booster-purley-302177537641.us-west1.run.app/';
+const profitPartnerAnalysisPrompt = ai.definePrompt({
+  name: 'profitPartnerAnalysisPrompt',
+  input: { schema: ProfitPartnerQueryInputSchema },
+  output: { schema: ProfitPartnerQueryOutputSchema },
+  prompt: `You are a helpful assistant for a building supplies company's branch manager.
+Your goal is to analyze trader data and provide actionable insights based on the user's query.
+You will be given a query, a string of current trader data for the branch, and optionally, content from an uploaded customer file.
+
+User's Query:
+{{{query}}}
+
+Trader Data (summary format):
+{{{traderData}}}
+
+{{#if uploadedFileContent}}
+Additional Uploaded Data (e.g., customer list, sales records):
+{{{uploadedFileContent}}}
+{{/if}}
+
+Based on all the provided information, please generate a concise and helpful answer to the user's query.
+Focus on providing actionable insights, identifying trends, or suggesting specific actions the branch manager can take.
+If the query asks for a list (e.g., "list all active traders"), provide the list.
+If the query is about totals or averages, calculate and provide them.
+If the query is open-ended (e.g., "suggest strategies"), provide thoughtful suggestions.
+Be specific and refer to the data where possible.
+If the uploaded file content is relevant to the query, incorporate it into your analysis.
+If the data seems insufficient to answer the query fully, politely state that and explain what additional information might be needed.
+`,
+  // The default model is 'googleai/gemini-2.0-flash' as per src/ai/genkit.ts
+  // You can add model configuration or safety settings here if needed, for example:
+  // model: 'googleai/gemini-1.5-flash-latest', // Or another compatible model
+  // config: {
+  //   temperature: 0.7,
+  //   safetySettings: [
+  //     {
+  //       category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+  //       threshold: 'BLOCK_NONE', // Example: Adjust safety settings
+  //     },
+  //   ],
+  // },
+});
 
 const profitPartnerQueryFlow = ai.defineFlow(
   {
@@ -37,56 +78,39 @@ const profitPartnerQueryFlow = ai.defineFlow(
     outputSchema: ProfitPartnerQueryOutputSchema,
   },
   async (input: ProfitPartnerQueryInput): Promise<ProfitPartnerQueryOutput> => {
-    console.log(`[profitPartnerQueryFlow] Received query: "${input.query}" for external service.`);
+    console.log(`[profitPartnerQueryFlow] Received query: "${input.query}" for Genkit/Gemini analysis.`);
     console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
-    console.log(`[profitPartnerQueryFlow] Calling external analysis service at: ${EXTERNAL_ANALYSIS_URL}`);
 
+    if (!process.env.GOOGLE_API_KEY) {
+      console.error("[profitPartnerQueryFlow] CRITICAL: GOOGLE_API_KEY environment variable is not set. Branch Booster AI will not function.");
+      throw new Error(`Branch Booster analysis failed: The GOOGLE_API_KEY environment variable is not configured on the server. Please contact support or check server logs.`);
+    }
+    
     try {
-      const response = await fetch(EXTERNAL_ANALYSIS_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
+      const {output} = await profitPartnerAnalysisPrompt(input);
 
-      if (!response.ok) {
-        const errorBody = await response.text();
-        console.error(`[profitPartnerQueryFlow] External service returned error: ${response.status} ${response.statusText}. Body: ${errorBody}`);
-        
-        if (response.status === 404) {
-          if (errorBody.includes("Cannot POST /") || (errorBody.toLowerCase().includes("cannot post") && errorBody.includes(EXTERNAL_ANALYSIS_URL.endsWith('/') ? '/' : EXTERNAL_ANALYSIS_URL.split('/').pop() || '/'))) {
-            throw new Error(`External analysis service (404 Not Found): The endpoint at ${EXTERNAL_ANALYSIS_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyze) or check the external service's routing configuration. Original details: ${errorBody.substring(0, 150)}...`);
-          } else {
-            throw new Error(`External analysis service (404 Not Found): The endpoint at ${EXTERNAL_ANALYSIS_URL} could not be found. Please verify the URL and ensure the service is deployed and the path is correct. Original details: ${errorBody.substring(0, 200)}...`);
-          }
-        } else {
-          throw new Error(`External analysis service failed with status ${response.status}: ${response.statusText}. Details: ${errorBody.substring(0, 200)}...`);
-        }
+      if (!output || typeof output.answer !== 'string' || output.answer.trim() === "") {
+        console.error('[profitPartnerQueryFlow] Genkit/Gemini analysis returned an empty, undefined, or invalid answer. Raw output:', output);
+        throw new Error('The analysis service returned an invalid or empty answer.');
       }
-
-      const responseData = await response.json();
-
-      if (!responseData || typeof responseData.answer !== 'string' || responseData.answer.trim() === "") {
-        console.error('[profitPartnerQueryFlow] External service response was empty, undefined, or answer field missing/empty/not a string.');
-        console.debug('[profitPartnerQueryFlow] Raw response data from external service:', responseData);
-        throw new Error('Received an invalid or empty answer from the external analysis service.');
-      }
-
-      console.log('[profitPartnerQueryFlow] Successfully received answer from external analysis service.');
-      return { answer: responseData.answer };
-
+      
+      console.log('[profitPartnerQueryFlow] Successfully received answer from Genkit/Gemini analysis.');
+      return output; // output directly matches ProfitPartnerQueryOutputSchema
     } catch (error) {
-      console.error('[profitPartnerQueryFlow] Error during call to external analysis service:', error);
-      let detailedErrorMessage = 'An unexpected error occurred while communicating with the external analysis service.';
+      console.error('[profitPartnerQueryFlow] Error during Genkit/Gemini analysis:', error);
+      let detailedErrorMessage = 'An unexpected error occurred during the analysis.';
       if (error instanceof Error) {
-        if (error.message.includes('fetch failed') || error.message.includes('ECONNREFUSED')) {
-            detailedErrorMessage = `Network Error: Could not connect to the external service at ${EXTERNAL_ANALYSIS_URL}. Please ensure the service is running and accessible.`;
-        } else if (error.message.startsWith('External analysis service failed with status') || 
-                   error.message.startsWith('External analysis service (404 Not Found)') ||
-                   error.message.startsWith('Received an invalid or empty answer')) {
-            detailedErrorMessage = error.message; 
+        if (error.message.includes('API key not valid') || 
+            error.message.includes('API_KEY_INVALID') || 
+            error.message.toLowerCase().includes('api key is missing')) {
+          detailedErrorMessage = 'The GOOGLE_API_KEY is invalid or missing. Please check your server environment variables.';
+        } else if (error.message.includes('quota') || error.message.includes('RESOURCE_EXHAUSTED')) {
+          detailedErrorMessage = 'The analysis service quota has been exceeded. Please try again later or check your Google Cloud project quota.';
+        } else if (error.message.includes('Vertex AI API has not been used') || error.message.includes(' služba ভয়ঙ্কর POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=')) {
+             detailedErrorMessage = "The Vertex AI API (which Gemini uses) may not be enabled in your Google Cloud project, or there's an issue with its configuration. Please ensure it's enabled, billing is set up, and the correct API (Generative Language API or Vertex AI) is active.";
+        } else if (error.message.includes('SAFETY')) {
+            detailedErrorMessage = 'The generated response was blocked due to safety settings. Try rephrasing your query or check the content filters.';
         } else {
           detailedErrorMessage = error.message;
         }
@@ -95,4 +119,3 @@ const profitPartnerQueryFlow = ai.defineFlow(
     }
   }
 );
-
