@@ -54,12 +54,20 @@ const profitPartnerQueryFlow = ai.defineFlow(
       if (!response.ok) {
         const errorBody = await response.text();
         console.error(`[profitPartnerQueryFlow] External service returned error: ${response.status} ${response.statusText}. Body: ${errorBody}`);
-        throw new Error(`External analysis service failed with status ${response.status}: ${response.statusText}. Details: ${errorBody.substring(0, 200)}...`);
+        
+        if (response.status === 404) {
+          if (errorBody.includes("Cannot POST /") || (errorBody.toLowerCase().includes("cannot post") && errorBody.includes(EXTERNAL_ANALYSIS_URL.endsWith('/') ? '/' : EXTERNAL_ANALYSIS_URL.split('/').pop() || '/'))) {
+            throw new Error(`External analysis service (404 Not Found): The endpoint at ${EXTERNAL_ANALYSIS_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyze) or check the external service's routing configuration. Original details: ${errorBody.substring(0, 150)}...`);
+          } else {
+            throw new Error(`External analysis service (404 Not Found): The endpoint at ${EXTERNAL_ANALYSIS_URL} could not be found. Please verify the URL and ensure the service is deployed and the path is correct. Original details: ${errorBody.substring(0, 200)}...`);
+          }
+        } else {
+          throw new Error(`External analysis service failed with status ${response.status}: ${response.statusText}. Details: ${errorBody.substring(0, 200)}...`);
+        }
       }
 
       const responseData = await response.json();
 
-      // Validate the response structure (at least check for the answer field)
       if (!responseData || typeof responseData.answer !== 'string' || responseData.answer.trim() === "") {
         console.error('[profitPartnerQueryFlow] External service response was empty, undefined, or answer field missing/empty/not a string.');
         console.debug('[profitPartnerQueryFlow] Raw response data from external service:', responseData);
@@ -75,17 +83,16 @@ const profitPartnerQueryFlow = ai.defineFlow(
       if (error instanceof Error) {
         if (error.message.includes('fetch failed') || error.message.includes('ECONNREFUSED')) {
             detailedErrorMessage = `Network Error: Could not connect to the external service at ${EXTERNAL_ANALYSIS_URL}. Please ensure the service is running and accessible.`;
-        } else if (error.message.startsWith('External analysis service failed with status')) {
-            detailedErrorMessage = error.message; // Use the more specific error from the !response.ok block
-        } else if (error.message.startsWith('Received an invalid or empty answer')) {
-            detailedErrorMessage = error.message; // Use the specific error for bad response structure
-        }
-         else {
+        } else if (error.message.startsWith('External analysis service failed with status') || 
+                   error.message.startsWith('External analysis service (404 Not Found)') ||
+                   error.message.startsWith('Received an invalid or empty answer')) {
+            detailedErrorMessage = error.message; 
+        } else {
           detailedErrorMessage = error.message;
         }
       }
-      // Ensure the error message passed to the client is concise but informative
       throw new Error(`Branch Booster analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}. Check server logs for full details.`);
     }
   }
 );
+
