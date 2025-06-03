@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +22,7 @@ import { LogIn } from "lucide-react";
 const formSchema = z.object({
   branchId: z.string().min(1, { message: "Branch ID is required." })
     .refine(val => VALID_BRANCH_IDS.includes(val as BranchId), {
-      message: "Invalid Branch ID. Try PURLEY, BRANCH_B, BRANCH_C, or BRANCH_D.",
+      message: "Invalid Branch ID. Try PURLEY, BRANCH_B, BRANCH_C, BRANCH_D, or DOVER.",
     }),
 });
 
@@ -78,3 +79,4 @@ export function LoginForm() {
     </Form>
   );
 }
+

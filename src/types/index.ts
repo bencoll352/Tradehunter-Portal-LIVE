@@ -22,9 +22,9 @@ export interface Trader {
   notes?: string | null; // New field for notes
 }
 
-export type BranchId = 'PURLEY' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D';
+export type BranchId = 'PURLEY' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D' | 'DOVER';
 
-export const VALID_BRANCH_IDS: BranchId[] = ['PURLEY', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D'];
+export const VALID_BRANCH_IDS: BranchId[] = ['PURLEY', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D', 'DOVER'];
 
 // For bulk upload parsing
 export type ParsedTraderData = {
@@ -45,3 +45,4 @@ export type ParsedTraderData = {
   ownerProfileLink?: string | null;
   notes?: string | null; // New field for notes
 };
+

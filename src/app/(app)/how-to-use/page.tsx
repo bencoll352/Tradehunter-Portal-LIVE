@@ -12,7 +12,7 @@ const faqs = [
   {
     value: "item-1",
     question: "How do I log in?",
-    answer: "Navigate to the login page and enter your unique Branch ID. Valid demo IDs are PURLEY, BRANCH_B, BRANCH_C, or BRANCH_D.",
+    answer: "Navigate to the login page and enter your unique Branch ID. Valid demo IDs are PURLEY, BRANCH_B, BRANCH_C, BRANCH_D, or DOVER.",
     icon: <HelpCircle className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -33,7 +33,7 @@ const faqs = [
     answer: "Use the 'Bulk Add Traders' button on the dashboard. Upload a CSV file. The system uses flexible parsing: \n" +
             "• **Headers are Key**: It primarily relies on matching header names (case-insensitive, space-trimmed), though a general column order is good practice (e.g., Name, Total Sales, Status, etc., up to 16 common fields). \n" +
             "• **Mandatory 'Name'**: The 'Name' header and corresponding data for each trader are mandatory. \n" +
-            "• **Expected Headers (approximate)**: Name, Total Sales, Status, Last Activity, Description, Reviews, Rating, 🌐Website, 📞 Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Actions (Actions column data ignored). Some headers have alternative names (e.g., 'Owner Name' or 'Owner'). Refer to the dialog for specific examples and more details. \n" +
+            "• **Expected Headers (approximate)**: Name, Total Sales, Status, Last Activity, Description, Reviews, Rating, 🌐Website, 📞 Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Notes, Actions (Actions column data ignored). Some headers have alternative names (e.g., 'Owner Name' or 'Owner'). Refer to the dialog for specific examples and more details. \n" +
             "• **Quoted Fields**: Fields containing commas (e.g., in Description, Address, Categories) MUST be enclosed in double quotes (e.g., \"Main St, Suite 100\"). \n" +
             "• **Duplicate Handling**: Traders with phone numbers already existing in the database or duplicated within the CSV will be automatically skipped. A summary of additions and skips will be provided.",
     icon: <UploadCloud className="h-5 w-5 text-primary mr-2" />
@@ -101,7 +101,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">1. Logging In</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Go to the main page. You will be redirected to the login screen.</li>
-              <li>Enter your assigned Branch ID (e.g., "PURLEY", "BRANCH_B", "BRANCH_C", "BRANCH_D").</li>
+              <li>Enter your assigned Branch ID (e.g., "PURLEY", "BRANCH_B", "BRANCH_C", "BRANCH_D", "DOVER").</li>
               <li>Click "Sign In". You will be taken to your branch's dashboard.</li>
             </ul>
           </div>
@@ -140,7 +140,7 @@ export default function HowToUsePage() {
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All your trader data is stored securely in Firebase Firestore and is specific to your branch.</li>
               <li>Changes you make (add, edit, delete) are persistent and will be available across your sessions.</li>
-              <li>If your branch's trader data is empty in Firestore, it will be automatically seeded with initial sample data on first load.</li>
+              <li>If your branch's trader data is empty in Firestore (and it's not 'PURLEY'), it will be automatically seeded with initial sample data on first load.</li>
             </ul>
           </div>
         </CardContent>
