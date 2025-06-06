@@ -13,7 +13,7 @@ import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts
 
 const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/";
 
-export const SalesNavigatorQueryInputSchema = z.object({
+const SalesNavigatorQueryInputSchema = z.object({
   query: z.string().describe('The strategic question or analysis request for the Sales Navigator.'),
   traderData: z.string().describe('The current trader data CSV string for the branch.'),
   branchId: z.string().describe('The base branch ID for context.'),
@@ -21,7 +21,7 @@ export const SalesNavigatorQueryInputSchema = z.object({
 });
 export type SalesNavigatorQueryInput = z.infer<typeof SalesNavigatorQueryInputSchema>;
 
-export const SalesNavigatorQueryOutputSchema = z.object({
+const SalesNavigatorQueryOutputSchema = z.object({
   strategy: z.string().describe('The strategic advice, analysis, or answer from the Sales Navigator.'),
   // Add any other fields the external Sales Navigator API might return
 });
@@ -56,7 +56,7 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
 
       // Check for common "Cannot POST /" type error from external service
       if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /")) {
-         throw new Error(`Sales Navigator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify the URL path or check the external service's routing configuration.`);
+         throw new Error(`Sales Navigator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyze) or check the external service's routing configuration.`);
       }
       
       console.error(`[SalesNavigatorQuery] External service error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
