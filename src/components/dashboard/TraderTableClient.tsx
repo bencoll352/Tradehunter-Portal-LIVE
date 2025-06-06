@@ -28,19 +28,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
-import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2 } from "lucide-react"; 
+import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download } from "lucide-react"; 
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "./TraderForm";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import Papa from "papaparse"; // For CSV export
 
-const ITEMS_PER_PAGE = 20; 
+const ITEMS_PER_PAGE = 50; // Increased from 20
 
 type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes'>;
 
@@ -52,34 +59,8 @@ interface TraderTableClientProps {
   onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
-  onBulkDelete: (traderIds: string[]) => Promise<BulkDeleteTradersResult>; // New prop
+  onBulkDelete: (traderIds: string[]) => Promise<BulkDeleteTradersResult>;
 }
-
-const CATEGORY_FILTERS = [
-  { label: "All Categories", keywords: [] },
-  { label: "Carpenters & Joiners", keywords: ["carpenter", "joiner"] },
-  { label: "General Builders", keywords: ["builder", "general builder"] },
-  { label: "Groundworkers", keywords: ["groundwork"] },
-  { label: "Bricklayers & Stonemasons", keywords: ["bricklayer", "stonemason"] },
-  { label: "Roofing", keywords: ["roofing", "roofer"] },
-  { label: "Interior Design", keywords: ["interior design", "designer"] },
-  { label: "Property Maintenance", keywords: ["propertymaintenance", "maintenance"] },
-  { label: "Plasterers", keywords: ["plasterer"] },
-  { label: "Landscapers", keywords: ["landscap", "garden design", "gardendesign"] },
-  { label: "Decking & Fencing", keywords: ["decking", "fencing"] },
-  { label: "Patios & Driveways", keywords: ["patio", "driveway", "paving"] },
-  { label: "Drywall Installers", keywords: ["drywall", "dry wall"] },
-  { label: "Flooring Installers", keywords: ["flooring", "floor installer"] },
-  { label: "Residential Construction", keywords: ["residential construction", "house builder"] },
-  { label: "Commercial Construction", keywords: ["commercial construction"] },
-  { label: "Extensions", keywords: ["extension"] },
-  { label: "Handyman / Home Improvements", keywords: ["handyman", "home improvement", "homeimprovement"] },
-  { label: "Modular Construction", keywords: ["modular", "prefabricated"] },
-  { label: "House Developers", keywords: ["house developer", "developer"] },
-  { label: "Painters & Decorators", keywords: ["painter", "decorator"] },
-  { label: "Kitchen & Bathroom (K&B)", keywords: ["k and b", "kitchen", "bathroom", "k&b"] },
-];
-
 
 export function TraderTableClient({ 
   initialTraders, 
@@ -95,7 +76,7 @@ export function TraderTableClient({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>(CATEGORY_FILTERS[0].label);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("All Categories"); // Default to "All Categories"
   const [selectedTraderIds, setSelectedTraderIds] = useState<Set<string>>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
@@ -104,24 +85,39 @@ export function TraderTableClient({
 
   useEffect(() => {
     setTraders(initialTraders);
-    setSelectedTraderIds(new Set()); // Clear selection when initial traders change
+    setSelectedTraderIds(new Set()); 
     setCurrentPage(1); 
   }, [initialTraders]);
+
+  const dynamicCategoryOptions = useMemo(() => {
+    const categoriesSet = new Set<string>();
+    allBranchTraders.forEach(trader => {
+      if (trader.mainCategory && trader.mainCategory.trim()) {
+        categoriesSet.add(trader.mainCategory.trim());
+      }
+      if (trader.categories) {
+        trader.categories.split(',').forEach(cat => {
+          const trimmedCat = cat.trim();
+          if (trimmedCat) {
+            categoriesSet.add(trimmedCat);
+          }
+        });
+      }
+    });
+    const sortedCategories = Array.from(categoriesSet).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    return ["All Categories", ...sortedCategories];
+  }, [allBranchTraders]);
 
   const filteredTraders = useMemo(() => {
     let searchableTraders = [...traders];
     
-    if (activeCategoryFilter && activeCategoryFilter !== CATEGORY_FILTERS[0].label) {
-      const selectedFilter = CATEGORY_FILTERS.find(f => f.label === activeCategoryFilter);
-      if (selectedFilter && selectedFilter.keywords.length > 0) {
-        searchableTraders = searchableTraders.filter(trader => {
-          const mainCatLower = trader.mainCategory?.toLowerCase() || '';
-          const categoriesLower = trader.categories?.toLowerCase() || '';
-          return selectedFilter.keywords.some(keyword => 
-            mainCatLower.includes(keyword.toLowerCase()) || categoriesLower.includes(keyword.toLowerCase())
-          );
-        });
-      }
+    if (activeCategoryFilter && activeCategoryFilter !== "All Categories") {
+      const filterLower = activeCategoryFilter.toLowerCase();
+      searchableTraders = searchableTraders.filter(trader => {
+        const mainCatLower = trader.mainCategory?.trim().toLowerCase() || '';
+        const categoriesArray = trader.categories?.split(',').map(c => c.trim().toLowerCase()) || [];
+        return mainCatLower === filterLower || categoriesArray.includes(filterLower);
+      });
     }
 
     if (searchTerm) {
@@ -157,9 +153,14 @@ export function TraderTableClient({
           return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
         if (sortConfig.key === 'lastActivity') {
-            const dateA = parseISO(valA as string).getTime();
-            const dateB = parseISO(valB as string).getTime();
-            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+            try {
+                const dateA = parseISO(valA as string).getTime();
+                const dateB = parseISO(valB as string).getTime();
+                 if (isNaN(dateA) && isNaN(dateB)) return 0;
+                 if (isNaN(dateA)) return sortConfig.direction === 'ascending' ? -1 : 1;
+                 if (isNaN(dateB)) return sortConfig.direction === 'ascending' ? 1 : -1;
+                return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+            } catch (e) { return 0;} // Should not happen if data is clean
         }
         
         const stringA = String(valA);
@@ -196,7 +197,7 @@ export function TraderTableClient({
 
   const handleSelectAllPaginatedTraders = () => {
     const paginatedIds = paginatedTraders.map(t => t.id);
-    const allPaginatedSelected = paginatedIds.every(id => selectedTraderIds.has(id));
+    const allPaginatedSelected = paginatedIds.length > 0 && paginatedIds.every(id => selectedTraderIds.has(id));
 
     setSelectedTraderIds(prevSelected => {
       const newSelected = new Set(prevSelected);
@@ -224,8 +225,8 @@ export function TraderTableClient({
     setCurrentPage(1);
   };
 
-  const handleCategoryFilterChange = (categoryLabel: string) => {
-    setActiveCategoryFilter(categoryLabel);
+  const handleCategoryFilterChange = (categoryValue: string) => {
+    setActiveCategoryFilter(categoryValue);
     setCurrentPage(1);
   };
   
@@ -249,10 +250,10 @@ export function TraderTableClient({
 
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name, totalSales: trader.totalSales, tradesMade: trader.tradesMade, status: newStatus,
-      description: trader.description || "", rating: trader.rating, website: trader.website || "",
-      phone: trader.phone || "", address: trader.address || "", mainCategory: trader.mainCategory || "",
-      ownerName: trader.ownerName || "", ownerProfileLink: trader.ownerProfileLink || "",
-      categories: trader.categories || "", workdayTiming: trader.workdayTiming || "", notes: trader.notes || "",
+      description: trader.description || undefined, rating: trader.rating, website: trader.website || undefined,
+      phone: trader.phone || undefined, address: trader.address || undefined, mainCategory: trader.mainCategory || undefined,
+      ownerName: trader.ownerName || undefined, ownerProfileLink: trader.ownerProfileLink || undefined,
+      categories: trader.categories || undefined, workdayTiming: trader.workdayTiming || undefined, notes: trader.notes || undefined,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -300,6 +301,60 @@ export function TraderTableClient({
     setIsBulkDeleteAlertOpen(false);
   };
 
+  const downloadCsv = () => {
+    if (filteredTraders.length === 0) {
+      toast({
+        title: "No Data to Export",
+        description: "There are no traders in the current view to export.",
+      });
+      return;
+    }
+
+    const csvData = filteredTraders.map(trader => ({
+      "ID": trader.id,
+      "Name": trader.name,
+      "Branch ID": trader.branchId,
+      "Total Sales (£)": trader.totalSales,
+      "Reviews (Trades Made)": trader.tradesMade,
+      "Status": trader.status,
+      "Last Activity": trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy HH:mm:ss') : '',
+      "Description": trader.description || '',
+      "Rating": trader.rating,
+      "Website": trader.website || '',
+      "Phone": trader.phone || '',
+      "Address": trader.address || '',
+      "Main Category": trader.mainCategory || '',
+      "Owner Name": trader.ownerName || '',
+      "Owner Profile Link": trader.ownerProfileLink || '',
+      "Categories": trader.categories || '',
+      "Workday Timing": trader.workdayTiming || '',
+      "Closed On": trader.closedOn || '',
+      "Review Keywords": trader.reviewKeywords || '',
+      "Notes": trader.notes || '',
+    }));
+
+    try {
+        const csvString = Papa.unparse(csvData, { header: true });
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) { 
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `traders_export_${branchId}_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            toast({ title: "Export Successful", description: "Trader data CSV downloaded." });
+        } else {
+            toast({ variant: "destructive", title: "Export Failed", description: "Browser does not support CSV download." });
+        }
+    } catch (error) {
+        console.error("Error generating CSV:", error);
+        toast({ variant: "destructive", title: "Export Error", description: "Could not generate CSV file." });
+    }
+  };
 
   const SortableHeader = ({ sortKey, label }: { sortKey: SortKey, label: string }) => (
     <TableHead onClick={() => requestSort(sortKey)} className="cursor-pointer hover:bg-muted/50 whitespace-nowrap">
@@ -322,7 +377,7 @@ export function TraderTableClient({
                 <span className="truncate">{stringContent.substring(0, maxChars)}...</span>
               </div>
             </TooltipTrigger>
-            <TooltipContent className="max-w-md break-words">
+            <TooltipContent className="max-w-md break-words bg-background border text-foreground p-2 rounded-md shadow-lg z-50">
               <p>{stringContent}</p>
             </TooltipContent>
           </Tooltip>
@@ -353,24 +408,42 @@ export function TraderTableClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search traders..."
-            value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1);}}
-            className="pl-10"
-          />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder="Search traders..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1);}}
+                className="pl-10"
+            />
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+                <Select value={activeCategoryFilter} onValueChange={handleCategoryFilterChange}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue placeholder="Filter by category..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {dynamicCategoryOptions.map(category => (
+                        <SelectItem key={category} value={category}>
+                        {category}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
+
+        <div className="flex gap-2 flex-wrap justify-start sm:justify-end w-full sm:w-auto mt-2 sm:mt-0">
           {selectedTraderIds.size > 0 && (
              <AlertDialog open={isBulkDeleteAlertOpen} onOpenChange={setIsBulkDeleteAlertOpen}>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" disabled={isBulkDeleting}>
                   {isBulkDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                  Delete Selected ({selectedTraderIds.size})
+                  Delete ({selectedTraderIds.size})
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -383,12 +456,16 @@ export function TraderTableClient({
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleConfirmBulkDelete} disabled={isBulkDeleting} className="bg-destructive hover:bg-destructive/90">
-                    {isBulkDeleting ? "Deleting..." : "Delete"}
+                    {isBulkDeleting ? "Deleting..." : "Confirm Delete"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           )}
+           <Button variant="outline" onClick={downloadCsv}>
+            <Download className="mr-2 h-4 w-4" />
+            Download CSV
+          </Button>
           <BulkAddTradersDialog 
             branchId={branchId} 
             existingTraders={allBranchTraders}
@@ -402,31 +479,7 @@ export function TraderTableClient({
         </div>
       </div>
       
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Filter className="h-4 w-4" />
-          <span>Filter by Category:</span>
-        </div>
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex gap-2 pb-2">
-            {CATEGORY_FILTERS.map(filter => (
-              <Button
-                key={filter.label}
-                variant={activeCategoryFilter === filter.label ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleCategoryFilterChange(filter.label)}
-                className="shrink-0"
-              >
-                {filter.label}
-              </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-
-
-      {paginatedTraders.length === 0 && filteredTraders.length === 0 && searchTerm === "" && activeCategoryFilter === CATEGORY_FILTERS[0].label ? (
+      {paginatedTraders.length === 0 && filteredTraders.length === 0 && searchTerm === "" && activeCategoryFilter === "All Categories" ? (
          <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
           <FileWarning className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-muted-foreground">No Traders Found</h3>
@@ -452,6 +505,7 @@ export function TraderTableClient({
                   checked={isAllPaginatedSelected}
                   onCheckedChange={handleSelectAllPaginatedTraders}
                   aria-label="Select all traders on this page"
+                  disabled={paginatedTraders.length === 0}
                 />
               </TableHead>
               <SortableHeader sortKey="name" label="Name" />
@@ -557,3 +611,6 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+
+    
