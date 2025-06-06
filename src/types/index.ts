@@ -2,11 +2,11 @@
 export interface Trader {
   id: string;
   name: string;
-  branchId: string;
-  totalSales: number; // Will be £
+  branchId: string; // This will store the BaseBranchId
+  totalSales: number; 
   tradesMade: number;
   status: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead';
-  lastActivity: string; // ISO Date string e.g. "2023-10-26T10:00:00.000Z"
+  lastActivity: string; 
   description?: string | null;
   rating?: number | null;
   website?: string | null;
@@ -20,16 +20,59 @@ export interface Trader {
   closedOn?: string | null; 
   reviewKeywords?: string | null;
   notes?: string | null;
-  callBackDate?: string | null; // New field for call-back reminders
+  callBackDate?: string | null; 
 }
 
-export type BranchId = 'PURLEY' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D' | 'DOVER';
+export type BranchLoginId = 
+  | 'PURLEY' | 'PURLEYMANAGER'
+  | 'BRANCH_B' | 'BRANCH_BMANAGER'
+  | 'BRANCH_C' | 'BRANCH_CMANAGER'
+  | 'BRANCH_D' | 'BRANCH_DMANAGER'
+  | 'DOVER' | 'DOVERMANAGER';
 
-export const VALID_BRANCH_IDS: BranchId[] = ['PURLEY', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D', 'DOVER'];
+export type BaseBranchId = 'PURLEY' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D' | 'DOVER';
+export type UserRole = 'team' | 'manager' | 'unknown';
+
+export const VALID_LOGIN_IDS: BranchLoginId[] = [
+  'PURLEY', 'PURLEYMANAGER',
+  'BRANCH_B', 'BRANCH_BMANAGER',
+  'BRANCH_C', 'BRANCH_CMANAGER',
+  'BRANCH_D', 'BRANCH_DMANAGER',
+  'DOVER', 'DOVERMANAGER'
+];
+
+export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = ['PURLEY', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D', 'DOVER'];
+
+export interface BranchInfo {
+  baseBranchId: BaseBranchId | null;
+  role: UserRole;
+  displayLoginId: BranchLoginId | null;
+}
+
+export function getBranchInfo(loginId: string | null): BranchInfo {
+  if (!loginId || !VALID_LOGIN_IDS.includes(loginId as BranchLoginId)) {
+    return { baseBranchId: null, role: 'unknown', displayLoginId: null };
+  }
+
+  const upperLoginId = loginId.toUpperCase();
+
+  if (upperLoginId.endsWith('MANAGER')) {
+    const baseId = upperLoginId.replace('MANAGER', '') as BaseBranchId;
+    if (VALID_BASE_BRANCH_IDS.includes(baseId)) {
+      return { baseBranchId: baseId, role: 'manager', displayLoginId: loginId as BranchLoginId };
+    }
+  } else {
+    if (VALID_BASE_BRANCH_IDS.includes(upperLoginId as BaseBranchId)) {
+      return { baseBranchId: upperLoginId as BaseBranchId, role: 'team', displayLoginId: loginId as BranchLoginId };
+    }
+  }
+  return { baseBranchId: null, role: 'unknown', displayLoginId: loginId as BranchLoginId };
+}
+
 
 // For bulk upload parsing
 export type ParsedTraderData = {
-  name: string; // Mandatory
+  name: string; 
   totalSales?: number;
   status?: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead';
   lastActivity?: string; 
@@ -45,7 +88,7 @@ export type ParsedTraderData = {
   address?: string | null;
   ownerProfileLink?: string | null;
   notes?: string | null;
-  callBackDate?: string | null; // New field for call-back reminders
+  callBackDate?: string | null; 
 };
 
 export interface BulkDeleteTradersResult {
@@ -53,4 +96,3 @@ export interface BulkDeleteTradersResult {
   failureCount: number;
   error?: string | null;
 }
-

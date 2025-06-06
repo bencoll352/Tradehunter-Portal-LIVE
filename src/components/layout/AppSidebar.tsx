@@ -21,15 +21,14 @@ import {
   HelpCircle,
   LogOut,
   Users,
-  BarChart3,
   Lightbulb, 
   ShieldCheck,
   FileText,
-  PackageSearch
+  Compass // Icon for Sales Navigator
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
-import type { BranchId } from "@/types";
+import { getBranchInfo, type BranchInfo } from "@/types"; // Updated import
 import {
   Accordion,
   AccordionContent,
@@ -48,8 +47,8 @@ const capabilitiesData = [
     category: "Trader Management",
     icon: Users,
     features: [
-      "Access & View Trader Database: After logging in, your branch's traders are listed in the main dashboard table. The table shows 50 traders per page; use pagination to navigate.",
-      "Add New Trader: Click 'Add New Trader' on the dashboard. A form will appear to enter details like name, sales, status, contact info, notes, and specific call-back dates. The system checks for duplicate phone numbers.",
+      "Access & View Trader Database: After logging in with your Branch or Manager ID, your branch's traders are listed in the main dashboard table. The table shows 50 traders per page; use pagination to navigate.",
+      "Add New Trader: Click 'Add New Trader' on the dashboard. A form will appear to enter details like name, sales, status, contact info, notes, and specific call-back dates. The system checks for duplicate phone numbers within the branch.",
       "Edit Trader Information: In the trader table, click the pencil icon (✏️) in the 'Actions' column for the desired trader. Their details will load in a form for you to modify and save.",
       "Delete Single Trader: Click the trash can icon (🗑️) in the 'Actions' column for a trader. A confirmation dialog will ask you to confirm before permanently deleting.",
       "Bulk Delete Multiple Traders: Select traders by clicking the checkboxes next to their names in the table. The 'Delete (X)' button will appear; click it and confirm to remove all selected traders at once.",
@@ -63,7 +62,7 @@ const capabilitiesData = [
   },
   {
     category: "Data Analysis & Branch Booster",
-    icon: Lightbulb, // Changed from BarChart3 as it's more about AI insights
+    icon: Lightbulb,
     features: [
       "Query Trader Data (Branch Booster): Find the 'Branch Booster' section on your dashboard. Type your questions about your branch's traders directly into the text area (e.g., 'What is the total sales volume for active traders?', 'List all traders in the 'Brickwork' category with a call-back date this month'). The analysis automatically uses your current branch's trader data.",
       "Use Quick Actions (Branch Booster): Click pre-defined buttons in the Branch Booster for common analyses like 'New Customers', 'High Potential New Customers', or 'List Bricklayers & Sales Campaign'. This pre-fills the query for you.",
@@ -71,6 +70,15 @@ const capabilitiesData = [
       "Estimate Project Materials (Branch Booster): Click the 'Estimate Project Materials' Quick Action. You can then further refine the project type or details in the query box. The Branch Booster leverages its understanding of UK building processes to help estimate typical materials needed.",
       "Get Actionable Insights & Suggestions (Branch Booster): Ask the Branch Booster for strategic advice, such as 'Suggest strategies to re-engage lapsed accounts who were previously high value' or 'Draft a promotional message for our new line of eco-friendly insulation to traders in the 'Roofing' category'.",
       "View Key Branch Statistics: The mini-dashboard at the top of the page provides an at-a-glance view of 'Active Traders', 'Call-Back Traders', 'New Leads', and 'Recently Active Traders' counts for your branch."
+    ]
+  },
+  {
+    category: "Sales & Strategy Navigator (Managers Only)",
+    icon: Compass,
+    features: [
+      "Access Advanced Strategic Insights: If logged in with a Manager ID (e.g., 'PURLEYMANAGER'), the 'Sales & Strategy Navigator' agent appears below the Branch Booster.",
+      "Deep Dive Analysis: Use the Navigator to ask complex strategic questions, request market trend analysis relative to your branch's data, or get AI-driven recommendations for sales strategies, team performance optimization, and long-term branch growth.",
+      "External Intelligence: The Sales Navigator connects to a dedicated external analysis service for its insights, potentially incorporating broader market data beyond just your branch's immediate traders."
     ]
   },
   {
@@ -85,7 +93,8 @@ const capabilitiesData = [
     category: "System & Security",
     icon: ShieldCheck,
     features: [
-      "Branch-Specific Data Access: Your unique Branch ID, used at login, ensures that you can only access and manage trader data associated with your specific branch.",
+      "Role-Based Login: The system supports Team logins (e.g., 'PURLEY') and Manager logins (e.g., 'PURLEYMANAGER'). Managers have access to additional tools like the Sales & Strategy Navigator.",
+      "Branch-Specific Data Access: Your Login ID ensures that you can only access and manage trader data associated with your specific branch. Manager logins view the same branch data as their team counterparts, but with added analytical tools.",
       "Secure Data Storage: All trader information is stored in Firebase Firestore, a cloud-hosted database, using security rules to maintain data integrity and isolation between branches.",
       "Secure Portal Access: The TradeHunter Pro portal is delivered over HTTPS, encrypting data transmitted between your browser and the server."
     ]
@@ -97,22 +106,26 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { setOpenMobile, state: sidebarState } = useSidebar();
-  const [currentBranchId, setCurrentBranchId] = useState<BranchId | null>(null);
+  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedBranchId = localStorage.getItem("branchId") as BranchId | null;
-      setCurrentBranchId(storedBranchId);
+      const loggedInId = localStorage.getItem("loggedInId");
+      setBranchInfo(getBranchInfo(loggedInId));
     }
   }, []);
   
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem("branchId");
+      localStorage.removeItem("loggedInId");
     }
     router.push("/login");
     setOpenMobile(false);
   };
+
+  const displayId = branchInfo?.displayLoginId || "Branch";
+  const avatarChar = displayId.includes("MANAGER") ? displayId.charAt(0) + "M" : displayId.charAt(0);
+
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="border-r-0">
@@ -164,6 +177,10 @@ export function AppSidebar() {
             <Accordion type="multiple" className="w-full">
               {capabilitiesData.map((capability, index) => {
                 const IconComponent = capability.icon;
+                // Conditionally render Sales Navigator capability
+                if (capability.category.includes("Managers Only") && branchInfo?.role !== 'manager') {
+                  return null;
+                }
                 return (
                   <AccordionItem value={`item-${index}`} key={capability.category} className="border-sidebar-border/50">
                     <AccordionTrigger className="py-2 text-sm text-sidebar-foreground hover:no-underline hover:text-sidebar-primary-foreground [&[data-state=open]>svg]:text-sidebar-primary-foreground">
@@ -192,15 +209,15 @@ export function AppSidebar() {
         <Separator className="my-2 bg-sidebar-border group-data-[collapsible=icon]:hidden"/>
         <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center p-2 rounded-md hover:bg-sidebar-accent transition-colors">
             <Avatar className="h-9 w-9 border-2 border-sidebar-primary">
-              <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">
-                {currentBranchId ? currentBranchId.charAt(0) : '?'}
+              <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
+                {avatarChar}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
               <span className="text-sm font-medium text-sidebar-primary-foreground">
-                {currentBranchId || "Branch"}
+                {displayId}
               </span>
-              <span className="text-xs text-sidebar-foreground/80">Branch Account</span>
+              <span className="text-xs text-sidebar-foreground/80">{branchInfo?.role === 'manager' ? 'Manager Account' : 'Branch Account'}</span>
             </div>
         </div>
 
@@ -216,5 +233,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
-    

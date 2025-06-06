@@ -2,16 +2,16 @@
 // This file is a Server Component by default in Next.js App Router.
 import { DashboardClientPageContent } from '@/components/dashboard/DashboardClientPageContent';
 import { addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions';
-import type { Trader, ParsedTraderData, BranchId, BulkDeleteTradersResult } from '@/types';
+import type { Trader, ParsedTraderData, BaseBranchId, BulkDeleteTradersResult } from '@/types'; // Use BaseBranchId
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 
-// Define more specific types for the action props
-type AddTraderActionType = (branchId: BranchId, values: z.infer<typeof traderFormSchema>) => Promise<{ data: Trader | null; error: string | null }>;
-type UpdateTraderActionType = (branchId: BranchId, traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<{ data: Trader | null; error: string | null }>;
-type DeleteTraderActionType = (branchId: BranchId, traderId: string) => Promise<{ success: boolean; error: string | null }>;
-type BulkAddTradersActionType = (branchId: BranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
-type BulkDeleteTradersActionType = (branchId: BranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>;
+// Define more specific types for the action props using BaseBranchId
+type AddTraderActionType = (branchId: BaseBranchId, values: z.infer<typeof traderFormSchema>) => Promise<{ data: Trader | null; error: string | null }>;
+type UpdateTraderActionType = (branchId: BaseBranchId, traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<{ data: Trader | null; error: string | null }>;
+type DeleteTraderActionType = (branchId: BaseBranchId, traderId: string) => Promise<{ success: boolean; error: string | null }>;
+type BulkAddTradersActionType = (branchId: BaseBranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
+type BulkDeleteTradersActionType = (branchId: BaseBranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>;
 
 
 export default function DashboardPage() {
@@ -21,7 +21,7 @@ export default function DashboardPage() {
       updateTraderAction={updateTraderAction as UpdateTraderActionType}
       deleteTraderAction={deleteTraderAction as DeleteTraderActionType}
       bulkAddTradersAction={bulkAddTradersAction as BulkAddTradersActionType}
-      bulkDeleteTradersAction={bulkDeleteTradersAction as BulkDeleteTradersActionType} // Pass the new action
+      bulkDeleteTradersAction={bulkDeleteTradersAction as BulkDeleteTradersActionType}
     />
   );
 }

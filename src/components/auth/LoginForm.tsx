@@ -16,13 +16,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { VALID_BRANCH_IDS, type BranchId } from "@/types";
+import { VALID_LOGIN_IDS, type BranchLoginId } from "@/types";
 import { LogIn } from "lucide-react";
 
 const formSchema = z.object({
   branchId: z.string().min(1, { message: "Branch ID is required." })
-    .refine(val => VALID_BRANCH_IDS.includes(val as BranchId), {
-      message: "Invalid Branch ID. Try PURLEY, BRANCH_B, BRANCH_C, BRANCH_D, or DOVER.",
+    .refine(val => VALID_LOGIN_IDS.includes(val.toUpperCase() as BranchLoginId), {
+      message: "Invalid Login ID. Example: PURLEY (team) or PURLEYMANAGER (manager).",
     }),
 });
 
@@ -38,20 +38,19 @@ export function LoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Simulate authentication
-    if (VALID_BRANCH_IDS.includes(values.branchId as BranchId)) {
-      localStorage.setItem("branchId", values.branchId);
+    const enteredId = values.branchId.toUpperCase() as BranchLoginId;
+    if (VALID_LOGIN_IDS.includes(enteredId)) {
+      localStorage.setItem("loggedInId", enteredId); // Store the entered ID
       toast({
         title: "Login Successful",
-        description: `Welcome, ${values.branchId}! Redirecting to dashboard...`,
+        description: `Welcome! Redirecting to dashboard...`,
       });
       router.push("/dashboard");
     } else {
-      // This case should ideally be caught by zod refinement, but as a fallback:
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid Branch ID.",
+        description: "Invalid Login ID. Example: PURLEY (team) or PURLEYMANAGER (manager).",
       });
     }
   }
@@ -64,9 +63,9 @@ export function LoginForm() {
           name="branchId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-foreground">Branch ID</FormLabel>
+              <FormLabel className="text-foreground">Login ID</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., PURLEY" {...field} className="text-base" />
+                <Input placeholder="e.g., PURLEY or PURLEYMANAGER" {...field} className="text-base" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -79,4 +78,3 @@ export function LoginForm() {
     </Form>
   );
 }
-

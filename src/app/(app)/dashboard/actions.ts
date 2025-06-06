@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { BranchId, Trader, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
+import type { BaseBranchId, Trader, ParsedTraderData, BulkDeleteTradersResult } from "@/types"; // Use BaseBranchId
 import { 
   getTradersByBranch as dbGetTradersByBranch,
   addTraderToDb, 
@@ -12,12 +12,11 @@ import {
 } from "@/lib/trader-service"; 
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
-import { db } from '@/lib/firebase'; // Import db for direct Firestore access
-import { collection, writeBatch, doc, deleteDoc } from 'firebase/firestore'; // Import Firestore batch operations
+import { db } from '@/lib/firebase';
+import { collection, writeBatch, doc } from 'firebase/firestore';
 
 const TRADERS_COLLECTION = 'traders';
 
-// Helper function to extract a string error message
 function extractErrorMessage(error: unknown, defaultMessage: string): string {
   if (error instanceof Error) {
     return error.message;
@@ -26,7 +25,6 @@ function extractErrorMessage(error: unknown, defaultMessage: string): string {
     return error;
   }
   if (error && typeof error === 'object' && 'message' in error && typeof (error as any).message === 'string') {
-    // Firestore errors sometimes come in this shape
     if ('code' in error) {
        return `Error Code: ${(error as any).code} - ${(error as any).message}`;
     }
@@ -34,33 +32,36 @@ function extractErrorMessage(error: unknown, defaultMessage: string): string {
   }
   try {
     const stringifiedError = JSON.stringify(error);
-    // Avoid returning empty objects or generic "[object Object]"
     if (stringifiedError && stringifiedError !== '{}' && stringifiedError !== '[object Object]') {
       return stringifiedError;
     }
   } catch (e) {
-    // Ignore stringify error if it fails (e.g., circular references)
+    // Ignore stringify error
   }
   return defaultMessage;
 }
 
-
-export async function getTradersAction(branchId: BranchId): Promise<{ data: Trader[] | null; error: string | null }> {
+// Action now expects BaseBranchId
+export async function getTradersAction(baseBranchId: BaseBranchId): Promise<{ data: Trader[] | null; error: string | null }> {
   try {
-    const traders = await dbGetTradersByBranch(branchId);
+    const traders = await dbGetTradersByBranch(baseBranchId);
     return { data: traders, error: null };
   } catch (error) {
-    const errorMessage = extractErrorMessage(error, `Failed to get traders for branch ${branchId}.`);
-    console.error(`getTradersAction for ${branchId} failed:`, errorMessage, "Original error:", error);
+    const errorMessage = extractErrorMessage(error, `Failed to get traders for branch ${baseBranchId}.`);
+    console.error(`getTradersAction for ${baseBranchId} failed:`, errorMessage, "Original error:", error);
     return { data: null, error: errorMessage };
   }
 }
 
-export async function addTraderAction(branchId: BranchId, values: z.infer<typeof traderFormSchema>): Promise<{ data: Trader | null; error: string | null }> {
+// Action now expects BaseBranchId
+export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infer<typeof traderFormSchema>): Promise<{ data: Trader | null; error: string | null }> {
   try {
-    const newTraderData: Omit<Trader, 'id' | 'lastActivity'> = {
+    // The traderData for addTraderToDb should not include 'id', 'lastActivity', or 'branchId'
+    // as these are handled by the service or are system-generated.
+    // traderFormSchema already aligns with this mostly.
+    const newTraderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'> = {
       name: values.name,
-      branchId, 
+      // branchId is set by addTraderToDb using the passed baseBranchId
       totalSales: values.totalSales,
       tradesMade: values.tradesMade,
       status: values.status,
@@ -75,11 +76,11 @@ export async function addTraderAction(branchId: BranchId, values: z.infer<typeof
       categories: values.categories === undefined ? null : values.categories,
       workdayTiming: values.workdayTiming === undefined ? null : values.workdayTiming,
       notes: values.notes === undefined ? null : values.notes,
-      callBackDate: values.callBackDate === undefined ? null : values.callBackDate, // Include callBackDate
+      callBackDate: values.callBackDate === undefined ? null : values.callBackDate,
       closedOn: null, 
       reviewKeywords: null, 
     };
-    const newTrader = await addTraderToDb(newTraderData, branchId);
+    const newTrader = await addTraderToDb(newTraderData, baseBranchId);
     return { data: newTrader, error: null };
   } catch (error) {
     const errorMessage = extractErrorMessage(error, "Failed to add trader due to an unknown server error.");
@@ -88,18 +89,20 @@ export async function addTraderAction(branchId: BranchId, values: z.infer<typeof
   }
 }
 
-export async function updateTraderAction(branchId: BranchId, traderId: string, values: z.infer<typeof traderFormSchema>): Promise<{ data: Trader | null; error: string | null }> {
+// Action now expects BaseBranchId
+export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: string, values: z.infer<typeof traderFormSchema>): Promise<{ data: Trader | null; error: string | null }> {
   try {
-    const existingTrader = await dbGetTraderById(traderId, branchId);
+    const existingTrader = await dbGetTraderById(traderId, baseBranchId);
     
     if (!existingTrader) {
-      const errorMessage = `Trader with ID ${traderId} in branch ${branchId} not found for update.`;
+      const errorMessage = `Trader with ID ${traderId} in branch ${baseBranchId} not found for update.`;
       console.error(errorMessage);
       return { data: null, error: errorMessage };
     }
 
+    // Construct the full Trader object for updateTraderInDb
     const traderToUpdate: Trader = {
-      ...existingTrader, 
+      ...existingTrader, // Spread existing trader to preserve fields not in form (like id, branchId)
       name: values.name,
       totalSales: values.totalSales,
       tradesMade: values.tradesMade,
@@ -115,7 +118,8 @@ export async function updateTraderAction(branchId: BranchId, traderId: string, v
       categories: values.categories === undefined ? null : values.categories,
       workdayTiming: values.workdayTiming === undefined ? null : values.workdayTiming,
       notes: values.notes === undefined ? null : values.notes,
-      callBackDate: values.callBackDate === undefined ? null : values.callBackDate, // Include callBackDate
+      callBackDate: values.callBackDate === undefined ? null : values.callBackDate,
+      // branchId remains from existingTrader, ensuring it's the BaseBranchId
     };
     const updatedTrader = await updateTraderInDb(traderToUpdate);
     return { data: updatedTrader, error: null };
@@ -126,9 +130,11 @@ export async function updateTraderAction(branchId: BranchId, traderId: string, v
   }
 }
 
-export async function deleteTraderAction(branchId: BranchId, traderId: string): Promise<{ success: boolean; error: string | null; }> {
+// Action now expects BaseBranchId
+export async function deleteTraderAction(baseBranchId: BaseBranchId, traderId: string): Promise<{ success: boolean; error: string | null; }> {
    try {
-    const success = await deleteTraderFromDb(traderId, branchId);
+    // deleteTraderFromDb now takes baseBranchId for logging/verification if needed, but primarily relies on traderId
+    const success = await deleteTraderFromDb(traderId, baseBranchId);
     return { success, error: null };
   } catch (error) {
     const errorMessage = extractErrorMessage(error, "Failed to delete trader due to an unknown server error.");
@@ -137,9 +143,10 @@ export async function deleteTraderAction(branchId: BranchId, traderId: string): 
   }
 }
 
-export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> {
+// Action now expects BaseBranchId
+export async function bulkAddTradersAction(baseBranchId: BaseBranchId, tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> {
   try {
-    const data = await bulkAddTradersToDb(tradersToCreate, branchId);
+    const data = await bulkAddTradersToDb(tradersToCreate, baseBranchId);
     return { data, error: null };
   } catch (error) {
     const errorMessage = extractErrorMessage(error, "An unknown server error occurred during bulk add.");
@@ -148,7 +155,8 @@ export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: 
   }
 }
 
-export async function bulkDeleteTradersAction(branchId: BranchId, traderIds: string[]): Promise<BulkDeleteTradersResult> {
+// Action now expects BaseBranchId
+export async function bulkDeleteTradersAction(baseBranchId: BaseBranchId, traderIds: string[]): Promise<BulkDeleteTradersResult> {
   if (!db) {
     console.error("[TraderService:bulkDeleteTradersAction] Firestore not initialized. Aborting operation. Check Firebase configuration.");
     return { successCount: 0, failureCount: traderIds.length, error: "Firestore not initialized." };
@@ -157,36 +165,32 @@ export async function bulkDeleteTradersAction(branchId: BranchId, traderIds: str
     return { successCount: 0, failureCount: 0, error: "No trader IDs provided for deletion." };
   }
 
-  // Firestore batch writes are limited (e.g., 500 operations). 
-  // If more traders could be selected, chunking would be needed.
-  // For typical page sizes (e.g., up to 50), a single batch is fine.
   if (traderIds.length > 499) {
-     console.warn(`[TraderService:bulkDeleteTradersAction] Attempting to delete ${traderIds.length} traders, which exceeds the typical batch limit. Consider implementing chunking if this is a common scenario.`);
-     // For now, we'll proceed but this is a note for future improvement if necessary.
+     console.warn(`[TraderService:bulkDeleteTradersAction] Attempting to delete ${traderIds.length} traders from branch ${baseBranchId}, which exceeds the typical batch limit.`);
   }
 
   const batch = writeBatch(db);
   let successCount = 0;
   let failureCount = 0;
 
-  console.log(`[TraderService:bulkDeleteTradersAction] Attempting to bulk delete ${traderIds.length} traders from branch ${branchId}`);
+  console.log(`[TraderService:bulkDeleteTradersAction] Attempting to bulk delete ${traderIds.length} traders from branch ${baseBranchId}`);
 
   for (const traderId of traderIds) {
-    // Basic validation for traderId, though server should ideally verify ownership if rules are strict.
-    // For this app, branchId consistency is managed by client.
     const traderDocRef = doc(db, TRADERS_COLLECTION, traderId);
+    // Before adding to batch, one could optionally fetch the doc to verify it belongs to baseBranchId if Firestore rules aren't strict enough.
+    // However, for performance in a bulk operation, relying on rules or prior client-side filtering is common.
     batch.delete(traderDocRef);
   }
 
   try {
     await batch.commit();
     successCount = traderIds.length;
-    console.log(`[TraderService:bulkDeleteTradersAction] Successfully bulk deleted ${successCount} traders from branch ${branchId}.`);
+    console.log(`[TraderService:bulkDeleteTradersAction] Successfully bulk deleted ${successCount} traders from branch ${baseBranchId}.`);
     return { successCount, failureCount, error: null };
   } catch (error) {
-    failureCount = traderIds.length; // Assume all failed if batch commit fails
+    failureCount = traderIds.length;
     const errorMessage = extractErrorMessage(error, "An unknown server error occurred during bulk delete.");
-    console.error(`[TraderService:bulkDeleteTradersAction] Error bulk deleting traders from branch ${branchId}:`, error);
+    console.error(`[TraderService:bulkDeleteTradersAction] Error bulk deleting traders from branch ${baseBranchId}:`, error);
     return { successCount: 0, failureCount, error: errorMessage };
   }
 }

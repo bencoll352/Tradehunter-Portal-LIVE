@@ -2,12 +2,12 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import type { BranchId, Trader, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { VALID_BRANCH_IDS } from "@/types"; 
+import { type BaseBranchId, type Trader, type ParsedTraderData, type BulkDeleteTradersResult, getBranchInfo, type BranchInfo, type BranchLoginId } from "@/types";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
 import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAgentClient";
+import { SalesNavigatorAgentClient } from "./SalesNavigatorAgentClient"; // Import new agent
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
@@ -18,11 +18,11 @@ import { getTradersAction } from '@/app/(app)/dashboard/actions';
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
 interface DashboardClientPageContentProps {
-  addTraderAction: (branchId: BranchId, values: TraderFormValues) => Promise<{ data: Trader | null; error: string | null }>;
-  updateTraderAction: (branchId: BranchId, traderId: string, values: TraderFormValues) => Promise<{ data: Trader | null; error: string | null }>;
-  deleteTraderAction: (branchId: BranchId, traderId: string) => Promise<{ success: boolean; error: string | null }>;
-  bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
-  bulkDeleteTradersAction: (branchId: BranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>; // New action
+  addTraderAction: (branchId: BaseBranchId, values: TraderFormValues) => Promise<{ data: Trader | null; error: string | null }>;
+  updateTraderAction: (branchId: BaseBranchId, traderId: string, values: TraderFormValues) => Promise<{ data: Trader | null; error: string | null }>;
+  deleteTraderAction: (branchId: BaseBranchId, traderId: string) => Promise<{ success: boolean; error: string | null }>;
+  bulkAddTradersAction: (branchId: BaseBranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
+  bulkDeleteTradersAction: (branchId: BaseBranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>;
 }
 
 export function DashboardClientPageContent({
@@ -30,9 +30,9 @@ export function DashboardClientPageContent({
   updateTraderAction,
   deleteTraderAction,
   bulkAddTradersAction,
-  bulkDeleteTradersAction, // New action
+  bulkDeleteTradersAction,
 }: DashboardClientPageContentProps) {
-  const [branchId, setBranchId] = useState<BranchId | null>(null);
+  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [keyForTable, setKeyForTable] = useState(0); 
@@ -41,41 +41,30 @@ export function DashboardClientPageContent({
   useEffect(() => {
     const initializeDashboard = async () => {
       if (typeof window !== 'undefined') {
-        const storedBranchId = localStorage.getItem('branchId') as BranchId | null;
-        
-        if (storedBranchId && !VALID_BRANCH_IDS.includes(storedBranchId)) {
-          toast({
-            variant: "destructive",
-            title: "Invalid Branch ID Detected",
-            description: `The Branch ID "${storedBranchId}" stored in your browser is no longer valid. This may cause errors. Please log out and log back in using a current valid ID (e.g., PURLEY, BRANCH_B, BRANCH_C, BRANCH_D).`,
-            duration: 15000 
-          });
-        }
-        setBranchId(storedBranchId);
+        const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
+        const info = getBranchInfo(storedLoggedInId);
+        setBranchInfo(info);
 
-        if (storedBranchId) {
+        if (info.baseBranchId && info.role !== 'unknown') {
           setIsLoading(true);
           try {
-            const result = await getTradersAction(storedBranchId);
+            const result = await getTradersAction(info.baseBranchId);
             if (result.data) {
               setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
             } else {
-              if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
-                setTraders([]);
-                toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data. The server might be busy or there's a configuration issue." });
-              }
+              setTraders([]);
+              toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data. Server might be busy or configuration issue." });
             }
           } catch (error) {
             console.error("Error fetching initial traders (client catch):", error);
             setTraders([]);
-             if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
-              toast({ variant: "destructive", title: "Error Loading Data", description: "Failed to load trader data due to an unexpected client-side error." });
-            }
+            toast({ variant: "destructive", title: "Error Loading Data", description: "Failed to load trader data due to an unexpected client-side error." });
           } finally {
             setIsLoading(false);
           }
         } else {
           setIsLoading(false); 
+          // Redirection to login should be handled by AppLayout
         }
       }
     };
@@ -84,28 +73,28 @@ export function DashboardClientPageContent({
   
   useEffect(() => {
     const refreshTradersForBranch = async () => {
-      if (branchId && VALID_BRANCH_IDS.includes(branchId)) { 
+      if (branchInfo?.baseBranchId && branchInfo?.role !== 'unknown') { 
         setIsLoading(true);
         try {
-          const result = await getTradersAction(branchId);
+          const result = await getTradersAction(branchInfo.baseBranchId);
           if (result.data) {
             setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
           } else {
-             toast({ variant: "destructive", title: "Error Refreshing Data", description: result.error || `Could not refresh traders for ${branchId}.` });
+             toast({ variant: "destructive", title: "Error Refreshing Data", description: result.error || `Could not refresh traders for ${branchInfo.baseBranchId}.` });
           }
         } catch (error) {
-          console.error(`Error refreshing traders for ${branchId} (client catch):`, error);
-          toast({ variant: "destructive", title: "Error Refreshing Data", description: "Failed to refresh trader data due to an unexpected client-side error." });
+          console.error(`Error refreshing traders for ${branchInfo.baseBranchId} (client catch):`, error);
+          toast({ variant: "destructive", title: "Error Refreshing Data", description: "Failed to refresh trader data." });
         } finally {
           setIsLoading(false);
         }
-      } else if (branchId && !VALID_BRANCH_IDS.includes(branchId)) {
+      } else if (branchInfo && branchInfo.role === 'unknown') {
         setTraders([]);
         setIsLoading(false);
       }
     };
      refreshTradersForBranch();
-  }, [branchId, keyForTable, toast]); 
+  }, [branchInfo, keyForTable, toast]); 
 
   const activeTradersCount = useMemo(() => traders.filter(t => t.status === 'Active').length, [traders]);
   const callBackTradersCount = useMemo(() => traders.filter(t => t.status === 'Call-Back').length, [traders]);
@@ -123,12 +112,15 @@ export function DashboardClientPageContent({
     }).length;
   }, [traders]);
 
+  const currentBaseBranchId = branchInfo?.baseBranchId;
+  const currentUserRole = branchInfo?.role;
+
   const handleAdd = async (values: TraderFormValues): Promise<boolean> => {
-    if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot add trader: Invalid Branch ID. Please re-login." });
+    if (!currentBaseBranchId || currentUserRole === 'unknown') {
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot add trader: Invalid Branch ID or Role. Please re-login." });
       return false;
     }
-    const result = await addTraderAction(branchId, values);
+    const result = await addTraderAction(currentBaseBranchId, values);
     if (result.data) {
       setKeyForTable(prev => prev + 1); 
       toast({ title: "Success", description: `${result.data.name} added.`});
@@ -139,11 +131,11 @@ export function DashboardClientPageContent({
   };
 
   const handleUpdate = async (traderId: string, values: TraderFormValues): Promise<boolean> => {
-     if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot update trader: Invalid Branch ID. Please re-login." });
+     if (!currentBaseBranchId || currentUserRole === 'unknown') {
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot update trader: Invalid Branch ID or Role. Please re-login." });
       return false;
     }
-    const result = await updateTraderAction(branchId, traderId, values);
+    const result = await updateTraderAction(currentBaseBranchId, traderId, values);
     if (result.data) {
       setKeyForTable(prev => prev + 1);
       toast({ title: "Success", description: `${result.data.name} updated.`});
@@ -154,11 +146,11 @@ export function DashboardClientPageContent({
   };
 
   const handleDelete = async (traderId: string): Promise<boolean> => {
-     if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot delete trader: Invalid Branch ID. Please re-login." });
+     if (!currentBaseBranchId || currentUserRole === 'unknown') {
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot delete trader: Invalid Branch ID or Role. Please re-login." });
       return false;
     }
-    const result = await deleteTraderAction(branchId, traderId);
+    const result = await deleteTraderAction(currentBaseBranchId, traderId);
     if (result.success) {
       setKeyForTable(prev => prev + 1);
     } else {
@@ -168,11 +160,12 @@ export function DashboardClientPageContent({
   };
 
   const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
-    if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk add: Invalid Branch ID. Please re-login." });
-      return { data: null, error: "Invalid or missing Branch ID." };
+    if (!currentBaseBranchId || currentUserRole === 'unknown') {
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk add: Invalid Branch ID or Role. Please re-login." });
+      return { data: null, error: "Invalid or missing Branch ID/Role." };
     }
-    const result = await bulkAddTradersAction(branchId, tradersToCreate);
+    // The bulkAddTradersAction from props expects BaseBranchId, which currentBaseBranchId is.
+    const result = await bulkAddTradersAction(currentBaseBranchId, tradersToCreate); 
     if (result.data && result.data.length > 0) { 
       setKeyForTable(prev => prev + 1);
     } 
@@ -180,20 +173,18 @@ export function DashboardClientPageContent({
   };
 
   const handleBulkDelete = async (traderIds: string[]): Promise<BulkDeleteTradersResult> => {
-    if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk delete: Invalid Branch ID. Please re-login." });
-      return { successCount: 0, failureCount: traderIds.length, error: "Invalid or missing Branch ID." };
+    if (!currentBaseBranchId || currentUserRole === 'unknown') {
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk delete: Invalid Branch ID or Role. Please re-login." });
+      return { successCount: 0, failureCount: traderIds.length, error: "Invalid or missing Branch ID/Role." };
     }
-    const result = await bulkDeleteTradersAction(branchId, traderIds);
+    const result = await bulkDeleteTradersAction(currentBaseBranchId, traderIds);
     if (result.successCount > 0) {
       setKeyForTable(prev => prev + 1); 
     }
-    // Specific toasts for bulk delete are handled in TraderTableClient to give immediate feedback after dialog.
-    // This function primarily ensures data refresh.
     return result;
   };
 
-  if (isLoading && !traders.length && (!branchId || VALID_BRANCH_IDS.includes(branchId))) { 
+  if (isLoading && !traders.length && (!currentBaseBranchId || currentUserRole !== 'unknown')) { 
     return (
       <div className="space-y-6">
         <Skeleton className="h-24 w-full md:w-1/2 lg:w-1/3" />
@@ -204,8 +195,8 @@ export function DashboardClientPageContent({
     );
   }
 
-  if (!branchId && !isLoading) { 
-    return <p>Error: Branch ID not found. Please ensure you are logged in with a valid Branch ID.</p>;
+  if (!currentBaseBranchId && !isLoading) { 
+    return <p>Error: Branch information not found. Please ensure you are logged in correctly.</p>;
   }
   
   return (
@@ -221,22 +212,22 @@ export function DashboardClientPageContent({
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
-              <CardDescription>Manage traders for branch: {branchId || 'Loading...'}</CardDescription>
+              <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading && traders.length === 0 && (!branchId || VALID_BRANCH_IDS.includes(branchId)) ? (
+              {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
                  <Skeleton className="h-64 w-full" />
               ) : (
                 <TraderTableClient 
                   key={keyForTable} 
                   initialTraders={traders} 
-                  branchId={branchId!} 
+                  branchId={currentBaseBranchId!} 
                   allBranchTraders={traders} 
                   onAdd={handleAdd}
                   onUpdate={handleUpdate}
                   onDelete={handleDelete}
                   onBulkAdd={handleBulkAdd}
-                  onBulkDelete={handleBulkDelete} // Pass down the new handler
+                  onBulkDelete={handleBulkDelete}
                 />
               )}
             </CardContent>
@@ -245,6 +236,9 @@ export function DashboardClientPageContent({
 
         <div className="lg:col-span-1 space-y-6">
           <ProfitPartnerAgentClient traders={traders} />
+          {currentUserRole === 'manager' && currentBaseBranchId && (
+            <SalesNavigatorAgentClient traders={traders} baseBranchId={currentBaseBranchId} />
+          )}
         </div>
       </div>
     </div>

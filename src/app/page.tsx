@@ -1,17 +1,20 @@
+
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { getBranchInfo } from '@/types'; // Import getBranchInfo
 
 export default function HomePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Ensure localStorage is accessed only on the client side
     if (typeof window !== 'undefined') {
-      const branchId = localStorage.getItem('branchId');
-      if (branchId) {
+      const loggedInId = localStorage.getItem('loggedInId');
+      const branchInfo = getBranchInfo(loggedInId); // Use getBranchInfo
+
+      if (branchInfo.baseBranchId && branchInfo.role !== 'unknown') {
         router.replace('/dashboard');
       } else {
         router.replace('/login');
