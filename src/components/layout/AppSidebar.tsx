@@ -22,19 +22,10 @@ import {
   LogOut,
   Users,
   BarChart3,
-  Megaphone,
-  Lightbulb, // Changed from Brain
-  HardHat,
+  Lightbulb, 
   ShieldCheck,
-  LayoutGrid,
-  Binary,
-  Settings2,
-  Wrench,
   FileText,
-  Database,
-  UploadCloud,
-  Fingerprint,
-  LineChart
+  PackageSearch
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -57,122 +48,46 @@ const capabilitiesData = [
     category: "Trader Management",
     icon: Users,
     features: [
-      "Access Trader Database: Retrieve a list of all active trade professionals, including their specialties, contact details, and sales volume, linked to the branch’s unique ID.",
-      "Add Trader Records: Enter new trader data via a form on the branch dashboard.",
-      "Update Trader Information: Modify existing trader records using a pre-filled form.",
-      "Delete Trader Records: Remove trader records with a confirmation prompt.",
-      "Persistent Data Storage: Trader data is securely stored in Firebase Firestore, ensuring data is saved per branch and persists across sessions. Includes automatic data seeding if a branch's collection is initially empty.",
-      "Bulk Add Traders: Upload trader data in bulk via CSV files, with robust parsing for various formats (header-based matching, flexible column order, quoted field handling) and duplicate detection.",
-      "Duplicate Trader Prevention: System checks for duplicate traders by phone number during manual addition and bulk CSV uploads, preventing redundant entries with appropriate user feedback.",
-      "Search and Filter Traders: Filter traders by name, specialty, or sales volume using a search bar and category filters on the dashboard.",
-      "Segment Traders by Category: Categorize traders into six types (new customers, high-potential new customers, existing customers needing increased spend, high-value existing customers, lapsed accounts with no spend in 3 months, declined accounts with no spend in 6 months) for targeted interactions (primarily via Branch Booster queries)."
+      "Access & View Trader Database: After logging in, your branch's traders are listed in the main dashboard table. The table shows 50 traders per page; use pagination to navigate.",
+      "Add New Trader: Click 'Add New Trader' on the dashboard. A form will appear to enter details like name, sales, status, contact info, notes, and specific call-back dates. The system checks for duplicate phone numbers.",
+      "Edit Trader Information: In the trader table, click the pencil icon (✏️) in the 'Actions' column for the desired trader. Their details will load in a form for you to modify and save.",
+      "Delete Single Trader: Click the trash can icon (🗑️) in the 'Actions' column for a trader. A confirmation dialog will ask you to confirm before permanently deleting.",
+      "Bulk Delete Multiple Traders: Select traders by clicking the checkboxes next to their names in the table. The 'Delete (X)' button will appear; click it and confirm to remove all selected traders at once.",
+      "Bulk Add Traders (CSV Upload): Click 'Bulk Add Traders (CSV)'. Upload a CSV file containing trader data. The system primarily uses header names (e.g., 'Name', 'Total Sales', 'Phone') to map data, so column order is flexible. 'Name' is mandatory. See dialog instructions for more on expected headers and CSV formatting (e.g., use double quotes for fields with commas like addresses). Duplicates (by phone number, compared to existing data or within the CSV) are automatically skipped, with a summary provided.",
+      "Search Traders: Use the search bar above the trader table. Type keywords to find traders across various fields like name, description, main category, address, or notes.",
+      "Filter Traders by Category: Use the 'Filter by category' dropdown (next to the search bar) to view traders belonging to specific categories. The category list is dynamically generated from your branch's trader data.",
+      "Sort Trader Data: Click on column headers in the trader table (e.g., 'Name', 'Total Sales', 'Last Activity', 'Call-Back Date') to sort the data by that column in ascending or descending order.",
+      "Set & Manage Call-Back Reminders: When adding or editing a trader, use the 'Call-Back Date' field (with a calendar picker) to set a follow-up date. These dates are visible in the 'Call-Back' column and can be sorted to prioritize upcoming calls.",
+      "Data Persistence & Branch Isolation: All trader data is securely stored per branch in Firebase Firestore. This means your data is saved across sessions and is separate from other branches."
     ]
   },
   {
-    category: "Data Analysis and Insights",
-    icon: BarChart3, // Consider LineChart or similar if more fitting for "Insights"
+    category: "Data Analysis & Branch Booster",
+    icon: Lightbulb, // Changed from BarChart3 as it's more about AI insights
     features: [
-      "Branch Booster Queries: Use the Branch Booster (powered by Genkit and Google Gemini API) to answer questions about branch-specific trader data via a chat interface. Examples: “What is my total sales volume?”, “Who are my top 5 traders by sales?”",
-      "Analyze Uploaded Contextual Data: Upload supplementary customer data files (e.g., .txt, .csv) to the Branch Booster for deeper, context-aware analysis alongside existing trader data (e.g., identifying upsell opportunities based on customer purchase history).",
-      "Provide Real-Time Analytics: Access live performance dashboards showing metrics like total sales, response rates to campaigns, and dormant account reactivation rates (some metrics available via Mini Dashboard).",
-      "Estimate Project Materials: Calculate materials needed for construction projects based on project type using the system’s understanding of UK building processes.",
-      "Suggest Product Bundles: Recommend complementary products based on trader purchase history or project needs.",
-      "Track Campaign Performance: Monitor the effectiveness of marketing campaigns (e.g., response rates, conversions) using real-time data from the portal (requires campaign feature implementation)."
+      "Query Trader Data (Branch Booster): Find the 'Branch Booster' section on your dashboard. Type your questions about your branch's traders directly into the text area (e.g., 'What is the total sales volume for active traders?', 'List all traders in the 'Brickwork' category with a call-back date this month'). The analysis automatically uses your current branch's trader data.",
+      "Use Quick Actions (Branch Booster): Click pre-defined buttons in the Branch Booster for common analyses like 'New Customers', 'High Potential New Customers', or 'List Bricklayers & Sales Campaign'. This pre-fills the query for you.",
+      "Analyze Uploaded Customer/Contextual Data (Branch Booster): Use the 'Upload Additional Customer Data' option in the Branch Booster to upload a text or CSV file (e.g., a list of local customers, specific project details). The Branch Booster will then use this information alongside your trader data to answer more complex queries (e.g., 'Based on this uploaded customer list, which of my active traders might be suitable for them?').",
+      "Estimate Project Materials (Branch Booster): Click the 'Estimate Project Materials' Quick Action. You can then further refine the project type or details in the query box. The Branch Booster leverages its understanding of UK building processes to help estimate typical materials needed.",
+      "Get Actionable Insights & Suggestions (Branch Booster): Ask the Branch Booster for strategic advice, such as 'Suggest strategies to re-engage lapsed accounts who were previously high value' or 'Draft a promotional message for our new line of eco-friendly insulation to traders in the 'Roofing' category'.",
+      "View Key Branch Statistics: The mini-dashboard at the top of the page provides an at-a-glance view of 'Active Traders', 'Call-Back Traders', 'New Leads', and 'Recently Active Traders' counts for your branch."
     ]
   },
   {
-    category: "Campaign Creation and Management",
-    icon: Megaphone,
-    features: [
-      "Create Targeted Campaigns: Design trade-specific marketing campaigns using live trader data from the portal, targeting specific trader types or specialties (e.g., timber promotion for carpenters).",
-      "Customize Campaign Content: Adjust campaign messages, offers, or delivery methods (e.g., email, SMS) based on trader profiles and preferences.",
-      "Schedule Campaigns: Set up campaigns to run at specific times or intervals, ensuring timely outreach to traders.",
-      "Track Campaign Responses: Record responses to campaigns (e.g., clicks, replies, purchases) to evaluate effectiveness and refine future efforts.",
-      "Reactivate Dormant Accounts: Identify and target lapsed (no spend in 3 months) or declined (no spend in 6 months) accounts with tailored campaigns, such as discount offers or re-engagement messages."
-    ]
-  },
-  {
-    category: "Insight & Assistance Features",
-    icon: Lightbulb,
-    features: [
-      "Answer Trader-Related Questions: Respond to user queries about trader data, sales, or project needs via the Branch Booster, using advanced query understanding.",
-      "Provide Contextual Responses: Maintain conversation history within a Branch Booster session to offer relevant follow-ups.",
-      "Offer Proactive Suggestions: Suggest actions based on trader data via Branch Booster queries.",
-      "Handle Objections: Provide relevant responses to common objections or hesitations found in queries and suggest solutions like discounts or bulk deals.",
-      "Escalate Complex Queries: For queries beyond the dataset, direct users to human support.",
-      "Support Staff Training: Provide interactive training modules or Q&A sessions to help staff learn about products, services, or the system.",
-      "Customize System Behavior: Adjust the system's tone, response length, or focus via admin settings (future capability)."
-    ]
-  },
-  {
-    category: "Construction Industry Expertise",
-    icon: HardHat,
-    features: [
-      "Understand Building Processes: Leverage knowledge of UK construction practices to provide accurate recommendations for materials and project planning.",
-      "Match Products to Trades: Align product catalog with specific trade needs.",
-      "Support Project Planning: Assist with estimating material quantities and timelines."
-    ]
-  },
-  {
-    category: "Security and Compliance",
-    icon: ShieldCheck,
-    features: [
-      "Ensure Data Isolation: Restrict each branch’s access to only their trader data using branch-specific IDs, with data stored in Firebase Firestore.",
-      "Secure Data Storage: Data is stored in Firebase Firestore with appropriate security rules (user to configure/verify).",
-      "Comply with GDPR: Adherence to GDPR requirements for data collection, storage, and deletion is crucial for a production system.",
-      "Prevent Unauthorized Access: Secure authentication and authorization mechanisms via Branch ID login.",
-      "Provide Secure Access: Deliver the portal via HTTPS."
-    ]
-  },
-  {
-    category: "Portal and Dashboard Features",
-    icon: LayoutGrid,
-    features: [
-      "Access Admin Dashboard: Admin functionalities are not part of the current branch user prototype.",
-      "View Branch Dashboard: Personalized dashboard with trader data, Branch Booster, and key statistics.",
-      "Dashboard Statistics: View key metrics at a glance, such as Live Traders Count and Recently Active Traders Count.",
-      "View Trader Data in Table: Display trader data in a sortable, paginated HTML table (20 records per page) with comprehensive trader details.",
-      "Export Trader Data: Download trader data as a CSV file (functionality to be implemented).",
-      "Monitor Usage Analytics: Track portal usage for admins (functionality to be implemented).",
-      "Access “How to Use” Guide: View a dedicated page with instructions.",
-      "Access Q&A Section: Refer to a Q&A page addressing common questions."
-    ]
-  },
-  {
-    category: "Competitive Intelligence",
-    icon: Binary,
-    features: [
-      "Reference Competitor Websites: Functionality for direct competitor website access/database not currently implemented.",
-      "Analyze Competitor Strategies: The system may be guided to consider general competitive factors if relevant data is provided."
-    ]
-  },
-  {
-    category: "Integration and Customization",
-    icon: Settings2,
-    features: [
-      "Integrate with Existing Systems: API integrations are not part of the current prototype.",
-      "Customize Interface: Limited customization; focus on core functionality.",
-      "Support Multi-User Access: Current prototype assumes single branch user session."
-    ]
-  },
-  {
-    category: "Operational Support",
-    icon: Wrench,
-    features: [
-      "Provide Implementation Support: Details for a structured onboarding process.",
-      "Assign Dedicated Account Manager: Service aspect for user support.",
-      "Conduct Team Training: Service aspect for user adoption.",
-      "Offer Ongoing Optimization: Service aspect for continuous improvement."
-    ]
-  },
-  {
-    category: "Example Use Cases",
+    category: "Reporting & Productivity",
     icon: FileText,
     features: [
-      "Branch Manager: Uses the portal to identify lapsed traders, launches a re-engagement campaign, and tracks a 15% reactivation rate.",
-      "Sales Staff: Queries the Branch Booster for top traders’ contact details, suggests product bundles, and secures a bulk order.",
-      "Admin: Creates new branch accounts and monitors usage analytics to ensure adoption.",
-      "Trader: Receives a targeted campaign for roofing materials, responds to a quote, and places an order via Click & Collect."
+      "Download Trader Data (CSV Export): In the 'Trader Overview' section, click the 'Download CSV' button. This will generate and download a CSV file containing the list of traders currently visible in your table (respecting any active search or category filters).",
+      "Access 'How to Use' Guide: For detailed instructions, feature explanations, and troubleshooting, click on 'How to Use' in the left sidebar. This page includes FAQs and step-by-step guides."
+    ]
+  },
+  {
+    category: "System & Security",
+    icon: ShieldCheck,
+    features: [
+      "Branch-Specific Data Access: Your unique Branch ID, used at login, ensures that you can only access and manage trader data associated with your specific branch.",
+      "Secure Data Storage: All trader information is stored in Firebase Firestore, a cloud-hosted database, using security rules to maintain data integrity and isolation between branches.",
+      "Secure Portal Access: The TradeHunter Pro portal is delivered over HTTPS, encrypting data transmitted between your browser and the server."
     ]
   }
 ];
@@ -244,7 +159,7 @@ export function AppSidebar() {
               Functional Capabilities
             </h3>
             <p className="mb-3 text-xs text-sidebar-foreground/80">
-              TradeHunter Pro is a precision intelligence system designed to support Jewson's branch teams in managing trader relationships, optimizing sales, and improving operational efficiency.
+              TradeHunter Pro is a precision intelligence system designed to support branch teams in managing trader relationships, optimizing sales, and improving operational efficiency.
             </p>
             <Accordion type="multiple" className="w-full">
               {capabilitiesData.map((capability, index) => {
