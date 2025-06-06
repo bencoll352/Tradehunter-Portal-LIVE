@@ -35,13 +35,13 @@ function cleanDataForFirestoreWrite<T extends Record<string, any>>(data: T): Rec
 
 // Initial seed data for traders. Used if Firestore is empty for a branch.
 const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
-  { name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5, notes: "Prefers Earl Grey tea for meetings. Important client for seasonal events." },
-  { name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Call-Back', description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction", website: null, notes: "Needs follow-up on new concrete mixer availability." },
-  { name: 'Charlie Brown', branchId: 'PURLEY', totalSales: 75000, tradesMade: 90, status: 'Inactive', mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts", rating: 3.0, website: null, ownerProfileLink: null, categories: null, closedOn: null, notes: "Account inactive for 6+ months." },
-  { name: 'Diana Prince', branchId: 'BRANCH_B', totalSales: 210000, tradesMade: 200, status: 'Active', address: '789 Amazon Way, Themyscira, THM 001', phone: '01234 567803', mainCategory: 'Consulting', closedOn: 'Weekends', description: "Antiquities expert and diplomatic consultant. Handles sensitive international relations.", rating: 5.0, website: "https://diana.example.com", categories: "Diplomacy, History, Art", reviewKeywords: "wise, strong, expert", ownerName: "Diana Prince", ownerProfileLink: null, workdayTiming: "By Appointment", notes: "High profile client, requires discreet handling." },
-  { name: 'Edward Scissorhands', branchId: 'BRANCH_B', totalSales: 150000, tradesMade: 180, status: 'New Lead', website: 'https://edwardcuts.example.com', description: 'Unique topiary and avant-garde hairdressing services. Gentle and artistic.', rating: 4.9, ownerProfileLink: 'https://example.com/edward', mainCategory: "Personal Care", categories: "Hairdressing, Landscaping, Art", phone: "01234567811", address: "1 Suburbia Drive, Castle Hill, CHL 555", reviewKeywords: "artistic, unique, gentle", ownerName: "Edward", workdayTiming: "Varies", closedOn: null, notes: "Potential for large landscaping projects." },
-  { name: 'Fiona Gallagher', branchId: 'BRANCH_C', totalSales: 180000, tradesMade: 165, status: 'Active', description: 'South Side resilience. Runs a local cafe and diner. Known for hearty meals and a welcoming atmosphere.', mainCategory: 'Cafe', phone: '01234 567804', address: "222 South Side St, Chicago, CHI 606", ownerName: "Fiona Gallagher", categories: "Food, Diner, Coffee", workdayTiming: "Mon-Sun 7am-10pm", reviewKeywords: "family, hearty, local", rating: 4.2, website: null, ownerProfileLink: null, closedOn: null, notes: "Always orders supplies on Tuesdays." },
-  { name: 'George Jetson', branchId: 'BRANCH_D', totalSales: 300000, tradesMade: 250, status: 'New Lead', description: 'Digital Indexer at Spacely Space Sprockets. Future-proof solutions.', rating: 4.0, phone: '01234 567805', mainCategory: 'Technology', categories: 'Automation, IT, Future Tech', address: "Orbit City Apartments", ownerName: "George Jetson", workdayTiming: "Mon-Fri 9am-5pm (21st Century Time)", website: null, ownerProfileLink: null, closedOn: null, notes: "Interested in our latest robotic tools." },
+  { name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5, notes: "Prefers Earl Grey tea for meetings. Important client for seasonal events.", callBackDate: null },
+  { name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Call-Back', description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction", website: null, notes: "Needs follow-up on new concrete mixer availability.", callBackDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() }, // Call back in 5 days
+  { name: 'Charlie Brown', branchId: 'PURLEY', totalSales: 75000, tradesMade: 90, status: 'Inactive', mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts", rating: 3.0, website: null, ownerProfileLink: null, categories: null, closedOn: null, notes: "Account inactive for 6+ months.", callBackDate: null },
+  { name: 'Diana Prince', branchId: 'BRANCH_B', totalSales: 210000, tradesMade: 200, status: 'Active', address: '789 Amazon Way, Themyscira, THM 001', phone: '01234 567803', mainCategory: 'Consulting', closedOn: 'Weekends', description: "Antiquities expert and diplomatic consultant. Handles sensitive international relations.", rating: 5.0, website: "https://diana.example.com", categories: "Diplomacy, History, Art", reviewKeywords: "wise, strong, expert", ownerName: "Diana Prince", ownerProfileLink: null, workdayTiming: "By Appointment", notes: "High profile client, requires discreet handling.", callBackDate: null },
+  { name: 'Edward Scissorhands', branchId: 'BRANCH_B', totalSales: 150000, tradesMade: 180, status: 'New Lead', website: 'https://edwardcuts.example.com', description: 'Unique topiary and avant-garde hairdressing services. Gentle and artistic.', rating: 4.9, ownerProfileLink: 'https://example.com/edward', mainCategory: "Personal Care", categories: "Hairdressing, Landscaping, Art", phone: "01234567811", address: "1 Suburbia Drive, Castle Hill, CHL 555", reviewKeywords: "artistic, unique, gentle", ownerName: "Edward", workdayTiming: "Varies", closedOn: null, notes: "Potential for large landscaping projects.", callBackDate: null },
+  { name: 'Fiona Gallagher', branchId: 'BRANCH_C', totalSales: 180000, tradesMade: 165, status: 'Active', description: 'South Side resilience. Runs a local cafe and diner. Known for hearty meals and a welcoming atmosphere.', mainCategory: 'Cafe', phone: '01234 567804', address: "222 South Side St, Chicago, CHI 606", ownerName: "Fiona Gallagher", categories: "Food, Diner, Coffee", workdayTiming: "Mon-Sun 7am-10pm", reviewKeywords: "family, hearty, local", rating: 4.2, website: null, ownerProfileLink: null, closedOn: null, notes: "Always orders supplies on Tuesdays.", callBackDate: null },
+  { name: 'George Jetson', branchId: 'DOVER', totalSales: 300000, tradesMade: 250, status: 'New Lead', description: 'Digital Indexer at Spacely Space Sprockets. Future-proof solutions.', rating: 4.0, phone: '01234 567805', mainCategory: 'Technology', categories: 'Automation, IT, Future Tech', address: "Orbit City Apartments", ownerName: "George Jetson", workdayTiming: "Mon-Fri 9am-5pm (21st Century Time)", website: null, ownerProfileLink: null, closedOn: null, notes: "Interested in our latest robotic tools.", callBackDate: null },
 ];
 
 // Add lastActivity to seed data and clean it
@@ -111,6 +111,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
     closedOn: data.closedOn ?? null,
     reviewKeywords: data.reviewKeywords ?? null,
     notes: data.notes ?? null,
+    callBackDate: data.callBackDate ? determineLastActivityString(data.callBackDate) : null, // Handle callBackDate
   };
 };
 
@@ -128,23 +129,36 @@ export async function getTradersByBranch(branchId: BranchId): Promise<Trader[]> 
     if (querySnapshot.empty) {
       if (branchId === 'PURLEY') {
         console.log(`[TraderService:getTradersByBranch] No traders found for branch PURLEY. Seeding is intentionally skipped for this branch.`);
-        return []; 
-      }
-
-      console.log(`[TraderService:getTradersByBranch] No traders found for branch ${branchId}, attempting to seed initial data...`);
-      const seedDataForBranch = INITIAL_SEED_TRADERS_DATA.filter(t => t.branchId === branchId);
-      if (seedDataForBranch.length > 0) {
-        const batch = writeBatch(db);
-        seedDataForBranch.forEach(traderSeedData => {
-          const traderDocRef = doc(tradersCollectionRef); 
-          batch.set(traderDocRef, traderSeedData); 
-        });
-        await batch.commit();
-        console.log(`[TraderService:getTradersByBranch] Seeded ${seedDataForBranch.length} traders for branch ${branchId}. Refetching...`);
-        querySnapshot = await getDocs(q); 
+         // For PURLEY, if it's empty, let's seed it with the PURLEY specific data from INITIAL_SEED_TRADERS_DATA
+        const purleySeedData = INITIAL_SEED_TRADERS_DATA.filter(t => t.branchId === 'PURLEY');
+        if (purleySeedData.length > 0) {
+            const batch = writeBatch(db);
+            purleySeedData.forEach(traderSeedData => {
+            const traderDocRef = doc(tradersCollectionRef); 
+            batch.set(traderDocRef, traderSeedData); 
+            });
+            await batch.commit();
+            console.log(`[TraderService:getTradersByBranch] Seeded ${purleySeedData.length} traders for branch PURLEY. Refetching...`);
+            querySnapshot = await getDocs(q);
+        } else {
+            return [];
+        }
       } else {
-        console.log(`[TraderService:getTradersByBranch] No seed data configured for branch ${branchId}. Returning empty list.`);
-        return [];
+        console.log(`[TraderService:getTradersByBranch] No traders found for branch ${branchId}, attempting to seed initial data...`);
+        const seedDataForBranch = INITIAL_SEED_TRADERS_DATA.filter(t => t.branchId === branchId);
+        if (seedDataForBranch.length > 0) {
+          const batch = writeBatch(db);
+          seedDataForBranch.forEach(traderSeedData => {
+            const traderDocRef = doc(tradersCollectionRef); 
+            batch.set(traderDocRef, traderSeedData); 
+          });
+          await batch.commit();
+          console.log(`[TraderService:getTradersByBranch] Seeded ${seedDataForBranch.length} traders for branch ${branchId}. Refetching...`);
+          querySnapshot = await getDocs(q); 
+        } else {
+          console.log(`[TraderService:getTradersByBranch] No seed data configured for branch ${branchId}. Returning empty list.`);
+          return [];
+        }
       }
     }
     
@@ -193,6 +207,7 @@ export async function addTraderToDb(
       ...traderData,
       branchId: branchId, 
       lastActivity: new Date().toISOString(),
+      // callBackDate is already part of traderData if provided
     };
     const cleanedData = cleanDataForFirestoreWrite(dataWithSystemFields);
     
@@ -218,6 +233,7 @@ export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trade
     const dataToPrepareForUpdate = {
       ...updatedTraderData,
       lastActivity: new Date().toISOString(), // Always update lastActivity on any modification
+      // callBackDate is already part of updatedTraderData if provided
     };
     const { id, ...dataWithoutId } = dataToPrepareForUpdate;
     const cleanedData = cleanDataForFirestoreWrite(dataWithoutId);
@@ -284,6 +300,7 @@ export async function bulkAddTradersToDb(
       categories: parsedData.categories,
       workdayTiming: parsedData.workdayTiming,
       notes: parsedData.notes,
+      callBackDate: parsedData.callBackDate ?? null, // Add callBackDate
       closedOn: null, 
       reviewKeywords: null,
     };
@@ -305,4 +322,3 @@ export async function bulkAddTradersToDb(
     throw error; 
   }
 }
-

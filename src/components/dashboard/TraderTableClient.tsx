@@ -39,7 +39,7 @@ import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
-import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download } from "lucide-react"; 
+import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download, CalendarClock } from "lucide-react"; 
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "./TraderForm";
@@ -47,9 +47,9 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import Papa from "papaparse"; // For CSV export
 
-const ITEMS_PER_PAGE = 50; // Increased from 20
+const ITEMS_PER_PAGE = 50; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes'>;
+type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -76,7 +76,7 @@ export function TraderTableClient({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("All Categories"); // Default to "All Categories"
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("All Categories"); 
   const [selectedTraderIds, setSelectedTraderIds] = useState<Set<string>>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
@@ -129,7 +129,8 @@ export function TraderTableClient({
         (trader.address && trader.address.toLowerCase().includes(searchTermLower)) ||
         (trader.categories && trader.categories.toLowerCase().includes(searchTermLower)) ||
         (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower)) ||
-        (trader.notes && trader.notes.toLowerCase().includes(searchTermLower))
+        (trader.notes && trader.notes.toLowerCase().includes(searchTermLower)) ||
+        (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower))
       );
     }
 
@@ -147,20 +148,20 @@ export function TraderTableClient({
         if (valB === null) return sortConfig.direction === 'ascending' ? 1 : -1;
 
         if (typeof valA === 'string' && typeof valB === 'string') {
-          return sortConfig.direction === 'ascending' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-        }
-        if (typeof valA === 'number' && typeof valB === 'number') {
-          return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
-        }
-        if (sortConfig.key === 'lastActivity') {
+          if (sortConfig.key === 'lastActivity' || sortConfig.key === 'callBackDate') {
             try {
                 const dateA = parseISO(valA as string).getTime();
                 const dateB = parseISO(valB as string).getTime();
                  if (isNaN(dateA) && isNaN(dateB)) return 0;
-                 if (isNaN(dateA)) return sortConfig.direction === 'ascending' ? -1 : 1;
-                 if (isNaN(dateB)) return sortConfig.direction === 'ascending' ? 1 : -1;
+                 if (isNaN(dateA)) return sortConfig.direction === 'ascending' ? -1 : 1; // nulls/invalid dates first when ascending
+                 if (isNaN(dateB)) return sortConfig.direction === 'ascending' ? 1 : -1; // nulls/invalid dates last when descending
                 return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
-            } catch (e) { return 0;} // Should not happen if data is clean
+            } catch (e) { return 0;}
+          }
+          return sortConfig.direction === 'ascending' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return sortConfig.direction === 'ascending' ? valA - valB : valB - valA;
         }
         
         const stringA = String(valA);
@@ -254,6 +255,7 @@ export function TraderTableClient({
       phone: trader.phone || undefined, address: trader.address || undefined, mainCategory: trader.mainCategory || undefined,
       ownerName: trader.ownerName || undefined, ownerProfileLink: trader.ownerProfileLink || undefined,
       categories: trader.categories || undefined, workdayTiming: trader.workdayTiming || undefined, notes: trader.notes || undefined,
+      callBackDate: trader.callBackDate || undefined,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -318,6 +320,7 @@ export function TraderTableClient({
       "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
       "Last Activity": trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy HH:mm:ss') : '',
+      "Call-Back Date": trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : '',
       "Description": trader.description || '',
       "Rating": trader.rating,
       "Website": trader.website || '',
@@ -356,9 +359,10 @@ export function TraderTableClient({
     }
   };
 
-  const SortableHeader = ({ sortKey, label }: { sortKey: SortKey, label: string }) => (
+  const SortableHeader = ({ sortKey, label, icon: Icon }: { sortKey: SortKey, label: string, icon?: React.ElementType }) => (
     <TableHead onClick={() => requestSort(sortKey)} className="cursor-pointer hover:bg-muted/50 whitespace-nowrap">
       <div className="flex items-center gap-1">
+        {Icon && <Icon className="h-4 w-4" />}
         {label}
         {sortConfig?.key === sortKey ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : <ArrowUpDown className="h-3 w-3 opacity-50" />}
       </div>
@@ -512,6 +516,7 @@ export function TraderTableClient({
               <SortableHeader sortKey="totalSales" label="Total Sales" />
               <SortableHeader sortKey="status" label="Status" />
               <SortableHeader sortKey="lastActivity" label="Last Activity" />
+              <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
               <SortableHeader sortKey="description" label="Description" />
               <TableHead>Notes</TableHead>
               <SortableHeader sortKey="tradesMade" label="Reviews" />
@@ -556,6 +561,7 @@ export function TraderTableClient({
                   </Button>
                 </TableCell>
                 <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
+                <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
                 <TableCell>{renderCellContent(trader.description)}</TableCell>
                 <TableCell>{renderCellContent(trader.notes, 25, true)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
@@ -611,6 +617,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-
-    

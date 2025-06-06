@@ -19,7 +19,8 @@ export interface Trader {
   workdayTiming?: string | null;
   closedOn?: string | null; 
   reviewKeywords?: string | null;
-  notes?: string | null; // New field for notes
+  notes?: string | null;
+  callBackDate?: string | null; // New field for call-back reminders
 }
 
 export type BranchId = 'PURLEY' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D' | 'DOVER';
@@ -43,7 +44,8 @@ export type ParsedTraderData = {
   workdayTiming?: string | null;
   address?: string | null;
   ownerProfileLink?: string | null;
-  notes?: string | null; // New field for notes
+  notes?: string | null;
+  callBackDate?: string | null; // New field for call-back reminders
 };
 
 export interface BulkDeleteTradersResult {
@@ -51,3 +53,4 @@ export interface BulkDeleteTradersResult {
   failureCount: number;
   error?: string | null;
 }
+

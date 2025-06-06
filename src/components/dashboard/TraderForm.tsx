@@ -23,6 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Trader } from "@/types";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format as formatDateFns, parseISO } from "date-fns";
 
 // Schema now includes all fields present in the TraderTable overview
 export const traderFormSchema = z.object({
@@ -40,7 +45,8 @@ export const traderFormSchema = z.object({
   ownerProfileLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')).nullable(),
   categories: z.string().optional().nullable(), 
   workdayTiming: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(), // Added notes field
+  notes: z.string().optional().nullable(),
+  callBackDate: z.string().optional().nullable(), // ISO date string
 });
 
 interface TraderFormProps {
@@ -68,7 +74,8 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
       ownerProfileLink: defaultValues?.ownerProfileLink ?? null,
       categories: defaultValues?.categories ?? null,
       workdayTiming: defaultValues?.workdayTiming ?? null,
-      notes: defaultValues?.notes ?? null, // Default value for notes
+      notes: defaultValues?.notes ?? null,
+      callBackDate: defaultValues?.callBackDate ?? null,
     },
   });
 
@@ -282,6 +289,46 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
                 <FormMessage />
             </FormItem>
             )}
+        />
+
+        <FormField
+          control={form.control}
+          name="callBackDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Call-Back Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? (
+                        formatDateFns(parseISO(field.value), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? parseISO(field.value) : undefined}
+                    onSelect={(date) => field.onChange(date ? date.toISOString() : null)}
+                    disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() -1 )) } // Disable past dates (yesterday and before)
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField
