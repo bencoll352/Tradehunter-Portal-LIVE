@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import type { BranchId, Trader, ParsedTraderData } from "@/types";
+import type { BranchId, Trader, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
 import { VALID_BRANCH_IDS } from "@/types"; 
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +22,7 @@ interface DashboardClientPageContentProps {
   updateTraderAction: (branchId: BranchId, traderId: string, values: TraderFormValues) => Promise<{ data: Trader | null; error: string | null }>;
   deleteTraderAction: (branchId: BranchId, traderId: string) => Promise<{ success: boolean; error: string | null }>;
   bulkAddTradersAction: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
+  bulkDeleteTradersAction: (branchId: BranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>; // New action
 }
 
 export function DashboardClientPageContent({
@@ -29,6 +30,7 @@ export function DashboardClientPageContent({
   updateTraderAction,
   deleteTraderAction,
   bulkAddTradersAction,
+  bulkDeleteTradersAction, // New action
 }: DashboardClientPageContentProps) {
   const [branchId, setBranchId] = useState<BranchId | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
@@ -64,7 +66,6 @@ export function DashboardClientPageContent({
               }
             }
           } catch (error) {
-            // This catch is for unexpected errors during the getTradersAction call itself, though it should be handled within the action.
             console.error("Error fetching initial traders (client catch):", error);
             setTraders([]);
              if (!storedBranchId || VALID_BRANCH_IDS.includes(storedBranchId)) {
@@ -106,25 +107,15 @@ export function DashboardClientPageContent({
      refreshTradersForBranch();
   }, [branchId, keyForTable, toast]); 
 
-  const activeTradersCount = useMemo(() => {
-    return traders.filter(t => t.status === 'Active').length;
-  }, [traders]);
-
-  const callBackTradersCount = useMemo(() => {
-    return traders.filter(t => t.status === 'Call-Back').length;
-  }, [traders]);
-
-  const newLeadTradersCount = useMemo(() => {
-    return traders.filter(t => t.status === 'New Lead').length;
-  }, [traders]);
-
+  const activeTradersCount = useMemo(() => traders.filter(t => t.status === 'Active').length, [traders]);
+  const callBackTradersCount = useMemo(() => traders.filter(t => t.status === 'Call-Back').length, [traders]);
+  const newLeadTradersCount = useMemo(() => traders.filter(t => t.status === 'New Lead').length, [traders]);
   const recentlyActiveTradersCount = useMemo(() => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return traders.filter(t => {
       try {
-        const lastActivityDate = parseISO(t.lastActivity);
-        return lastActivityDate >= thirtyDaysAgo;
+        return parseISO(t.lastActivity) >= thirtyDaysAgo;
       } catch (e) {
         console.warn(`Invalid date format for trader ID ${t.id}: ${t.lastActivity}`);
         return false; 
@@ -134,61 +125,71 @@ export function DashboardClientPageContent({
 
   const handleAdd = async (values: TraderFormValues): Promise<boolean> => {
     if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot add trader due to an invalid or missing Branch ID. Please re-login." });
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot add trader: Invalid Branch ID. Please re-login." });
       return false;
     }
     const result = await addTraderAction(branchId, values);
     if (result.data) {
       setKeyForTable(prev => prev + 1); 
-      toast({ title: "Success", description: `${result.data.name} added successfully.`});
+      toast({ title: "Success", description: `${result.data.name} added.`});
       return true;
-    } else {
-      toast({ variant: "destructive", title: "Error Adding Trader", description: result.error || "Failed to add trader." });
-      return false;
     }
+    toast({ variant: "destructive", title: "Error Adding Trader", description: result.error || "Failed to add trader." });
+    return false;
   };
 
   const handleUpdate = async (traderId: string, values: TraderFormValues): Promise<boolean> => {
      if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot update trader due to an invalid or missing Branch ID. Please re-login." });
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot update trader: Invalid Branch ID. Please re-login." });
       return false;
     }
     const result = await updateTraderAction(branchId, traderId, values);
     if (result.data) {
       setKeyForTable(prev => prev + 1);
-      toast({ title: "Success", description: `${result.data.name} updated successfully.`});
+      toast({ title: "Success", description: `${result.data.name} updated.`});
       return true;
-    } else {
-      toast({ variant: "destructive", title: "Error Updating Trader", description: result.error || "Failed to update trader." });
-      return false;
     }
+    toast({ variant: "destructive", title: "Error Updating Trader", description: result.error || "Failed to update trader." });
+    return false;
   };
 
   const handleDelete = async (traderId: string): Promise<boolean> => {
      if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot delete trader due to an invalid or missing Branch ID. Please re-login." });
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot delete trader: Invalid Branch ID. Please re-login." });
       return false;
     }
     const result = await deleteTraderAction(branchId, traderId);
     if (result.success) {
       setKeyForTable(prev => prev + 1);
-      // Toast for delete success/failure is handled by DeleteTraderDialog based on the return value.
-      // Toasting here would be redundant.
     } else {
-       toast({ variant: "destructive", title: "Error Deleting Trader", description: result.error || "Failed to delete trader from server." });
+       toast({ variant: "destructive", title: "Error Deleting Trader", description: result.error || "Failed to delete trader." });
     }
     return result.success;
   };
 
   const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
     if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk add traders due to an invalid or missing Branch ID. Please re-login." });
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk add: Invalid Branch ID. Please re-login." });
       return { data: null, error: "Invalid or missing Branch ID." };
     }
     const result = await bulkAddTradersAction(branchId, tradersToCreate);
     if (result.data && result.data.length > 0) { 
       setKeyForTable(prev => prev + 1);
     } 
+    return result;
+  };
+
+  const handleBulkDelete = async (traderIds: string[]): Promise<BulkDeleteTradersResult> => {
+    if (!branchId || !VALID_BRANCH_IDS.includes(branchId)) {
+      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk delete: Invalid Branch ID. Please re-login." });
+      return { successCount: 0, failureCount: traderIds.length, error: "Invalid or missing Branch ID." };
+    }
+    const result = await bulkDeleteTradersAction(branchId, traderIds);
+    if (result.successCount > 0) {
+      setKeyForTable(prev => prev + 1); 
+    }
+    // Specific toasts for bulk delete are handled in TraderTableClient to give immediate feedback after dialog.
+    // This function primarily ensures data refresh.
     return result;
   };
 
@@ -210,7 +211,7 @@ export function DashboardClientPageContent({
   return (
     <div className="space-y-6">
       <MiniDashboardStats 
-        liveTradersCount={activeTradersCount} // Renamed from liveTradersCount
+        liveTradersCount={activeTradersCount}
         callBackTradersCount={callBackTradersCount}
         newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
@@ -234,7 +235,8 @@ export function DashboardClientPageContent({
                   onAdd={handleAdd}
                   onUpdate={handleUpdate}
                   onDelete={handleDelete}
-                  onBulkAdd={handleBulkAdd} 
+                  onBulkAdd={handleBulkAdd}
+                  onBulkDelete={handleBulkDelete} // Pass down the new handler
                 />
               )}
             </CardContent>

@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { BranchId, Trader, ParsedTraderData } from "@/types";
+import type { BranchId, Trader, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
 import { 
   getTradersByBranch as dbGetTradersByBranch,
   addTraderToDb, 
@@ -12,6 +12,10 @@ import {
 } from "@/lib/trader-service"; 
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
+import { db } from '@/lib/firebase'; // Import db for direct Firestore access
+import { collection, writeBatch, doc, deleteDoc } from 'firebase/firestore'; // Import Firestore batch operations
+
+const TRADERS_COLLECTION = 'traders';
 
 // Helper function to extract a string error message
 function extractErrorMessage(error: unknown, defaultMessage: string): string {
@@ -139,5 +143,48 @@ export async function bulkAddTradersAction(branchId: BranchId, tradersToCreate: 
     const errorMessage = extractErrorMessage(error, "An unknown server error occurred during bulk add.");
     console.error("Failed to bulk add traders (action level). Processed Error Message:", errorMessage, "Original Error Object:", error);
     return { data: null, error: errorMessage };
+  }
+}
+
+export async function bulkDeleteTradersAction(branchId: BranchId, traderIds: string[]): Promise<BulkDeleteTradersResult> {
+  if (!db) {
+    console.error("[TraderService:bulkDeleteTradersAction] Firestore not initialized. Aborting operation. Check Firebase configuration.");
+    return { successCount: 0, failureCount: traderIds.length, error: "Firestore not initialized." };
+  }
+  if (!traderIds || traderIds.length === 0) {
+    return { successCount: 0, failureCount: 0, error: "No trader IDs provided for deletion." };
+  }
+
+  // Firestore batch writes are limited (e.g., 500 operations). 
+  // If more traders could be selected, chunking would be needed.
+  // For typical page sizes (e.g., up to 50), a single batch is fine.
+  if (traderIds.length > 499) {
+     console.warn(`[TraderService:bulkDeleteTradersAction] Attempting to delete ${traderIds.length} traders, which exceeds the typical batch limit. Consider implementing chunking if this is a common scenario.`);
+     // For now, we'll proceed but this is a note for future improvement if necessary.
+  }
+
+  const batch = writeBatch(db);
+  let successCount = 0;
+  let failureCount = 0;
+
+  console.log(`[TraderService:bulkDeleteTradersAction] Attempting to bulk delete ${traderIds.length} traders from branch ${branchId}`);
+
+  for (const traderId of traderIds) {
+    // Basic validation for traderId, though server should ideally verify ownership if rules are strict.
+    // For this app, branchId consistency is managed by client.
+    const traderDocRef = doc(db, TRADERS_COLLECTION, traderId);
+    batch.delete(traderDocRef);
+  }
+
+  try {
+    await batch.commit();
+    successCount = traderIds.length;
+    console.log(`[TraderService:bulkDeleteTradersAction] Successfully bulk deleted ${successCount} traders from branch ${branchId}.`);
+    return { successCount, failureCount, error: null };
+  } catch (error) {
+    failureCount = traderIds.length; // Assume all failed if batch commit fails
+    const errorMessage = extractErrorMessage(error, "An unknown server error occurred during bulk delete.");
+    console.error(`[TraderService:bulkDeleteTradersAction] Error bulk deleting traders from branch ${branchId}:`, error);
+    return { successCount: 0, failureCount, error: errorMessage };
   }
 }

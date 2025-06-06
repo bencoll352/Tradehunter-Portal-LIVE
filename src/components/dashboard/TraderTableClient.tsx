@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react"; 
-import type { Trader, BranchId, ParsedTraderData } from "@/types";
+import type { Trader, BranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
 import { useState, useMemo, useEffect } from "react";
 import type { z } from "zod";
 import {
@@ -16,11 +16,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { AddTraderDialog } from "./AddTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
-import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon } from "lucide-react"; // Added NotesIcon
+import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2 } from "lucide-react"; 
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "./TraderForm";
@@ -40,6 +52,7 @@ interface TraderTableClientProps {
   onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
+  onBulkDelete: (traderIds: string[]) => Promise<BulkDeleteTradersResult>; // New prop
 }
 
 const CATEGORY_FILTERS = [
@@ -68,17 +81,30 @@ const CATEGORY_FILTERS = [
 ];
 
 
-export function TraderTableClient({ initialTraders, branchId: propBranchId, allBranchTraders, onAdd, onUpdate, onDelete, onBulkAdd }: TraderTableClientProps) {
+export function TraderTableClient({ 
+  initialTraders, 
+  branchId: propBranchId, 
+  allBranchTraders, 
+  onAdd, 
+  onUpdate, 
+  onDelete, 
+  onBulkAdd,
+  onBulkDelete 
+}: TraderTableClientProps) {
   const [traders, setTraders] = useState<Trader[]>(initialTraders);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>(CATEGORY_FILTERS[0].label);
+  const [selectedTraderIds, setSelectedTraderIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
   const branchId = propBranchId;
 
   useEffect(() => {
     setTraders(initialTraders);
+    setSelectedTraderIds(new Set()); // Clear selection when initial traders change
     setCurrentPage(1); 
   }, [initialTraders]);
 
@@ -136,7 +162,6 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
             return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
         }
         
-        // Fallback: convert to string for comparison if types are mixed or not directly comparable
         const stringA = String(valA);
         const stringB = String(valB);
         if (stringA < stringB) {
@@ -156,6 +181,39 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredTraders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredTraders, currentPage]);
+
+  const handleSelectTrader = (traderId: string) => {
+    setSelectedTraderIds(prevSelected => {
+      const newSelected = new Set(prevSelected);
+      if (newSelected.has(traderId)) {
+        newSelected.delete(traderId);
+      } else {
+        newSelected.add(traderId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSelectAllPaginatedTraders = () => {
+    const paginatedIds = paginatedTraders.map(t => t.id);
+    const allPaginatedSelected = paginatedIds.every(id => selectedTraderIds.has(id));
+
+    setSelectedTraderIds(prevSelected => {
+      const newSelected = new Set(prevSelected);
+      if (allPaginatedSelected) {
+        paginatedIds.forEach(id => newSelected.delete(id));
+      } else {
+        paginatedIds.forEach(id => newSelected.add(id));
+      }
+      return newSelected;
+    });
+  };
+
+  const isAllPaginatedSelected = useMemo(() => {
+    if (paginatedTraders.length === 0) return false;
+    return paginatedTraders.every(trader => selectedTraderIds.has(trader.id));
+  }, [paginatedTraders, selectedTraderIds]);
+
 
   const requestSort = (key: SortKey) => {
     let direction: 'ascending' | 'descending' = 'ascending';
@@ -182,38 +240,19 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
   const handleStatusToggle = async (trader: Trader) => {
     let newStatus: Trader['status'];
     switch (trader.status) {
-      case 'Active':
-        newStatus = 'Inactive';
-        break;
-      case 'Inactive':
-        newStatus = 'Active';
-        break;
-      case 'Call-Back':
-        newStatus = 'Active';
-        break;
-      case 'New Lead':
-        newStatus = 'Active';
-        break;
-      default:
-        newStatus = 'Active'; 
+      case 'Active': newStatus = 'Inactive'; break;
+      case 'Inactive': newStatus = 'Active'; break;
+      case 'Call-Back': newStatus = 'Active'; break;
+      case 'New Lead': newStatus = 'Active'; break;
+      default: newStatus = 'Active'; 
     }
 
     const formValues: z.infer<typeof traderFormSchema> = {
-      name: trader.name,
-      totalSales: trader.totalSales,
-      tradesMade: trader.tradesMade,
-      status: newStatus,
-      description: trader.description || "",
-      rating: trader.rating, 
-      website: trader.website || "",
-      phone: trader.phone || "",
-      address: trader.address || "",
-      mainCategory: trader.mainCategory || "",
-      ownerName: trader.ownerName || "",
-      ownerProfileLink: trader.ownerProfileLink || "",
-      categories: trader.categories || "",
-      workdayTiming: trader.workdayTiming || "",
-      notes: trader.notes || "", // Include notes
+      name: trader.name, totalSales: trader.totalSales, tradesMade: trader.tradesMade, status: newStatus,
+      description: trader.description || "", rating: trader.rating, website: trader.website || "",
+      phone: trader.phone || "", address: trader.address || "", mainCategory: trader.mainCategory || "",
+      ownerName: trader.ownerName || "", ownerProfileLink: trader.ownerProfileLink || "",
+      categories: trader.categories || "", workdayTiming: trader.workdayTiming || "", notes: trader.notes || "",
     };
     await onUpdate(trader.id, formValues);
   };
@@ -222,6 +261,11 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     const success = await onDelete(traderId);
     if (success) {
       toast({ title: "Success", description: "Trader deleted successfully." });
+      setSelectedTraderIds(prev => {
+        const newSelected = new Set(prev);
+        newSelected.delete(traderId);
+        return newSelected;
+      });
     }
     return success; 
   };
@@ -230,6 +274,32 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
     const result = await onBulkAdd(tradersToCreate);
     return result;
   };
+
+  const handleConfirmBulkDelete = async () => {
+    if (selectedTraderIds.size === 0) return;
+    setIsBulkDeleting(true);
+    const idsToDelete = Array.from(selectedTraderIds);
+    const result = await onBulkDelete(idsToDelete);
+    
+    if (result.error) {
+      toast({ variant: "destructive", title: "Bulk Delete Failed", description: result.error });
+    } else {
+      if (result.successCount > 0) {
+        toast({ title: "Bulk Delete Successful", description: `${result.successCount} trader(s) deleted.` });
+      }
+      if (result.failureCount > 0) {
+        toast({ variant: "destructive", title: "Partial Bulk Delete", description: `${result.failureCount} trader(s) could not be deleted.` });
+      }
+      if (result.successCount === 0 && result.failureCount === 0){
+         toast({ title: "Bulk Delete", description: "No traders were deleted." });
+      }
+    }
+    
+    setSelectedTraderIds(new Set());
+    setIsBulkDeleting(false);
+    setIsBulkDeleteAlertOpen(false);
+  };
+
 
   const SortableHeader = ({ sortKey, label }: { sortKey: SortKey, label: string }) => (
     <TableHead onClick={() => requestSort(sortKey)} className="cursor-pointer hover:bg-muted/50 whitespace-nowrap">
@@ -272,16 +342,11 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
 
   const getStatusBadgeClass = (status: Trader['status']) => {
     switch (status) {
-      case 'Active':
-        return 'bg-green-500/20 text-green-700 border-green-500/30 hover:bg-green-500/30';
-      case 'Inactive':
-        return 'bg-red-500/10 text-red-700 border-red-500/20 hover:bg-red-500/30';
-      case 'Call-Back':
-        return 'bg-amber-500/20 text-amber-700 border-amber-500/30 hover:bg-amber-500/30';
-      case 'New Lead':
-        return 'bg-blue-500/20 text-blue-700 border-blue-500/30 hover:bg-blue-500/30';
-      default:
-        return 'bg-secondary text-secondary-foreground hover:bg-secondary/80';
+      case 'Active': return 'bg-green-500/20 text-green-700 border-green-500/30 hover:bg-green-500/30';
+      case 'Inactive': return 'bg-red-500/10 text-red-700 border-red-500/20 hover:bg-red-500/30';
+      case 'Call-Back': return 'bg-amber-500/20 text-amber-700 border-amber-500/30 hover:bg-amber-500/30';
+      case 'New Lead': return 'bg-blue-500/20 text-blue-700 border-blue-500/30 hover:bg-blue-500/30';
+      default: return 'bg-secondary text-secondary-foreground hover:bg-secondary/80';
     }
   };
 
@@ -300,6 +365,30 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
           />
         </div>
         <div className="flex gap-2 flex-wrap">
+          {selectedTraderIds.size > 0 && (
+             <AlertDialog open={isBulkDeleteAlertOpen} onOpenChange={setIsBulkDeleteAlertOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={isBulkDeleting}>
+                  {isBulkDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                  Delete Selected ({selectedTraderIds.size})
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete {selectedTraderIds.size} selected trader(s). This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleConfirmBulkDelete} disabled={isBulkDeleting} className="bg-destructive hover:bg-destructive/90">
+                    {isBulkDeleting ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <BulkAddTradersDialog 
             branchId={branchId} 
             existingTraders={allBranchTraders}
@@ -337,12 +426,20 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
       </div>
 
 
-      {paginatedTraders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
+      {paginatedTraders.length === 0 && filteredTraders.length === 0 && searchTerm === "" && activeCategoryFilter === CATEGORY_FILTERS[0].label ? (
+         <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
           <FileWarning className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-muted-foreground">No Traders Found</h3>
           <p className="text-muted-foreground">
-            {searchTerm || activeCategoryFilter !== CATEGORY_FILTERS[0].label ? "Try adjusting your search or filter, or add a new trader." : "Add a new trader or use bulk upload to get started."}
+            There are no traders for this branch yet. Add a new trader or use bulk upload to get started.
+          </p>
+        </div>
+      ) : paginatedTraders.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
+          <FileWarning className="h-16 w-16 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-semibold text-muted-foreground">No Traders Match Filter</h3>
+          <p className="text-muted-foreground">
+            Try adjusting your search or category filter.
           </p>
         </div>
       ) : (
@@ -350,6 +447,13 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[50px]">
+                <Checkbox
+                  checked={isAllPaginatedSelected}
+                  onCheckedChange={handleSelectAllPaginatedTraders}
+                  aria-label="Select all traders on this page"
+                />
+              </TableHead>
               <SortableHeader sortKey="name" label="Name" />
               <SortableHeader sortKey="totalSales" label="Total Sales" />
               <SortableHeader sortKey="status" label="Status" />
@@ -371,21 +475,28 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
           </TableHeader>
           <TableBody>
             {paginatedTraders.map((trader) => (
-              <TableRow key={trader.id}>
+              <TableRow 
+                key={trader.id} 
+                data-state={selectedTraderIds.has(trader.id) ? "selected" : ""}
+              >
+                <TableCell>
+                  <Checkbox
+                    checked={selectedTraderIds.has(trader.id)}
+                    onCheckedChange={() => handleSelectTrader(trader.id)}
+                    aria-label={`Select trader ${trader.name}`}
+                  />
+                </TableCell>
                 <TableCell className="font-medium whitespace-nowrap">{renderCellContent(trader.name, 20)}</TableCell>
                 <TableCell className="whitespace-nowrap">
                   {typeof trader.totalSales === 'number' ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(trader.totalSales) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
                 <TableCell>
                    <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="ghost" size="sm"
                       className={`p-1 h-auto hover:opacity-80 ${getStatusBadgeClass(trader.status).split(' ').find(c => c.startsWith('hover:bg-'))}`}
                       onClick={() => handleStatusToggle(trader)}
                     >
-                    <Badge variant={'outline'}
-                      className={`${getStatusBadgeClass(trader.status)} cursor-pointer`}
-                    >
+                    <Badge variant={'outline'} className={`${getStatusBadgeClass(trader.status)} cursor-pointer`}>
                       {trader.status}
                     </Badge>
                   </Button>
@@ -396,18 +507,10 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
                 <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {trader.website ? (
-                    <a href={trader.website.startsWith('http') ? trader.website : `https://${trader.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
-                      Visit <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : <span className="text-muted-foreground/50">-</span>}
+                  {trader.website ? (<a href={trader.website.startsWith('http') ? trader.website : `https://${trader.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Visit <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {trader.phone ? (
-                    <a href={`tel:${trader.phone}`} className="text-primary hover:underline">
-                      {renderCellContent(trader.phone, 15)}
-                    </a>
-                  ) : <span className="text-muted-foreground/50">-</span>}
+                  {trader.phone ? (<a href={`tel:${trader.phone}`} className="text-primary hover:underline">{renderCellContent(trader.phone, 15)}</a>) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
                 <TableCell>{renderCellContent(trader.ownerName, 20)}</TableCell>
                 <TableCell>{renderCellContent(trader.mainCategory, 15)}</TableCell>
@@ -415,11 +518,7 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
                 <TableCell>{renderCellContent(trader.workdayTiming, 20)}</TableCell>
                 <TableCell>{renderCellContent(trader.address, 25)}</TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {trader.ownerProfileLink ? (
-                    <a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://${trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
-                      Profile <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : <span className="text-muted-foreground/50">-</span>}
+                  {trader.ownerProfileLink ? (<a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://${trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Profile <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
                 <TableCell className="flex gap-1 whitespace-nowrap">
                   <EditTraderDialog trader={trader} onUpdateTrader={(traderId, values) => handleUpdateTrader(traderId, values)} />
@@ -434,25 +533,9 @@ export function TraderTableClient({ initialTraders, branchId: propBranchId, allB
 
       {totalPages > 1 && (
         <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>Previous</Button>
+          <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>Next</Button>
         </div>
       )}
     </div>
@@ -469,14 +552,8 @@ const TooltipContent = React.forwardRef<
   <TooltipPrimitive.Content
     ref={ref}
     sideOffset={sideOffset}
-    className={cn(
-      "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className
-    )}
+    className={cn("z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", className)}
     {...props}
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-
-    

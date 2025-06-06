@@ -46,3 +46,8 @@ export type ParsedTraderData = {
   notes?: string | null; // New field for notes
 };
 
+export interface BulkDeleteTradersResult {
+  successCount: number;
+  failureCount: number;
+  error?: string | null;
+}
