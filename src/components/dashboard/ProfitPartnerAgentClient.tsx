@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb } from "lucide-react";
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch } from "lucide-react"; // Added PackageSearch for new icon
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils";
@@ -33,6 +33,7 @@ const quickActions = [
   { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions." },
   { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons." },
   { label: "List Bricklayers & Sales Campaign", query: "Give me a list of all traders who are 'Bricklayers' or in 'Brickwork' category. Then, suggest a brief sales campaign message to promote our new line of premium mortar to them." },
+  { label: "Estimate Project Materials", query: "Help me estimate the materials needed for a common construction project (e.g., a small extension, a garden wall). Please ask for the project type if needed and list typical materials.", icon: PackageSearch },
 ];
 
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
@@ -80,6 +81,9 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
 
   const handleQuickAction = (query: string) => {
     form.setValue("query", query);
+    // Optionally, immediately submit the form if the quick action is definitive enough
+    // For "Estimate Project Materials", it's better to let the user add more details if needed.
+    // form.handleSubmit(onSubmit)(); 
   };
 
   const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
@@ -105,7 +109,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
       console.error("Analysis Error:", e);
       let errorMessage = "Sorry, I couldn't process that request. Please try again or check the external service.";
       if (e instanceof Error) {
-        errorMessage = e.message; // Use the specific error from profitPartnerQueryFlow
+        errorMessage = e.message; 
       }
       setError(errorMessage);
       toast({ variant: "destructive", title: "Analysis Failed", description: errorMessage });
@@ -130,16 +134,20 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
         <div>
           <h3 className="text-md font-semibold mb-2 text-foreground">Quick Actions</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {quickActions.map(action => (
-              <Button
-                key={action.label}
-                variant="outline"
-                className="w-full justify-start text-left h-auto py-2"
-                onClick={() => handleQuickAction(action.query)}
-              >
-                {action.label}
-              </Button>
-            ))}
+            {quickActions.map(action => {
+              const IconComponent = action.icon;
+              return (
+                <Button
+                  key={action.label}
+                  variant="outline"
+                  className="w-full justify-start text-left h-auto py-2"
+                  onClick={() => handleQuickAction(action.query)}
+                >
+                  {IconComponent && <IconComponent className="mr-2 h-4 w-4" />}
+                  {action.label}
+                </Button>
+              );
+            })}
           </div>
         </div>
 
