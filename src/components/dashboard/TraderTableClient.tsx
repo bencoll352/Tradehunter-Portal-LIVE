@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react"; 
-import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types"; // Corrected BranchId to BaseBranchId
+import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
 import { useState, useMemo, useEffect } from "react";
 import type { z } from "zod";
 import {
@@ -35,14 +35,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EditTraderDialog } from "./EditTraderDialog";
-import { DeleteTraderDialog } from "./DeleteTraderDialog";
-import { AddTraderDialog } from "./AddTraderDialog";
-import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
+import { EditTraderDialog } from "@/components/dashboard/EditTraderDialog";
+import { DeleteTraderDialog } from "@/components/dashboard/DeleteTraderDialog";
+import { AddTraderDialog } from "@/components/dashboard/AddTraderDialog";
+import { BulkAddTradersDialog } from "@/components/dashboard/BulkAddTradersDialog";
 import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download, CalendarClock } from "lucide-react"; 
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
-import type { traderFormSchema } from "./TraderForm";
+import type { traderFormSchema } from "@/components/dashboard/TraderForm";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import Papa from "papaparse"; // For CSV export
@@ -53,7 +53,7 @@ type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
-  branchId: BaseBranchId; // Ensure this uses BaseBranchId
+  branchId: BaseBranchId; 
   allBranchTraders: Trader[]; 
   onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
   onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
@@ -81,7 +81,7 @@ export function TraderTableClient({
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
-  const branchId = propBranchId; // This is now correctly typed as BaseBranchId
+  const branchId = propBranchId; 
 
   useEffect(() => {
     setTraders(initialTraders);
