@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Compass, Sparkles, Paperclip, XCircle, TrendingUp, ShieldAlert, Target, LightbulbBulb } from "lucide-react";
+import { Loader2, Compass, Sparkles, Paperclip, XCircle, TrendingUp, ShieldAlert, Target, Lightbulb } from "lucide-react";
 import { salesNavigatorQuery, type SalesNavigatorQueryInput } from "@/ai/flows/sales-navigator-query";
 import type { Trader, BaseBranchId } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils";
@@ -29,7 +29,7 @@ interface SalesNavigatorAgentClientProps {
 const strategicQuickActions = [
   { label: "Market Trends Analysis", query: "Analyze current market trends for our key product lines in this branch's territory.", icon: TrendingUp },
   { label: "Growth Opportunities", query: "Identify 3 strategic growth opportunities for this branch in the next 12 months, considering current trader performance.", icon: Target },
-  { label: "New Client Campaign Strategy", query: "Suggest a high-level sales campaign outline for targeting new commercial clients in the area.", icon: LightbulbBulb },
+  { label: "New Client Campaign Strategy", query: "Suggest a high-level sales campaign outline for targeting new commercial clients in the area.", icon: Lightbulb },
   { label: "Risk Assessment & Mitigation", query: "What are potential risks to our market share (e.g., new competitors, economic shifts) and how can we proactively mitigate them?", icon: ShieldAlert },
   { label: "Optimize High-Value Trader Sales", query: "Based on current high-value trader performance, outline a strategy to optimize sales team effectiveness and further grow these accounts.", icon: Sparkles },
 ];
@@ -56,11 +56,8 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
         setSelectedFile(file);
         const reader = new FileReader();
         reader.onload = (e) => {
-          setFileContent(e.target?.result as string); // This will be base64 for binary, text for text
+          setFileContent(e.target?.result as string);
         };
-        // For simplicity in this example, we'll read as text.
-        // For binary files, you'd use readAsDataURL for a Base64 string or handle ArrayBuffer.
-        // The external service needs to be able to decode/process this.
         reader.readAsText(file); 
         toast({ title: "File Selected", description: `${file.name} is ready for analysis.` });
       } else {

@@ -15,16 +15,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import type { BranchId, ParsedTraderData, Trader } from "@/types";
+import type { BaseBranchId, ParsedTraderData, Trader } from "@/types"; // Changed BranchId to BaseBranchId
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Papa from "papaparse";
 import { normalizePhoneNumber } from "@/lib/utils";
 
 interface BulkAddTradersDialogProps {
-  branchId: BranchId;
+  branchId: BaseBranchId; // Changed BranchId to BaseBranchId
   existingTraders: Trader[];
-  onBulkAddTraders: (branchId: BranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
+  onBulkAddTraders: (branchId: BaseBranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>; // Changed BranchId to BaseBranchId
 }
 
 const EXPECTED_HEADERS = [
