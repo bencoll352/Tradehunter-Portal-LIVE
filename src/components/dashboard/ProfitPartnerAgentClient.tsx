@@ -86,7 +86,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     // form.handleSubmit(onSubmit)();
   };
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);
