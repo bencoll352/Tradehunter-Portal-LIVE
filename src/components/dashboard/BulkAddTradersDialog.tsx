@@ -145,7 +145,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             const parsedFallback = new Date(val); // Attempt direct parsing
             if (!isNaN(parsedFallback.getTime())) { // Check if it's a valid date object
                 // Add a sanity check for year, e.g., to avoid misinterpreting things like "1-2-3" as a valid date in 1903
-                if (parsedFallback.getUTCFullYear() > 1900) { 
+                if (parsedFallback.getUTCFullYear() > 1900) {
                     date = parsedFallback;
                 }
             }
@@ -284,7 +284,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         if (!ownerNameValue) missingFields.push("Owner Name (expected 'Owner Name' or 'Owner')");
         if (!mainCategoryValue) missingFields.push("Main Category (expected 'Main Category' or 'Category')");
         if (!workdayTimingValue) missingFields.push("Workday Timing (expected 'Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', or 'WorkdayTiming')");
-        
+
         if (missingFields.length > 0) { // Only log if there are actually fields missing from this specific list
             console.warn(
             `[CSV Parsing Debug] For trader "${name}": Could not find data for: [${missingFields.join('; ')}]. ` +
@@ -322,7 +322,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     const duplicatePhonesInCsv = new Set<string>(); // Store actual phone numbers that were CSV duplicates
     let skippedCount = 0;
 
-    // Create a set of normalized phone numbers from existing traders for efficient lookup
+    // Create a set of normalised phone numbers from existing traders for efficient lookup
     const existingNormalizedPhones = new Set(
       existingTraders.map(t => normalizePhoneNumber(t.phone))
     );
@@ -334,7 +334,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       if (normalizedPhone) { // Only check for duplicates if a phone number exists
         if (existingNormalizedPhones.has(normalizedPhone)) {
           isDuplicate = true;
-           console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" already exists in the database (based on existing traders passed to dialog). Skipping.`);
+           console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" already exists in the database (based on existing traders passed to dialogue). Skipping.`);
         } else if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
           isDuplicate = true;
           duplicatePhonesInCsv.add(trader.phone || 'N/A'); // Store the original phone for reporting
@@ -419,7 +419,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           if (result.error.toLowerCase().includes("firestore not initialized")) {
             toastDescription = (
               <div className="text-sm">
-                <p className="font-semibold">Server error: Firestore Not Initialized</p>
+                <p className="font-semibold">Server error: Firestore Not Initialised</p>
                 <p className="mt-2 text-xs">
                   The application's backend couldn't connect to Firebase. This is usually due to missing or incorrect Firebase configuration environment variables.
                 </p>
@@ -464,16 +464,16 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             variant: "destructive",
             title: "Bulk Upload Failed on Server",
             description: toastDescription,
-            duration: 20000, 
+            duration: 20000,
           });
           setIsLoading(false);
-          return; 
+          return;
         }
 
         if (result.data) {
           newTradersAddedCount = result.data.length;
         }
-      } catch (error) { 
+      } catch (error) {
         const clientErrorMessage = error instanceof Error ? error.message : "Unknown client error";
         console.error("Unexpected client error during bulk add traders operation:", error);
         toast({
@@ -482,7 +482,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           description: `An unexpected client-error occurred: ${clientErrorMessage}. Check console.`,
         });
         setIsLoading(false);
-        return; 
+        return;
       }
     }
 
@@ -509,7 +509,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 {summaryMessages.map((msg, idx) => <span key={idx}>{msg}</span>)}
             </div>
             ),
-            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000, 
+            duration: newTradersAddedCount > 0 && skippedCount === 0 ? 5000 : 10000,
         });
     } else if (validTraders.length === 0 && skippedCount === 0) {
         toast({
@@ -527,7 +527,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       setOpen(isOpen);
-      if (!isOpen) { 
+      if (!isOpen) {
         clearFile();
       }
     }}>
@@ -544,7 +544,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <br/>The <strong>'Name'</strong> header is mandatory and its column must contain data for each trader.
             <br/>Other common headers (examples):
             <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ...etc.</code>
-            <br/>(See full list of expected headers by expanding this dialog or checking "How to Use").
+            <br/>(See full list of expected headers by expanding this dialogue or checking "How to Use").
             <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back', or 'New Lead'.
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
             <br/>Max {FIRESTORE_BATCH_LIMIT} traders per file.
@@ -598,6 +598,3 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
-    
-
-    

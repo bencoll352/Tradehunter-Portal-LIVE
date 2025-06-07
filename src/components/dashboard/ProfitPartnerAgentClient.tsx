@@ -63,7 +63,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
          toast({ title: "File Selected", description: `${file.name} is ready for analysis.` });
       } else {
         toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a text-based file (e.g., .txt, .csv)." });
-        if(fileInputRef.current) fileInputRef.current.value = ""; 
+        if(fileInputRef.current) fileInputRef.current.value = "";
         setSelectedFile(null);
         setFileContent(null);
       }
@@ -83,16 +83,16 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     form.setValue("query", query);
     // Optionally, immediately submit the form if the quick action is definitive enough
     // For "Estimate Project Materials", it's better to let the user add more details if needed.
-    // form.handleSubmit(onSubmit)(); 
+    // form.handleSubmit(onSubmit)();
   };
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);
 
     const traderDataString = formatTraderDataForAnalysis(traders);
-    
+
     const input: ProfitPartnerQueryInput = {
       query: values.query,
       traderData: traderDataString,
@@ -102,14 +102,14 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     try {
       const result = await profitPartnerQuery(input);
       setAnalysisResponse(result.answer);
-      if (selectedFile) { 
+      if (selectedFile) {
         clearFile();
       }
     } catch (e) {
       console.error("Analysis Error:", e);
       let errorMessage = "Sorry, I couldn't process that request. Please try again or check the external service.";
       if (e instanceof Error) {
-        errorMessage = e.message; 
+        errorMessage = e.message;
       }
       setError(errorMessage);
       toast({ variant: "destructive", title: "Analysis Failed", description: errorMessage });
@@ -129,7 +129,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div>
           <h3 className="text-md font-semibold mb-2 text-foreground">Quick Actions</h3>
@@ -199,7 +199,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
                 Upload a list of customers or specific customer data for deeper insights (e.g., upsell/cross-sell opportunities, multi-customer recommendations).
               </p>
             </FormItem>
-            
+
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading} className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 {isLoading ? (

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -20,14 +21,14 @@ import {
   HelpCircle,
   LogOut,
   Users,
-  Lightbulb, 
+  Lightbulb,
   ShieldCheck,
   FileText,
-  Compass 
+  Compass
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
-import { getBranchInfo, type BranchInfo } from "@/types"; 
+import { getBranchInfo, type BranchInfo } from "@/types";
 import {
   Accordion,
   AccordionContent,
@@ -49,13 +50,13 @@ const capabilitiesData = [
       "Access & View Trader Database: After logging in with your Branch or Manager ID, your branch's traders are listed in the main dashboard table. The table shows 50 traders per page; use pagination to navigate.",
       "Add New Trader: Click 'Add New Trader' on the dashboard. A form will appear to enter details like name, sales, status, contact info, notes, and specific call-back dates. The system checks for duplicate phone numbers within the branch.",
       "Edit Trader Information: In the trader table, click the pencil icon (✏️) in the 'Actions' column for the desired trader. Their details will load in a form for you to modify and save.",
-      "Delete Single Trader: Click the trash can icon (🗑️) in the 'Actions' column for a trader. A confirmation dialog will ask you to confirm before permanently deleting.",
+      "Delete Single Trader: Click the trash can icon (🗑️) in the 'Actions' column for a trader. A confirmation dialogue will ask you to confirm before permanently deleting.",
       "Bulk Delete Multiple Traders: Select traders by clicking the checkboxes next to their names in the table. The 'Delete (X)' button will appear; click it and confirm to remove all selected traders at once.",
-      "Bulk Add Traders (CSV Upload): Click 'Bulk Add Traders (CSV)'. Upload a CSV file containing trader data. The system primarily uses header names (e.g., 'Name', 'Total Sales', 'Phone') to map data, so column order is flexible. 'Name' is mandatory. See dialog instructions for more on expected headers and CSV formatting (e.g., use double quotes for fields with commas like addresses). Duplicates (by phone number, compared to existing data or within the CSV) are automatically skipped, with a summary provided.",
+      "Bulk Add Traders (CSV Upload): Click 'Bulk Add Traders (CSV)'. Upload a CSV file containing trader data. The system primarily uses header names (e.g., 'Name', 'Total Sales', 'Phone') to map data, so column order is flexible. 'Name' is mandatory. See dialogue instructions for more on expected headers and CSV formatting (e.g., use double quotes for fields with commas like addresses). Duplicates (by phone number, compared to existing data or within the CSV) are automatically skipped, with a summary provided.",
       "Search Traders: Use the search bar above the trader table. Type keywords to find traders across various fields like name, description, main category, address, or notes.",
       "Filter Traders by Category: Use the 'Filter by category' dropdown (next to the search bar) to view traders belonging to specific categories. The category list is dynamically generated from your branch's trader data.",
       "Sort Trader Data: Click on column headers in the trader table (e.g., 'Name', 'Total Sales', 'Last Activity', 'Call-Back Date') to sort the data by that column in ascending or descending order.",
-      "Set & Manage Call-Back Reminders: When adding or editing a trader, use the 'Call-Back Date' field (with a calendar picker) to set a follow-up date. These dates are visible in the 'Call-Back' column and can be sorted to prioritize upcoming calls.",
+      "Set & Manage Call-Back Reminders: When adding or editing a trader, use the 'Call-Back Date' field (with a calendar picker) to set a follow-up date. These dates are visible in the 'Call-Back' column and can be sorted to prioritise upcoming calls.",
       "Data Persistence & Branch Isolation: All trader data is securely stored per branch in Firebase Firestore. This means your data is saved across sessions and is separate from other branches."
     ]
   },
@@ -65,7 +66,7 @@ const capabilitiesData = [
     features: [
       "Query Trader Data (Branch Booster): Find the 'Branch Booster' section on your dashboard. Type your questions about your branch's traders directly into the text area (e.g., 'What is the total sales volume for active traders?', 'List all traders in the 'Brickwork' category with a call-back date this month'). The analysis automatically uses your current branch's trader data.",
       "Use Quick Actions (Branch Booster): Click pre-defined buttons in the Branch Booster for common analyses like 'New Customers', 'High Potential New Customers', or 'List Bricklayers & Sales Campaign'. This pre-fills the query for you.",
-      "Analyze Uploaded Customer/Contextual Data (Branch Booster): Use the 'Upload Additional Customer Data' option in the Branch Booster to upload a text or CSV file (e.g., a list of local customers, specific project details). The Branch Booster will then use this information alongside your trader data to answer more complex queries (e.g., 'Based on this uploaded customer list, which of my active traders might be suitable for them?').",
+      "Analyse Uploaded Customer/Contextual Data (Branch Booster): Use the 'Upload Additional Customer Data' option in the Branch Booster to upload a text or CSV file (e.g., a list of local customers, specific project details). The Branch Booster will then use this information alongside your trader data to answer more complex queries (e.g., 'Based on this uploaded customer list, which of my active traders might be suitable for them?').",
       "Estimate Project Materials (Branch Booster): Click the 'Estimate Project Materials' Quick Action. You can then further refine the project type or details in the query box. The Branch Booster leverages its understanding of UK building processes to help estimate typical materials needed.",
       "Get Actionable Insights & Suggestions (Branch Booster): Ask the Branch Booster for strategic advice, such as 'Suggest strategies to re-engage lapsed accounts who were previously high value' or 'Draft a promotional message for our new line of eco-friendly insulation to traders in the 'Roofing' category'.",
       "View Key Branch Statistics: The mini-dashboard at the top of the page provides an at-a-glance view of 'Active Traders', 'Call-Back Traders', 'New Leads', and 'Recently Active Traders' counts for your branch."
@@ -76,7 +77,7 @@ const capabilitiesData = [
     icon: Compass,
     features: [
       "Access Advanced Strategic Insights: If logged in with a Manager ID (e.g., 'PURLEYMANAGER'), the 'Sales & Strategy Accelerator' agent appears below the Branch Booster.",
-      "Deep Dive Analysis: Use the Accelerator to ask complex strategic questions, request market trend analysis relative to your branch's data, or get AI-driven recommendations for sales strategies, team performance optimization, and long-term branch growth.",
+      "Deep Dive Analysis: Use the Accelerator to ask complex strategic questions, request market trend analysis relative to your branch's data, or get AI-driven recommendations for sales strategies, team performance optimisation, and long-term branch growth.",
       "Upload Supplemental Data (Accelerator): Use the 'Upload Supplemental Data' option within the Accelerator to upload files like market reports or competitor profiles. This provides additional context to the external analysis service, potentially leading to more tailored strategic insights.",
       "Use Strategic Quick Actions (Accelerator): Click pre-defined buttons in the Accelerator for common strategic queries, such as 'Market Trends Analysis', 'Growth Opportunities', or 'Risk Assessment & Mitigation'.",
       "External Intelligence: The Sales & Strategy Accelerator connects to a dedicated external analysis service for its insights, potentially incorporating broader market data beyond just your branch's immediate traders."
@@ -115,7 +116,7 @@ export function AppSidebar() {
       setBranchInfo(getBranchInfo(loggedInId));
     }
   }, []);
-  
+
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem("loggedInId");
@@ -136,9 +137,9 @@ export function AppSidebar() {
             sidebarState === 'collapsed' ? "justify-center" : ""
           )}
         >
-          <Logo 
-            width={sidebarState === 'collapsed' ? 40 : 180} 
-            height={sidebarState === 'collapsed' ? 20 : 47} 
+          <Logo
+            width={sidebarState === 'collapsed' ? 40 : 180}
+            height={sidebarState === 'collapsed' ? 20 : 47}
           />
         </div>
       </SidebarHeader>
@@ -156,7 +157,7 @@ export function AppSidebar() {
                     onClick={() => setOpenMobile(false)}
                     className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
                   >
-                    <div> 
+                    <div>
                       <item.icon />
                       <span>{item.label}</span>
                     </div>
@@ -167,13 +168,13 @@ export function AppSidebar() {
           </SidebarMenu>
 
           <Separator className="my-3 bg-sidebar-border group-data-[collapsible=icon]:hidden" />
-          
+
           <div className="px-3 py-2 group-data-[collapsible=icon]:hidden">
             <h3 className="mb-2 text-sm font-semibold text-sidebar-primary-foreground tracking-wider">
               Functional Capabilities
             </h3>
             <p className="mb-3 text-xs text-sidebar-foreground/80">
-              TradeHunter Pro is a precision intelligence system designed to support branch teams in managing trader relationships, optimizing sales, and improving operational efficiency.
+              TradeHunter Pro is a precision intelligence system designed to support branch teams in managing trader relationships, optimising sales, and improving operational efficiency.
             </p>
             <Accordion type="multiple" className="w-full">
               {capabilitiesData.map((capability, index) => {

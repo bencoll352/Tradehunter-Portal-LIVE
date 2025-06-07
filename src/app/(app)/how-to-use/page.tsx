@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -42,13 +43,13 @@ const faqs = [
   {
     value: "item-4",
     question: "What is the Branch Booster?",
-    answer: "The Branch Booster helps you analyze trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.",
+    answer: "The Branch Booster helps you analyse trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-7",
     question: "What is the Sales & Strategy Accelerator? (Managers Only)",
-    answer: "If you log in with a Manager ID (e.g., PURLEYMANAGER), you'll see the Sales & Strategy Accelerator below the Branch Booster. This tool connects to an external, specialized AI service for more in-depth strategic analysis. You can ask complex questions about market positioning, long-term sales strategies, competitive analysis relative to your branch's data, use strategic quick actions, upload supplemental documents (like market reports), and get AI-driven recommendations for optimizing team performance and branch growth.",
+    answer: "If you log in with a Manager ID (e.g., PURLEYMANAGER), you'll see the Sales & Strategy Accelerator below the Branch Booster. This tool connects to an external, specialised AI service for more in-depth strategic analysis. You can ask complex questions about market positioning, long-term sales strategies, competitive analysis relative to your branch's data, use strategic quick actions, upload supplemental documents (like market reports), and get AI-driven recommendations for optimising team performance and branch growth.",
     icon: <Compass className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -69,7 +70,7 @@ export default function HowToUsePage() {
             <div>
               <CardTitle className="text-3xl font-bold text-primary">How to Use TradeHunter Pro</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Your guide to navigating and utilizing the portal.
+                Your guide to navigating and utilising the portal.
               </CardDescription>
             </div>
           </div>
@@ -108,7 +109,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">1. Logging In</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Go to the main page. You will be redirected to the login screen.</li>
-              <li>Enter your assigned Login ID. 
+              <li>Enter your assigned Login ID.
                 <ul className="list-disc list-inside text-muted-foreground space-y-0.5 pl-6 text-sm">
                     <li>Team examples: "PURLEY", "BRANCH_B", "DOVER".</li>
                     <li>Manager examples: "PURLEYMANAGER", "BRANCH_BMANAGER".</li>
@@ -124,10 +125,10 @@ export default function HowToUsePage() {
               <li><strong>Search & Filter:</strong> Use the search bar to find traders by keyword. Use the category dropdown filter for targeted views.</li>
               <li><strong>Sort:</strong> Click on table headers (Name, Total Sales, Call-Back Date, etc.) to sort data.</li>
               <li><strong>Add Trader:</strong> Click "Add New Trader", fill the comprehensive form (including call-back dates), and submit. You'll be warned about duplicate phone numbers.</li>
-              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders". Upload your CSV file. 
+              <li><strong>Bulk Add Traders:</strong> Click "Bulk Add Traders". Upload your CSV file.
                 <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-6 text-sm">
                     <li>Ensure it has a mandatory 'Name' header.</li>
-                    <li>The system uses flexible header matching (see dialog instructions for details and expected headers).</li>
+                    <li>The system uses flexible header matching (see dialogue instructions for details and expected headers).</li>
                     <li>Fields with commas (e.g., in addresses or categories) must be double-quoted.</li>
                     <li>Duplicate traders (by phone number, compared to existing data or within the CSV) are automatically skipped.</li>
                 </ul>
@@ -152,9 +153,9 @@ export default function HowToUsePage() {
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If logged in with a Manager ID (e.g., "PURLEYMANAGER"), this agent appears below the Branch Booster.</li>
               <li>Use "Strategic Quick Actions" for pre-defined high-level analyses.</li>
-              <li>Enter complex strategic queries related to market trends, sales team optimization, competitive positioning, or long-term growth strategies for your branch.</li>
+              <li>Enter complex strategic queries related to market trends, sales team optimisation, competitive positioning, or long-term growth strategies for your branch.</li>
               <li>Optionally, upload supplemental data (like market reports or competitor info) to enhance the analysis.</li>
-              <li>Click "Get Strategic Insights". The response from the specialized external analysis service will appear below.</li>
+              <li>Click "Get Strategic Insights". The response from the specialised external analysis service will appear below.</li>
             </ul>
           </div>
            <div>
@@ -170,3 +171,4 @@ export default function HowToUsePage() {
     </div>
   );
 }
+

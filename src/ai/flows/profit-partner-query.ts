@@ -34,7 +34,7 @@ const profitPartnerAnalysisPrompt = ai.definePrompt({
   input: { schema: ProfitPartnerQueryInputSchema },
   output: { schema: ProfitPartnerQueryOutputSchema },
   prompt: `You are a helpful assistant for a building supplies company's branch manager.
-Your goal is to analyze trader data and provide actionable insights based on the user's query.
+Your goal is to analyse trader data and provide actionable insights based on the user's query.
 You will be given a query, a string of current trader data for the branch, and optionally, content from an uploaded customer file.
 
 User's Query:
@@ -86,7 +86,7 @@ const profitPartnerQueryFlow = ai.defineFlow(
       console.error("[profitPartnerQueryFlow] CRITICAL: GOOGLE_API_KEY environment variable is not set. Branch Booster AI will not function.");
       throw new Error(`Branch Booster analysis failed: The GOOGLE_API_KEY environment variable is not configured on the server. Please contact support or check server logs.`);
     }
-    
+
     try {
       const {output} = await profitPartnerAnalysisPrompt(input);
 
@@ -94,15 +94,15 @@ const profitPartnerQueryFlow = ai.defineFlow(
         console.error('[profitPartnerQueryFlow] Genkit/Gemini analysis returned an empty, undefined, or invalid answer. Raw output:', output);
         throw new Error('The analysis service returned an invalid or empty answer.');
       }
-      
+
       console.log('[profitPartnerQueryFlow] Successfully received answer from Genkit/Gemini analysis.');
       return output; // output directly matches ProfitPartnerQueryOutputSchema
     } catch (error) {
       console.error('[profitPartnerQueryFlow] Error during Genkit/Gemini analysis:', error);
       let detailedErrorMessage = 'An unexpected error occurred during the analysis.';
       if (error instanceof Error) {
-        if (error.message.includes('API key not valid') || 
-            error.message.includes('API_KEY_INVALID') || 
+        if (error.message.includes('API key not valid') ||
+            error.message.includes('API_KEY_INVALID') ||
             error.message.toLowerCase().includes('api key is missing')) {
           detailedErrorMessage = 'The GOOGLE_API_KEY is invalid or missing. Please check your server environment variables.';
         } else if (error.message.includes('quota') || error.message.includes('RESOURCE_EXHAUSTED')) {

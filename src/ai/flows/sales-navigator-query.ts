@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Sales & Strategy Accelerator tool for providing advanced strategic insights.
@@ -32,7 +33,7 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
   if (input.uploadedFileContent) {
     console.log(`[SalesNavigatorQuery] Including uploaded file content (length: ${input.uploadedFileContent.length} chars).`);
   }
-  
+
   try {
     const response = await fetch(SALES_NAVIGATOR_EXTERNAL_URL, {
       method: 'POST',
@@ -40,7 +41,7 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
         'Content-Type': 'application/json',
       },
       // The body will now include uploadedFileContent if present
-      body: JSON.stringify(input), 
+      body: JSON.stringify(input),
     });
 
     if (!response.ok) {
@@ -59,22 +60,22 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
 
       // Check for common "Cannot POST /" type error from external service
       if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /")) {
-         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyze) or check the external service's routing configuration.`);
+         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyse) or check the external service's routing configuration.`);
       }
-      
+
       console.error(`[SalesNavigatorQuery] External service error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
       throw new Error(`Sales & Strategy Accelerator service failed with status ${response.status}: ${response.statusText}. Details: ${errorDetails.substring(0,150)}...`);
     }
 
     const result = await response.json();
-    
+
     // Validate the output against the schema (optional but good practice)
     const parsedOutput = SalesNavigatorQueryOutputSchema.safeParse(result);
     if (!parsedOutput.success) {
       console.error("[SalesNavigatorQuery] Invalid response structure from external service:", parsedOutput.error.flatten());
       throw new Error("Sales & Strategy Accelerator service returned an invalid response format.");
     }
-    
+
     console.log('[SalesNavigatorQuery] Successfully received strategy from external service.');
     return parsedOutput.data;
 

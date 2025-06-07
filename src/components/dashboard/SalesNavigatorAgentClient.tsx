@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -26,11 +27,11 @@ interface SalesNavigatorAgentClientProps {
 }
 
 const strategicQuickActions = [
-  { label: "Market Trends Analysis", query: "Analyze current market trends for our key product lines in this branch's territory.", icon: TrendingUp },
+  { label: "Market Trends Analysis", query: "Analyse current market trends for our key product lines in this branch's territory.", icon: TrendingUp },
   { label: "Growth Opportunities", query: "Identify 3 strategic growth opportunities for this branch in the next 12 months, considering current trader performance.", icon: Target },
   { label: "New Client Campaign Strategy", query: "Suggest a high-level sales campaign outline for targeting new commercial clients in the area.", icon: Lightbulb },
   { label: "Risk Assessment & Mitigation", query: "What are potential risks to our market share (e.g., new competitors, economic shifts) and how can we proactively mitigate them?", icon: ShieldAlert },
-  { label: "Optimize High-Value Trader Sales", query: "Based on current high-value trader performance, outline a strategy to optimize sales team effectiveness and further grow these accounts.", icon: Sparkles },
+  { label: "Optimise High-Value Trader Sales", query: "Based on current high-value trader performance, outline a strategy to optimise sales team effectiveness and further grow these accounts.", icon: Sparkles },
 ];
 
 
@@ -57,11 +58,11 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
         reader.onload = (e) => {
           setFileContent(e.target?.result as string);
         };
-        reader.readAsText(file); 
+        reader.readAsText(file);
         toast({ title: "File Selected", description: `${file.name} is ready for analysis.` });
       } else {
         toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a text-based file (e.g., .txt, .csv), PDF, or Office document." });
-        if(fileInputRef.current) fileInputRef.current.value = ""; 
+        if(fileInputRef.current) fileInputRef.current.value = "";
         setSelectedFile(null);
         setFileContent(null);
       }
@@ -76,7 +77,7 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
     }
     toast({ title: "File Cleared", description: "Uploaded file has been removed." });
   };
-  
+
   const handleQuickAction = (query: string) => {
     form.setValue("query", query);
   };
@@ -87,7 +88,7 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
     setError(null);
 
     const traderDataString = formatTraderDataForAnalysis(traders);
-    
+
     const input: SalesNavigatorQueryInput = {
       query: values.query,
       traderData: traderDataString,
@@ -98,14 +99,14 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
     try {
       const result = await salesNavigatorQuery(input);
       setAnalysisResponse(result.strategy);
-      if (selectedFile) { 
+      if (selectedFile) {
         clearFile();
       }
     } catch (e) {
       console.error("Sales & Strategy Accelerator Analysis Error:", e);
       let errorMessage = "Sorry, I couldn't process that strategic request. Please try again or check the external Sales & Strategy Accelerator service.";
       if (e instanceof Error) {
-        errorMessage = e.message; 
+        errorMessage = e.message;
       }
       setError(errorMessage);
       toast({ variant: "destructive", title: "Sales & Strategy Accelerator Failed", description: errorMessage });
@@ -125,7 +126,7 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div>
           <h3 className="text-md font-semibold mb-2 text-foreground">Strategic Quick Actions</h3>
@@ -157,7 +158,7 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
                   <FormLabel>Your Strategic Question or Objective</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="e.g., Analyze Q3 sales trends and suggest three actionable strategies to increase market share in the commercial sector for this branch. Consider current trader performance and potential new leads based on local economic indicators."
+                      placeholder="e.g., Analyse Q3 sales trends and suggest three actionable strategies to increase market share in the commercial sector for this branch. Consider current trader performance and potential new leads based on local economic indicators."
                       className="resize-none"
                       rows={4}
                       {...field}
@@ -195,7 +196,7 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
                 Upload market reports, competitor profiles, or other relevant documents to enhance strategic analysis.
               </p>
             </FormItem>
-            
+
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 {isLoading ? (

@@ -35,7 +35,7 @@ function cleanDataForFirestoreWrite<T extends Record<string, any>>(data: T): Rec
 
 // Initial seed data for traders. Used if Firestore is empty for a branch.
 const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
-  { name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', description: 'Curiouser and curiouser goods. Specializes in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5, notes: "Prefers Earl Grey tea for meetings. Important client for seasonal events.", callBackDate: null },
+  { name: 'Alice Wonderland', branchId: 'PURLEY', totalSales: 125000, tradesMade: 150, status: 'Active', description: 'Curiouser and curiouser goods. Specialises in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', mainCategory: 'Retail', ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: "Party Supplies, Garden, Gifts", workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5, notes: "Prefers Earl Grey tea for meetings. Important client for seasonal events.", callBackDate: null },
   { name: 'Bob The Builder', branchId: 'PURLEY', totalSales: 98000, tradesMade: 120, status: 'Call-Back', description: 'Can he fix it? Yes, he can! General construction and home repair services. Reliable and efficient.', rating: 4.8, phone: '01234 567802', mainCategory: 'Construction', categories: 'Building, Repairs, Home Improvement', address: "456 Fixit Ave, Builderville, BLD 456", ownerName: "Bob", ownerProfileLink: "https://example.com/bob", workdayTiming: "Mon-Fri 8am-5pm", closedOn: "Weekends", reviewKeywords: "reliable, efficient, construction", website: null, notes: "Needs follow-up on new concrete mixer availability.", callBackDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() }, // Call back in 5 days
   { name: 'Charlie Brown', branchId: 'PURLEY', totalSales: 75000, tradesMade: 90, status: 'Inactive', mainCategory: 'Services', address: '456 Kite Street, Townsville, TWN 789', workdayTiming: "Mon-Fri 9am-5pm", description: "Good grief! Offering comic strip consultation and kite flying lessons. Currently on hiatus.", phone: "01234567810", ownerName: "Charles M. Schulz (Estate)", reviewKeywords:"comic, kite, peanuts", rating: 3.0, website: null, ownerProfileLink: null, categories: null, closedOn: null, notes: "Account inactive for 6+ months.", callBackDate: null },
   { name: 'Diana Prince', branchId: 'BRANCH_B', totalSales: 210000, tradesMade: 200, status: 'Active', address: '789 Amazon Way, Themyscira, THM 001', phone: '01234 567803', mainCategory: 'Consulting', closedOn: 'Weekends', description: "Antiquities expert and diplomatic consultant. Handles sensitive international relations.", rating: 5.0, website: "https://diana.example.com", categories: "Diplomacy, History, Art", reviewKeywords: "wise, strong, expert", ownerName: "Diana Prince", ownerProfileLink: null, workdayTiming: "By Appointment", notes: "High profile client, requires discreet handling.", callBackDate: null },
@@ -70,7 +70,7 @@ const determineLastActivityString = (activity: any): string => {
       return new Date(0).toISOString();
     }
   }
-  if (activity && typeof activity.toDate === 'function') { 
+  if (activity && typeof activity.toDate === 'function') {
     try {
       return activity.toDate().toISOString();
     } catch(e) {
@@ -81,7 +81,7 @@ const determineLastActivityString = (activity: any): string => {
   if (activity !== null && activity !== undefined) {
     console.warn(`[TraderService] Unexpected lastActivity type: ${typeof activity}, value: ${JSON.stringify(activity)}. Defaulting to epoch.`);
   }
-  return new Date(0).toISOString(); 
+  return new Date(0).toISOString();
 };
 
 
@@ -94,7 +94,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
     branchId: data.branchId ?? 'UNKNOWN_BRANCH', // This should be a BaseBranchId
     totalSales: data.totalSales ?? 0,
     tradesMade: data.tradesMade ?? 0,
-    status: data.status ?? 'New Lead', 
+    status: data.status ?? 'New Lead',
     lastActivity: determineLastActivityString(data.lastActivity),
     description: data.description ?? null,
     rating: data.rating ?? null,
@@ -116,8 +116,8 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
 // Renamed branchId to baseBranchId to reflect its purpose
 export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Trader[]> {
   if (!db) {
-    console.error("[TraderService:getTradersByBranch] Firestore not initialized. Aborting operation. Check Firebase configuration.");
-    throw new Error("Firestore not initialized. Cannot fetch traders.");
+    console.error("[TraderService:getTradersByBranch] Firestore not initialised. Aborting operation. Check Firebase configuration.");
+    throw new Error("Firestore not initialised. Cannot fetch traders.");
   }
   const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
   // Queries Firestore using the baseBranchId (e.g., "PURLEY")
@@ -132,18 +132,18 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
         console.log(`[TraderService:getTradersByBranch] No traders found for branch ${baseBranchId}, attempting to seed initial data...`);
         const batch = writeBatch(db);
         seedDataForBranch.forEach(traderSeedData => {
-          const traderDocRef = doc(tradersCollectionRef); 
-          batch.set(traderDocRef, traderSeedData); 
+          const traderDocRef = doc(tradersCollectionRef);
+          batch.set(traderDocRef, traderSeedData);
         });
         await batch.commit();
         console.log(`[TraderService:getTradersByBranch] Seeded ${seedDataForBranch.length} traders for branch ${baseBranchId}. Refetching...`);
-        querySnapshot = await getDocs(q); 
+        querySnapshot = await getDocs(q);
       } else {
         console.log(`[TraderService:getTradersByBranch] No traders found for branch ${baseBranchId} and no seed data configured. Returning empty list.`);
         return [];
       }
     }
-    
+
     return querySnapshot.docs.map(doc => mapDocToTrader(doc.data(), doc.id));
 
   } catch (error) {
@@ -155,8 +155,8 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
 // Renamed branchId to baseBranchId
 export async function getTraderById(id: string, baseBranchId: BaseBranchId): Promise<Trader | null> {
   if (!db) {
-    console.error("[TraderService:getTraderById] Firestore not initialized. Aborting operation. Check Firebase configuration.");
-    throw new Error("Firestore not initialized. Cannot fetch trader.");
+    console.error("[TraderService:getTraderById] Firestore not initialised. Aborting operation. Check Firebase configuration.");
+    throw new Error("Firestore not initialised. Cannot fetch trader.");
   }
   try {
     const traderDocRef = doc(db, TRADERS_COLLECTION, id);
@@ -169,7 +169,7 @@ export async function getTraderById(id: string, baseBranchId: BaseBranchId): Pro
         return trader;
       }
       console.warn(`[TraderService:getTraderById] Trader ${id} found but does not belong to branch ${baseBranchId}. Belongs to ${trader.branchId}`);
-      return null; 
+      return null;
     }
     return null;
   } catch (error) {
@@ -183,8 +183,8 @@ export async function addTraderToDb(
   baseBranchId: BaseBranchId // Use BaseBranchId
 ): Promise<Trader> {
   if (!db) {
-    console.error("[TraderService:addTraderToDb] Firestore not initialized. Aborting operation. Check Firebase configuration.");
-    throw new Error("Firestore not initialized. Cannot add trader.");
+    console.error("[TraderService:addTraderToDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
+    throw new Error("Firestore not initialised. Cannot add trader.");
   }
   try {
     const dataWithSystemFields = {
@@ -193,7 +193,7 @@ export async function addTraderToDb(
       lastActivity: new Date().toISOString(),
     };
     const cleanedData = cleanDataForFirestoreWrite(dataWithSystemFields);
-    
+
     const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
     console.log(`[TraderService:addTraderToDb] Attempting to add trader: ${cleanedData.name} to branch ${baseBranchId}`);
     const docRef = await addDoc(tradersCollectionRef, cleanedData);
@@ -209,15 +209,15 @@ export async function addTraderToDb(
 // updatedTraderData.branchId should already be the BaseBranchId
 export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trader | null> {
   if (!db) {
-    console.error("[TraderService:updateTraderInDb] Firestore not initialized. Aborting operation. Check Firebase configuration.");
-    throw new Error("Firestore not initialized. Cannot update trader.");
+    console.error("[TraderService:updateTraderInDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
+    throw new Error("Firestore not initialised. Cannot update trader.");
   }
   try {
     const traderDocRef = doc(db, TRADERS_COLLECTION, updatedTraderData.id);
-    
+
     const dataToPrepareForUpdate = {
       ...updatedTraderData,
-      lastActivity: new Date().toISOString(), 
+      lastActivity: new Date().toISOString(),
     };
     const { id, ...dataWithoutId } = dataToPrepareForUpdate;
     const cleanedData = cleanDataForFirestoreWrite(dataWithoutId);
@@ -235,8 +235,8 @@ export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trade
 // Renamed branchId to baseBranchId
 export async function deleteTraderFromDb(traderId: string, baseBranchId: BaseBranchId): Promise<boolean> {
    if (!db) {
-    console.error("[TraderService:deleteTraderFromDb] Firestore not initialized. Aborting operation. Check Firebase configuration.");
-    throw new Error("Firestore not initialized. Cannot delete trader.");
+    console.error("[TraderService:deleteTraderFromDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
+    throw new Error("Firestore not initialised. Cannot delete trader.");
   }
   try {
     // It's good practice to verify the trader belongs to the branch before deleting,
@@ -258,8 +258,8 @@ export async function bulkAddTradersToDb(
   baseBranchId: BaseBranchId // Use BaseBranchId
 ): Promise<Trader[]> {
   if (!db) {
-    console.error("[TraderService:bulkAddTradersToDb] Firestore not initialized. Aborting operation. Check Firebase configuration.");
-    throw new Error("Firestore not initialized. Cannot bulk add traders.");
+    console.error("[TraderService:bulkAddTradersToDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
+    throw new Error("Firestore not initialised. Cannot bulk add traders.");
   }
   const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
   const batch = writeBatch(db);
@@ -268,14 +268,14 @@ export async function bulkAddTradersToDb(
   console.log(`[TraderService:bulkAddTradersToDb] Attempting to bulk add ${tradersToCreate.length} traders to branch ${baseBranchId}`);
 
   tradersToCreate.forEach((parsedData, index) => {
-    const newTraderDocRef = doc(tradersCollectionRef); 
-    
+    const newTraderDocRef = doc(tradersCollectionRef);
+
     const newTraderObject: Omit<Trader, 'id'> = {
       name: parsedData.name,
       branchId: baseBranchId, // Set the baseBranchId
       totalSales: parsedData.totalSales ?? 0,
       tradesMade: parsedData.tradesMade ?? 0,
-      status: parsedData.status ?? 'New Lead', 
+      status: parsedData.status ?? 'New Lead',
       lastActivity: parsedData.lastActivity || new Date().toISOString(),
       description: parsedData.description,
       rating: parsedData.rating,
@@ -289,10 +289,10 @@ export async function bulkAddTradersToDb(
       workdayTiming: parsedData.workdayTiming,
       notes: parsedData.notes,
       callBackDate: parsedData.callBackDate ?? null,
-      closedOn: null, 
+      closedOn: null,
       reviewKeywords: null,
     };
-    
+
     const finalTraderDataForDb = cleanDataForFirestoreWrite(newTraderObject);
     batch.set(newTraderDocRef, finalTraderDataForDb);
     createdTraders.push({ ...(finalTraderDataForDb as Omit<Trader, 'id'>), id: newTraderDocRef.id });
@@ -307,6 +307,6 @@ export async function bulkAddTradersToDb(
     return createdTraders;
   } catch (error) {
     console.error(`[TraderService:bulkAddTradersToDb] Error bulk adding traders for branch ${baseBranchId}:`, error);
-    throw error; 
+    throw error;
   }
 }
