@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react"; 
-import type { Trader, BranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
+import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types"; // Corrected BranchId to BaseBranchId
 import { useState, useMemo, useEffect } from "react";
 import type { z } from "zod";
 import {
@@ -53,7 +53,7 @@ type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
-  branchId: BranchId;
+  branchId: BaseBranchId; // Ensure this uses BaseBranchId
   allBranchTraders: Trader[]; 
   onAdd: (values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
   onUpdate: (traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<boolean>;
@@ -81,7 +81,7 @@ export function TraderTableClient({
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
-  const branchId = propBranchId;
+  const branchId = propBranchId; // This is now correctly typed as BaseBranchId
 
   useEffect(() => {
     setTraders(initialTraders);
@@ -617,3 +617,4 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
