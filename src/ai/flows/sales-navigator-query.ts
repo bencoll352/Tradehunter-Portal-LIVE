@@ -17,7 +17,7 @@ const SalesNavigatorQueryInputSchema = z.object({
   query: z.string().describe('The strategic question or analysis request for the Sales Navigator.'),
   traderData: z.string().describe('The current trader data CSV string for the branch.'),
   branchId: z.string().describe('The base branch ID for context.'),
-  // Add any other specific fields the external Sales Navigator API might need
+  uploadedFileContent: z.string().optional().describe('Optional: Content of an uploaded file (e.g., market data, competitor info) for analysis. Expected format: raw text content of the file.'),
 });
 export type SalesNavigatorQueryInput = z.infer<typeof SalesNavigatorQueryInputSchema>;
 
@@ -30,6 +30,9 @@ export type SalesNavigatorQueryOutput = z.infer<typeof SalesNavigatorQueryOutput
 
 export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Promise<SalesNavigatorQueryOutput> {
   console.log(`[SalesNavigatorQuery] Sending query to external service: "${input.query}" for branch ${input.branchId}`);
+  if (input.uploadedFileContent) {
+    console.log(`[SalesNavigatorQuery] Including uploaded file content (length: ${input.uploadedFileContent.length} chars).`);
+  }
   
   try {
     const response = await fetch(SALES_NAVIGATOR_EXTERNAL_URL, {
@@ -37,7 +40,8 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(input),
+      // The body will now include uploadedFileContent if present
+      body: JSON.stringify(input), 
     });
 
     if (!response.ok) {

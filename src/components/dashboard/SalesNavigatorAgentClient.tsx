@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2, Compass, Sparkles } from "lucide-react";
-import { salesNavigatorQuery, SalesNavigatorQueryInputSchema, type SalesNavigatorQueryInput } from "@/ai/flows/sales-navigator-query";
+import { Input } from "@/components/ui/input";
+import { Loader2, Compass, Sparkles, Paperclip, XCircle, TrendingUp, ShieldAlert, Target, LightbulbBulb } from "lucide-react";
+import { salesNavigatorQuery, type SalesNavigatorQueryInput } from "@/ai/flows/sales-navigator-query";
 import type { Trader, BaseBranchId } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,16 +26,64 @@ interface SalesNavigatorAgentClientProps {
   baseBranchId: BaseBranchId;
 }
 
+const strategicQuickActions = [
+  { label: "Market Trends Analysis", query: "Analyze current market trends for our key product lines in this branch's territory.", icon: TrendingUp },
+  { label: "Growth Opportunities", query: "Identify 3 strategic growth opportunities for this branch in the next 12 months, considering current trader performance.", icon: Target },
+  { label: "New Client Campaign Strategy", query: "Suggest a high-level sales campaign outline for targeting new commercial clients in the area.", icon: LightbulbBulb },
+  { label: "Risk Assessment & Mitigation", query: "What are potential risks to our market share (e.g., new competitors, economic shifts) and how can we proactively mitigate them?", icon: ShieldAlert },
+  { label: "Optimize High-Value Trader Sales", query: "Based on current high-value trader performance, outline a strategy to optimize sales team effectiveness and further grow these accounts.", icon: Sparkles },
+];
+
+
 export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNavigatorAgentClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResponse, setAnalysisResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof agentFormSchema>>({
     resolver: zodResolver(agentFormSchema),
     defaultValues: { query: "" },
   });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith("text/") || file.name.endsWith(".csv") || file.name.endsWith(".tsv") || file.type === "application/pdf" || file.type.startsWith("application/vnd.openxmlformats-officedocument")) {
+        setSelectedFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setFileContent(e.target?.result as string); // This will be base64 for binary, text for text
+        };
+        // For simplicity in this example, we'll read as text.
+        // For binary files, you'd use readAsDataURL for a Base64 string or handle ArrayBuffer.
+        // The external service needs to be able to decode/process this.
+        reader.readAsText(file); 
+        toast({ title: "File Selected", description: `${file.name} is ready for analysis.` });
+      } else {
+        toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a text-based file (e.g., .txt, .csv), PDF, or Office document." });
+        if(fileInputRef.current) fileInputRef.current.value = ""; 
+        setSelectedFile(null);
+        setFileContent(null);
+      }
+    }
+  };
+
+  const clearFile = () => {
+    setSelectedFile(null);
+    setFileContent(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    toast({ title: "File Cleared", description: "Uploaded file has been removed." });
+  };
+  
+  const handleQuickAction = (query: string) => {
+    form.setValue("query", query);
+  };
 
   const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
     setIsLoading(true);
@@ -47,11 +96,15 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
       query: values.query,
       traderData: traderDataString,
       branchId: baseBranchId,
+      ...(fileContent && { uploadedFileContent: fileContent }),
     };
 
     try {
       const result = await salesNavigatorQuery(input);
       setAnalysisResponse(result.strategy);
+      if (selectedFile) { 
+        clearFile();
+      }
     } catch (e) {
       console.error("Sales Navigator Analysis Error:", e);
       let errorMessage = "Sorry, I couldn't process that strategic request. Please try again or check the external Sales Navigator service.";
@@ -78,6 +131,26 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
       </CardHeader>
       
       <CardContent className="space-y-4">
+        <div>
+          <h3 className="text-md font-semibold mb-2 text-foreground">Strategic Quick Actions</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {strategicQuickActions.map(action => {
+              const IconComponent = action.icon;
+              return (
+                <Button
+                  key={action.label}
+                  variant="outline"
+                  className="w-full justify-start text-left h-auto py-2 border-primary/30 hover:bg-primary/5 hover:border-primary/50"
+                  onClick={() => handleQuickAction(action.query)}
+                >
+                  {IconComponent && <IconComponent className="mr-2 h-4 w-4 text-primary/80" />}
+                  {action.label}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -98,6 +171,34 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
                 </FormItem>
               )}
             />
+
+            <FormItem>
+              <FormLabel htmlFor="sales-navigator-file-upload">Upload Supplemental Data (Optional .txt, .csv, .pdf, .docx)</FormLabel>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="sales-navigator-file-upload"
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="flex-grow"
+                  accept=".txt,.csv,text/plain,text/csv,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                />
+                {selectedFile && (
+                  <Button variant="ghost" size="icon" onClick={clearFile} aria-label="Clear file">
+                    <XCircle className="h-5 w-5 text-destructive" />
+                  </Button>
+                )}
+              </div>
+              {selectedFile && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  <Paperclip className="inline h-3 w-3 mr-1" />
+                  {selectedFile.name} selected. Its content will be sent for analysis.
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Upload market reports, competitor profiles, or other relevant documents to enhance strategic analysis.
+              </p>
+            </FormItem>
             
             <div className="flex justify-end">
               <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
