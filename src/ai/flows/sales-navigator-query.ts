@@ -1,7 +1,6 @@
-
 'use server';
 /**
- * @fileOverview A Sales & Strategy Navigator tool for providing advanced strategic insights.
+ * @fileOverview A Sales & Strategy Accelerator tool for providing advanced strategic insights.
  * This flow communicates with an external service.
  *
  * - salesNavigatorQuery - A function that handles the query process.
@@ -14,7 +13,7 @@ import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts
 const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/";
 
 const SalesNavigatorQueryInputSchema = z.object({
-  query: z.string().describe('The strategic question or analysis request for the Sales Navigator.'),
+  query: z.string().describe('The strategic question or analysis request for the Sales & Strategy Accelerator.'),
   traderData: z.string().describe('The current trader data CSV string for the branch.'),
   branchId: z.string().describe('The base branch ID for context.'),
   uploadedFileContent: z.string().optional().describe('Optional: Content of an uploaded file (e.g., market data, competitor info) for analysis. Expected format: raw text content of the file.'),
@@ -22,8 +21,8 @@ const SalesNavigatorQueryInputSchema = z.object({
 export type SalesNavigatorQueryInput = z.infer<typeof SalesNavigatorQueryInputSchema>;
 
 const SalesNavigatorQueryOutputSchema = z.object({
-  strategy: z.string().describe('The strategic advice, analysis, or answer from the Sales Navigator.'),
-  // Add any other fields the external Sales Navigator API might return
+  strategy: z.string().describe('The strategic advice, analysis, or answer from the Sales & Strategy Accelerator.'),
+  // Add any other fields the external Sales Accelerator API might return
 });
 export type SalesNavigatorQueryOutput = z.infer<typeof SalesNavigatorQueryOutputSchema>;
 
@@ -60,11 +59,11 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
 
       // Check for common "Cannot POST /" type error from external service
       if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /")) {
-         throw new Error(`Sales Navigator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyze) or check the external service's routing configuration.`);
+         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyze) or check the external service's routing configuration.`);
       }
       
       console.error(`[SalesNavigatorQuery] External service error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
-      throw new Error(`Sales Navigator service failed with status ${response.status}: ${response.statusText}. Details: ${errorDetails.substring(0,150)}...`);
+      throw new Error(`Sales & Strategy Accelerator service failed with status ${response.status}: ${response.statusText}. Details: ${errorDetails.substring(0,150)}...`);
     }
 
     const result = await response.json();
@@ -73,7 +72,7 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
     const parsedOutput = SalesNavigatorQueryOutputSchema.safeParse(result);
     if (!parsedOutput.success) {
       console.error("[SalesNavigatorQuery] Invalid response structure from external service:", parsedOutput.error.flatten());
-      throw new Error("Sales Navigator service returned an invalid response format.");
+      throw new Error("Sales & Strategy Accelerator service returned an invalid response format.");
     }
     
     console.log('[SalesNavigatorQuery] Successfully received strategy from external service.');
@@ -81,11 +80,11 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
 
   } catch (error) {
     console.error('[SalesNavigatorQuery] Error during external service call:', error);
-    let detailedErrorMessage = 'An unexpected error occurred while contacting the Sales Navigator service.';
+    let detailedErrorMessage = 'An unexpected error occurred while contacting the Sales & Strategy Accelerator service.';
     if (error instanceof Error) {
       detailedErrorMessage = error.message;
     }
     // Ensure the error message passed to the client is concise but informative
-    throw new Error(`Sales Navigator analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}. Check server logs for full details.`);
+    throw new Error(`Sales & Strategy Accelerator analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}. Check server logs for full details.`);
   }
 }

@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -48,8 +47,8 @@ const faqs = [
   },
   {
     value: "item-7",
-    question: "What is the Sales & Strategy Navigator? (Managers Only)",
-    answer: "If you log in with a Manager ID (e.g., PURLEYMANAGER), you'll see the Sales & Strategy Navigator below the Branch Booster. This tool connects to an external, specialized AI service for more in-depth strategic analysis. You can ask complex questions about market positioning, long-term sales strategies, competitive analysis relative to your branch's data, and get AI-driven recommendations for optimizing team performance and branch growth.",
+    question: "What is the Sales & Strategy Accelerator? (Managers Only)",
+    answer: "If you log in with a Manager ID (e.g., PURLEYMANAGER), you'll see the Sales & Strategy Accelerator below the Branch Booster. This tool connects to an external, specialized AI service for more in-depth strategic analysis. You can ask complex questions about market positioning, long-term sales strategies, competitive analysis relative to your branch's data, use strategic quick actions, upload supplemental documents (like market reports), and get AI-driven recommendations for optimizing team performance and branch growth.",
     icon: <Compass className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -149,10 +148,12 @@ export default function HowToUsePage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Sales & Strategy Navigator (Managers Only)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Sales & Strategy Accelerator (Managers Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If logged in with a Manager ID (e.g., "PURLEYMANAGER"), this agent appears below the Branch Booster.</li>
+              <li>Use "Strategic Quick Actions" for pre-defined high-level analyses.</li>
               <li>Enter complex strategic queries related to market trends, sales team optimization, competitive positioning, or long-term growth strategies for your branch.</li>
+              <li>Optionally, upload supplemental data (like market reports or competitor info) to enhance the analysis.</li>
               <li>Click "Get Strategic Insights". The response from the specialized external analysis service will appear below.</li>
             </ul>
           </div>

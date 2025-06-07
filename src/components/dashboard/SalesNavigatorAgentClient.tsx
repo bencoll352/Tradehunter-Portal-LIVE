@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -103,13 +102,13 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
         clearFile();
       }
     } catch (e) {
-      console.error("Sales Navigator Analysis Error:", e);
-      let errorMessage = "Sorry, I couldn't process that strategic request. Please try again or check the external Sales Navigator service.";
+      console.error("Sales & Strategy Accelerator Analysis Error:", e);
+      let errorMessage = "Sorry, I couldn't process that strategic request. Please try again or check the external Sales & Strategy Accelerator service.";
       if (e instanceof Error) {
         errorMessage = e.message; 
       }
       setError(errorMessage);
-      toast({ variant: "destructive", title: "Sales Navigator Failed", description: errorMessage });
+      toast({ variant: "destructive", title: "Sales & Strategy Accelerator Failed", description: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -121,8 +120,8 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
         <div className="flex items-center gap-3">
           <Compass className="h-8 w-8 text-primary" />
           <div>
-            <CardTitle className="text-2xl text-primary">Sales & Strategy Navigator</CardTitle>
-            <CardDescription>Input your strategic questions for advanced market and sales analysis. (Manager Access)</CardDescription>
+            <CardTitle className="text-2xl text-primary">Sales & Strategy Accelerator</CardTitle>
+            <CardDescription>Input your strategic questions for advanced market and sales acceleration. (Manager Access)</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -213,7 +212,7 @@ export function SalesNavigatorAgentClient({ traders, baseBranchId }: SalesNaviga
 
       {(analysisResponse || error) && (
         <CardContent className="mt-4 border-t border-primary/30 pt-4">
-          <h3 className="text-lg font-semibold mb-2 text-primary">Navigator Response:</h3>
+          <h3 className="text-lg font-semibold mb-2 text-primary">Accelerator Response:</h3>
           {analysisResponse && (
             <ScrollArea className="h-[200px] rounded-md border p-3 bg-muted/30">
               <p className="text-sm text-foreground whitespace-pre-wrap">{analysisResponse}</p>

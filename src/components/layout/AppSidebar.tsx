@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -24,11 +23,11 @@ import {
   Lightbulb, 
   ShieldCheck,
   FileText,
-  Compass // Icon for Sales Navigator
+  Compass 
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
-import { getBranchInfo, type BranchInfo } from "@/types"; // Updated import
+import { getBranchInfo, type BranchInfo } from "@/types"; 
 import {
   Accordion,
   AccordionContent,
@@ -73,12 +72,14 @@ const capabilitiesData = [
     ]
   },
   {
-    category: "Sales & Strategy Navigator (Managers Only)",
+    category: "Sales & Strategy Accelerator (Managers Only)",
     icon: Compass,
     features: [
-      "Access Advanced Strategic Insights: If logged in with a Manager ID (e.g., 'PURLEYMANAGER'), the 'Sales & Strategy Navigator' agent appears below the Branch Booster.",
-      "Deep Dive Analysis: Use the Navigator to ask complex strategic questions, request market trend analysis relative to your branch's data, or get AI-driven recommendations for sales strategies, team performance optimization, and long-term branch growth.",
-      "External Intelligence: The Sales Navigator connects to a dedicated external analysis service for its insights, potentially incorporating broader market data beyond just your branch's immediate traders."
+      "Access Advanced Strategic Insights: If logged in with a Manager ID (e.g., 'PURLEYMANAGER'), the 'Sales & Strategy Accelerator' agent appears below the Branch Booster.",
+      "Deep Dive Analysis: Use the Accelerator to ask complex strategic questions, request market trend analysis relative to your branch's data, or get AI-driven recommendations for sales strategies, team performance optimization, and long-term branch growth.",
+      "Upload Supplemental Data (Accelerator): Use the 'Upload Supplemental Data' option within the Accelerator to upload files like market reports or competitor profiles. This provides additional context to the external analysis service, potentially leading to more tailored strategic insights.",
+      "Use Strategic Quick Actions (Accelerator): Click pre-defined buttons in the Accelerator for common strategic queries, such as 'Market Trends Analysis', 'Growth Opportunities', or 'Risk Assessment & Mitigation'.",
+      "External Intelligence: The Sales & Strategy Accelerator connects to a dedicated external analysis service for its insights, potentially incorporating broader market data beyond just your branch's immediate traders."
     ]
   },
   {
@@ -93,7 +94,7 @@ const capabilitiesData = [
     category: "System & Security",
     icon: ShieldCheck,
     features: [
-      "Role-Based Login: The system supports Team logins (e.g., 'PURLEY') and Manager logins (e.g., 'PURLEYMANAGER'). Managers have access to additional tools like the Sales & Strategy Navigator.",
+      "Role-Based Login: The system supports Team logins (e.g., 'PURLEY') and Manager logins (e.g., 'PURLEYMANAGER'). Managers have access to additional tools like the Sales & Strategy Accelerator.",
       "Branch-Specific Data Access: Your Login ID ensures that you can only access and manage trader data associated with your specific branch. Manager logins view the same branch data as their team counterparts, but with added analytical tools.",
       "Secure Data Storage: All trader information is stored in Firebase Firestore, a cloud-hosted database, using security rules to maintain data integrity and isolation between branches.",
       "Secure Portal Access: The TradeHunter Pro portal is delivered over HTTPS, encrypting data transmitted between your browser and the server."
@@ -177,7 +178,7 @@ export function AppSidebar() {
             <Accordion type="multiple" className="w-full">
               {capabilitiesData.map((capability, index) => {
                 const IconComponent = capability.icon;
-                // Conditionally render Sales Navigator capability
+                // Conditionally render Sales Accelerator capability
                 if (capability.category.includes("Managers Only") && branchInfo?.role !== 'manager') {
                   return null;
                 }
