@@ -35,7 +35,7 @@ const faqs = [
     answer: "Use the 'Bulk Add Traders' button on the dashboard. Upload a CSV file. The system uses flexible parsing: \n" +
             "• **Headers are Key**: It primarily relies on matching header names (case-insensitive, space-trimmed), though a general column order is good practice (e.g., Name, Total Sales, Status, etc., up to 16 common fields). \n" +
             "• **Mandatory 'Name'**: The 'Name' header and corresponding data for each trader are mandatory. \n" +
-            "• **Expected Headers (approximate)**: Name, Total Sales, Status, Last Activity, Description, Reviews, Rating, 🌐Website, 📞 Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Notes, Actions (Actions column data ignored). Some headers have alternative names (e.g., 'Owner Name' or 'Owner'). Refer to the dialog for specific examples and more details. \n" +
+            "• **Expected Headers (approximate)**: Name, Total Sales, Status, Last Activity, Description, Reviews, Rating, 🌐Website, 📞 Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Notes, Actions (Actions column data ignored). Some headers have alternative names (e.g., 'Owner Name' or 'Owner'). Refer to the dialogue for specific examples and more details. \n" +
             "• **Quoted Fields**: Fields containing commas (e.g., in Description, Address, Categories) MUST be enclosed in double quotes (e.g., \"Main St, Suite 100\"). \n" +
             "• **Duplicate Handling**: Traders with phone numbers already existing in the database or duplicated within the CSV will be automatically skipped. A summary of additions and skips will be provided.",
     icon: <UploadCloud className="h-5 w-5 text-primary mr-2" />

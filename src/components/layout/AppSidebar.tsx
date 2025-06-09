@@ -25,7 +25,7 @@ import {
   ShieldCheck,
   FileText,
   Compass,
-  Briefcase, // Keep for capabilities section icon if needed
+  Briefcase, 
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
-// Removed BuildWise Intel from here
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "Help & FAQs" },
@@ -158,7 +157,6 @@ export function AppSidebar() {
           <SidebarMenu className="px-3 py-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
-              // Removed isBuildWiseIntel and its specific styling logic
               return (
                 <SidebarMenuItem key={item.href}>
                   <Link href={item.href}>
