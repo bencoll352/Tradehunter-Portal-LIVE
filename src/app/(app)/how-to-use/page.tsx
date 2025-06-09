@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Fingerprint, Compass, Briefcase } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Compass, Briefcase } from "lucide-react";
 
 const faqs = [
   {
@@ -20,7 +20,7 @@ const faqs = [
   {
     value: "item-2",
     question: "How can I view trader data?",
-    answer: "Once logged in, the dashboard will display a table of traders specific to your branch. You can sort columns by clicking on their headers, search by keywords, filter by category, and paginate through the data (50 traders per page). The dashboard also shows mini-stats like Live and Recently Active traders.",
+    answer: "Once logged in, the dashboard (accessible via the 'Dashboard' tab in the header) will display a table of traders specific to your branch. You can sort columns by clicking on their headers, search by keywords, filter by category, and paginate through the data (50 traders per page). The dashboard also shows mini-stats like Live and Recently Active traders.",
     icon: <BarChart2 className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -43,19 +43,19 @@ const faqs = [
   {
     value: "item-4",
     question: "What is the Branch Booster?",
-    answer: "The Branch Booster helps you analyse trader and customer data. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.",
+    answer: "The Branch Booster helps you analyse trader and customer data. It's located on the Dashboard page. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-7",
     question: "What is the Sales & Strategy Accelerator? (Managers Only)",
-    answer: "If you log in with a Manager ID (e.g., PURLEYMANAGER), you'll see the Sales & Strategy Accelerator below the Branch Booster. This tool connects to an external, specialised AI service for more in-depth strategic analysis. You can ask complex questions about market positioning, long-term sales strategies, competitive analysis relative to your branch's data, use strategic quick actions, upload supplemental documents (like market reports), and get AI-driven recommendations for optimising team performance and branch growth.",
+    answer: "If you log in with a Manager ID (e.g., PURLEYMANAGER), you'll see the Sales & Strategy Accelerator below the Branch Booster on the Dashboard page. This tool connects to an external, specialised AI service for more in-depth strategic analysis. You can ask complex questions about market positioning, long-term sales strategies, competitive analysis relative to your branch's data, use strategic quick actions, upload supplemental documents (like market reports), and get AI-driven recommendations for optimising team performance and branch growth.",
     icon: <Compass className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-8",
     question: "What is the BuildWise Intel page?",
-    answer: "The 'BuildWise Intel' page, accessible from the sidebar, embeds an external application from BuildWise Intel. This provides access to additional specialised data, tools, or insights relevant to the construction and trade industry. Navigate within the embedded content using its own scrollbars and interface.",
+    answer: "The 'BuildWise Intel' page, accessible via the 'BuildWise Intel' tab/button in the main header, embeds an external application from BuildWise Intel. This provides access to additional specialised data, tools, or insights relevant to the construction and trade industry. Navigate within the embedded content using its own scrollbars and interface.",
     icon: <Briefcase className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -121,11 +121,19 @@ export default function HowToUsePage() {
                     <li>Manager examples: "PURLEYMANAGER", "BRANCH_BMANAGER".</li>
                 </ul>
               </li>
-              <li>Click "Sign In". You will be taken to your branch's dashboard.</li>
+              <li>Click "Sign In". You will be taken to your branch's dashboard (main page after login).</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">2. Managing Traders</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">2. Accessing Main Sections</h3>
+            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
+              <li><strong>Dashboard:</strong> Click the "Dashboard" tab in the header to view and manage traders, and use analytical tools.</li>
+              <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in the header to access the external insights portal.</li>
+              <li><strong>How to Use (this page):</strong> Click "How to Use" in the left sidebar for help and FAQs.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-foreground mb-1">3. Managing Traders (on Dashboard)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li><strong>View Traders:</strong> Traders for your branch are listed on the dashboard (50 per page). View mini-stats at the top for a quick overview.</li>
               <li><strong>Search & Filter:</strong> Use the search bar to find traders by keyword. Use the category dropdown filter for targeted views.</li>
@@ -144,7 +152,7 @@ export default function HowToUsePage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">3. Using the Branch Booster (All Users)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Branch Booster (on Dashboard)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Locate the "Branch Booster" section on the dashboard.</li>
               <li>Use "Quick Actions" for common pre-defined analyses.</li>
@@ -155,9 +163,9 @@ export default function HowToUsePage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Sales & Strategy Accelerator (Managers Only)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">5. Using the Sales & Strategy Accelerator (Managers Only, on Dashboard)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>If logged in with a Manager ID (e.g., "PURLEYMANAGER"), this agent appears below the Branch Booster.</li>
+              <li>If logged in with a Manager ID (e.g., "PURLEYMANAGER"), this agent appears below the Branch Booster on the dashboard.</li>
               <li>Use "Strategic Quick Actions" for pre-defined high-level analyses.</li>
               <li>Enter complex strategic queries related to market trends, sales team optimisation, competitive positioning, or long-term growth strategies for your branch.</li>
               <li>Optionally, upload supplemental data (like market reports or competitor info) to enhance the analysis.</li>
@@ -165,15 +173,15 @@ export default function HowToUsePage() {
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">5. Accessing BuildWise Intel Portal</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">6. Accessing BuildWise Intel Portal</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>Click on "BuildWise Intel" in the left sidebar.</li>
+              <li>Click on the "BuildWise Intel" tab/button in the main header at the top of the page.</li>
               <li>The page will load an embedded version of the external BuildWise Intel application.</li>
               <li>Use the interface and scrollbars provided within the embedded content area to interact with the BuildWise Intel portal.</li>
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">6. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">7. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All your trader data is stored securely in Firebase Firestore and is specific to your branch's base ID.</li>
               <li>Changes you make (add, edit, delete) are persistent and will be available across your sessions.</li>
