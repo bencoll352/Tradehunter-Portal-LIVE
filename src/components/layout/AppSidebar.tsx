@@ -25,7 +25,7 @@ import {
   ShieldCheck,
   FileText,
   Compass,
-  Briefcase, // Added Briefcase icon
+  Briefcase,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
-  { href: "/buildwise-intel", icon: Briefcase, label: "BuildWise Intel", tooltip: "BuildWise Intel Portal" }, // New item
+  { href: "/buildwise-intel", icon: Briefcase, label: "BuildWise Intel", tooltip: "BuildWise Intel Portal" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "Help & FAQs" },
 ];
 
@@ -86,7 +86,7 @@ const capabilitiesData = [
     ]
   },
   {
-    category: "External Integrations", // New Category
+    category: "External Integrations",
     icon: Briefcase,
     features: [
       "Access BuildWise Intel Portal: Navigate to the 'BuildWise Intel' tab from the sidebar to access an embedded version of the external BuildWise Intel application. This portal provides additional specialised data, tools, or insights relevant to the construction and trade industry. Use the interface and scrollbars within the embedded content area to interact with it."
@@ -156,24 +156,37 @@ export function AppSidebar() {
       <SidebarContent>
         <ScrollArea className="flex-1">
           <SidebarMenu className="px-3 py-2">
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <Link href={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.href}
-                    tooltip={item.tooltip}
-                    onClick={() => setOpenMobile(false)}
-                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground"
-                  >
-                    <div>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              const isBuildWiseIntel = item.label === "BuildWise Intel";
+              return (
+                <SidebarMenuItem key={item.href}>
+                  <Link href={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.tooltip}
+                      onClick={() => setOpenMobile(false)}
+                      className={cn(
+                        // Default inactive styles
+                        "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        // Specific styles for BuildWise Intel when inactive
+                        isBuildWiseIntel && !isActive && 
+                          "text-sidebar-primary-foreground hover:text-sidebar-primary",
+                        // Active styles (will override inactive styles due to data-active attribute or direct application)
+                        isActive && 
+                          "bg-sidebar-primary text-sidebar-primary-foreground"
+                      )}
+                    >
+                      <div>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
 
           <Separator className="my-3 bg-sidebar-border group-data-[collapsible=icon]:hidden" />
@@ -244,3 +257,5 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
+    
