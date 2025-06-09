@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Fingerprint, Compass } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Fingerprint, Compass, Briefcase } from "lucide-react";
 
 const faqs = [
   {
@@ -51,6 +51,12 @@ const faqs = [
     question: "What is the Sales & Strategy Accelerator? (Managers Only)",
     answer: "If you log in with a Manager ID (e.g., PURLEYMANAGER), you'll see the Sales & Strategy Accelerator below the Branch Booster. This tool connects to an external, specialised AI service for more in-depth strategic analysis. You can ask complex questions about market positioning, long-term sales strategies, competitive analysis relative to your branch's data, use strategic quick actions, upload supplemental documents (like market reports), and get AI-driven recommendations for optimising team performance and branch growth.",
     icon: <Compass className="h-5 w-5 text-primary mr-2" />
+  },
+  {
+    value: "item-8",
+    question: "What is the BuildWise Intel page?",
+    answer: "The 'BuildWise Intel' page, accessible from the sidebar, embeds an external application from BuildWise Intel. This provides access to additional specialised data, tools, or insights relevant to the construction and trade industry. Navigate within the embedded content using its own scrollbars and interface.",
+    icon: <Briefcase className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-5",
@@ -159,7 +165,15 @@ export default function HowToUsePage() {
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">5. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">5. Accessing BuildWise Intel Portal</h3>
+            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
+              <li>Click on "BuildWise Intel" in the left sidebar.</li>
+              <li>The page will load an embedded version of the external BuildWise Intel application.</li>
+              <li>Use the interface and scrollbars provided within the embedded content area to interact with the BuildWise Intel portal.</li>
+            </ul>
+          </div>
+           <div>
+            <h3 className="text-xl font-semibold text-foreground mb-1">6. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All your trader data is stored securely in Firebase Firestore and is specific to your branch's base ID.</li>
               <li>Changes you make (add, edit, delete) are persistent and will be available across your sessions.</li>
@@ -171,4 +185,3 @@ export default function HowToUsePage() {
     </div>
   );
 }
-

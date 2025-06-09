@@ -24,7 +24,8 @@ import {
   Lightbulb,
   ShieldCheck,
   FileText,
-  Compass
+  Compass,
+  Briefcase, // Added Briefcase icon
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -39,6 +40,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
+  { href: "/buildwise-intel", icon: Briefcase, label: "BuildWise Intel", tooltip: "BuildWise Intel Portal" }, // New item
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "Help & FAQs" },
 ];
 
@@ -81,6 +83,13 @@ const capabilitiesData = [
       "Upload Supplemental Data (Accelerator): Use the 'Upload Supplemental Data' option within the Accelerator to upload files like market reports or competitor profiles. This provides additional context to the external analysis service, potentially leading to more tailored strategic insights.",
       "Use Strategic Quick Actions (Accelerator): Click pre-defined buttons in the Accelerator for common strategic queries, such as 'Market Trends Analysis', 'Growth Opportunities', or 'Risk Assessment & Mitigation'.",
       "External Intelligence: The Sales & Strategy Accelerator connects to a dedicated external analysis service for its insights, potentially incorporating broader market data beyond just your branch's immediate traders."
+    ]
+  },
+  {
+    category: "External Integrations", // New Category
+    icon: Briefcase,
+    features: [
+      "Access BuildWise Intel Portal: Navigate to the 'BuildWise Intel' tab from the sidebar to access an embedded version of the external BuildWise Intel application. This portal provides additional specialised data, tools, or insights relevant to the construction and trade industry. Use the interface and scrollbars within the embedded content area to interact with it."
     ]
   },
   {
