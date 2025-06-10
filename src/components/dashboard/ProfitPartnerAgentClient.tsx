@@ -111,7 +111,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     try {
       const result = await profitPartnerQuery(input);
       setAnalysisResponse(result.answer);
-      if (selectedFile) {
+      if (selectedFile) { 
         clearFile();
       }
     } catch (e) {
