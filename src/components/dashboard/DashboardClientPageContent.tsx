@@ -7,7 +7,6 @@ import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
 import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAgentClient";
-// SalesNavigatorAgentClient is now on its own page /sales-accelerator
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
@@ -15,16 +14,16 @@ import { MiniDashboardStats } from './MiniDashboardStats';
 import { parseISO } from 'date-fns';
 import { getTradersAction } from '@/app/(app)/dashboard/actions'; 
 import { InfoAccordion } from '@/components/common/InfoAccordion';
-import { ListChecks, HelpCircle } from 'lucide-react'; // Icons for accordion
+import { ListChecks, HelpCircle, Users, Rocket } from 'lucide-react';
 
 const dashboardInfoSections = [
   {
     id: "dashboard-capabilities",
-    title: "Dashboard & Trader Management Capabilities",
+    title: "Dashboard & Trader Management",
     icon: ListChecks,
     defaultOpen: true,
     content: [
-      "View & Manage Trader Database: Your branch's traders are listed in the main table (50 per page). Use pagination to navigate. Mini-stats at the top provide a quick overview (Active, Call-Backs, New Leads, Recently Active).",
+      "View & Manage Trader Database: Your branch's traders are listed in the main table. Use pagination to navigate. Mini-stats at the top provide a quick overview (Active, Call-Backs, New Leads, Recently Active).",
       "Add New Trader: Click 'Add New Trader'. Fill in details like name, sales, status, contact info, notes, and call-back dates. Duplicate phone number warnings are provided.",
       "Edit Trader Information: Click the pencil icon (✏️) in the 'Actions' column to modify and save trader details.",
       "Delete Single/Multiple Traders: Click the trash icon (🗑️) for single deletion. Select multiple traders via checkboxes and use the 'Delete (X)' button for bulk removal. Confirmations are required.",
@@ -38,7 +37,7 @@ const dashboardInfoSections = [
   },
   {
     id: "branch-booster-dashboard-how-to",
-    title: "How to Use Branch Booster (on Dashboard)",
+    title: "How to Use Branch Booster",
     icon: HelpCircle,
     content: [
       "Locate the 'Branch Booster' section on this Dashboard page.",
@@ -235,48 +234,51 @@ export function DashboardClientPageContent({
   }
   
   return (
-    <div className="space-y-6">
-      <MiniDashboardStats 
-        liveTradersCount={activeTradersCount}
-        callBackTradersCount={callBackTradersCount}
-        newLeadTradersCount={newLeadTradersCount} // Corrected duplicate prop
-        recentlyActiveTradersCount={recentlyActiveTradersCount}
-      />
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
-              <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
-                 <Skeleton className="h-64 w-full" />
-              ) : (
-                <TraderTableClient 
-                  key={keyForTable} 
-                  initialTraders={traders} 
-                  branchId={currentBaseBranchId!} 
-                  allBranchTraders={traders} 
-                  onAdd={handleAdd}
-                  onUpdate={handleUpdate}
-                  onDelete={handleDelete}
-                  onBulkAdd={handleBulkAdd}
-                  onBulkDelete={handleBulkDelete}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="lg:col-span-1 space-y-6">
-          <ProfitPartnerAgentClient traders={traders} />
-          {/* SalesNavigatorAgentClient is now on its own page, conditionally shown in AppHeader */}
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Main Content Area */}
+      <div className="lg:col-span-9 space-y-6">
+        <MiniDashboardStats 
+          liveTradersCount={activeTradersCount}
+          callBackTradersCount={callBackTradersCount}
+          newLeadTradersCount={newLeadTradersCount}
+          recentlyActiveTradersCount={recentlyActiveTradersCount}
+        />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6"> {/* Internal grid for table and booster */}
+          <div className="xl:col-span-2 space-y-6"> {/* Trader Table takes 2/3 on XL screens */}
+            <Card className="shadow-md">
+              <CardHeader>
+                <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
+                <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
+                   <Skeleton className="h-64 w-full" />
+                ) : (
+                  <TraderTableClient 
+                    key={keyForTable} 
+                    initialTraders={traders} 
+                    branchId={currentBaseBranchId!} 
+                    allBranchTraders={traders} 
+                    onAdd={handleAdd}
+                    onUpdate={handleUpdate}
+                    onDelete={handleDelete}
+                    onBulkAdd={handleBulkAdd}
+                    onBulkDelete={handleBulkDelete}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          <div className="xl:col-span-1 space-y-6"> {/* Branch Booster takes 1/3 on XL screens */}
+            <ProfitPartnerAgentClient traders={traders} />
+          </div>
         </div>
       </div>
-      <InfoAccordion sections={dashboardInfoSections} className="mt-8 lg:col-span-3"/>
+
+      {/* Sidebar Info Area */}
+      <div className="lg:col-span-3 space-y-6">
+        <InfoAccordion sections={dashboardInfoSections} />
+      </div>
     </div>
   );
 }
-
-    

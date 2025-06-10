@@ -97,33 +97,37 @@ export default function SalesAcceleratorPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="shadow-lg w-full border-primary/30">
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <Compass className="h-10 w-10 text-primary" />
-            <div>
-              <CardTitle className="text-3xl font-bold text-primary">Sales & Strategy Accelerator</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">
-                Leverage advanced analytics for strategic decision-making. (Manager Access for Branch: {branchInfo.displayLoginId})
-              </CardDescription>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Main Content Area */}
+      <div className="lg:col-span-9 space-y-6">
+        <Card className="shadow-lg w-full border-primary/30">
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <Compass className="h-10 w-10 text-primary" />
+              <div>
+                <CardTitle className="text-3xl font-bold text-primary">Sales & Strategy Accelerator</CardTitle>
+                <CardDescription className="text-lg text-muted-foreground">
+                  Leverage advanced analytics for strategic decision-making. (Manager Access for Branch: {branchInfo.displayLoginId})
+                </CardDescription>
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {branchInfo.baseBranchId ? (
-            <SalesNavigatorAgentClient traders={traders} baseBranchId={branchInfo.baseBranchId} />
-          ) : (
-             <p className="text-muted-foreground p-4 text-center">
-              Branch information is missing. Cannot load the Sales & Strategy Accelerator.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            {branchInfo.baseBranchId ? (
+              <SalesNavigatorAgentClient traders={traders} baseBranchId={branchInfo.baseBranchId} />
+            ) : (
+               <p className="text-muted-foreground p-4 text-center">
+                Branch information is missing. Cannot load the Sales & Strategy Accelerator.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-      <InfoAccordion sections={salesAcceleratorInfoSections} />
+      {/* Sidebar Info Area */}
+      <div className="lg:col-span-3 space-y-6">
+        <InfoAccordion sections={salesAcceleratorInfoSections} />
+      </div>
     </div>
   );
 }
-
-    
