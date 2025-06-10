@@ -23,8 +23,11 @@ export default function DashboardOverviewPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-foreground mb-6 text-center md:text-left">
+          <p className="text-foreground mb-4 text-center md:text-left">
             Navigate through the portal using the header tabs, sidebar, or the quick links below to access powerful tools designed to boost your branch's performance.
+          </p>
+          <p className="text-lg font-semibold text-accent text-center md:text-left italic px-4 py-2 bg-accent/10 rounded-md border border-accent/30">
+            The precision intelligence system that enables builders merchants to identify, target, and engage with ALL construction professionals within their territories.
           </p>
         </CardContent>
       </Card>
