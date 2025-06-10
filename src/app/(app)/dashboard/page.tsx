@@ -1,11 +1,69 @@
 
+"use client";
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Eye, Briefcase, Calculator, Users, ArrowRight, Columns } from "lucide-react";
+import { Eye, Briefcase, Calculator, Users, ArrowRight, Columns, Loader2 } from "lucide-react";
 import Image from 'next/image';
+import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
+import { getTradersAction } from '@/app/(app)/tradehunter/actions'; // Adjusted path
+import { useToast } from '@/hooks/use-toast';
+import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
+import { parseISO } from 'date-fns';
 
 export default function DashboardOverviewPage() {
+  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
+  const [traders, setTraders] = useState<Trader[]>([]);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const initializeBranchInfo = () => {
+      if (typeof window !== 'undefined') {
+        const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
+        const info = getBranchInfo(storedLoggedInId);
+        setBranchInfo(info);
+      }
+    };
+    initializeBranchInfo();
+  }, []);
+
+  useEffect(() => {
+    const fetchTraderData = async () => {
+      if (branchInfo?.baseBranchId && branchInfo.role !== 'unknown') {
+        setIsLoadingStats(true);
+        try {
+          const result = await getTradersAction(branchInfo.baseBranchId);
+          if (result.data) {
+            setTraders(result.data);
+          } else {
+            setTraders([]);
+            toast({ variant: "destructive", title: "Error Loading Stats Data", description: result.error || "Could not load trader data for dashboard stats." });
+          }
+        } catch (error) {
+          console.error("Error fetching traders for dashboard stats:", error);
+          setTraders([]);
+          toast({ variant: "destructive", title: "Error Loading Stats Data", description: "Failed to load trader data for dashboard stats due to an unexpected error." });
+        } finally {
+          setIsLoadingStats(false);
+        }
+      } else if (branchInfo && branchInfo.role === 'unknown') {
+        setIsLoadingStats(false); // No valid branch to fetch for
+      }
+    };
+
+    if (branchInfo) { // Only fetch if branchInfo is resolved
+      fetchTraderData();
+    }
+  }, [branchInfo, toast]);
+
+  const newLeadsCount = useMemo(() => traders.filter(t => t.status === 'New Lead').length, [traders]);
+  const hotLeadsCount = useMemo(() => traders.filter(t => t.status === 'Call-Back').length, [traders]);
+   const activeTradersCount = useMemo(() => traders.filter(t => t.status === 'Active').length, [traders]);
+
+
   return (
     <div className="space-y-8">
       <Card className="shadow-lg w-full bg-gradient-to-br from-primary/5 via-background to-background border-primary/20">
@@ -31,6 +89,28 @@ export default function DashboardOverviewPage() {
           </p>
         </CardContent>
       </Card>
+
+      {isLoadingStats && (!branchInfo || branchInfo.role === 'unknown') ? (
+        <div className="flex justify-center items-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="ml-2 text-muted-foreground">Loading branch data for stats...</p>
+        </div>
+      ) : branchInfo && branchInfo.role !== 'unknown' ? (
+         <DashboardStatsAndGoals
+            newLeadsCount={newLeadsCount}
+            hotLeadsCount={hotLeadsCount}
+            activeTradersGoalInitial={activeTradersCount} /* Pass current active count as potential initial value for goal */
+          />
+      ) : (
+        <Card className="shadow-md">
+            <CardHeader>
+                <CardTitle className="text-lg text-muted-foreground">Branch Statistics & Goals</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-sm text-muted-foreground">Login to view branch-specific statistics and set goals.</p>
+            </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <FeatureCard
