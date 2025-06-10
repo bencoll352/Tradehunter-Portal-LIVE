@@ -1,32 +1,35 @@
 
-"use client";
+"use client"; // Ensure client component directive
 
-import { useState, useRef } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon } from "lucide-react";
-import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
-import type { Trader } from "@/types";
-import { formatTraderDataForAnalysis } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useRef } from "react"; // React hooks
+import { z } from "zod"; // Zod for schema validation
+import { useForm } from "react-hook-form"; // React Hook Form
+import { zodResolver } from "@hookform/resolvers/zod"; // Zod resolver for RHF
+import { Button } from "@/components/ui/button"; // ShadCN Button
+import { Textarea } from "@/components/ui/textarea"; // ShadCN Textarea
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN Card components
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // ShadCN Form components
+import { Input } from "@/components/ui/input"; // ShadCN Input
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon } from "lucide-react"; // Lucide icons
+import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query"; // AI flow
+import type { Trader } from "@/types"; // Trader type
+import { formatTraderDataForAnalysis } from "@/lib/utils"; // Utility function
+import { ScrollArea } from "@/components/ui/scroll-area"; // ShadCN ScrollArea
+import { useToast } from "@/hooks/use-toast"; // Toast hook
 
+// Schema for the agent form
 const agentFormSchema = z.object({
   query: z.string().min(5, { message: "Query must be at least 5 characters." }),
-});
+}); // Explicit semicolon
 
+// Interface for QuickAction items
 interface QuickAction {
   label: string;
   query: string;
   icon: LucideIcon;
 }
 
+// Array of predefined quick actions
 const quickActions: QuickAction[] = [
   { label: "New Customers", query: "Identify new customers and provide a brief summary.", icon: Users },
   { label: "High Potential New Customers", query: "Which new customers show the highest potential? Provide reasons.", icon: TrendingUp },
@@ -40,12 +43,14 @@ const quickActions: QuickAction[] = [
     query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.",
     icon: PackageSearch
   }
-];
+]; // Explicit semicolon
 
+// Props interface for the component
 interface ProfitPartnerAgentClientProps {
   traders: Trader[];
 }
 
+// The main client component
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResponse, setAnalysisResponse] = useState<string | null>(null);
@@ -53,12 +58,12 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
+  const { toast } = useToast(); // Explicit semicolon
 
   const form = useForm<z.infer<typeof agentFormSchema>>({
     resolver: zodResolver(agentFormSchema),
     defaultValues: { query: "" },
-  });
+  }); // Explicit semicolon
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
@@ -80,7 +85,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
         setFileContent(null);
       }
     }
-  };
+  }; // Explicit semicolon
 
   const clearFile = (): void => {
     setSelectedFile(null);
@@ -89,11 +94,11 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
       fileInputRef.current.value = "";
     }
     toast({ title: "File Cleared", description: "Uploaded file has been removed." });
-  };
+  }; // Explicit semicolon
 
   const handleQuickAction = (query: string): void => {
     form.setValue("query", query);
-  };
+  }; // Explicit semicolon
 
   const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
     setIsLoading(true);
@@ -224,7 +229,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
       </CardContent>
 
       {(analysisResponse || error) && (
-        <CardContent className="mt-4 border-t pt-4">
+         <CardContent className="mt-4 border-t pt-4">
           <h3 className="text-lg font-semibold mb-2 text-foreground">Analysis Result:</h3>
           {analysisResponse && (
             <ScrollArea className="h-[250px] rounded-md border p-3 bg-muted/50">
