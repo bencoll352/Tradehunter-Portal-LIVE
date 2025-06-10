@@ -38,7 +38,7 @@ const quickActions = [
     query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.",
     icon: PackageSearch
   }
-]; // Semicolon after array declaration
+]; // Terminate array with a semicolon
 
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -119,7 +119,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     } finally {
       setIsLoading(false);
     }
-  }; // Semicolon after function declaration
+  };
 
   return (
     <Card className="shadow-lg">
