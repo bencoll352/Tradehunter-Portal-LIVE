@@ -260,6 +260,28 @@ export function TraderTableClient({
     await onUpdate(trader.id, formValues);
   };
 
+  const handleMarkAsHotLead = async (trader: Trader) => {
+    const formValues: z.infer<typeof traderFormSchema> = {
+      name: trader.name,
+      totalSales: trader.totalSales,
+      tradesMade: trader.tradesMade,
+      status: 'Call-Back', // Set status to Call-Back
+      description: trader.description || undefined,
+      rating: trader.rating,
+      website: trader.website || undefined,
+      phone: trader.phone || undefined,
+      address: trader.address || undefined,
+      mainCategory: trader.mainCategory || undefined,
+      ownerName: trader.ownerName || undefined,
+      ownerProfileLink: trader.ownerProfileLink || undefined,
+      categories: trader.categories || undefined,
+      workdayTiming: trader.workdayTiming || undefined,
+      notes: trader.notes || undefined,
+      callBackDate: trader.callBackDate || undefined,
+    };
+    await onUpdate(trader.id, formValues);
+  };
+
   const handleDeleteTrader = async (traderId: string): Promise<boolean> => {
     const success = await onDelete(traderId);
     if (success) {
@@ -545,7 +567,27 @@ export function TraderTableClient({
                     aria-label={`Select trader ${trader.name}`}
                   />
                 </TableCell>
-                <TableCell className="font-medium whitespace-nowrap">{renderCellContent(trader.name, 20)}</TableCell>
+                <TableCell className="font-medium whitespace-nowrap">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span 
+                          onClick={() => handleMarkAsHotLead(trader)}
+                          className="cursor-pointer text-primary hover:underline"
+                          title={`Mark ${trader.name} as Hot Lead`}
+                        >
+                          {trader.name.length > 20 ? `${trader.name.substring(0, 20)}...` : trader.name}
+                          {trader.status === 'Call-Back' && <Flame className="inline h-4 w-4 ml-1 text-orange-500" />}
+                        </span>
+                      </TooltipTrigger>
+                      {trader.name.length > 20 && (
+                        <TooltipContent className="max-w-md break-words bg-background border text-foreground p-2 rounded-md shadow-lg z-50">
+                          <p>{trader.name}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {typeof trader.totalSales === 'number' ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(trader.totalSales) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
