@@ -545,7 +545,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <br/>Other common headers (examples):
             <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ...etc.</code>
             <br/>(See full list of expected headers by expanding this dialogue or checking "How to Use").
-            <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back', or 'New Lead'.
+            <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back' (Hot Lead 🔥), or 'New Lead'.
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
             <br/>Max {FIRESTORE_BATCH_LIMIT} traders per file.
           </DialogDescription>

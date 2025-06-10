@@ -2,13 +2,13 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Activity, PhoneCall, UserPlus } from "lucide-react"; // Added PhoneCall and UserPlus
+import { Users, Activity, Flame, UserPlus } from "lucide-react"; // Changed PhoneCall to Flame
 
 interface MiniDashboardStatsProps {
   liveTradersCount: number;
   recentlyActiveTradersCount: number;
-  callBackTradersCount: number; // New prop
-  newLeadTradersCount: number;  // New prop
+  callBackTradersCount: number; 
+  newLeadTradersCount: number;  
 }
 
 export function MiniDashboardStats({ 
@@ -36,14 +36,14 @@ export function MiniDashboardStats({
       <Card className="shadow-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-primary">
-            Call-Back Traders
+            Hot Leads 🔥
           </CardTitle>
-          <PhoneCall className="h-4 w-4 text-muted-foreground" />
+          <Flame className="h-4 w-4 text-orange-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{callBackTradersCount}</div>
           <p className="text-xs text-muted-foreground">
-            Traders marked for 'Call-Back'
+            Traders status 'Call-Back' (Hot Leads)
           </p>
         </CardContent>
       </Card>

@@ -39,7 +39,7 @@ import { EditTraderDialog } from "@/components/dashboard/EditTraderDialog";
 import { DeleteTraderDialog } from "@/components/dashboard/DeleteTraderDialog";
 import { AddTraderDialog } from "@/components/dashboard/AddTraderDialog";
 import { BulkAddTradersDialog } from "@/components/dashboard/BulkAddTradersDialog";
-import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download, CalendarClock } from "lucide-react"; 
+import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download, CalendarClock, Flame } from "lucide-react"; 
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "@/components/dashboard/TraderForm";
@@ -555,7 +555,8 @@ export function TraderTableClient({
                       className={`p-1 h-auto hover:opacity-80 ${getStatusBadgeClass(trader.status).split(' ').find(c => c.startsWith('hover:bg-'))}`}
                       onClick={() => handleStatusToggle(trader)}
                     >
-                    <Badge variant={'outline'} className={`${getStatusBadgeClass(trader.status)} cursor-pointer`}>
+                    <Badge variant={'outline'} className={`${getStatusBadgeClass(trader.status)} cursor-pointer flex items-center gap-1`}>
+                      {trader.status === 'Call-Back' && <Flame className="h-3 w-3 text-orange-500" />}
                       {trader.status}
                     </Badge>
                   </Button>

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import type { Trader } from "@/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Flame } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format as formatDateFns, parseISO } from "date-fns";
@@ -139,7 +139,11 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
                     <SelectContent>
                     <SelectItem value="Active">Active</SelectItem>
                     <SelectItem value="Inactive">Inactive</SelectItem>
-                    <SelectItem value="Call-Back">Call-Back</SelectItem>
+                    <SelectItem value="Call-Back">
+                        <div className="flex items-center">
+                           <Flame className="mr-2 h-4 w-4 text-orange-500" /> Call-Back 🔥 (Hot Lead)
+                        </div>
+                    </SelectItem>
                     <SelectItem value="New Lead">New Lead</SelectItem>
                     </SelectContent>
                 </Select>
