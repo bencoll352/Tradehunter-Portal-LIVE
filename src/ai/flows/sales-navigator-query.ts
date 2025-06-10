@@ -11,8 +11,8 @@
 
 import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts use it
 
-// Corrected URL to point to the /api/analyse endpoint
-const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/api/analyse";
+// Corrected URL to point to the /api/analyse/ endpoint (added trailing slash)
+const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/api/analyse/";
 
 const SalesNavigatorQueryInputSchema = z.object({
   query: z.string().describe('The strategic question or analysis request for the Sales & Strategy Accelerator.'),
@@ -41,7 +41,6 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
       headers: {
         'Content-Type': 'application/json',
       },
-      // The body will now include uploadedFileContent if present
       body: JSON.stringify(input),
     });
 
@@ -59,16 +58,13 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
         // Ignore if error response is not JSON
       }
 
-      // Check for common "Cannot POST /" type error from external service
-      if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /") && !SALES_NAVIGATOR_EXTERNAL_URL.endsWith("/")) {
-         // This condition should now trigger if /api/analyse is a 404 for POST but exists
-         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at this specific path. Please verify the path is correct or check the external service's routing configuration. The current path does not end with a trailing slash.`);
+      if (response.status === 404) {
+        if (errorDetails.toLowerCase().includes("cannot post")) { // Check if error details indicate a method issue
+          throw new Error(`Sales & Strategy Accelerator service (404 Method Not Allowed): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests. Please verify the external service's routing and method handling for this path.`);
+        } else {
+          throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was not found. Please verify the URL path is correct.`);
+        }
       }
-       if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /") && SALES_NAVIGATOR_EXTERNAL_URL.endsWith("/")){
-         // This condition should no longer trigger if the URL is correctly .../api/analyse (no trailing slash)
-         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyse) or check the external service's routing configuration.`);
-       }
-
 
       console.error(`[SalesNavigatorQuery] External service error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
       throw new Error(`Sales & Strategy Accelerator service failed with status ${response.status}: ${response.statusText}. Details: ${errorDetails.substring(0,150)}...`);
@@ -76,7 +72,6 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
 
     const result = await response.json();
 
-    // Validate the output against the schema (optional but good practice)
     const parsedOutput = SalesNavigatorQueryOutputSchema.safeParse(result);
     if (!parsedOutput.success) {
       console.error("[SalesNavigatorQuery] Invalid response structure from external service:", parsedOutput.error.flatten());
@@ -92,8 +87,6 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
     if (error instanceof Error) {
       detailedErrorMessage = error.message;
     }
-    // Ensure the error message passed to the client is concise but informative
     throw new Error(`Sales & Strategy Accelerator analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}. Check server logs for full details.`);
   }
 }
-
