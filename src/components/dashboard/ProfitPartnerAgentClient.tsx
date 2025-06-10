@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch } from "lucide-react"; // Added PackageSearch for new icon
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch } from "lucide-react";
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils";
@@ -32,7 +33,7 @@ const quickActions = [
   { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions." },
   { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons." },
   { label: "List Bricklayers & Sales Campaign", query: "Give me a list of all traders who are 'Bricklayers' or in 'Brickwork' category. Then, suggest a brief sales campaign message to promote our new line of premium mortar to them." },
-  { label: "Estimate Project Materials", query: "Help me estimate the materials needed for a common construction project (e.g., a small extension, a garden wall). Please ask for the project type if needed and list typical materials.", icon: PackageSearch },
+  { label: "Estimate Project Materials", query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.", icon: PackageSearch },
 ];
 
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
@@ -80,12 +81,9 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
 
   const handleQuickAction = (query: string) => {
     form.setValue("query", query);
-    // Optionally, immediately submit the form if the quick action is definitive enough
-    // For "Estimate Project Materials", it's better to let the user add more details if needed.
-    // form.handleSubmit(onSubmit)();
   };
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);
@@ -217,7 +215,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
         <CardContent className="mt-4 border-t pt-4">
           <h3 className="text-lg font-semibold mb-2 text-foreground">Analysis Result:</h3>
           {analysisResponse && (
-            <ScrollArea className="h-[150px] rounded-md border p-3 bg-muted/50">
+            <ScrollArea className="h-[250px] rounded-md border p-3 bg-muted/50">
               <p className="text-sm text-foreground whitespace-pre-wrap">{analysisResponse}</p>
             </ScrollArea>
           )}

@@ -22,134 +22,66 @@ import {
   Home,
   Calculator,
   Compass,
-  ListChecks,
-  HelpCircle,
+  BarChart2,
   Users,
+  UploadCloud,
   Rocket,
-  PackageSearch, // For Branch Booster's estimator
+  PackageSearch,
+  FileText,
+  ShieldCheck,
+  Briefcase,
+  LucideIcon,
+  Eye,
+  ClipboardList,
+  Info,
+  Wrench,
+  ShoppingBasket,
+  TrendingUp,
+  Brain,
+  MessageSquareQuestion
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
 import { getBranchInfo, type BranchInfo } from "@/types";
 import { cn } from "@/lib/utils";
-import { InfoAccordion } from "@/components/common/InfoAccordion"; // Import new component
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
   // Other main navigation items are now in AppHeader
 ];
 
-// Define InfoAccordion sections for each page
-const dashboardInfoSections = [
-  {
-    id: "dashboard-capabilities",
-    title: "Dashboard & Traders",
-    icon: ListChecks,
-    defaultOpen: true,
-    content: [
-      "View & Manage Trader Database: Main table lists branch traders. Use pagination. Mini-stats show Active, Call-Backs, New Leads, Recently Active.",
-      "Add New Trader: Use 'Add New Trader'. Form includes name, sales, status, contacts, notes, call-back dates. Duplicate phone warnings.",
-      "Edit Trader: Click pencil icon (✏️) to modify.",
-      "Delete Single/Multiple Traders: Trash icon (🗑️) for single. Checkboxes + 'Delete (X)' for bulk.",
-      "Bulk Add Traders (CSV): Use 'Bulk Add Traders (CSV)'. Header row with mandatory 'Name' needed.",
-      "Search & Filter: Keyword search and category dropdown filter.",
-      "Sort Trader Data: Click column headers to sort.",
-      "Set Call-Back Reminders: Use 'Call-Back Date' field.",
-      "Download Trader Data (CSV): 'Download CSV' button exports current view.",
-    ],
-  },
-  {
-    id: "branch-booster-dashboard-how-to",
-    title: "Branch Booster Usage",
-    icon: Rocket,
-    content: [
-      "Locate 'Branch Booster' on Dashboard.",
-      "Ask Questions: e.g., 'List active traders with sales over £50k'.",
-      "Use Quick Actions: Pre-fill common queries like 'Estimate Project Materials' (icon: PackageSearch).",
-      "Upload Customer Data (Optional): For deeper insights.",
-      "Get Insights: Click button for analysis.",
-    ],
-  },
+interface PurposeBoxItem {
+  id: string;
+  icon: LucideIcon;
+  text: string;
+}
+
+const dashboardPurposeItems: PurposeBoxItem[] = [
+  { id: 'dp1', icon: Eye, text: "View & manage branch trader data" },
+  { id: 'dp2', icon: Users, text: "Add, edit, & delete traders" },
+  { id: 'dp3', icon: Rocket, text: "Analyse data with Branch Booster" },
+  { id: 'dp4', icon: BarChart2, text: "See quick stats at a glance" },
 ];
 
-const buildwiseIntelInfoSections = [
-  {
-    id: "bwi-capabilities",
-    title: "BuildWise Intel Portal",
-    icon: Home,
-    defaultOpen: true,
-    content: [
-      "Access External Insights: Embeds the BuildWise Intel application for specialized industry data and tools.",
-      "Integrated Analysis: Branch Booster is available on this page to analyse BuildWise insights with your branch's trader data.",
-    ],
-  },
-  {
-    id: "bwi-how-to-use",
-    title: "Using BuildWise & Booster",
-    icon: HelpCircle,
-    content: [
-      "Access BuildWise Intel: Via 'BuildWise Intel' tab in header.",
-      "Navigate Portal: Use embedded scrollbars and interface.",
-      "Combine Insights: While viewing BuildWise, use Branch Booster alongside.",
-      "Contextual Queries: Ask Booster questions linking BuildWise info to your traders (e.g., 'BuildWise shows X trend. How does this affect my Y traders?').",
-      "Upload Data: Optionally upload data to Branch Booster for specific analysis.",
-    ],
-  },
+const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
+  { id: 'bwi1', icon: Briefcase, text: "Access external BuildWise Intel portal" },
+  { id: 'bwi2', icon: Brain, text: "Gain specialized industry insights" },
+  { id: 'bwi3', icon: Rocket, text: "Use Branch Booster for contextual analysis" },
+  { id: 'bwi4', icon: MessageSquareQuestion, text: "Bridge external data with your traders" },
 ];
 
-const estimatorInfoSections = [
-  {
-    id: "estimator-capabilities",
-    title: "Materials Estimator",
-    icon: Calculator,
-    defaultOpen: true,
-    content: [
-      "Access External Estimator: Embeds an external Building Materials Estimator tool.",
-      "Estimate Project Materials: Use the tool to estimate material quantities for construction projects.",
-    ],
-  },
-  {
-    id: "estimator-how-to-use",
-    title: "Using Materials Estimator",
-    icon: HelpCircle,
-    content: [
-      "Access Estimator: Via 'Estimator' tab in header.",
-      "Navigate Tool: Use embedded interface and scrollbars.",
-      "Input Project Details: Follow tool instructions.",
-      "View Estimates: Tool provides material estimates.",
-      "Note: External tool. Refer to its documentation for specific questions. Branch Booster also has a material estimation quick action.",
-    ],
-  },
+const estimatorPurposeItems: PurposeBoxItem[] = [
+  { id: 'est1', icon: Wrench, text: "Access external materials estimator" },
+  { id: 'est2', icon: ShoppingBasket, text: "Estimate materials for projects" },
+  { id: 'est3', icon: ClipboardList, text: "Plan material needs efficiently" },
+  { id: 'est4', icon: Info, text: "Note: External tool, independent usage" },
 ];
 
-const salesAcceleratorInfoSections = [
-  {
-    id: "ssa-capabilities",
-    title: "Sales Accelerator",
-    icon: Compass,
-    defaultOpen: true,
-    content: [
-      "Advanced Strategic Insights: For strategic planning.",
-      "Deep Dive Analysis: Ask complex questions (market position, sales strategies, competitive analysis).",
-      "AI-Driven Recommendations: For team performance and branch growth.",
-      "Upload Supplemental Data: Market reports, competitor profiles for tailored insights.",
-      "Use Strategic Quick Actions: For common strategic queries.",
-      "External Intelligence: Connects to dedicated external analysis service.",
-    ],
-  },
-  {
-    id: "ssa-how-to-use",
-    title: "Using Sales Accelerator",
-    icon: HelpCircle,
-    content: [
-      "Access: For Managers, via 'Sales Accelerator' tab in header.",
-      "Formulate Strategic Query: Input complex question/objective.",
-      "Use Quick Actions: e.g., 'Market Trends Analysis'.",
-      "Upload Supporting Docs (Optional): For enhanced context.",
-      "Get Insights: Click 'Get Strategic Insights'.",
-      "Contextual Data: Branch trader data automatically included.",
-    ],
-  },
+const salesAcceleratorPurposeItems: PurposeBoxItem[] = [
+  { id: 'sa1', icon: Compass, text: "Advanced strategic analysis (Managers)" },
+  { id: 'sa2', icon: TrendingUp, text: "Identify growth & market opportunities" },
+  { id: 'sa3', icon: FileText, text: "Analyse with supplemental documents" },
+  { id: 'sa4', icon: ShieldCheck, text: "Develop data-driven sales strategies" },
 ];
 
 
@@ -177,15 +109,21 @@ export function AppSidebar() {
   const displayId = branchInfo?.displayLoginId || "Branch";
   const avatarChar = displayId.includes("MANAGER") ? displayId.charAt(0) + "M" : displayId.charAt(0);
 
-  let currentPageInfoSections: any[] = [];
+  let currentPurposeItems: PurposeBoxItem[] = [];
+  let currentPageTitle = "Page Info";
+
   if (pathname.startsWith("/dashboard")) {
-    currentPageInfoSections = dashboardInfoSections;
+    currentPurposeItems = dashboardPurposeItems;
+    currentPageTitle = "Dashboard Purpose";
   } else if (pathname.startsWith("/buildwise-intel")) {
-    currentPageInfoSections = buildwiseIntelInfoSections;
+    currentPurposeItems = buildwiseIntelPurposeItems;
+    currentPageTitle = "BuildWise Intel Purpose";
   } else if (pathname.startsWith("/estimator")) {
-    currentPageInfoSections = estimatorInfoSections;
+    currentPurposeItems = estimatorPurposeItems;
+    currentPageTitle = "Estimator Purpose";
   } else if (pathname.startsWith("/sales-accelerator") && branchInfo?.role === 'manager') {
-    currentPageInfoSections = salesAcceleratorInfoSections;
+    currentPurposeItems = salesAcceleratorPurposeItems;
+    currentPageTitle = "Accelerator Purpose";
   }
 
 
@@ -233,8 +171,25 @@ export function AppSidebar() {
             })}
           </SidebarMenu>
           
-          {currentPageInfoSections.length > 0 && (
-            <InfoAccordion sections={currentPageInfoSections} />
+          {currentPurposeItems.length > 0 && (
+            <div className="space-y-2 pt-2 group-data-[collapsible=icon]:px-0.5">
+              <h3 className="text-xs font-semibold uppercase text-sidebar-foreground/60 px-2 group-data-[collapsible=icon]:hidden">
+                {currentPageTitle}
+              </h3>
+              {currentPurposeItems.map((item) => (
+                <div 
+                  key={item.id} 
+                  className={cn(
+                    "flex items-center gap-2.5 p-2 rounded-md text-sidebar-foreground/90 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-2.5 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:aspect-square group-data-[collapsible=icon]:h-auto",
+                    sidebarState === "collapsed" ? "hover:bg-sidebar-accent/40" : "bg-sidebar-accent/10 hover:bg-sidebar-accent/30" 
+                  )}
+                  title={sidebarState === 'collapsed' ? item.text : undefined}
+                >
+                  <item.icon className="h-4 w-4 shrink-0 text-sidebar-primary group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                  <span className="text-xs group-data-[collapsible=icon]:hidden">{item.text}</span>
+                </div>
+              ))}
+            </div>
           )}
 
         </ScrollArea>
@@ -268,4 +223,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
