@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Compass, Briefcase } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Compass, Briefcase, Home } from "lucide-react";
 
 const faqs = [
   {
@@ -43,7 +43,8 @@ const faqs = [
   {
     value: "item-4",
     question: "What is the Branch Booster?",
-    answer: "The Branch Booster helps you analyse trader and customer data. It's located on the Dashboard page. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.",
+    answer: "The Branch Booster helps you analyse trader and customer data. It's located on the Dashboard page and also on the BuildWise Intel page. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.\n" +
+            "When using it on the BuildWise Intel page, you can ask questions that bridge insights from the Intel portal with your trader data, e.g., 'How can I apply the market trends shown in BuildWise Intel to my top 5 traders?'",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -55,8 +56,9 @@ const faqs = [
   {
     value: "item-8",
     question: "What is the BuildWise Intel page?",
-    answer: "The 'BuildWise Intel' page, accessible via the 'BuildWise Intel' tab/button in the main header, embeds an external application from BuildWise Intel. This provides access to additional specialised data, tools, or insights relevant to the construction and trade industry. Navigate within the embedded content using its own scrollbars and interface.",
-    icon: <Briefcase className="h-5 w-5 text-primary mr-2" />
+    answer: "The 'BuildWise Intel' page, accessible via the 'BuildWise Intel' tab/button in the main header, embeds an external application from BuildWise Intel. This provides access to additional specialised data, tools, or insights relevant to the construction and trade industry. Navigate within the embedded content using its own scrollbars and interface. \n" +
+            "The Branch Booster tool is also available at the bottom of this page, allowing you to analyse insights from BuildWise Intel in conjunction with your branch's trader data.",
+    icon: <Home className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-5",
@@ -128,7 +130,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">2. Accessing Main Sections</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li><strong>Dashboard:</strong> Click the "Dashboard" tab in the header to view and manage traders, and use analytical tools.</li>
-              <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in the header to access the external insights portal.</li>
+              <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in the header to access the external insights portal and use the integrated Branch Booster.</li>
               <li><strong>How to Use (this page):</strong> Click "How to Use" in the left sidebar for help and FAQs.</li>
             </ul>
           </div>
@@ -152,14 +154,15 @@ export default function HowToUsePage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Branch Booster (on Dashboard)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Branch Booster</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>Locate the "Branch Booster" section on the dashboard.</li>
+              <li>Locate the "Branch Booster" section on the <strong>Dashboard page</strong> or at the bottom of the <strong>BuildWise Intel page</strong>.</li>
               <li>Use "Quick Actions" for common pre-defined analyses.</li>
-              <li>Type your question about trader performance into the text area.</li>
+              <li>Type your question about trader performance or market insights into the text area.</li>
               <li>Optionally, upload a customer data file (e.g., .csv, .txt) for more detailed, context-aware analysis.</li>
               <li>Click "Get Insights". The analysis will appear below.</li>
-              <li>Example queries: "List all active traders.", "What is the average sales per trader?".</li>
+              <li><strong>On Dashboard:</strong> Example queries: "List all active traders.", "What is the average sales per trader?".</li>
+              <li><strong>On BuildWise Intel Page:</strong> Example queries: "Using the information from BuildWise Intel, suggest 3 cross-selling opportunities for my current active traders.", "Which of my traders are best suited to supply materials for projects trending in the BuildWise Intel data?"</li>
             </ul>
           </div>
           <div>
@@ -173,11 +176,12 @@ export default function HowToUsePage() {
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">6. Accessing BuildWise Intel Portal</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">6. Accessing & Utilising BuildWise Intel Portal</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "BuildWise Intel" tab/button in the main header at the top of the page.</li>
               <li>The page will load an embedded version of the external BuildWise Intel application.</li>
               <li>Use the interface and scrollbars provided within the embedded content area to interact with the BuildWise Intel portal.</li>
+              <li>Below the embedded portal, you will find the <strong>Branch Booster</strong>. Use this to ask questions that bridge information from BuildWise Intel with your branch's trader data. For example, you can view trends in BuildWise Intel and then ask the Branch Booster how these trends might affect your specific traders or identify opportunities.</li>
             </ul>
           </div>
            <div>

@@ -25,7 +25,7 @@ import {
   ShieldCheck,
   FileText,
   Compass,
-  Briefcase, 
+  Home, // Changed from Briefcase
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -65,19 +65,20 @@ const capabilitiesData = [
     category: "Data Analysis & Branch Booster",
     icon: Lightbulb,
     features: [
-      "Query Trader Data (Branch Booster): Find the 'Branch Booster' section on your dashboard. Type your questions about your branch's traders directly into the text area (e.g., 'What is the total sales volume for active traders?', 'List all traders in the 'Brickwork' category with a call-back date this month'). The analysis automatically uses your current branch's trader data.",
+      "Query Trader Data (Branch Booster): Find the 'Branch Booster' section on your dashboard or the BuildWise Intel page. Type your questions about your branch's traders directly into the text area (e.g., 'What is the total sales volume for active traders?', 'List all traders in the 'Brickwork' category with a call-back date this month'). The analysis automatically uses your current branch's trader data.",
       "Use Quick Actions (Branch Booster): Click pre-defined buttons in the Branch Booster for common analyses like 'New Customers', 'High Potential New Customers', or 'List Bricklayers & Sales Campaign'. This pre-fills the query for you.",
       "Analyse Uploaded Customer/Contextual Data (Branch Booster): Use the 'Upload Additional Customer Data' option in the Branch Booster to upload a text or CSV file (e.g., a list of local customers, specific project details). The Branch Booster will then use this information alongside your trader data to answer more complex queries (e.g., 'Based on this uploaded customer list, which of my active traders might be suitable for them?').",
       "Estimate Project Materials (Branch Booster): Click the 'Estimate Project Materials' Quick Action. You can then further refine the project type or details in the query box. The Branch Booster leverages its understanding of UK building processes to help estimate typical materials needed.",
       "Get Actionable Insights & Suggestions (Branch Booster): Ask the Branch Booster for strategic advice, such as 'Suggest strategies to re-engage lapsed accounts who were previously high value' or 'Draft a promotional message for our new line of eco-friendly insulation to traders in the 'Roofing' category'.",
-      "View Key Branch Statistics: The mini-dashboard at the top of the page provides an at-a-glance view of 'Active Traders', 'Call-Back Traders', 'New Leads', and 'Recently Active Traders' counts for your branch."
+      "View Key Branch Statistics: The mini-dashboard at the top of the page provides an at-a-glance view of 'Active Traders', 'Call-Back Traders', 'New Leads', and 'Recently Active Traders' counts for your branch.",
+      "Utilise the Branch Booster on the BuildWise Intel page to gain insights that leverage both your trader data and information from the external BuildWise Intel portal."
     ]
   },
   {
     category: "Sales & Strategy Accelerator (Managers Only)",
     icon: Compass,
     features: [
-      "Access Advanced Strategic Insights: If logged in with a Manager ID (e.g., 'PURLEYMANAGER'), the 'Sales & Strategy Accelerator' agent appears below the Branch Booster.",
+      "Access Advanced Strategic Insights: If logged in with a Manager ID (e.g., 'PURLEYMANAGER'), the 'Sales & Strategy Accelerator' agent appears below the Branch Booster on the Dashboard.",
       "Deep Dive Analysis: Use the Accelerator to ask complex strategic questions, request market trend analysis relative to your branch's data, or get AI-driven recommendations for sales strategies, team performance optimisation, and long-term branch growth.",
       "Upload Supplemental Data (Accelerator): Use the 'Upload Supplemental Data' option within the Accelerator to upload files like market reports or competitor profiles. This provides additional context to the external analysis service, potentially leading to more tailored strategic insights.",
       "Use Strategic Quick Actions (Accelerator): Click pre-defined buttons in the Accelerator for common strategic queries, such as 'Market Trends Analysis', 'Growth Opportunities', or 'Risk Assessment & Mitigation'.",
@@ -86,16 +87,17 @@ const capabilitiesData = [
   },
   {
     category: "External Integrations",
-    icon: Briefcase,
+    icon: Home, // Changed from Briefcase
     features: [
-      "Access BuildWise Intel Portal: Navigate to the 'BuildWise Intel' tab/button in the main header area to access an embedded version of the external BuildWise Intel application. This portal provides additional specialised data, tools, or insights relevant to the construction and trade industry. Use the interface and scrollbars within the embedded content area to interact with it."
+      "Access BuildWise Intel Portal: Navigate to the 'BuildWise Intel' tab/button in the main header area to access an embedded version of the external BuildWise Intel application. This portal provides additional specialised data, tools, or insights relevant to the construction and trade industry. Use the interface and scrollbars within the embedded content area to interact with it.",
+      "The Branch Booster is also available on the BuildWise Intel page, allowing you to ask questions that combine insights from the external application with your branch's trader data."
     ]
   },
   {
     category: "Reporting & Productivity",
     icon: FileText,
     features: [
-      "Download Trader Data (CSV Export): In the 'Trader Overview' section, click the 'Download CSV' button. This will generate and download a CSV file containing the list of traders currently visible in your table (respecting any active search or category filters).",
+      "Download Trader Data (CSV Export): In the 'Trader Overview' section on the Dashboard, click the 'Download CSV' button. This will generate and download a CSV file containing the list of traders currently visible in your table (respecting any active search or category filters).",
       "Access 'How to Use' Guide: For detailed instructions, feature explanations, and troubleshooting, click on 'How to Use' in the left sidebar. This page includes FAQs and step-by-step guides."
     ]
   },
@@ -167,8 +169,7 @@ export function AppSidebar() {
                       onClick={() => setOpenMobile(false)}
                       className={cn(
                         "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                        isActive && 
-                          "bg-sidebar-primary text-sidebar-primary-foreground"
+                         isActive && "bg-sidebar-primary text-sidebar-primary-foreground"
                       )}
                     >
                       <div>
