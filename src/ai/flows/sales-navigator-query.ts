@@ -11,7 +11,7 @@
 
 import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts use it
 
-const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/";
+const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/api/analyse";
 
 const SalesNavigatorQueryInputSchema = z.object({
   query: z.string().describe('The strategic question or analysis request for the Sales & Strategy Accelerator.'),
@@ -29,7 +29,7 @@ export type SalesNavigatorQueryOutput = z.infer<typeof SalesNavigatorQueryOutput
 
 
 export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Promise<SalesNavigatorQueryOutput> {
-  console.log(`[SalesNavigatorQuery] Sending query to external service: "${input.query}" for branch ${input.branchId}`);
+  console.log(`[SalesNavigatorQuery] Sending query to external service: "${input.query}" for branch ${input.branchId} at URL: ${SALES_NAVIGATOR_EXTERNAL_URL}`);
   if (input.uploadedFileContent) {
     console.log(`[SalesNavigatorQuery] Including uploaded file content (length: ${input.uploadedFileContent.length} chars).`);
   }
@@ -59,9 +59,13 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
       }
 
       // Check for common "Cannot POST /" type error from external service
-      if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /")) {
-         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyse) or check the external service's routing configuration.`);
+      if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /") && !SALES_NAVIGATOR_EXTERNAL_URL.endsWith("/")) {
+         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at this specific path. Please verify the path is correct or check the external service's routing configuration. The current path does not end with a trailing slash.`);
       }
+       if (response.status === 404 && errorDetails.toLowerCase().includes("cannot post /") && SALES_NAVIGATOR_EXTERNAL_URL.endsWith("/")){
+         throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyse) or check the external service's routing configuration.`);
+       }
+
 
       console.error(`[SalesNavigatorQuery] External service error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
       throw new Error(`Sales & Strategy Accelerator service failed with status ${response.status}: ${response.statusText}. Details: ${errorDetails.substring(0,150)}...`);
@@ -89,3 +93,4 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
     throw new Error(`Sales & Strategy Accelerator analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}. Check server logs for full details.`);
   }
 }
+
