@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -67,7 +66,7 @@ const capabilitiesData = [
     icon: Lightbulb,
     features: [
       "Query Trader Data (Branch Booster): Find the 'Branch Booster' section on your dashboard or the BuildWise Intel page. Type your questions about your branch's traders directly into the text area (e.g., 'What is the total sales volume for active traders?', 'List all traders in the 'Brickwork' category with a call-back date this month'). The analysis automatically uses your current branch's trader data.",
-      "Use Quick Actions (Branch Booster): Click pre-defined buttons in the Branch Booster for common analyses like 'New Customers', 'High Potential New Customers', or 'List Bricklayers & Sales Campaign'. This pre-fills the query for you.",
+      "Use Quick Actions (Branch Booster): Click pre-defined buttons in the Branch Booster for common analyses like 'New Customers', 'High Potential New Customers', or 'Estimate Project Materials'. This pre-fills the query for you.",
       "Analyse Uploaded Customer/Contextual Data (Branch Booster): Use the 'Upload Additional Customer Data' option in the Branch Booster to upload a text or CSV file (e.g., a list of local customers, specific project details). The Branch Booster will then use this information alongside your trader data to answer more complex queries (e.g., 'Based on this uploaded customer list, which of my active traders might be suitable for them?').",
       "Estimate Project Materials (Branch Booster): Click the 'Estimate Project Materials' Quick Action. You can then further refine the project type or details in the query box. The Branch Booster leverages its understanding of UK building processes to help estimate typical materials needed.",
       "Get Actionable Insights & Suggestions (Branch Booster): Ask the Branch Booster for strategic advice, such as 'Suggest strategies to re-engage lapsed accounts who were previously high value' or 'Draft a promotional message for our new line of eco-friendly insulation to traders in the 'Roofing' category'.",

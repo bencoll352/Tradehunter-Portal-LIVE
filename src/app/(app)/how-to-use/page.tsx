@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -43,7 +42,7 @@ const faqs = [
   {
     value: "item-4",
     question: "What is the Branch Booster?",
-    answer: "The Branch Booster helps you analyse trader and customer data. It's located on the Dashboard page and also on the BuildWise Intel page. Use Quick Actions for common analyses, type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.\n" +
+    answer: "The Branch Booster helps you analyse trader and customer data. It's located on the Dashboard page and also on the BuildWise Intel page. Use Quick Actions for common analyses (like 'Estimate Project Materials'), type your questions (e.g., 'What is the total sales volume?', 'Who are the top traders?') into the query box. You can also upload a customer data file (e.g., .txt, .csv) for deeper, context-specific insights like upsell opportunities. The system uses advanced analytical models to provide answers based on the current data for your branch and any uploaded file.\n" +
             "When using it on the BuildWise Intel page, you can ask questions that bridge insights from the Intel portal with your trader data, e.g., 'How can I apply the market trends shown in BuildWise Intel to my top 5 traders?'",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
@@ -164,7 +163,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Branch Booster</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Locate the "Branch Booster" section on the <strong>Dashboard page</strong> or at the bottom of the <strong>BuildWise Intel page</strong>.</li>
-              <li>Use "Quick Actions" for common pre-defined analyses.</li>
+              <li>Use "Quick Actions" for common pre-defined analyses (e.g., "Estimate Project Materials").</li>
               <li>Type your question about trader performance or market insights into the text area.</li>
               <li>Optionally, upload a customer data file (e.g., .csv, .txt) for more detailed, context-aware analysis.</li>
               <li>Click "Get Insights". The analysis will appear below.</li>
