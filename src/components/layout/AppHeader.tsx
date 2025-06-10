@@ -1,24 +1,33 @@
-
 "use client";
 
 import Link from 'next/link';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Calculator } from "lucide-react"; 
+import { Home, LayoutDashboard, Calculator, Compass } from "lucide-react"; 
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from 'react';
+import { getBranchInfo, type BranchInfo } from '@/types';
 
 const getPathTitle = (path: string) => {
   if (path.startsWith("/dashboard")) return "Dashboard";
-  if (path.startsWith("/how-to-use")) return "How to Use & FAQs";
   if (path.startsWith("/buildwise-intel")) return "BuildWise Intel";
   if (path.startsWith("/estimator")) return "Materials Estimator";
+  if (path.startsWith("/sales-accelerator")) return "Sales & Strategy Accelerator";
   return "TradeHunter Pro Portal";
 };
 
 export function AppHeader() {
   const pathname = usePathname();
   const title = getPathTitle(pathname);
+  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInId = localStorage.getItem("loggedInId");
+      setBranchInfo(getBranchInfo(loggedInId));
+    }
+  }, [pathname]); // Re-check on path change if needed, though role usually doesn't change mid-session
 
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
@@ -67,7 +76,7 @@ export function AppHeader() {
           className={cn(
             "font-medium",
             pathname === "/estimator"
-              ? "bg-primary text-primary-foreground hover:bg-primary/90" // Using primary color like Dashboard
+              ? "bg-primary text-primary-foreground hover:bg-primary/90" 
               : "text-primary/90 hover:bg-primary/10 hover:text-primary"
           )}
         >
@@ -76,6 +85,24 @@ export function AppHeader() {
             Estimator
           </Link>
         </Button>
+        {branchInfo?.role === 'manager' && (
+          <Button
+            asChild
+            size="lg"
+            variant={pathname === "/sales-accelerator" ? "default" : "ghost"}
+            className={cn(
+              "font-medium",
+              pathname === "/sales-accelerator"
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" // Distinct color for manager tool
+                : "text-destructive/90 hover:bg-destructive/10 hover:text-destructive-foreground/80"
+            )}
+          >
+            <Link href="/sales-accelerator" className="flex items-center gap-2">
+              <Compass className="h-5 w-5" />
+              Sales Accelerator
+            </Link>
+          </Button>
+        )}
       </nav>
     </header>
   );

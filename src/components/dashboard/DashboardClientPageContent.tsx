@@ -6,13 +6,50 @@ import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
 import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAgentClient";
-import { SalesNavigatorAgentClient } from "./SalesNavigatorAgentClient"; // Import new agent
+// SalesNavigatorAgentClient is removed from here, will be on its own page
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { MiniDashboardStats } from './MiniDashboardStats';
 import { parseISO } from 'date-fns';
 import { getTradersAction } from '@/app/(app)/dashboard/actions'; 
+import { InfoAccordion } from '@/components/common/InfoAccordion';
+import { Users, Lightbulb, HelpCircle, ListChecks, BarChart } from 'lucide-react';
+
+const dashboardInfoSections = [
+  {
+    id: "dashboard-capabilities",
+    title: "Dashboard & Trader Management Capabilities",
+    icon: ListChecks, // Changed from Users for variety
+    defaultOpen: true,
+    content: [
+      "View & Manage Trader Database: Your branch's traders are listed in the main table (50 per page). Use pagination to navigate. Mini-stats at the top provide a quick overview (Active, Call-Backs, New Leads, Recently Active).",
+      "Add New Trader: Click 'Add New Trader'. Fill in details like name, sales, status, contact info, notes, and call-back dates. Duplicate phone number warnings are provided.",
+      "Edit Trader Information: Click the pencil icon (✏️) in the 'Actions' column to modify and save trader details.",
+      "Delete Single/Multiple Traders: Click the trash icon (🗑️) for single deletion. Select multiple traders via checkboxes and use the 'Delete (X)' button for bulk removal. Confirmations are required.",
+      "Bulk Add Traders (CSV): Use 'Bulk Add Traders (CSV)'. Upload a CSV with a header row (mandatory 'Name' header). The system uses header names flexibly for data mapping. Duplicates (by phone) are skipped.",
+      "Search & Filter: Use the search bar for keywords across various fields. Filter by category using the dropdown.",
+      "Sort Trader Data: Click column headers (e.g., 'Name', 'Total Sales', 'Call-Back Date') to sort data.",
+      "Set Call-Back Reminders: Use the 'Call-Back Date' field (calendar picker) when adding/editing. View and sort by these dates in the 'Call-Back' column.",
+      "Data Persistence & Security: Data is stored per-branch in Firebase Firestore, ensuring persistence and isolation. Access is via your Login ID.",
+      "Download Trader Data (CSV): Click 'Download CSV' to export the current table view (respecting filters/search).",
+    ],
+  },
+  {
+    id: "branch-booster-dashboard-how-to",
+    title: "How to Use Branch Booster (on Dashboard)",
+    icon: HelpCircle,
+    content: [
+      "Locate the 'Branch Booster' section on this Dashboard page.",
+      "Ask Questions: Type questions about your traders (e.g., 'List active traders with sales over £50k', 'Who are my top 3 bricklayer traders?') into the text area. Your branch's trader data is automatically used.",
+      "Use Quick Actions: Click pre-defined buttons like 'New Customers' or 'Estimate Project Materials' to pre-fill common queries.",
+      "Upload Customer/Contextual Data (Optional): Use 'Upload Additional Customer Data' (e.g., .txt, .csv of local prospects) for deeper, context-specific insights like upsell opportunities or multi-customer recommendations.",
+      "Get Insights: Click 'Get Insights'. The analysis will appear below. The Branch Booster helps you analyse trader performance, identify trends, and get suggestions.",
+      "Example Query: 'What is the average sales per active trader in the 'Plumbing' category?'",
+    ],
+  },
+];
+
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -63,7 +100,6 @@ export function DashboardClientPageContent({
           }
         } else {
           setIsLoading(false); 
-          // Redirection to login should be handled by AppLayout
         }
       }
     };
@@ -163,7 +199,6 @@ export function DashboardClientPageContent({
       toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk add: Invalid Branch ID or Role. Please re-login." });
       return { data: null, error: "Invalid or missing Branch ID/Role." };
     }
-    // The bulkAddTradersAction from props expects BaseBranchId, which currentBaseBranchId is.
     const result = await bulkAddTradersAction(currentBaseBranchId, tradersToCreate); 
     if (result.data && result.data.length > 0) { 
       setKeyForTable(prev => prev + 1);
@@ -203,6 +238,7 @@ export function DashboardClientPageContent({
       <MiniDashboardStats 
         liveTradersCount={activeTradersCount}
         callBackTradersCount={callBackTradersCount}
+        newLeadTradersCount={callBackTradersCount}
         newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
@@ -235,11 +271,10 @@ export function DashboardClientPageContent({
 
         <div className="lg:col-span-1 space-y-6">
           <ProfitPartnerAgentClient traders={traders} />
-          {currentUserRole === 'manager' && currentBaseBranchId && (
-            <SalesNavigatorAgentClient traders={traders} baseBranchId={currentBaseBranchId} />
-          )}
+          {/* SalesNavigatorAgentClient is now on its own page, conditionally shown in AppHeader */}
         </div>
       </div>
+      <InfoAccordion sections={dashboardInfoSections} className="mt-8 lg:col-span-3"/>
     </div>
   );
 }

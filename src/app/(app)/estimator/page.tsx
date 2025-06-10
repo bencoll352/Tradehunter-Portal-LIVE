@@ -1,8 +1,35 @@
-
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator } from "lucide-react";
+import { Calculator, HelpCircle, ListChecks } from "lucide-react";
+import { InfoAccordion } from "@/components/common/InfoAccordion";
+
+const estimatorInfoSections = [
+  {
+    id: "estimator-capabilities",
+    title: "Materials Estimator Capabilities",
+    icon: ListChecks,
+    defaultOpen: true,
+    content: [
+      "Access External Estimator: This page embeds an external Building Materials Estimator tool.",
+      "Estimate Project Materials: Use the tool to estimate quantities of various materials needed for common construction projects.",
+    ],
+  },
+  {
+    id: "estimator-how-to-use",
+    title: "How to Use the Materials Estimator",
+    icon: HelpCircle,
+    content: [
+      "Access the Estimator: Click the 'Estimator' tab in the main header.",
+      "Navigate the Tool: Use the interface and scrollbars provided within the embedded content area to interact with the estimator.",
+      "Input Project Details: Follow the instructions within the embedded tool to input your project specifications.",
+      "View Estimates: The tool will provide material estimates based on your inputs.",
+      "Note: This is an external tool. For detailed questions about its specific calculations or features, refer to any help documentation provided within the tool itself.",
+      "The Branch Booster on the Dashboard page also has a 'Estimate Project Materials' quick action that can provide general material lists using its own knowledge base."
+    ],
+  },
+];
+
 
 export default function EstimatorPage() {
   const estimatorAppUrl = "https://building-materials-estimator-302177537641.us-west1.run.app/";
@@ -37,6 +64,7 @@ export default function EstimatorPage() {
           </div>
         </CardContent>
       </Card>
+      <InfoAccordion sections={estimatorInfoSections} className="mt-8"/>
     </div>
   );
 }
