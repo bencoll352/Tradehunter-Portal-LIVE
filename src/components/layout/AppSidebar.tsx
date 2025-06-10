@@ -25,7 +25,8 @@ import {
   ShieldCheck,
   FileText,
   Compass,
-  Home, // Changed from Briefcase
+  Home, 
+  Calculator, // Added Calculator icon
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -86,11 +87,12 @@ const capabilitiesData = [
     ]
   },
   {
-    category: "External Integrations",
-    icon: Home, // Changed from Briefcase
+    category: "External Integrations & Tools", // Renamed for clarity
+    icon: Home, 
     features: [
       "Access BuildWise Intel Portal: Navigate to the 'BuildWise Intel' tab/button in the main header area to access an embedded version of the external BuildWise Intel application. This portal provides additional specialised data, tools, or insights relevant to the construction and trade industry. Use the interface and scrollbars within the embedded content area to interact with it.",
-      "The Branch Booster is also available on the BuildWise Intel page, allowing you to ask questions that combine insights from the external application with your branch's trader data."
+      "The Branch Booster is also available on the BuildWise Intel page, allowing you to ask questions that combine insights from the external application with your branch's trader data.",
+      "Access Materials Estimator: Navigate to the 'Estimator' tab/button in the main header. This embeds an external tool for estimating building materials for various projects."
     ]
   },
   {

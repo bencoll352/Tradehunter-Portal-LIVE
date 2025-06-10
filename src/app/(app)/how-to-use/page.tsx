@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Compass, Briefcase, Home } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Compass, Briefcase, Home, Calculator } from "lucide-react";
 
 const faqs = [
   {
@@ -61,6 +61,12 @@ const faqs = [
     icon: <Home className="h-5 w-5 text-primary mr-2" />
   },
   {
+    value: "item-9",
+    question: "What is the Materials Estimator page?",
+    answer: "The 'Estimator' page, accessible via the 'Estimator' tab/button in the main header, embeds an external Building Materials Estimator tool. This tool can help you estimate the quantities of various materials needed for common construction projects. Navigate within the embedded content using its own scrollbars and interface.",
+    icon: <Calculator className="h-5 w-5 text-primary mr-2" />
+  },
+  {
     value: "item-5",
     question: "Is my branch data secure and persistent?",
     answer: "Yes, the system is designed for data isolation. Each branch can only access its own trader data, authenticated by your Login ID. Manager logins see the same underlying branch data as their team. Trader data is persistently stored in Firebase Firestore, ensuring it's saved across sessions and centrally managed for your branch.",
@@ -91,7 +97,7 @@ export default function HowToUsePage() {
           </p>
 
           <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq) => (
+            {faqs.sort((a,b) => parseInt(a.value.split('-')[1]) - parseInt(b.value.split('-')[1])).map((faq) => (
               <AccordionItem value={faq.value} key={faq.value} className="border-b border-border">
                 <AccordionTrigger className="text-lg hover:no-underline py-4 text-left">
                   <div className="flex items-center">
@@ -131,6 +137,7 @@ export default function HowToUsePage() {
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li><strong>Dashboard:</strong> Click the "Dashboard" tab in the header to view and manage traders, and use analytical tools.</li>
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in the header to access the external insights portal and use the integrated Branch Booster.</li>
+              <li><strong>Estimator:</strong> Click the "Estimator" tab in the header to access the external Building Materials Estimator tool.</li>
               <li><strong>How to Use (this page):</strong> Click "How to Use" in the left sidebar for help and FAQs.</li>
             </ul>
           </div>
@@ -184,8 +191,16 @@ export default function HowToUsePage() {
               <li>Below the embedded portal, you will find the <strong>Branch Booster</strong>. Use this to ask questions that bridge information from BuildWise Intel with your branch's trader data. For example, you can view trends in BuildWise Intel and then ask the Branch Booster how these trends might affect your specific traders or identify opportunities.</li>
             </ul>
           </div>
+          <div>
+            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Materials Estimator</h3>
+            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
+              <li>Click on the "Estimator" tab/button in the main header at the top of the page.</li>
+              <li>The page will load an embedded version of the external Building Materials Estimator tool.</li>
+              <li>Use the interface provided within the embedded content area to estimate materials for your projects.</li>
+            </ul>
+          </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">7. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">8. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All your trader data is stored securely in Firebase Firestore and is specific to your branch's base ID.</li>
               <li>Changes you make (add, edit, delete) are persistent and will be available across your sessions.</li>
