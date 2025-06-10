@@ -21,14 +21,14 @@ const agentFormSchema = z.object({
   query: z.string().min(5, { message: "Query must be at least 5 characters." }),
 });
 
-interface ProfitPartnerAgentClientProps {
-  traders: Trader[];
-}
-
 interface QuickAction {
   label: string;
   query: string;
   icon: LucideIcon;
+}
+
+interface ProfitPartnerAgentClientProps {
+  traders: Trader[];
 }
 
 const quickActions: QuickAction[] = [
