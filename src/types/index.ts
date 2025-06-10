@@ -21,6 +21,8 @@ export interface Trader {
   reviewKeywords?: string | null;
   notes?: string | null;
   callBackDate?: string | null; 
+  annualTurnover?: number | null;
+  totalAssets?: number | null;
 }
 
 export type BranchLoginId = 
@@ -89,6 +91,8 @@ export type ParsedTraderData = {
   ownerProfileLink?: string | null;
   notes?: string | null;
   callBackDate?: string | null; 
+  annualTurnover?: number | null;
+  totalAssets?: number | null;
 };
 
 export interface BulkDeleteTradersResult {

@@ -30,7 +30,8 @@ interface BulkAddTradersDialogProps {
 const EXPECTED_HEADERS = [
   "Name", "Total Sales", "Status", "Last Activity", "Description",
   "Reviews", "Rating", "🌐Website", "📞 Phone", "Owner Name",
-  "Main Category", "Categories", "Workday Timing", "Address", "Link", "Notes", "Actions"
+  "Main Category", "Categories", "Workday Timing", "Address", "Link", "Notes", "Actions",
+  "Annual Turnover", "Total Assets" // Added new headers
 ];
 
 const FIRESTORE_BATCH_LIMIT = 500;
@@ -199,8 +200,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           ),
         duration: 10000,
       });
-      // If there are fundamental parsing errors (like unclosed quotes), it might not make sense to proceed further.
-      // You might want to return early if specific error types are encountered.
       if (parseResults.errors.some(e => e.type === 'Quotes' || e.code === 'TooManyFields' || e.code === 'TooFewFields')) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
@@ -216,7 +215,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
-    // Check for mandatory 'Name' header (case-insensitive)
     const hasNameHeader = actualHeaders.some(h => h.trim().toLowerCase() === "name");
     if (!hasNameHeader) {
       toast({
@@ -228,38 +226,34 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
-    // Heuristic check for common headers to warn if the CSV seems very different
-    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "total sales", "owner name", "main category", "reviews", "rating", "website", "notes"];
+    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "total sales", "owner name", "main category", "reviews", "rating", "website", "notes", "annual turnover", "total assets"];
     const foundCommonHeadersCount = actualHeaders.filter(h =>
         commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
     ).length;
 
-    // Warn if "Name" is present but very few other common headers are found.
-    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.some(h => h.trim().toLowerCase() === "name")) { // Ensure there's more than just 'Name' to avoid warning on single-column name lists
+    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.some(h => h.trim().toLowerCase() === "name")) { 
         console.warn(`[CSV Parsing Debug] Few common headers found. Expected some of: ${commonExpectedHeadersForHeuristicCheck.join(', ')}. Detected headers: ${actualHeaders.join(', ')}`);
         toast({
-            variant: "default", // Not destructive, just a notice
+            variant: "default", 
             title: "Unusual CSV Headers Detected",
-            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Total Sales, Notes). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
+            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Total Sales, Notes, Annual Turnover, Total Assets). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
             duration: 10000,
         });
     }
 
 
-    for (const row of parseResults.data as any[]) { // Type cast to any[] as PapaParse.data can be unknown[]
+    for (const row of parseResults.data as any[]) { 
       const name = getRowValue(row, ["Name"]);
       if (!name) {
-        // If a row has no name, skip it. This can happen with trailing empty lines not caught by skipEmptyLines if they have commas.
         console.warn("[CSV Parsing Debug] Skipping row due to missing 'Name'. Row data:", row);
         continue;
       }
 
       const statusValueRaw = getRowValue(row, ["Status"]);
-      let parsedStatus : ParsedTraderData['status'] = 'New Lead'; // Default if status is invalid or missing
+      let parsedStatus : ParsedTraderData['status'] = 'New Lead'; 
       if (statusValueRaw) {
         const statusValueLower = statusValueRaw.toLowerCase();
         if (VALID_STATUSES_LOWER.includes(statusValueLower)) {
-            // Map to capitalized version
             if (statusValueLower === 'active') parsedStatus = 'Active';
             else if (statusValueLower === 'inactive') parsedStatus = 'Inactive';
             else if (statusValueLower === 'call-back') parsedStatus = 'Call-Back';
@@ -272,25 +266,22 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
       const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
       const phoneValue = getRowValue(row, ["📞 Phone", "Phone"]);
-
-      // Specific debug for potentially problematic fields
       const ownerNameValue = getRowValue(row, ["Owner Name", "Owner"]);
       const mainCategoryValue = getRowValue(row, ["Main Category", "Category"]);
-      const workdayTimingValue = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]); // Added "WorkdayTiming" (no space)
+      const workdayTimingValue = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]); 
 
-      // Log if any of these specific fields are missing for a trader with a name
       if (!ownerNameValue && name || !mainCategoryValue && name || !workdayTimingValue && name) {
         const missingFields = [];
         if (!ownerNameValue) missingFields.push("Owner Name (expected 'Owner Name' or 'Owner')");
         if (!mainCategoryValue) missingFields.push("Main Category (expected 'Main Category' or 'Category')");
         if (!workdayTimingValue) missingFields.push("Workday Timing (expected 'Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', or 'WorkdayTiming')");
 
-        if (missingFields.length > 0) { // Only log if there are actually fields missing from this specific list
+        if (missingFields.length > 0) { 
             console.warn(
             `[CSV Parsing Debug] For trader "${name}": Could not find data for: [${missingFields.join('; ')}]. ` +
             `This could be due to missing headers or empty cells for these fields in your CSV. ` +
             `Ensure headers match expected variations (case-insensitive, space-trimmed) and that data is present in the cells. ` +
-            `Detected headers for this row by the system: ${Object.keys(row).join(', ')}` // Shows headers available for *this specific row*
+            `Detected headers for this row by the system: ${Object.keys(row).join(', ')}` 
             );
         }
       }
@@ -300,7 +291,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         totalSales: parseNumericValue(getRowValue(row, ["Total Sales"]), "Total Sales", name),
         status: parsedStatus,
         lastActivity: lastActivityValue,
-        description: getRowValue(row, ["Description"]) || undefined, // Ensure undefined if empty
+        description: getRowValue(row, ["Description"]) || undefined, 
         tradesMade: parseIntValue(getRowValue(row, ["Reviews"]), "Reviews", name),
         rating: parseNumericValue(getRowValue(row, ["Rating"]), "Rating", name),
         website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
@@ -312,17 +303,17 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         address: getRowValue(row, ["Address"]) || undefined,
         ownerProfileLink: getRowValue(row, ["Link"]) || undefined,
         notes: getRowValue(row, ["Notes"]) || undefined,
+        annualTurnover: parseNumericValue(getRowValue(row, ["Annual Turnover"]), "Annual Turnover", name),
+        totalAssets: parseNumericValue(getRowValue(row, ["Total Assets"]), "Total Assets", name),
       };
       tradersToProcess.push(trader);
     }
 
-    // Post-processing for duplicates (client-side check)
     const validTraders: ParsedTraderData[] = [];
-    const processedPhoneNumbersInCsv = new Set<string>(); // To track duplicates *within* the CSV
-    const duplicatePhonesInCsv = new Set<string>(); // Store actual phone numbers that were CSV duplicates
+    const processedPhoneNumbersInCsv = new Set<string>(); 
+    const duplicatePhonesInCsv = new Set<string>(); 
     let skippedCount = 0;
 
-    // Create a set of normalised phone numbers from existing traders for efficient lookup
     const existingNormalizedPhones = new Set(
       existingTraders.map(t => normalizePhoneNumber(t.phone))
     );
@@ -331,13 +322,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       const normalizedPhone = normalizePhoneNumber(trader.phone);
       let isDuplicate = false;
 
-      if (normalizedPhone) { // Only check for duplicates if a phone number exists
+      if (normalizedPhone) { 
         if (existingNormalizedPhones.has(normalizedPhone)) {
           isDuplicate = true;
            console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" already exists in the database (based on existing traders passed to dialogue). Skipping.`);
         } else if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
           isDuplicate = true;
-          duplicatePhonesInCsv.add(trader.phone || 'N/A'); // Store the original phone for reporting
+          duplicatePhonesInCsv.add(trader.phone || 'N/A'); 
           console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" is a duplicate within the CSV file itself. Skipping.`);
         }
       }
@@ -364,14 +355,11 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
     const { validTraders, skippedCount, duplicatePhonesInCsv, rawParseResults } = parseCsvData(fileContent);
 
-    // Condition for "No Traders Parsed"
     if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() !== "") {
-      // This means the file was not empty, but nothing processable came out of parseCsvData.
-      // This usually means no 'Name' header or no rows with 'Name' data.
       console.warn(`[CSV Parsing Debug] No valid traders parsed from a non-empty file.
         Raw parsed data length (PapaParse): ${rawParseResults?.data?.length ?? 'N/A'}.
         This could mean rows were present but lacked a 'Name', or failed other validations.
-        First few raw data rows (if any):`, rawParseResults?.data?.slice(0,3) ?? "N/A"); // Log first few raw rows from PapaParse
+        First few raw data rows (if any):`, rawParseResults?.data?.slice(0,3) ?? "N/A"); 
       toast({
         variant: "destructive",
         title: "No Traders Parsed",
@@ -386,12 +374,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
               </ul>
             </div>
           ),
-        duration: 20000, // Increased duration for this detailed toast
+        duration: 20000, 
       });
       setIsLoading(false);
       return;
     }
-    if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() === "") { // File was genuinely empty
+    if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() === "") { 
       toast({ variant: "destructive", title: "Empty File", description: "The selected CSV file is empty." });
       setIsLoading(false);
       return;
@@ -546,11 +534,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ...etc.</code>
             <br/>(See full list of expected headers by expanding this dialogue or checking "How to Use").
             <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back' (Hot Lead 🔥), or 'New Lead'.
+            <br/>Headers for financial data: 'Total Sales', 'Annual Turnover', 'Total Assets'.
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
             <br/>Max {FIRESTORE_BATCH_LIMIT} traders per file.
           </DialogDescription>
           <div className="text-sm text-muted-foreground mt-2 text-left">
-            <strong>If fields like 'Owner Name', 'Main Category', 'Workday Timing', or 'Notes' are not loading:</strong>
+            <strong>If fields like 'Owner Name', 'Main Category', 'Workday Timing', 'Notes', 'Annual Turnover', or 'Total Assets' are not loading:</strong>
             <ol className="list-decimal list-inside pl-4 text-xs mt-1">
               <li>Double-check the exact spelling of these headers in your <strong>raw CSV file</strong> (not just how they appear in Excel or other spreadsheet software).</li>
               <li>After an upload attempt, open your browser's developer console (usually by right-clicking on the page, selecting 'Inspect' or 'Inspect Element', then finding the 'Console' tab). Look for messages starting with "[CSV Parsing Debug]". These messages will show the headers the system actually detected for problematic rows, and any specific parsing issues for values.</li>

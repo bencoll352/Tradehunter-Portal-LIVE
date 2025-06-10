@@ -24,6 +24,8 @@ export const formatTraderDataForAnalysis = (traders: Trader[]): string => {
   return traders.map(trader => {
     let details = `Trader: ${trader.name}, Sales: £${(trader.totalSales ?? 0).toLocaleString('en-GB')}, Trades: ${trader.tradesMade ?? 0}, Status: ${trader.status}, Last Activity: ${format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}`;
     if (trader.callBackDate) details += `, Call-Back Date: ${format(parseISO(trader.callBackDate), 'dd/MM/yyyy')}`;
+    if (trader.annualTurnover) details += `, Annual Turnover: £${trader.annualTurnover.toLocaleString('en-GB')}`;
+    if (trader.totalAssets) details += `, Total Assets: £${trader.totalAssets.toLocaleString('en-GB')}`;
     if (trader.description) details += `, Description: ${trader.description}`;
     if (trader.rating) details += `, Rating: ${trader.rating}`;
     if (trader.website) details += `, Website: ${trader.website}`;

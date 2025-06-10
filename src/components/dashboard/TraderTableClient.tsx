@@ -49,7 +49,7 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate'>;
+type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'annualTurnover' | 'totalAssets'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -256,6 +256,8 @@ export function TraderTableClient({
       ownerName: trader.ownerName || undefined, ownerProfileLink: trader.ownerProfileLink || undefined,
       categories: trader.categories || undefined, workdayTiming: trader.workdayTiming || undefined, notes: trader.notes || undefined,
       callBackDate: trader.callBackDate || undefined,
+      annualTurnover: trader.annualTurnover,
+      totalAssets: trader.totalAssets,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -278,6 +280,8 @@ export function TraderTableClient({
       workdayTiming: trader.workdayTiming || undefined,
       notes: trader.notes || undefined,
       callBackDate: trader.callBackDate || undefined,
+      annualTurnover: trader.annualTurnover,
+      totalAssets: trader.totalAssets,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -339,6 +343,8 @@ export function TraderTableClient({
       "Name": trader.name,
       "Branch ID": trader.branchId,
       "Total Sales (£)": trader.totalSales,
+      "Annual Turnover (£)": trader.annualTurnover,
+      "Total Assets (£)": trader.totalAssets,
       "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
       "Last Activity": trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy HH:mm:ss') : '',
@@ -391,7 +397,13 @@ export function TraderTableClient({
     </TableHead>
   );
 
-  const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false) => {
+  const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false, isCurrency = false) => {
+    if (isCurrency) {
+        if (typeof content === 'number') {
+            return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(content);
+        }
+        return <span className="text-muted-foreground/50">-</span>;
+    }
     const stringContent = String(content || '');
     if (stringContent.length > maxChars) {
       return (
@@ -536,6 +548,8 @@ export function TraderTableClient({
               </TableHead>
               <SortableHeader sortKey="name" label="Name" />
               <SortableHeader sortKey="totalSales" label="Total Sales" />
+              <SortableHeader sortKey="annualTurnover" label="Annual Turnover" />
+              <SortableHeader sortKey="totalAssets" label="Total Assets" />
               <SortableHeader sortKey="status" label="Status" />
               <SortableHeader sortKey="lastActivity" label="Last Activity" />
               <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
@@ -588,9 +602,9 @@ export function TraderTableClient({
                     </Tooltip>
                   </TooltipProvider>
                 </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {typeof trader.totalSales === 'number' ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(trader.totalSales) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
+                <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
+                <TableCell className="whitespace-nowrap">{renderCellContent(trader.annualTurnover, 0, false, true)}</TableCell>
+                <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalAssets, 0, false, true)}</TableCell>
                 <TableCell>
                    <Button
                       variant="ghost" size="sm"
