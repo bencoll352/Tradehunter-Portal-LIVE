@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast"; // Toast hook
 // Schema for the agent form
 const agentFormSchema = z.object({
   query: z.string().min(5, { message: "Query must be at least 5 characters." }),
-}); // Explicit semicolon
+});
 
 // Interface for QuickAction items
 interface QuickAction {
@@ -43,7 +43,7 @@ const quickActions: QuickAction[] = [
     query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.",
     icon: PackageSearch
   }
-]; // Explicit semicolon
+];
 
 // Props interface for the component
 interface ProfitPartnerAgentClientProps {
@@ -58,14 +58,14 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast(); // Explicit semicolon
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof agentFormSchema>>({
     resolver: zodResolver(agentFormSchema),
     defaultValues: { query: "" },
-  }); // Explicit semicolon
+  });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.type.startsWith("text/") || file.name.endsWith(".csv") || file.name.endsWith(".tsv")) {
@@ -85,22 +85,22 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
         setFileContent(null);
       }
     }
-  }; // Explicit semicolon
+  };
 
-  const clearFile = (): void => {
+  const clearFile = () => {
     setSelectedFile(null);
     setFileContent(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
     toast({ title: "File Cleared", description: "Uploaded file has been removed." });
-  }; // Explicit semicolon
+  };
 
-  const handleQuickAction = (query: string): void => {
+  const handleQuickAction = (query: string) => {
     form.setValue("query", query);
-  }; // Explicit semicolon
+  };
 
-  const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
+  const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);
