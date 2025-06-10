@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp } from "lucide-react";
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon } from "lucide-react";
 import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils";
@@ -25,7 +25,13 @@ interface ProfitPartnerAgentClientProps {
   traders: Trader[];
 }
 
-const quickActions = [
+interface QuickAction {
+  label: string;
+  query: string;
+  icon: LucideIcon;
+}
+
+const quickActions: QuickAction[] = [
   { label: "New Customers", query: "Identify new customers and provide a brief summary.", icon: Users },
   { label: "High Potential New Customers", query: "Which new customers show the highest potential? Provide reasons.", icon: TrendingUp },
   { label: "Boost Existing Customer Spend", query: "Suggest strategies to boost spending from existing customers.", icon: BarChart },
