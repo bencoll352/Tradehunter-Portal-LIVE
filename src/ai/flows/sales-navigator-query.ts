@@ -11,7 +11,7 @@
 
 import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts use it
 
-// Corrected URL to point to the /api/analyse/ endpoint (added trailing slash)
+// Corrected URL to point to the /api/analyse/ endpoint with a trailing slash
 const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/api/analyse/";
 
 const SalesNavigatorQueryInputSchema = z.object({
@@ -59,13 +59,14 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
       }
 
       if (response.status === 404) {
-        if (errorDetails.toLowerCase().includes("cannot post")) { // Check if error details indicate a method issue
+        // Check if error details indicate a method issue (e.g., "cannot post /api/analyse/")
+        if (errorDetails.toLowerCase().includes("cannot post")) { 
           throw new Error(`Sales & Strategy Accelerator service (404 Method Not Allowed): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests. Please verify the external service's routing and method handling for this path.`);
-        } else {
+        } else { // Generic 404 if "cannot post" is not in details
           throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was not found. Please verify the URL path is correct.`);
         }
       }
-
+      // For other non-ok statuses (e.g., 500, 401, 403)
       console.error(`[SalesNavigatorQuery] External service error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
       throw new Error(`Sales & Strategy Accelerator service failed with status ${response.status}: ${response.statusText}. Details: ${errorDetails.substring(0,150)}...`);
     }
@@ -87,6 +88,13 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
     if (error instanceof Error) {
       detailedErrorMessage = error.message;
     }
-    throw new Error(`Sales & Strategy Accelerator analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}. Check server logs for full details.`);
+    
+    // Refined final error message construction
+    let finalMessagePart1 = `Sales & Strategy Accelerator analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}`;
+    if (!finalMessagePart1.endsWith('.') && !finalMessagePart1.endsWith('!') && !finalMessagePart1.endsWith('?')) {
+      finalMessagePart1 += '.';
+    }
+    
+    throw new Error(`${finalMessagePart1} Check server logs for full details.`);
   }
 }
