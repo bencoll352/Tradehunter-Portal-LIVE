@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp } from "lucide-react";
-import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
+import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -37,7 +37,7 @@ const quickActions = [
     label: "Estimate Project Materials",
     query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.",
     icon: PackageSearch
-  },
+  }
 ];
 
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
