@@ -38,7 +38,10 @@ import {
   ShoppingBasket,
   TrendingUp,
   Brain,
-  MessageSquareQuote 
+  MessageSquareQuote,
+  HelpCircle, // Added
+  ListChecks, // Added
+  BookOpenText // Added
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -47,6 +50,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
+  { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
   // Other main navigation items are now in AppHeader
 ];
 
@@ -82,6 +86,13 @@ const salesAcceleratorPurposeItems: PurposeBoxItem[] = [
   { id: 'sa2', icon: TrendingUp, text: "Identify growth & market opportunities" },
   { id: 'sa3', icon: FileText, text: "Analyse with supplemental documents" },
   { id: 'sa4', icon: ShieldCheck, text: "Develop data-driven sales strategies" },
+];
+
+const howToUsePurposeItems: PurposeBoxItem[] = [
+  { id: 'htu1', icon: HelpCircle, text: "View FAQs for common questions" },
+  { id: 'htu2', icon: ListChecks, text: "Follow step-by-step instructions" },
+  { id: 'htu3', icon: BookOpenText, text: "Learn about portal features & tools" },
+  { id: 'htu4', icon: Info, text: "Get guidance on using the portal effectively" },
 ];
 
 
@@ -124,6 +135,9 @@ export function AppSidebar() {
   } else if (pathname.startsWith("/sales-accelerator") && branchInfo?.role === 'manager') {
     currentPurposeItems = salesAcceleratorPurposeItems;
     currentPageTitle = "Accelerator Purpose";
+  } else if (pathname.startsWith("/how-to-use")) {
+    currentPurposeItems = howToUsePurposeItems;
+    currentPageTitle = "How to Use Guide";
   }
 
 
@@ -146,7 +160,9 @@ export function AppSidebar() {
         <ScrollArea className="flex-1 px-3 py-2">
           <SidebarMenu className="mb-4">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || (item.href === "/dashboard" && pathname.startsWith("/dashboard"));
+              const isActive = pathname === item.href || 
+                               (item.href === "/dashboard" && pathname.startsWith("/dashboard")) ||
+                               (item.href === "/how-to-use" && pathname.startsWith("/how-to-use"));
               return (
                 <SidebarMenuItem key={item.href}>
                   <Link href={item.href}>
