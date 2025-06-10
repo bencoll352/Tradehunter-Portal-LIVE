@@ -30,7 +30,7 @@ import {
   FileText,
   ShieldCheck,
   Briefcase,
-  LucideIcon,
+  type LucideIcon,
   Eye,
   ClipboardList,
   Info,
@@ -38,7 +38,7 @@ import {
   ShoppingBasket,
   TrendingUp,
   Brain,
-  MessageSquareQuestion
+  MessageSquareQuote 
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -67,7 +67,7 @@ const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
   { id: 'bwi1', icon: Briefcase, text: "Access external BuildWise Intel portal" },
   { id: 'bwi2', icon: Brain, text: "Gain specialized industry insights" },
   { id: 'bwi3', icon: Rocket, text: "Use Branch Booster for contextual analysis" },
-  { id: 'bwi4', icon: MessageSquareQuestion, text: "Bridge external data with your traders" },
+  { id: 'bwi4', icon: MessageSquareQuote, text: "Bridge external data with your traders" }, 
 ];
 
 const estimatorPurposeItems: PurposeBoxItem[] = [
