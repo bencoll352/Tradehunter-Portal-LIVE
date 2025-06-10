@@ -13,43 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MiniDashboardStats } from './MiniDashboardStats';
 import { parseISO } from 'date-fns';
 import { getTradersAction } from '@/app/(app)/dashboard/actions'; 
-import { InfoAccordion } from '@/components/common/InfoAccordion';
-import { ListChecks, HelpCircle, Users, Rocket } from 'lucide-react';
-
-const dashboardInfoSections = [
-  {
-    id: "dashboard-capabilities",
-    title: "Dashboard & Trader Management",
-    icon: ListChecks,
-    defaultOpen: true,
-    content: [
-      "View & Manage Trader Database: Your branch's traders are listed in the main table. Use pagination to navigate. Mini-stats at the top provide a quick overview (Active, Call-Backs, New Leads, Recently Active).",
-      "Add New Trader: Click 'Add New Trader'. Fill in details like name, sales, status, contact info, notes, and call-back dates. Duplicate phone number warnings are provided.",
-      "Edit Trader Information: Click the pencil icon (✏️) in the 'Actions' column to modify and save trader details.",
-      "Delete Single/Multiple Traders: Click the trash icon (🗑️) for single deletion. Select multiple traders via checkboxes and use the 'Delete (X)' button for bulk removal. Confirmations are required.",
-      "Bulk Add Traders (CSV): Use 'Bulk Add Traders (CSV)'. Upload a CSV with a header row (mandatory 'Name' header). The system uses header names flexibly for data mapping. Duplicates (by phone) are skipped.",
-      "Search & Filter: Use the search bar for keywords across various fields. Filter by category using the dropdown.",
-      "Sort Trader Data: Click column headers (e.g., 'Name', 'Total Sales', 'Call-Back Date') to sort data.",
-      "Set Call-Back Reminders: Use the 'Call-Back Date' field (calendar picker) when adding/editing. View and sort by these dates in the 'Call-Back' column.",
-      "Data Persistence & Security: Data is stored per-branch in Firebase Firestore, ensuring persistence and isolation. Access is via your Login ID.",
-      "Download Trader Data (CSV): Click 'Download CSV' to export the current table view (respecting filters/search).",
-    ],
-  },
-  {
-    id: "branch-booster-dashboard-how-to",
-    title: "How to Use Branch Booster",
-    icon: HelpCircle,
-    content: [
-      "Locate the 'Branch Booster' section on this Dashboard page.",
-      "Ask Questions: Type questions about your traders (e.g., 'List active traders with sales over £50k', 'Who are my top 3 bricklayer traders?') into the text area. Your branch's trader data is automatically used.",
-      "Use Quick Actions: Click pre-defined buttons like 'New Customers' or 'Estimate Project Materials' to pre-fill common queries.",
-      "Upload Customer/Contextual Data (Optional): Use 'Upload Additional Customer Data' (e.g., .txt, .csv of local prospects) for deeper, context-specific insights like upsell opportunities or multi-customer recommendations.",
-      "Get Insights: Click 'Get Insights'. The analysis will appear below. The Branch Booster helps you analyse trader performance, identify trends, and get suggestions.",
-      "Example Query: 'What is the average sales per active trader in the 'Plumbing' category?'",
-    ],
-  },
-];
-
+// InfoAccordion is now in the AppSidebar, not directly on this page.
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -234,51 +198,46 @@ export function DashboardClientPageContent({
   }
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      {/* Main Content Area */}
-      <div className="lg:col-span-9 space-y-6">
-        <MiniDashboardStats 
-          liveTradersCount={activeTradersCount}
-          callBackTradersCount={callBackTradersCount}
-          newLeadTradersCount={newLeadTradersCount}
-          recentlyActiveTradersCount={recentlyActiveTradersCount}
-        />
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6"> {/* Internal grid for table and booster */}
-          <div className="xl:col-span-2 space-y-6"> {/* Trader Table takes 2/3 on XL screens */}
-            <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
-                <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
-                   <Skeleton className="h-64 w-full" />
-                ) : (
-                  <TraderTableClient 
-                    key={keyForTable} 
-                    initialTraders={traders} 
-                    branchId={currentBaseBranchId!} 
-                    allBranchTraders={traders} 
-                    onAdd={handleAdd}
-                    onUpdate={handleUpdate}
-                    onDelete={handleDelete}
-                    onBulkAdd={handleBulkAdd}
-                    onBulkDelete={handleBulkDelete}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          </div>
-          <div className="xl:col-span-1 space-y-6"> {/* Branch Booster takes 1/3 on XL screens */}
-            <ProfitPartnerAgentClient traders={traders} />
-          </div>
+    <div className="space-y-6"> {/* Removed outer grid for sidebar, content now takes full width */}
+      <MiniDashboardStats 
+        liveTradersCount={activeTradersCount}
+        callBackTradersCount={callBackTradersCount}
+        newLeadTradersCount={newLeadTradersCount}
+        recentlyActiveTradersCount={recentlyActiveTradersCount}
+      />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
+              <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
+                 <Skeleton className="h-64 w-full" />
+              ) : (
+                <TraderTableClient 
+                  key={keyForTable} 
+                  initialTraders={traders} 
+                  branchId={currentBaseBranchId!} 
+                  allBranchTraders={traders} 
+                  onAdd={handleAdd}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  onBulkAdd={handleBulkAdd}
+                  onBulkDelete={handleBulkDelete}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        <div className="xl:col-span-1 space-y-6">
+          <ProfitPartnerAgentClient traders={traders} />
+          {/* SalesNavigatorAgentClient is now on its own page */}
         </div>
       </div>
-
-      {/* Sidebar Info Area */}
-      <div className="lg:col-span-3 space-y-6">
-        <InfoAccordion sections={dashboardInfoSections} />
-      </div>
+      {/* InfoAccordion is now in AppSidebar */}
     </div>
   );
 }
+

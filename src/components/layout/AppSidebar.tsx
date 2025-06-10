@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -18,18 +19,139 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutDashboard,
   LogOut,
+  Home,
+  Calculator,
+  Compass,
+  ListChecks,
+  HelpCircle,
+  Users,
+  Rocket,
+  PackageSearch, // For Branch Booster's estimator
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
 import { getBranchInfo, type BranchInfo } from "@/types";
 import { cn } from "@/lib/utils";
+import { InfoAccordion } from "@/components/common/InfoAccordion"; // Import new component
 
-// Main navigation items are now primarily in the AppHeader
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard (Main)" },
-  // "How to Use" is removed, content distributed to relevant pages.
-  // Other main tabs (BuildWise, Estimator, Sales Accelerator) are in AppHeader.
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
+  // Other main navigation items are now in AppHeader
 ];
+
+// Define InfoAccordion sections for each page
+const dashboardInfoSections = [
+  {
+    id: "dashboard-capabilities",
+    title: "Dashboard & Traders",
+    icon: ListChecks,
+    defaultOpen: true,
+    content: [
+      "View & Manage Trader Database: Main table lists branch traders. Use pagination. Mini-stats show Active, Call-Backs, New Leads, Recently Active.",
+      "Add New Trader: Use 'Add New Trader'. Form includes name, sales, status, contacts, notes, call-back dates. Duplicate phone warnings.",
+      "Edit Trader: Click pencil icon (✏️) to modify.",
+      "Delete Single/Multiple Traders: Trash icon (🗑️) for single. Checkboxes + 'Delete (X)' for bulk.",
+      "Bulk Add Traders (CSV): Use 'Bulk Add Traders (CSV)'. Header row with mandatory 'Name' needed.",
+      "Search & Filter: Keyword search and category dropdown filter.",
+      "Sort Trader Data: Click column headers to sort.",
+      "Set Call-Back Reminders: Use 'Call-Back Date' field.",
+      "Download Trader Data (CSV): 'Download CSV' button exports current view.",
+    ],
+  },
+  {
+    id: "branch-booster-dashboard-how-to",
+    title: "Branch Booster Usage",
+    icon: Rocket,
+    content: [
+      "Locate 'Branch Booster' on Dashboard.",
+      "Ask Questions: e.g., 'List active traders with sales over £50k'.",
+      "Use Quick Actions: Pre-fill common queries like 'Estimate Project Materials' (icon: PackageSearch).",
+      "Upload Customer Data (Optional): For deeper insights.",
+      "Get Insights: Click button for analysis.",
+    ],
+  },
+];
+
+const buildwiseIntelInfoSections = [
+  {
+    id: "bwi-capabilities",
+    title: "BuildWise Intel Portal",
+    icon: Home,
+    defaultOpen: true,
+    content: [
+      "Access External Insights: Embeds the BuildWise Intel application for specialized industry data and tools.",
+      "Integrated Analysis: Branch Booster is available on this page to analyse BuildWise insights with your branch's trader data.",
+    ],
+  },
+  {
+    id: "bwi-how-to-use",
+    title: "Using BuildWise & Booster",
+    icon: HelpCircle,
+    content: [
+      "Access BuildWise Intel: Via 'BuildWise Intel' tab in header.",
+      "Navigate Portal: Use embedded scrollbars and interface.",
+      "Combine Insights: While viewing BuildWise, use Branch Booster alongside.",
+      "Contextual Queries: Ask Booster questions linking BuildWise info to your traders (e.g., 'BuildWise shows X trend. How does this affect my Y traders?').",
+      "Upload Data: Optionally upload data to Branch Booster for specific analysis.",
+    ],
+  },
+];
+
+const estimatorInfoSections = [
+  {
+    id: "estimator-capabilities",
+    title: "Materials Estimator",
+    icon: Calculator,
+    defaultOpen: true,
+    content: [
+      "Access External Estimator: Embeds an external Building Materials Estimator tool.",
+      "Estimate Project Materials: Use the tool to estimate material quantities for construction projects.",
+    ],
+  },
+  {
+    id: "estimator-how-to-use",
+    title: "Using Materials Estimator",
+    icon: HelpCircle,
+    content: [
+      "Access Estimator: Via 'Estimator' tab in header.",
+      "Navigate Tool: Use embedded interface and scrollbars.",
+      "Input Project Details: Follow tool instructions.",
+      "View Estimates: Tool provides material estimates.",
+      "Note: External tool. Refer to its documentation for specific questions. Branch Booster also has a material estimation quick action.",
+    ],
+  },
+];
+
+const salesAcceleratorInfoSections = [
+  {
+    id: "ssa-capabilities",
+    title: "Sales Accelerator",
+    icon: Compass,
+    defaultOpen: true,
+    content: [
+      "Advanced Strategic Insights: For strategic planning.",
+      "Deep Dive Analysis: Ask complex questions (market position, sales strategies, competitive analysis).",
+      "AI-Driven Recommendations: For team performance and branch growth.",
+      "Upload Supplemental Data: Market reports, competitor profiles for tailored insights.",
+      "Use Strategic Quick Actions: For common strategic queries.",
+      "External Intelligence: Connects to dedicated external analysis service.",
+    ],
+  },
+  {
+    id: "ssa-how-to-use",
+    title: "Using Sales Accelerator",
+    icon: HelpCircle,
+    content: [
+      "Access: For Managers, via 'Sales Accelerator' tab in header.",
+      "Formulate Strategic Query: Input complex question/objective.",
+      "Use Quick Actions: e.g., 'Market Trends Analysis'.",
+      "Upload Supporting Docs (Optional): For enhanced context.",
+      "Get Insights: Click 'Get Strategic Insights'.",
+      "Contextual Data: Branch trader data automatically included.",
+    ],
+  },
+];
+
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -55,6 +177,18 @@ export function AppSidebar() {
   const displayId = branchInfo?.displayLoginId || "Branch";
   const avatarChar = displayId.includes("MANAGER") ? displayId.charAt(0) + "M" : displayId.charAt(0);
 
+  let currentPageInfoSections: any[] = [];
+  if (pathname.startsWith("/dashboard")) {
+    currentPageInfoSections = dashboardInfoSections;
+  } else if (pathname.startsWith("/buildwise-intel")) {
+    currentPageInfoSections = buildwiseIntelInfoSections;
+  } else if (pathname.startsWith("/estimator")) {
+    currentPageInfoSections = estimatorInfoSections;
+  } else if (pathname.startsWith("/sales-accelerator") && branchInfo?.role === 'manager') {
+    currentPageInfoSections = salesAcceleratorInfoSections;
+  }
+
+
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-3">
@@ -71,10 +205,10 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <ScrollArea className="flex-1">
-          <SidebarMenu className="px-3 py-2">
-            {navItems.map((item) => { // Only "Dashboard" link might remain here for quick access if desired
-              const isActive = pathname === item.href || (item.href === "/dashboard" && pathname.startsWith("/dashboard")); // Make dashboard active if on main dashboard
+        <ScrollArea className="flex-1 px-3 py-2">
+          <SidebarMenu className="mb-4">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || (item.href === "/dashboard" && pathname.startsWith("/dashboard"));
               return (
                 <SidebarMenuItem key={item.href}>
                   <Link href={item.href}>
@@ -99,8 +233,9 @@ export function AppSidebar() {
             })}
           </SidebarMenu>
           
-          {/* Functional Capabilities Accordion has been removed */}
-          {/* Its content is now distributed to individual pages */}
+          {currentPageInfoSections.length > 0 && (
+            <InfoAccordion sections={currentPageInfoSections} />
+          )}
 
         </ScrollArea>
       </SidebarContent>
@@ -133,3 +268,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
