@@ -17,6 +17,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   LayoutDashboard,
   LogOut,
   Home,
@@ -39,9 +45,9 @@ import {
   TrendingUp,
   Brain,
   MessageSquareQuote,
-  HelpCircle, // Added
-  ListChecks, // Added
-  BookOpenText // Added
+  HelpCircle, 
+  ListChecks, 
+  BookOpenText 
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -51,20 +57,36 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
-  // Other main navigation items are now in AppHeader
 ];
 
 interface PurposeBoxItem {
   id: string;
   icon: LucideIcon;
   text: string;
+  isAccordionTrigger?: boolean;
+  accordionContentKey?: string;
 }
+
+const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
+  dashboardHowTo: [
+    { id: 'htu-d1', icon: Users, text: "Manage Traders: Add, edit, delete individually or in bulk." },
+    { id: 'htu-d2', icon: BarChart2, text: "View Stats: See active, call-back, new lead counts." },
+    { id: 'htu-d3', icon: Rocket, text: "Use Branch Booster: Ask questions, analyze data, upload files for insights." },
+    { id: 'htu-d4', icon: BookOpenText, text: "For comprehensive details, visit the main 'How to Use' page via the top navigation." }
+  ]
+};
 
 const dashboardPurposeItems: PurposeBoxItem[] = [
   { id: 'dp1', icon: Eye, text: "View & manage branch trader data" },
   { id: 'dp2', icon: Users, text: "Add, edit, & delete traders" },
   { id: 'dp3', icon: Rocket, text: "Analyse data with Branch Booster" },
-  { id: 'dp4', icon: BarChart2, text: "See quick stats at a glance" },
+  { 
+    id: 'dp-htu', 
+    icon: ListChecks,
+    text: "Dashboard: Key How-To's", 
+    isAccordionTrigger: true, 
+    accordionContentKey: 'dashboardHowTo' 
+  },
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
@@ -125,7 +147,7 @@ export function AppSidebar() {
 
   if (pathname.startsWith("/dashboard")) {
     currentPurposeItems = dashboardPurposeItems;
-    currentPageTitle = "Dashboard Purpose";
+    currentPageTitle = "Dashboard Purpose & How-To's";
   } else if (pathname.startsWith("/buildwise-intel")) {
     currentPurposeItems = buildwiseIntelPurposeItems;
     currentPageTitle = "BuildWise Intel Purpose";
@@ -188,23 +210,66 @@ export function AppSidebar() {
           </SidebarMenu>
           
           {currentPurposeItems.length > 0 && (
-            <div className="space-y-2 pt-2 group-data-[collapsible=icon]:px-0.5">
-              <h3 className="text-xs font-semibold uppercase text-sidebar-foreground/60 px-2 group-data-[collapsible=icon]:hidden">
+            <div className="space-y-1 pt-2 group-data-[collapsible=icon]:px-0.5">
+              <h3 className="text-xs font-semibold uppercase text-sidebar-foreground/60 px-2 group-data-[collapsible=icon]:hidden mb-1">
                 {currentPageTitle}
               </h3>
-              {currentPurposeItems.map((item) => (
-                <div 
-                  key={item.id} 
-                  className={cn(
-                    "flex items-center gap-2.5 p-2 rounded-md text-sidebar-foreground/90 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-2.5 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:aspect-square group-data-[collapsible=icon]:h-auto",
-                    sidebarState === "collapsed" ? "hover:bg-sidebar-accent/40" : "bg-sidebar-accent/10 hover:bg-sidebar-accent/30" 
-                  )}
-                  title={sidebarState === 'collapsed' ? item.text : undefined}
-                >
-                  <item.icon className="h-4 w-4 shrink-0 text-sidebar-primary group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-                  <span className="text-xs group-data-[collapsible=icon]:hidden">{item.text}</span>
-                </div>
-              ))}
+              <Accordion type="single" collapsible className="w-full space-y-1">
+                {currentPurposeItems.map((item) => {
+                  const IconComponent = item.icon;
+                  if (item.isAccordionTrigger && item.accordionContentKey && pageSpecificAccordionContent[item.accordionContentKey]) {
+                    return (
+                      <AccordionItem value={item.id} key={item.id} 
+                        className={cn(
+                          "border-none rounded-md",
+                           sidebarState === "collapsed" ? "" : "bg-sidebar-accent/10" // Background for the whole item only if expanded
+                        )}
+                      >
+                        <AccordionTrigger 
+                          className={cn(
+                            "p-2 text-sidebar-foreground/90 no-underline hover:no-underline data-[state=open]:bg-sidebar-accent/40 data-[state=closed]:hover:bg-sidebar-accent/30 rounded-md w-full text-left",
+                            "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-2.5 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:aspect-square group-data-[collapsible=icon]:h-auto"
+                          )}
+                          title={sidebarState === 'collapsed' ? item.text : undefined}
+                        >
+                          <div className="flex items-center gap-2.5 w-full">
+                            <IconComponent className="h-4 w-4 shrink-0 text-sidebar-primary group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                            <span className="text-xs flex-1 group-data-[collapsible=icon]:hidden">{item.text}</span>
+                            {/* Chevron is part of AccordionTrigger by default and will be on the right */}
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-1 pb-2 pl-3 pr-2 space-y-1.5 group-data-[collapsible=icon]:hidden">
+                          {pageSpecificAccordionContent[item.accordionContentKey].map(subItem => {
+                            const SubItemIcon = subItem.icon;
+                            return (
+                              <div key={subItem.id} className="flex items-center gap-2 p-1.5 rounded-md hover:bg-sidebar-accent/20">
+                                <SubItemIcon className="h-3.5 w-3.5 shrink-0 text-sidebar-primary/80" />
+                                <span className="text-xs text-sidebar-foreground/80">{subItem.text}</span>
+                              </div>
+                            );
+                          })}
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  } else {
+                    return (
+                      <div 
+                        key={item.id} 
+                        className={cn(
+                          "flex items-center gap-2.5 p-2 rounded-md text-sidebar-foreground/90",
+                          sidebarState === "collapsed" 
+                            ? "hover:bg-sidebar-accent/40 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-2.5 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:aspect-square group-data-[collapsible=icon]:h-auto" 
+                            : "bg-sidebar-accent/10 hover:bg-sidebar-accent/30" 
+                        )}
+                        title={sidebarState === 'collapsed' ? item.text : undefined}
+                      >
+                        <IconComponent className="h-4 w-4 shrink-0 text-sidebar-primary group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+                        <span className="text-xs group-data-[collapsible=icon]:hidden">{item.text}</span>
+                      </div>
+                    );
+                  }
+                })}
+              </Accordion>
             </div>
           )}
 
