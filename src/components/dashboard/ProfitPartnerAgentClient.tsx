@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch } from "lucide-react";
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp } from "lucide-react";
 import { profitPartnerQuery, ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query";
 import type { Trader } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils";
@@ -26,14 +26,18 @@ interface ProfitPartnerAgentClientProps {
 }
 
 const quickActions = [
-  { label: "New Customers", query: "Identify new customers and provide a brief summary." },
-  { label: "High Potential New Customers", query: "Which new customers show the highest potential? Provide reasons." },
-  { label: "Boost Existing Customer Spend", query: "Suggest strategies to boost spending from existing customers." },
-  { label: "High Value Existing Customers", query: "List high-value existing customers and any recent changes in their activity." },
-  { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions." },
-  { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons." },
-  { label: "List Bricklayers & Sales Campaign", query: "Give me a list of all traders who are 'Bricklayers' or in 'Brickwork' category. Then, suggest a brief sales campaign message to promote our new line of premium mortar to them." },
-  { label: "Estimate Project Materials", query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.", icon: PackageSearch },
+  { label: "New Customers", query: "Identify new customers and provide a brief summary.", icon: Users },
+  { label: "High Potential New Customers", query: "Which new customers show the highest potential? Provide reasons.", icon: TrendingUp },
+  { label: "Boost Existing Customer Spend", query: "Suggest strategies to boost spending from existing customers.", icon: BarChart },
+  { label: "High Value Existing Customers", query: "List high-value existing customers and any recent changes in their activity.", icon: Sparkles },
+  { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions.", icon: Lightbulb },
+  { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons.", icon: XCircle },
+  { label: "List Bricklayers & Sales Campaign", query: "Give me a list of all traders who are 'Bricklayers' or in 'Brickwork' category. Then, suggest a brief sales campaign message to promote our new line of premium mortar to them.", icon: Users },
+  {
+    label: "Estimate Project Materials",
+    query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.",
+    icon: PackageSearch
+  },
 ];
 
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
@@ -140,7 +144,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
                   className="w-full justify-start text-left h-auto py-2"
                   onClick={() => handleQuickAction(action.query)}
                 >
-                  {IconComponent && <IconComponent className="mr-2 h-4 w-4" />}
+                  <IconComponent className="mr-2 h-4 w-4" />
                   {action.label}
                 </Button>
               );
