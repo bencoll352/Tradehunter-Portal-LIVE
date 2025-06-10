@@ -119,7 +119,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     } finally {
       setIsLoading(false);
     }
-  };
+  }; // Semicolon after function declaration
 
   return (
     <Card className="shadow-lg">
