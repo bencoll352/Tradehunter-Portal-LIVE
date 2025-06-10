@@ -38,7 +38,7 @@ const quickActions = [
     query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.",
     icon: PackageSearch
   }
-]; // Terminate array with a semicolon
+];
 
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +74,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
         setFileContent(null);
       }
     }
-  }; // Semicolon after function declaration
+  };
 
   const clearFile = () => {
     setSelectedFile(null);
@@ -83,11 +83,11 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
       fileInputRef.current.value = "";
     }
     toast({ title: "File Cleared", description: "Uploaded file has been removed." });
-  }; // Semicolon after function declaration
+  };
 
   const handleQuickAction = (query: string) => {
     form.setValue("query", query);
-  }; // Semicolon after function declaration
+  };
 
   const onSubmit = async (values: z.infer<typeof agentFormSchema>>) => {
     setIsLoading(true);
