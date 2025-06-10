@@ -85,7 +85,7 @@ const profitPartnerQueryFlow = ai.defineFlow(
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
 
     if (!process.env.GOOGLE_API_KEY) {
-      console.error("[profitPartnerQueryFlow] CRITICAL: GOOGLE_API_KEY environment variable is not set. Branch Booster AI will not function.");
+      console.error("[profitPartnerQueryFlow] CRITICAL: GOOGLE_API_KEY environment variable is not set. Branch Booster will not function.");
       throw new Error(`Branch Booster analysis failed: The GOOGLE_API_KEY environment variable is not configured on the server. Please contact support or check server logs.`);
     }
 

@@ -46,7 +46,7 @@ const faqs = [
   {
     value: "item-7",
     question: "What is the Sales & Strategy Accelerator? (Managers Only)",
-    answer: "Manager logins (e.g., PURLEYMANAGER) will find the Sales & Strategy Accelerator on its dedicated 'Sales Accelerator' page (tab in header). This tool connects to an external AI service for in-depth strategic analysis, supporting complex queries, document uploads, and AI-driven recommendations.",
+    answer: "Manager logins (e.g., PURLEYMANAGER) will find the Sales & Strategy Accelerator on its dedicated 'Sales Accelerator' page (tab in header). This tool connects to an external service for in-depth strategic analysis, supporting complex queries, document uploads, and system-driven recommendations.",
     icon: <Compass className="h-5 w-5 text-primary mr-2" />
   },
   {

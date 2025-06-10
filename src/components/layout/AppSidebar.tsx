@@ -23,13 +23,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  LayoutDashboard, // Main dashboard icon in header
   LogOut,
   Home,
   Calculator,
   Compass,
   BarChart2,
-  Users, // Icon for TradeHunter
+  Users, 
   UploadCloud,
   Rocket,
   PackageSearch,
@@ -43,7 +42,7 @@ import {
   Wrench,
   ShoppingBasket,
   TrendingUp,
-  Brain,
+  Lightbulb, // Changed from Brain
   MessageSquareQuote, 
   HelpCircle,
   ListChecks,
@@ -59,7 +58,7 @@ import {
   Link as LinkIcon, 
   Zap,
   Paperclip,
-  Columns, // Icon for new Dashboard (Overview) in sidebar
+  Columns, 
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -87,12 +86,12 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   ],
   'do2_content': [
     { id: 'do2c1', icon: Users, text: "Dive into detailed trader management: view, add, edit, and delete traders." },
-    { id: 'do2c2', icon: Rocket, text: "Utilize the Branch Booster for AI-powered insights on your trader data." },
+    { id: 'do2c2', icon: Rocket, text: "Utilise the Branch Booster for system-driven insights on your trader data." },
     { id: 'do2c3', icon: UploadCloud, text: "Perform bulk operations like CSV uploads and deletions." },
   ],
   'do3_content': [
-    { id: 'do3c1', icon: Briefcase, text: "Access an external portal for specialized industry data and insights." },
-    { id: 'do3c2', icon: Brain, text: "Use the integrated Branch Booster on that page to cross-reference Intel data with your local trader information." },
+    { id: 'do3c1', icon: Briefcase, text: "Access an external portal for specialised industry data and insights." },
+    { id: 'do3c2', icon: Lightbulb, text: "Use the integrated Branch Booster on that page to cross-reference Intel data with your local trader information." }, // Changed Brain to Lightbulb
   ],
   'do4_content': [
     { id: 'do4c1', icon: Calculator, text: "Access an external tool to help estimate materials needed for various construction projects." },
@@ -112,7 +111,7 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   ],
   'th3_content': [
     { id: 'th3c1', icon: MessageSquareQuote, text: "Ask questions about trader performance or market insights." },
-    { id: 'th3c2', icon: Zap, text: "Utilize 'Quick Actions' for common, pre-defined analyses." },
+    { id: 'th3c2', icon: Zap, text: "Utilise 'Quick Actions' for common, pre-defined analyses." },
     { id: 'th3c3', icon: Paperclip, text: "Upload customer data files (.csv, .txt) for deeper, contextual analysis." },
   ],
    'th4_content': [
@@ -124,8 +123,8 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   ],
   'bwi_content_main': [
     { id: 'bwic1', icon: Briefcase, text: "Access the external BuildWise Intel application." },
-    { id: 'bwic2', icon: Brain, text: "Gain specialized industry data and insights from their portal." },
-    { id: 'bwic3', icon: Rocket, text: "Use the Branch Booster (also on this page) to analyze Intel portal info alongside your trader data." },
+    { id: 'bwic2', icon: Lightbulb, text: "Gain specialised industry data and insights from their portal." }, // Changed Brain to Lightbulb, specialised
+    { id: 'bwic3', icon: Rocket, text: "Use the Branch Booster (also on this page) to analyse Intel portal info alongside your trader data." }, // analyse
   ],
   'est_content_main': [
     { id: 'estc1', icon: Wrench, text: "Access the external Building Materials Estimator tool." },
@@ -135,7 +134,7 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   'sa_content_main': [
    { id: 'sac1', icon: Compass, text: "For Managers: Advanced strategic analysis via external service." },
    { id: 'sac2', icon: TrendingUp, text: "Identify growth opportunities and assess market trends." },
-   { id: 'sac3', icon: FileText, text: "Analyze with supplemental documents (market reports, etc.)." },
+   { id: 'sac3', icon: FileText, text: "Analyse with supplemental documents (market reports, etc.)." }, // Analyse
   ],
   'htu_content_main': [
     { id: 'htuc1', icon: HelpCircle, text: "Find answers to Frequently Asked Questions." },
@@ -154,13 +153,13 @@ const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
 const tradeHunterPurposeItems: PurposeBoxItem[] = [
   { id: 'th1', icon: Eye, text: "View & Manage Trader Data", contentKey: 'th1_content' },
   { id: 'th2', icon: Users, text: "Add, Edit, & Delete Traders", contentKey: 'th2_content' },
-  { id: 'th3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'th3_content' },
+  { id: 'th3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'th3_content' }, // Analyse
   { id: 'th4', icon: BarChart2, text: "View Hub Statistics", contentKey: 'th4_content'},
   { id: 'th5', icon: BookOpenText, text: "Comprehensive 'How to Use' Guide", contentKey: 'th5_content' }
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
-  { id: 'bwi_main', icon: Home, text: "BuildWise Intel Portal & Analysis", contentKey: 'bwi_content_main' },
+  { id: 'bwi_main', icon: Home, text: "BuildWise Intel Portal & Analysis", contentKey: 'bwi_content_main' }, // Analysis
 ];
 
 const estimatorPurposeItems: PurposeBoxItem[] = [

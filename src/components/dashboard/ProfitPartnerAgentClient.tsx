@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // ShadCN Form components
 import { Input } from "@/components/ui/input"; // ShadCN Input
 import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon } from "lucide-react"; // Lucide icons
-import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query"; // AI flow
+import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query"; // Genkit flow
 import type { Trader } from "@/types"; // Trader type
 import { formatTraderDataForAnalysis } from "@/lib/utils"; // Utility function
 import { ScrollArea } from "@/components/ui/scroll-area"; // ShadCN ScrollArea

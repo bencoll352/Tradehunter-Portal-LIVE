@@ -35,7 +35,7 @@ export default function DashboardOverviewPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <FeatureCard
           title="TradeHunter Hub"
-          description="Manage your trader database, track performance, and get AI-powered insights with the Branch Booster. Access detailed trader information, add new traders, and perform bulk actions."
+          description="Manage your trader database, track performance, and get advanced insights with the Branch Booster. Access detailed trader information, add new traders, and perform bulk actions."
           icon={<Users className="h-8 w-8 text-accent" />}
           link="/tradehunter"
           imageSrc="https://placehold.co/600x400.png"
@@ -43,7 +43,7 @@ export default function DashboardOverviewPage() {
         />
         <FeatureCard
           title="BuildWise Intel"
-          description="Access specialised external data and insights from the BuildWise Intel portal. Use the integrated Branch Booster to analyze this information alongside your trader data."
+          description="Access specialised external data and insights from the BuildWise Intel portal. Use the integrated Branch Booster to analyse this information alongside your trader data."
           icon={<Briefcase className="h-8 w-8 text-accent" />}
           link="/buildwise-intel"
           imageSrc="https://placehold.co/600x400.png"
@@ -51,7 +51,7 @@ export default function DashboardOverviewPage() {
         />
         <FeatureCard
           title="Materials Estimator"
-          description="Utilize the external Building Materials Estimator tool to plan for projects. Estimate quantities for common construction tasks efficiently."
+          description="Utilise the external Building Materials Estimator tool to plan for projects. Estimate quantities for common construction tasks efficiently."
           icon={<Calculator className="h-8 w-8 text-accent" />}
           link="/estimator"
           imageSrc="https://placehold.co/600x400.png"

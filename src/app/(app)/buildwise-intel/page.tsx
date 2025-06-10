@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Rocket, Home } from "lucide-react"; 
 import { ProfitPartnerAgentClient } from '@/components/dashboard/ProfitPartnerAgentClient';
-import { getTradersAction } from '@/app/(app)/tradehunter/actions'; // Updated import path
+import { getTradersAction } from '@/app/(app)/tradehunter/actions'; 
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
