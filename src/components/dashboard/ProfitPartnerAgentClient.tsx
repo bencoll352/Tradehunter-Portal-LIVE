@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon } from "lucide-react";
@@ -27,10 +27,6 @@ interface QuickAction {
   icon: LucideIcon;
 }
 
-interface ProfitPartnerAgentClientProps {
-  traders: Trader[];
-}
-
 const quickActions: QuickAction[] = [
   { label: "New Customers", query: "Identify new customers and provide a brief summary.", icon: Users },
   { label: "High Potential New Customers", query: "Which new customers show the highest potential? Provide reasons.", icon: TrendingUp },
@@ -46,6 +42,10 @@ const quickActions: QuickAction[] = [
   }
 ];
 
+interface ProfitPartnerAgentClientProps {
+  traders: Trader[];
+}
+
 export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResponse, setAnalysisResponse] = useState<string | null>(null);
@@ -60,7 +60,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     defaultValues: { query: "" },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.type.startsWith("text/") || file.name.endsWith(".csv") || file.name.endsWith(".tsv")) {
@@ -82,7 +82,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     }
   };
 
-  const clearFile = () => {
+  const clearFile = (): void => {
     setSelectedFile(null);
     setFileContent(null);
     if (fileInputRef.current) {
@@ -91,7 +91,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     toast({ title: "File Cleared", description: "Uploaded file has been removed." });
   };
 
-  const handleQuickAction = (query: string) => {
+  const handleQuickAction = (query: string): void => {
     form.setValue("query", query);
   };
 
@@ -111,7 +111,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     try {
       const result = await profitPartnerQuery(input);
       setAnalysisResponse(result.answer);
-      if (selectedFile) {
+      if (selectedFile) { 
         clearFile();
       }
     } catch (e) {
