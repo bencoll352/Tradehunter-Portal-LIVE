@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -7,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils"; // Added this import
 
 interface InfoSection {
   id: string;
