@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
@@ -6,7 +7,7 @@ import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
 import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAgentClient";
-// SalesNavigatorAgentClient is removed from here, will be on its own page
+// SalesNavigatorAgentClient is now on its own page /sales-accelerator
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
@@ -14,13 +15,13 @@ import { MiniDashboardStats } from './MiniDashboardStats';
 import { parseISO } from 'date-fns';
 import { getTradersAction } from '@/app/(app)/dashboard/actions'; 
 import { InfoAccordion } from '@/components/common/InfoAccordion';
-import { Users, Lightbulb, HelpCircle, ListChecks, BarChart } from 'lucide-react';
+import { ListChecks, HelpCircle } from 'lucide-react'; // Icons for accordion
 
 const dashboardInfoSections = [
   {
     id: "dashboard-capabilities",
     title: "Dashboard & Trader Management Capabilities",
-    icon: ListChecks, // Changed from Users for variety
+    icon: ListChecks,
     defaultOpen: true,
     content: [
       "View & Manage Trader Database: Your branch's traders are listed in the main table (50 per page). Use pagination to navigate. Mini-stats at the top provide a quick overview (Active, Call-Backs, New Leads, Recently Active).",
@@ -238,8 +239,7 @@ export function DashboardClientPageContent({
       <MiniDashboardStats 
         liveTradersCount={activeTradersCount}
         callBackTradersCount={callBackTradersCount}
-        newLeadTradersCount={callBackTradersCount}
-        newLeadTradersCount={newLeadTradersCount}
+        newLeadTradersCount={newLeadTradersCount} // Corrected duplicate prop
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
       <div className="grid gap-6 lg:grid-cols-3">
@@ -278,3 +278,5 @@ export function DashboardClientPageContent({
     </div>
   );
 }
+
+    

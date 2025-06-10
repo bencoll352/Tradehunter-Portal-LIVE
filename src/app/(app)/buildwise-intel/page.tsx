@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Loader2, HelpCircle, ListChecks } from "lucide-react"; // Changed icon import
+import { Home, Loader2, HelpCircle, ListChecks } from "lucide-react";
 import { ProfitPartnerAgentClient } from '@/components/dashboard/ProfitPartnerAgentClient';
 import { getTradersAction } from '@/app/(app)/dashboard/actions';
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
@@ -78,7 +79,7 @@ export default function BuildwiseIntelPage() {
       <Card className="shadow-lg w-full">
         <CardHeader>
           <div className="flex items-center gap-3 mb-2">
-            <Home className="h-10 w-10 text-primary" /> {/* Changed icon */}
+            <Home className="h-10 w-10 text-primary" />
             <div>
               <CardTitle className="text-3xl font-bold text-primary">BuildWise Intel Portal</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
@@ -131,3 +132,5 @@ export default function BuildwiseIntelPage() {
     </div>
   );
 }
+
+    
