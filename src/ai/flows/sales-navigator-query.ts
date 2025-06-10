@@ -11,8 +11,8 @@
 
 import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts use it
 
-// Corrected URL to point to the /api/analyse/ endpoint with a trailing slash
-const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/api/analyse/";
+// URL reset to base as per request.
+const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/";
 
 const SalesNavigatorQueryInputSchema = z.object({
   query: z.string().describe('The strategic question or analysis request for the Sales & Strategy Accelerator.'),
@@ -58,12 +58,19 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
         // Ignore if error response is not JSON
       }
 
-      if (response.status === 404) {
-        // Check if error details indicate a method issue (e.g., "cannot post /api/analyse/")
-        if (errorDetails.toLowerCase().includes("cannot post")) { 
-          throw new Error(`Sales & Strategy Accelerator service (404 Method Not Allowed): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests. Please verify the external service's routing and method handling for this path.`);
-        } else { // Generic 404 if "cannot post" is not in details
-          throw new Error(`Sales & Strategy Accelerator service (404 Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was not found. Please verify the URL path is correct.`);
+      // Specific handling for "Method Not Allowed" or "Cannot POST /" at a specific path
+      if (response.status === 404 || response.status === 405) { // 405 is Method Not Allowed
+        if (errorDetails.toLowerCase().includes("cannot post") || response.status === 405) {
+          // Check if it's the root path or a specific sub-path like /api/analyse/
+          if (SALES_NAVIGATOR_EXTERNAL_URL.endsWith('/') && !SALES_NAVIGATOR_EXTERNAL_URL.substring(0, SALES_NAVIGATOR_EXTERNAL_URL.length -1).includes('/')) {
+             // This means it's likely the root path (e.g., "https://example.com/")
+             throw new Error(`Sales & Strategy Accelerator service (${response.status} ${response.statusText}): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at its root path ('/'). Please verify if a more specific path is needed (e.g., /api/analyse) or check the external service's routing configuration.`);
+          } else {
+             // This means it's a specific sub-path (e.g., "https://example.com/api/analyse/")
+            throw new Error(`Sales & Strategy Accelerator service (${response.status} ${response.statusText}): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was reached, but it's not configured to accept POST requests at this specific path. Please verify the path is correct or check the external service's routing and method handling.`);
+          }
+        } else { // Generic 404 if "cannot post" is not in details and it's not a 405
+          throw new Error(`Sales & Strategy Accelerator service (${response.status} Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was not found. Please verify the URL path is correct.`);
         }
       }
       // For other non-ok statuses (e.g., 500, 401, 403)
@@ -89,7 +96,6 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
       detailedErrorMessage = error.message;
     }
     
-    // Refined final error message construction
     let finalMessagePart1 = `Sales & Strategy Accelerator analysis failed: ${detailedErrorMessage.length > 300 ? detailedErrorMessage.substring(0, 297) + '...' : detailedErrorMessage}`;
     if (!finalMessagePart1.endsWith('.') && !finalMessagePart1.endsWith('!') && !finalMessagePart1.endsWith('?')) {
       finalMessagePart1 += '.';
