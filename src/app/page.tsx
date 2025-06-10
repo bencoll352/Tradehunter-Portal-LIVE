@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { getBranchInfo } from '@/types'; // Import getBranchInfo
+import { getBranchInfo } from '@/types'; 
 
 export default function HomePage() {
   const router = useRouter();
@@ -12,14 +12,14 @@ export default function HomePage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const loggedInId = localStorage.getItem('loggedInId');
-      const branchInfo = getBranchInfo(loggedInId); // Use getBranchInfo
+      const branchInfo = getBranchInfo(loggedInId); 
 
       if (branchInfo.baseBranchId && branchInfo.role !== 'unknown') {
-        router.replace('/dashboard');
+        router.replace('/dashboard'); // Remains /dashboard for the new overview page
       } else {
         router.replace('/login');
       }
-      // setLoading(false); // Not strictly necessary if redirecting immediately
+      // setLoading(false); 
     }
   }, [router]);
 

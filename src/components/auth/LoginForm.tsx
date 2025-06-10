@@ -40,12 +40,12 @@ export function LoginForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const enteredId = values.branchId.toUpperCase() as BranchLoginId;
     if (VALID_LOGIN_IDS.includes(enteredId)) {
-      localStorage.setItem("loggedInId", enteredId); // Store the entered ID
+      localStorage.setItem("loggedInId", enteredId); 
       toast({
         title: "Login Successful",
         description: `Welcome! Redirecting to dashboard...`,
       });
-      router.push("/dashboard");
+      router.push("/dashboard"); // Remains /dashboard for the new overview page
     } else {
       toast({
         variant: "destructive",

@@ -1,19 +1,22 @@
+
 "use client";
 
 import Link from 'next/link';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Calculator, Compass } from "lucide-react"; 
+import { Home, LayoutDashboard, Calculator, Compass, Users, Columns } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from 'react';
 import { getBranchInfo, type BranchInfo } from '@/types';
 
 const getPathTitle = (path: string) => {
-  if (path.startsWith("/dashboard")) return "Dashboard";
+  if (path === "/dashboard") return "Portal Overview"; 
+  if (path.startsWith("/tradehunter")) return "TradeHunter Hub";
   if (path.startsWith("/buildwise-intel")) return "BuildWise Intel";
   if (path.startsWith("/estimator")) return "Materials Estimator";
   if (path.startsWith("/sales-accelerator")) return "Sales & Strategy Accelerator";
+  if (path.startsWith("/how-to-use")) return "How to Use Guide";
   return "TradeHunter Pro Portal";
 };
 
@@ -27,7 +30,7 @@ export function AppHeader() {
       const loggedInId = localStorage.getItem("loggedInId");
       setBranchInfo(getBranchInfo(loggedInId));
     }
-  }, [pathname]); // Re-check on path change if needed, though role usually doesn't change mid-session
+  }, [pathname]); 
 
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
@@ -51,6 +54,22 @@ export function AppHeader() {
           <Link href="/dashboard" className="flex items-center gap-2">
             <LayoutDashboard className="h-5 w-5" /> 
             Dashboard
+          </Link>
+        </Button>
+        <Button
+          asChild
+          size="lg" 
+          variant={pathname.startsWith("/tradehunter") ? "default" : "ghost"}
+          className={cn(
+            "font-medium", 
+            pathname.startsWith("/tradehunter") 
+              ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+              : "text-primary/90 hover:bg-primary/10 hover:text-primary"
+          )}
+        >
+          <Link href="/tradehunter" className="flex items-center gap-2">
+            <Users className="h-5 w-5" /> 
+            TradeHunter
           </Link>
         </Button>
         <Button
@@ -93,7 +112,7 @@ export function AppHeader() {
             className={cn(
               "font-medium",
               pathname === "/sales-accelerator"
-                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" // Distinct color for manager tool
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" 
                 : "text-destructive/90 hover:bg-destructive/10 hover:text-destructive-foreground/80"
             )}
           >

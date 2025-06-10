@@ -3,14 +3,14 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Rocket, Home } from "lucide-react"; // Restored Home icon
+import { Loader2, Rocket, Home } from "lucide-react"; 
 import { ProfitPartnerAgentClient } from '@/components/dashboard/ProfitPartnerAgentClient';
-import { getTradersAction } from '@/app/(app)/dashboard/actions';
+import { getTradersAction } from '@/app/(app)/tradehunter/actions'; // Updated import path
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 export default function BuildwiseIntelPage() {
-  const intelAppUrl = "https://studio--buildwise-intel.us-central1.hosted.app/"; // Restored intelAppUrl
+  const intelAppUrl = "https://studio--buildwise-intel.us-central1.hosted.app/"; 
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoadingTraders, setIsLoadingTraders] = useState(true);
@@ -50,7 +50,6 @@ export default function BuildwiseIntelPage() {
 
   return (
     <div className="space-y-6">
-      {/* Restored Card containing the BuildWise Intel Portal iframe */}
       <Card className="shadow-lg w-full">
         <CardHeader>
           <div className="flex items-center gap-3">

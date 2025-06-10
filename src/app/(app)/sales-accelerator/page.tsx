@@ -3,13 +3,12 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Compass, Loader2 } from "lucide-react"; // Removed HelpCircle, ListChecks
+import { Compass, Loader2 } from "lucide-react"; 
 import { SalesNavigatorAgentClient } from '@/components/dashboard/SalesNavigatorAgentClient';
-import { getTradersAction } from '@/app/(app)/dashboard/actions';
+import { getTradersAction } from '@/app/(app)/tradehunter/actions'; // Updated import path
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-// InfoAccordion is now in the AppSidebar, not directly on this page.
 
 export default function SalesAcceleratorPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -27,7 +26,7 @@ export default function SalesAcceleratorPage() {
 
         if (info.role !== 'manager') {
           toast({ variant: "destructive", title: "Access Denied", description: "This page is for managers only." });
-          router.replace('/dashboard'); 
+          router.replace('/dashboard'); // Redirect to new overview dashboard
           return;
         }
 
@@ -67,8 +66,7 @@ export default function SalesAcceleratorPage() {
   }
 
   return (
-    <div className="space-y-6"> {/* Removed outer grid for sidebar, content now takes full width */}
-      {/* Main Content Area */}
+    <div className="space-y-6"> 
       <Card className="shadow-lg w-full border-primary/30">
         <CardHeader>
           <div className="flex items-center gap-3 mb-2">
@@ -91,8 +89,6 @@ export default function SalesAcceleratorPage() {
           )}
         </CardContent>
       </Card>
-      {/* InfoAccordion is now in AppSidebar */}
     </div>
   );
 }
-

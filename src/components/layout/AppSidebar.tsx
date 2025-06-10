@@ -23,13 +23,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  LayoutDashboard,
+  LayoutDashboard, // Main dashboard icon in header
   LogOut,
   Home,
   Calculator,
   Compass,
   BarChart2,
-  Users,
+  Users, // Icon for TradeHunter
   UploadCloud,
   Rocket,
   PackageSearch,
@@ -56,9 +56,10 @@ import {
   Trash2,
   CheckSquare,
   Activity,
-  Link as LinkIcon, // Renamed to avoid conflict with NextLink
+  Link as LinkIcon, 
   Zap,
   Paperclip,
+  Columns, // Icon for new Dashboard (Overview) in sidebar
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -66,7 +67,8 @@ import { getBranchInfo, type BranchInfo } from "@/types";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
+  { href: "/dashboard", icon: Columns, label: "Dashboard", tooltip: "Portal Overview" },
+  { href: "/tradehunter", icon: Users, label: "TradeHunter", tooltip: "TradeHunter Hub" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
 
@@ -78,31 +80,48 @@ interface PurposeBoxItem {
 }
 
 const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
-  'dp1_content': [
-    { id: 'dp1c1', icon: Table, text: "Trader data is displayed in a sortable, searchable table." },
-    { id: 'dp1c2', icon: Filter, text: "Filter traders by category using the dropdown." },
-    { id: 'dp1c3', icon: Download, text: "Download current view as CSV using the button." },
+  'do1_content': [
+    { id: 'do1c1', icon: Info, text: "Welcome to TradeHunter Pro! This is your main overview." },
+    { id: 'do1c2', icon: LinkIcon, text: "Quickly navigate to key sections like TradeHunter Hub, BuildWise Intel, and the Materials Estimator using the cards on this page or the header/sidebar navigation." },
+    { id: 'do1c3', icon: Columns, text: "Get a bird's-eye view of the tools available to help manage your branch effectively." },
   ],
-  'dp2_content': [
-    { id: 'dp2c1', icon: PlusCircle, text: "Click 'Add New Trader' for individual entries." },
-    { id: 'dp2c2', icon: UploadCloud, text: "Use 'Bulk Add Traders' for CSV files." },
-    { id: 'dp2c3', icon: Pencil, text: "Click pencil icon in table to edit a trader." },
-    { id: 'dp2c4', icon: Trash2, text: "Click trash icon to delete a trader individually." },
-    { id: 'dp2c5', icon: CheckSquare, text: "Select multiple traders for bulk deletion using checkboxes and the 'Delete (X)' button." },
+  'do2_content': [
+    { id: 'do2c1', icon: Users, text: "Dive into detailed trader management: view, add, edit, and delete traders." },
+    { id: 'do2c2', icon: Rocket, text: "Utilize the Branch Booster for AI-powered insights on your trader data." },
+    { id: 'do2c3', icon: UploadCloud, text: "Perform bulk operations like CSV uploads and deletions." },
   ],
-  'dp3_content': [
-    { id: 'dp3c1', icon: MessageSquareQuote, text: "Ask questions about trader performance or market insights." },
-    { id: 'dp3c2', icon: Zap, text: "Utilize 'Quick Actions' for common, pre-defined analyses." },
-    { id: 'dp3c3', icon: Paperclip, text: "Upload customer data files (.csv, .txt) for deeper, contextual analysis." },
+  'do3_content': [
+    { id: 'do3c1', icon: Briefcase, text: "Access an external portal for specialized industry data and insights." },
+    { id: 'do3c2', icon: Brain, text: "Use the integrated Branch Booster on that page to cross-reference Intel data with your local trader information." },
   ],
-   'dp4_content': [
-    { id: 'dp4c1', icon: Users, text: "See counts for Active, Call-Back, and New Lead traders." },
-    { id: 'dp4c2', icon: Activity, text: "View number of recently active traders (activity in last 30 days)." },
+  'do4_content': [
+    { id: 'do4c1', icon: Calculator, text: "Access an external tool to help estimate materials needed for various construction projects." },
+    { id: 'do4c2', icon: PackageSearch, text: "Streamline project planning by quickly getting material quantity estimates." },
   ],
-  'dp5_content': [
-    { id: 'dp5c1', icon: LinkIcon, text: "Navigate to the main 'How to Use' page (sidebar link) for complete portal documentation and FAQs." }
+  'th1_content': [
+    { id: 'th1c1', icon: Table, text: "Trader data is displayed in a sortable, searchable table." },
+    { id: 'th1c2', icon: Filter, text: "Filter traders by category using the dropdown." },
+    { id: 'th1c3', icon: Download, text: "Download current view as CSV using the button." },
   ],
-  // Define content for other pages if needed, e.g., buildwiseIntel, estimator
+  'th2_content': [
+    { id: 'th2c1', icon: PlusCircle, text: "Click 'Add New Trader' for individual entries." },
+    { id: 'th2c2', icon: UploadCloud, text: "Use 'Bulk Add Traders' for CSV files." },
+    { id: 'th2c3', icon: Pencil, text: "Click pencil icon in table to edit a trader." },
+    { id: 'th2c4', icon: Trash2, text: "Click trash icon to delete a trader individually." },
+    { id: 'th2c5', icon: CheckSquare, text: "Select multiple traders for bulk deletion using checkboxes and the 'Delete (X)' button." },
+  ],
+  'th3_content': [
+    { id: 'th3c1', icon: MessageSquareQuote, text: "Ask questions about trader performance or market insights." },
+    { id: 'th3c2', icon: Zap, text: "Utilize 'Quick Actions' for common, pre-defined analyses." },
+    { id: 'th3c3', icon: Paperclip, text: "Upload customer data files (.csv, .txt) for deeper, contextual analysis." },
+  ],
+   'th4_content': [
+    { id: 'th4c1', icon: Users, text: "See counts for Active, Call-Back, and New Lead traders." },
+    { id: 'th4c2', icon: Activity, text: "View number of recently active traders (activity in last 30 days)." },
+  ],
+  'th5_content': [
+    { id: 'th5c1', icon: LinkIcon, text: "Navigate to the main 'How to Use' page (sidebar link) for complete portal documentation and FAQs." }
+  ],
   'bwi_content_main': [
     { id: 'bwic1', icon: Briefcase, text: "Access the external BuildWise Intel application." },
     { id: 'bwic2', icon: Brain, text: "Gain specialized industry data and insights from their portal." },
@@ -114,9 +133,9 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'estc3', icon: ClipboardList, text: "Plan material needs (Note: this is an external tool)." },
   ],
   'sa_content_main': [
-    { id: 'sac1', icon: Compass, text: "For Managers: Advanced strategic analysis via external service." },
-    { id: 'sac2', icon: TrendingUp, text: "Identify growth opportunities and assess market trends." },
-    { id: 'sac3', icon: FileText, text: "Analyze with supplemental documents (market reports, etc.)." },
+   { id: 'sac1', icon: Compass, text: "For Managers: Advanced strategic analysis via external service." },
+   { id: 'sac2', icon: TrendingUp, text: "Identify growth opportunities and assess market trends." },
+   { id: 'sac3', icon: FileText, text: "Analyze with supplemental documents (market reports, etc.)." },
   ],
   'htu_content_main': [
     { id: 'htuc1', icon: HelpCircle, text: "Find answers to Frequently Asked Questions." },
@@ -125,12 +144,19 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   ]
 };
 
-const dashboardPurposeItems: PurposeBoxItem[] = [
-  { id: 'dp1', icon: Eye, text: "View & Manage Trader Data", contentKey: 'dp1_content' },
-  { id: 'dp2', icon: Users, text: "Add, Edit, & Delete Traders", contentKey: 'dp2_content' },
-  { id: 'dp3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'dp3_content' },
-  { id: 'dp4', icon: BarChart2, text: "View Dashboard Statistics", contentKey: 'dp4_content'},
-  { id: 'dp5', icon: BookOpenText, text: "Comprehensive 'How to Use' Guide", contentKey: 'dp5_content' }
+const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
+  { id: 'do1', icon: Eye, text: "Portal Overview & Navigation", contentKey: 'do1_content' },
+  { id: 'do2', icon: Users, text: "Go to: TradeHunter Hub", contentKey: 'do2_content' },
+  { id: 'do3', icon: Briefcase, text: "Go to: BuildWise Intel", contentKey: 'do3_content' },
+  { id: 'do4', icon: Calculator, text: "Go to: Materials Estimator", contentKey: 'do4_content' },
+];
+
+const tradeHunterPurposeItems: PurposeBoxItem[] = [
+  { id: 'th1', icon: Eye, text: "View & Manage Trader Data", contentKey: 'th1_content' },
+  { id: 'th2', icon: Users, text: "Add, Edit, & Delete Traders", contentKey: 'th2_content' },
+  { id: 'th3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'th3_content' },
+  { id: 'th4', icon: BarChart2, text: "View Hub Statistics", contentKey: 'th4_content'},
+  { id: 'th5', icon: BookOpenText, text: "Comprehensive 'How to Use' Guide", contentKey: 'th5_content' }
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
@@ -177,9 +203,12 @@ export function AppSidebar() {
   let currentPurposeItems: PurposeBoxItem[] = [];
   let currentPageTitle = "Page Info";
 
-  if (pathname.startsWith("/dashboard")) {
-    currentPurposeItems = dashboardPurposeItems;
-    currentPageTitle = "Dashboard: Purpose & How-To's";
+  if (pathname === "/dashboard") {
+    currentPurposeItems = dashboardOverviewPurposeItems;
+    currentPageTitle = "Dashboard: Overview & Purpose";
+  } else if (pathname.startsWith("/tradehunter")) {
+    currentPurposeItems = tradeHunterPurposeItems;
+    currentPageTitle = "TradeHunter Hub: Purpose & How-To's";
   } else if (pathname.startsWith("/buildwise-intel")) {
     currentPurposeItems = buildwiseIntelPurposeItems;
     currentPageTitle = "BuildWise Intel: Purpose";
@@ -214,9 +243,12 @@ export function AppSidebar() {
         <ScrollArea className="flex-1 px-3 py-2">
           <SidebarMenu className="mb-4">
             {navItems.map((item) => {
-              const isActive = pathname === item.href || 
-                               (item.href === "/dashboard" && pathname.startsWith("/dashboard")) ||
-                               (item.href === "/how-to-use" && pathname.startsWith("/how-to-use"));
+              let isActive = false;
+              if (item.href === "/dashboard") {
+                isActive = pathname === item.href;
+              } else {
+                isActive = pathname.startsWith(item.href);
+              }
               return (
                 <SidebarMenuItem key={item.href}>
                   <Link href={item.href}>
@@ -284,7 +316,7 @@ export function AppSidebar() {
                         </AccordionContent>
                       </AccordionItem>
                     );
-                  } else { // Render as a non-accordion item if no contentKey or no content
+                  } else { 
                     return (
                       <div 
                         key={item.id} 

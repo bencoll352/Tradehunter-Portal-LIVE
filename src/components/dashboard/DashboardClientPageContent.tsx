@@ -12,8 +12,7 @@ import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { MiniDashboardStats } from './MiniDashboardStats';
 import { parseISO } from 'date-fns';
-import { getTradersAction } from '@/app/(app)/dashboard/actions'; 
-// InfoAccordion is now in the AppSidebar, not directly on this page.
+import { getTradersAction } from '@/app/(app)/tradehunter/actions';  // Updated import path
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -25,7 +24,7 @@ interface DashboardClientPageContentProps {
   bulkDeleteTradersAction: (branchId: BaseBranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>;
 }
 
-export function DashboardClientPageContent({
+export function DashboardClientPageContent({ // This component is now used for the TradeHunter Hub
   addTraderAction,
   updateTraderAction,
   deleteTraderAction,
@@ -198,7 +197,7 @@ export function DashboardClientPageContent({
   }
   
   return (
-    <div className="space-y-6"> {/* Removed outer grid for sidebar, content now takes full width */}
+    <div className="space-y-6"> 
       <MiniDashboardStats 
         liveTradersCount={activeTradersCount}
         callBackTradersCount={callBackTradersCount}
@@ -209,7 +208,7 @@ export function DashboardClientPageContent({
         <div className="xl:col-span-2 space-y-6">
           <Card className="shadow-md">
             <CardHeader>
-              <CardTitle className="text-2xl text-primary">Trader Overview</CardTitle>
+              <CardTitle className="text-2xl text-primary">Trader Management</CardTitle> {/* Updated title */}
               <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
             </CardHeader>
             <CardContent>
@@ -233,11 +232,8 @@ export function DashboardClientPageContent({
         </div>
         <div className="xl:col-span-1 space-y-6">
           <ProfitPartnerAgentClient traders={traders} />
-          {/* SalesNavigatorAgentClient is now on its own page */}
         </div>
       </div>
-      {/* InfoAccordion is now in AppSidebar */}
     </div>
   );
 }
-
