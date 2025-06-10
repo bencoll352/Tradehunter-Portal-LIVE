@@ -36,6 +36,7 @@ const profitPartnerAnalysisPrompt = ai.definePrompt({
   prompt: `You are a helpful assistant for a building supplies company's branch manager.
 Your goal is to analyse trader data and provide actionable insights based on the user's query.
 You will be given a query, a string of current trader data for the branch, and optionally, content from an uploaded customer file.
+The user's query might also contain observations or data points they've gathered from an external insights portal (like the BuildWise Intel portal they might be viewing). If such context is provided in the query, please integrate it carefully into your analysis along with the trader data and any uploaded files to provide comprehensive insights.
 
 User's Query:
 {{{query}}}
