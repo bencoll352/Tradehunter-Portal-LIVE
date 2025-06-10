@@ -3,15 +3,14 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Loader2, Rocket } from "lucide-react"; // Removed HelpCircle, ListChecks as they are in AppSidebar
+import { Loader2, Rocket } from "lucide-react"; // Removed Home as the iframe card is removed
 import { ProfitPartnerAgentClient } from '@/components/dashboard/ProfitPartnerAgentClient';
 import { getTradersAction } from '@/app/(app)/dashboard/actions';
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-// InfoAccordion is now in the AppSidebar, not directly on this page.
 
 export default function BuildwiseIntelPage() {
-  const intelAppUrl = "https://studio--buildwise-intel.us-central1.hosted.app/";
+  // const intelAppUrl = "https://studio--buildwise-intel.us-central1.hosted.app/"; // No longer needed
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoadingTraders, setIsLoadingTraders] = useState(true);
@@ -50,46 +49,18 @@ export default function BuildwiseIntelPage() {
   }, [toast]);
 
   return (
-    <div className="space-y-6"> {/* Removed outer grid for sidebar, content now takes full width */}
-      {/* Main Content Area */}
-      <Card className="shadow-lg w-full">
-        <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <Home className="h-10 w-10 text-primary" />
-            <div>
-              <CardTitle className="text-3xl font-bold text-primary">BuildWise Intel Portal</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">
-                Access external insights and tools from BuildWise Intel. Use the Branch Booster to analyse this information alongside your trader data.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4 text-foreground">
-            This section embeds the BuildWise Intel application. Use the scrollbars within the embedded content to navigate.
-            If you encounter any issues, please try accessing the site directly.
-          </p>
-          <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20 mb-6">
-            <iframe
-              src={intelAppUrl}
-              title="BuildWise Intel Portal"
-              className="w-full h-full border-0"
-              allowFullScreen
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-            />
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* The Card containing the BuildWise Intel Portal iframe has been removed. */}
 
       <Card className="shadow-lg w-full">
         <CardHeader>
           <div className="flex items-center gap-3">
               <Rocket className="h-8 w-8 text-primary" />
               <div>
-                  <CardTitle className="text-2xl text-primary">Branch Booster Integration</CardTitle>
+                  <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle>
                   <CardDescription>
-                      Use the Branch Booster to ask questions that combine insights from the BuildWise Intel portal above with your current trader data.
-                      For example: "Based on the trends I see in BuildWise Intel, which of my traders are best positioned for growth?"
+                      Use the Branch Booster to ask questions and analyse your current trader data.
+                      {/* Adjusted description as the Intel portal context is removed from this page view */}
                   </CardDescription>
               </div>
           </div>
@@ -110,8 +81,6 @@ export default function BuildwiseIntelPage() {
         </CardContent>
       </Card>
       
-      {/* InfoAccordion is now in AppSidebar */}
     </div>
   );
 }
-
