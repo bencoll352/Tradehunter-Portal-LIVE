@@ -11,8 +11,9 @@
 
 import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts use it
 
-// URL reset to base as per request.
+// URL for the external Sales & Strategy Accelerator service
 const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/";
+const SALES_NAVIGATOR_API_KEY = "AIzaSyD6RmoyI7Ts5p8a7pRI10Gsjcoyny7L4HA"; // API Key provided by user
 
 const SalesNavigatorQueryInputSchema = z.object({
   query: z.string().describe('The strategic question or analysis request for the Sales & Strategy Accelerator.'),
@@ -35,12 +36,23 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
     console.log(`[SalesNavigatorQuery] Including uploaded file content (length: ${input.uploadedFileContent.length} chars).`);
   }
 
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (SALES_NAVIGATOR_API_KEY) {
+    // Assuming the external service expects the API key in a header like 'X-API-Key'.
+    // Adjust this header name if your service expects something different (e.g., 'Authorization: Bearer <key>').
+    headers['X-API-Key'] = SALES_NAVIGATOR_API_KEY;
+    console.log('[SalesNavigatorQuery] Including API Key in X-API-Key header.');
+  } else {
+    console.warn('[SalesNavigatorQuery] SALES_NAVIGATOR_API_KEY is not set. Request will be made without an API key.');
+  }
+
   try {
     const response = await fetch(SALES_NAVIGATOR_EXTERNAL_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: JSON.stringify(input),
     });
 
@@ -57,6 +69,12 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
       } catch (e) {
         // Ignore if error response is not JSON
       }
+      
+      if (response.status === 401 || response.status === 403) {
+        console.error(`[SalesNavigatorQuery] Authentication/Authorization error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
+        throw new Error(`Sales & Strategy Accelerator service failed with ${response.status}: API Key may be invalid or missing required permissions. Details: ${errorDetails.substring(0,150)}...`);
+      }
+
 
       // Specific handling for "Method Not Allowed" or "Cannot POST /" at a specific path
       if (response.status === 404 || response.status === 405) { // 405 is Method Not Allowed
@@ -73,7 +91,7 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
           throw new Error(`Sales & Strategy Accelerator service (${response.status} Not Found): The endpoint at ${SALES_NAVIGATOR_EXTERNAL_URL} was not found. Please verify the URL path is correct.`);
         }
       }
-      // For other non-ok statuses (e.g., 500, 401, 403)
+      // For other non-ok statuses (e.g., 500)
       console.error(`[SalesNavigatorQuery] External service error: ${response.status} ${response.statusText}. Details: ${errorDetails}`);
       throw new Error(`Sales & Strategy Accelerator service failed with status ${response.status}: ${response.statusText}. Details: ${errorDetails.substring(0,150)}...`);
     }
@@ -104,3 +122,4 @@ export async function salesNavigatorQuery(input: SalesNavigatorQueryInput): Prom
     throw new Error(`${finalMessagePart1} Check server logs for full details.`);
   }
 }
+
