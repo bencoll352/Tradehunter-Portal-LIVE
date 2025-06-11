@@ -62,8 +62,8 @@ export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infe
     const newTraderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'> = {
       name: values.name,
       // branchId is set by addTraderToDb using the passed baseBranchId
-      totalSales: values.totalSales,
-      tradesMade: values.tradesMade,
+      totalSales: values.totalSales ?? 0, // Default to 0 if null or undefined
+      tradesMade: values.tradesMade ?? 0, // Default to 0 if null or undefined
       status: values.status,
       description: values.description === undefined ? null : values.description,
       rating: values.rating === undefined ? null : values.rating,
@@ -77,6 +77,8 @@ export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infe
       workdayTiming: values.workdayTiming === undefined ? null : values.workdayTiming,
       notes: values.notes === undefined ? null : values.notes,
       callBackDate: values.callBackDate === undefined ? null : values.callBackDate,
+      annualTurnover: values.annualTurnover === undefined ? null : values.annualTurnover,
+      totalAssets: values.totalAssets === undefined ? null : values.totalAssets,
       closedOn: null, 
       reviewKeywords: null, 
     };
@@ -104,21 +106,23 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
     const traderToUpdate: Trader = {
       ...existingTrader, // Spread existing trader to preserve fields not in form (like id, branchId)
       name: values.name,
-      totalSales: values.totalSales,
-      tradesMade: values.tradesMade,
+      totalSales: values.totalSales ?? existingTrader.totalSales, // Use existing if form value is null/undefined
+      tradesMade: values.tradesMade ?? existingTrader.tradesMade, // Use existing if form value is null/undefined
       status: values.status,
-      description: values.description === undefined ? null : values.description,
-      rating: values.rating === undefined ? null : values.rating,
-      website: values.website === undefined ? null : values.website,
-      phone: values.phone === undefined ? null : values.phone,
-      address: values.address === undefined ? null : values.address,
-      mainCategory: values.mainCategory === undefined ? null : values.mainCategory,
-      ownerName: values.ownerName === undefined ? null : values.ownerName,
-      ownerProfileLink: values.ownerProfileLink === undefined ? null : values.ownerProfileLink,
-      categories: values.categories === undefined ? null : values.categories,
-      workdayTiming: values.workdayTiming === undefined ? null : values.workdayTiming,
-      notes: values.notes === undefined ? null : values.notes,
-      callBackDate: values.callBackDate === undefined ? null : values.callBackDate,
+      description: values.description === undefined ? existingTrader.description : values.description,
+      rating: values.rating === undefined ? existingTrader.rating : values.rating,
+      website: values.website === undefined ? existingTrader.website : values.website,
+      phone: values.phone === undefined ? existingTrader.phone : values.phone,
+      address: values.address === undefined ? existingTrader.address : values.address,
+      mainCategory: values.mainCategory === undefined ? existingTrader.mainCategory : values.mainCategory,
+      ownerName: values.ownerName === undefined ? existingTrader.ownerName : values.ownerName,
+      ownerProfileLink: values.ownerProfileLink === undefined ? existingTrader.ownerProfileLink : values.ownerProfileLink,
+      categories: values.categories === undefined ? existingTrader.categories : values.categories,
+      workdayTiming: values.workdayTiming === undefined ? existingTrader.workdayTiming : values.workdayTiming,
+      notes: values.notes === undefined ? existingTrader.notes : values.notes,
+      callBackDate: values.callBackDate === undefined ? existingTrader.callBackDate : values.callBackDate,
+      annualTurnover: values.annualTurnover === undefined ? existingTrader.annualTurnover : values.annualTurnover,
+      totalAssets: values.totalAssets === undefined ? existingTrader.totalAssets : values.totalAssets,
       // branchId remains from existingTrader, ensuring it's the BaseBranchId
     };
     const updatedTrader = await updateTraderInDb(traderToUpdate);
@@ -194,3 +198,4 @@ export async function bulkDeleteTradersAction(baseBranchId: BaseBranchId, trader
     return { successCount: 0, failureCount, error: errorMessage };
   }
 }
+
