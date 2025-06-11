@@ -11,8 +11,8 @@
 
 import { z } from 'genkit'; // Using genkit's Zod for consistency if other parts use it
 
-// URL for the external Sales & Strategy Accelerator service
-const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-302177537641.us-west1.run.app/";
+// URL for the external Sales & Strategy Accelerator service (Dover specific)
+const SALES_NAVIGATOR_EXTERNAL_URL = "https://sales-and-strategy-navigator-dover-302177537641.us-west1.run.app/";
 const SALES_NAVIGATOR_API_KEY = "AIzaSyD6RmoyI7Ts5p8a7pRI10Gsjcoyny7L4HA"; // API Key provided by user
 
 const SalesNavigatorQueryInputSchema = z.object({
