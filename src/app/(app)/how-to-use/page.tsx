@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -12,8 +13,8 @@ const faqs = [
     value: "item-1",
     question: "How do I log in?",
     answer: "Navigate to the login page and enter your unique Login ID. \n" +
-            "Team Login Examples: PURLEY, BRANCH_B, BRANCH_C, BRANCH_D, DOVER. \n" +
-            "Manager Login Examples: PURLEYMANAGER, BRANCH_BMANAGER, etc. (append 'MANAGER' to your branch's base ID). \n" +
+            "Team Login Examples: DOVER, PURLEY, BRANCH_B, BRANCH_C, BRANCH_D. \n" +
+            "Manager Login Examples: DOVERMANAGER, PURLEYMANAGER, BRANCH_BMANAGER, etc. (append 'MANAGER' to your branch's base ID). \n" +
             "After login, you will land on the main Dashboard (Portal Overview).",
     icon: <HelpCircle className="h-5 w-5 text-primary mr-2" />
   },
@@ -119,8 +120,8 @@ export default function HowToUsePage() {
               <li>Go to the main page. You will be redirected to the login screen.</li>
               <li>Enter your assigned Login ID.
                 <ul className="list-disc list-inside text-muted-foreground space-y-0.5 pl-6 text-sm">
-                    <li>Team examples: "PURLEY", "BRANCH_B", "DOVER".</li>
-                    <li>Manager examples: "PURLEYMANAGER", "BRANCH_BMANAGER", "DOVERMANAGER".</li>
+                    <li>Team examples: "DOVER", "PURLEY", "BRANCH_B", "BRANCH_C".</li>
+                    <li>Manager examples: "DOVERMANAGER", "PURLEYMANAGER", "BRANCH_BMANAGER", "BRANCH_CMANAGER".</li>
                 </ul>
               </li>
               <li>Click "Sign In". You will be taken to the main Dashboard (Portal Overview).</li>
