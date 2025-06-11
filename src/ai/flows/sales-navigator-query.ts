@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A Sales & Strategy Accelerator tool for providing advanced strategic insights.
