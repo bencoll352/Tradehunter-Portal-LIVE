@@ -231,7 +231,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
          <CardContent className="mt-4 border-t pt-4">
           <h3 className="text-lg font-semibold mb-2 text-foreground">Analysis Result:</h3>
           {analysisResponse && (
-            <div className="rounded-md border p-3 bg-muted/50 min-h-[50px]"> {/* Removed fixed height, added min-height for empty state */}
+            <div className="rounded-md border p-3 bg-muted/50">
               <p className="text-sm text-foreground whitespace-pre-wrap">{analysisResponse}</p>
             </div>
           )}
@@ -241,4 +241,3 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     </Card>
   );
 }
-
