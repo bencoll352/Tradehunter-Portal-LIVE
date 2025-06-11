@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -55,15 +54,14 @@ export default function DoverSalesNavigatorPage() {
             <div>
               <CardTitle className="text-3xl font-bold text-primary">Dover Sales & Strategy Navigator</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Specialized sales and strategy tool for {branchInfo?.baseBranchId ? `${branchInfo.baseBranchId} branch` : 'Dover branch'} management.
+                Your advanced hub for the {branchInfo?.baseBranchId ? `${branchInfo.baseBranchId} branch` : 'Dover branch'}, offering specialized sales insights and strategic planning capabilities.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <p className="mb-4 text-foreground">
-            Utilize this dedicated navigator to explore sales insights and strategic opportunities for the {branchInfo?.baseBranchId ? `${branchInfo.baseBranchId} branch` : 'Dover branch'}.
-            The application below provides advanced analytics and planning tools.
+            Leverage this dedicated navigator to uncover in-depth sales intelligence, identify strategic opportunities, and access comprehensive planning tools tailored for the {branchInfo?.baseBranchId ? `${branchInfo.baseBranchId} branch` : 'Dover branch'}.
           </p>
           <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
             <iframe

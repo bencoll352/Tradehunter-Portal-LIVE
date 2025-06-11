@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -58,7 +57,7 @@ const faqs = [
   {
     value: "item-10",
     question: "What is the Dover Sales Navigator (Dover Manager)?",
-    answer: "If you are logged in as 'DOVERMANAGER', you will see an additional 'Dover Sales Nav' tab in the header and sidebar. This provides access to a specialized Sales & Strategy Navigator tool specifically for the Dover branch, embedding an external application for analysis and planning.",
+    answer: "If logged in as 'DOVERMANAGER', an additional 'Dover Sales Nav' tab appears. This leads to an advanced, specialized Sales & Strategy Navigator tool for the Dover branch, embedding an external application for in-depth analysis, intelligence, and strategic planning.",
     icon: <Compass className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -178,7 +177,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Dover Sales Navigator (Dover Manager Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If you are the Dover Manager, click on the "Dover Sales Nav" tab in the header or sidebar.</li>
-              <li>Interact with the embedded Dover-specific Sales & Strategy Navigator tool.</li>
+              <li>Interact with the embedded Dover-specific advanced Sales & Strategy Navigator tool for comprehensive insights.</li>
             </ul>
           </div>
            <div>
@@ -194,3 +193,4 @@ export default function HowToUsePage() {
     </div>
   );
 }
+

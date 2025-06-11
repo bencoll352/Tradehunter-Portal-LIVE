@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -140,8 +139,8 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'htuc4', icon: Compass, text: "Dover Managers: Find a dedicated 'Dover Sales Navigator' tab providing access to a specialized tool." },
   ],
   'dsn_content_main': [
-    { id: 'dsnc1', icon: Compass, text: "Access the Dover-specific Sales & Strategy Navigator tool." },
-    { id: 'dsnc2', icon: TrendingUp, text: "Explore sales insights and strategic opportunities for the Dover branch." },
+    { id: 'dsnc1', icon: Compass, text: "Access the advanced Dover Sales & Strategy Navigator." },
+    { id: 'dsnc2', icon: TrendingUp, text: "Explore comprehensive sales intelligence and strategic opportunities for the Dover branch." },
     { id: 'dsnc3', icon: ShieldCheck, text: "This tool is exclusively available to the Dover Manager account." },
   ],
 };
@@ -207,22 +206,17 @@ export function AppSidebar() {
   let navItems = [...baseNavItems];
 
   if (branchInfo?.displayLoginId === 'DOVERMANAGER') {
-    // Insert Dover Sales Navigator before "How to Use"
     const howToUseIndex = navItems.findIndex(item => item.href === "/how-to-use");
+    const doverNavItem = {
+      href: "/dover-sales-navigator",
+      icon: Compass,
+      label: "Dover Sales Nav",
+      tooltip: "Dover: Advanced Sales & Strategy Hub",
+    };
     if (howToUseIndex !== -1) {
-      navItems.splice(howToUseIndex, 0, {
-        href: "/dover-sales-navigator",
-        icon: Compass,
-        label: "Dover Sales Nav",
-        tooltip: "Dover Sales & Strategy Navigator",
-      });
-    } else { // Fallback if "How to Use" is not found (should not happen)
-      navItems.push({
-        href: "/dover-sales-navigator",
-        icon: Compass,
-        label: "Dover Sales Nav",
-        tooltip: "Dover Sales & Strategy Navigator",
-      });
+      navItems.splice(howToUseIndex, 0, doverNavItem);
+    } else { 
+      navItems.push(doverNavItem);
     }
   }
 
@@ -267,7 +261,6 @@ export function AppSidebar() {
         <ScrollArea className="flex-1 px-3 py-2">
           <SidebarMenu className="mb-4">
             {navItems.map((item) => {
-              // Conditional rendering for Dover Sales Navigator
               if (item.href === "/dover-sales-navigator" && branchInfo?.displayLoginId !== 'DOVERMANAGER') {
                 return null;
               }
@@ -398,3 +391,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
