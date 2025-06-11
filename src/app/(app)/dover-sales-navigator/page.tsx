@@ -55,14 +55,14 @@ export default function DoverSalesNavigatorPage() {
             <div>
               <CardTitle className="text-3xl font-bold text-primary">Dover Sales & Strategy Navigator</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Specialized sales and strategy tool for Dover branch management.
+                Specialized sales and strategy tool for {branchInfo?.baseBranchId ? `${branchInfo.baseBranchId} branch` : 'Dover branch'} management.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <p className="mb-4 text-foreground">
-            Utilize this dedicated navigator to explore sales insights and strategic opportunities for the Dover branch.
+            Utilize this dedicated navigator to explore sales insights and strategic opportunities for the {branchInfo?.baseBranchId ? `${branchInfo.baseBranchId} branch` : 'Dover branch'}.
             The application below provides advanced analytics and planning tools.
           </p>
           <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
@@ -79,3 +79,4 @@ export default function DoverSalesNavigatorPage() {
     </div>
   );
 }
+
