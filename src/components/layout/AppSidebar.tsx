@@ -26,7 +26,6 @@ import {
   LogOut,
   Home,
   Calculator,
-  Compass,
   BarChart2,
   Users, 
   UploadCloud,
@@ -42,7 +41,7 @@ import {
   Wrench,
   ShoppingBasket,
   TrendingUp,
-  Lightbulb, // Changed from Brain
+  Lightbulb, 
   MessageSquareQuote, 
   HelpCircle,
   ListChecks,
@@ -91,7 +90,7 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   ],
   'do3_content': [
     { id: 'do3c1', icon: Briefcase, text: "Access an external portal for specialised industry data and insights." },
-    { id: 'do3c2', icon: Lightbulb, text: "Use the integrated Branch Booster on that page to cross-reference Intel data with your local trader information." }, // Changed Brain to Lightbulb
+    { id: 'do3c2', icon: Lightbulb, text: "Use the integrated Branch Booster on that page to cross-reference Intel data with your local trader information." }, 
   ],
   'do4_content': [
     { id: 'do4c1', icon: Calculator, text: "Access an external tool to help estimate materials needed for various construction projects." },
@@ -123,18 +122,13 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   ],
   'bwi_content_main': [
     { id: 'bwic1', icon: Briefcase, text: "Access the external BuildWise Intel application." },
-    { id: 'bwic2', icon: Lightbulb, text: "Gain specialised industry data and insights from their portal." }, // Changed Brain to Lightbulb, specialised
-    { id: 'bwic3', icon: Rocket, text: "Use the Branch Booster (also on this page) to analyse Intel portal info alongside your trader data." }, // analyse
+    { id: 'bwic2', icon: Lightbulb, text: "Gain specialised industry data and insights from their portal." }, 
+    { id: 'bwic3', icon: Rocket, text: "Use the Branch Booster (also on this page) to analyse Intel portal info alongside your trader data." }, 
   ],
   'est_content_main': [
     { id: 'estc1', icon: Wrench, text: "Access the external Building Materials Estimator tool." },
     { id: 'estc2', icon: ShoppingBasket, text: "Estimate materials for various construction projects." },
     { id: 'estc3', icon: ClipboardList, text: "Plan material needs (Note: this is an external tool)." },
-  ],
-  'sa_content_main': [
-   { id: 'sac1', icon: Compass, text: "For Managers: Advanced strategic analysis via external service." },
-   { id: 'sac2', icon: TrendingUp, text: "Identify growth opportunities and assess market trends." },
-   { id: 'sac3', icon: FileText, text: "Analyse with supplemental documents (market reports, etc.)." }, // Analyse
   ],
   'htu_content_main': [
     { id: 'htuc1', icon: HelpCircle, text: "Find answers to Frequently Asked Questions." },
@@ -153,21 +147,17 @@ const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
 const tradeHunterPurposeItems: PurposeBoxItem[] = [
   { id: 'th1', icon: Eye, text: "View & Manage Trader Data", contentKey: 'th1_content' },
   { id: 'th2', icon: Users, text: "Add, Edit, & Delete Traders", contentKey: 'th2_content' },
-  { id: 'th3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'th3_content' }, // Analyse
+  { id: 'th3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'th3_content' }, 
   { id: 'th4', icon: BarChart2, text: "View Hub Statistics", contentKey: 'th4_content'},
   { id: 'th5', icon: BookOpenText, text: "Comprehensive 'How to Use' Guide", contentKey: 'th5_content' }
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
-  { id: 'bwi_main', icon: Home, text: "BuildWise Intel Portal & Analysis", contentKey: 'bwi_content_main' }, // Analysis
+  { id: 'bwi_main', icon: Home, text: "BuildWise Intel Portal & Analysis", contentKey: 'bwi_content_main' }, 
 ];
 
 const estimatorPurposeItems: PurposeBoxItem[] = [
   { id: 'est_main', icon: Calculator, text: "Building Materials Estimator", contentKey: 'est_content_main' },
-];
-
-const salesAcceleratorPurposeItems: PurposeBoxItem[] = [
-   { id: 'sa_main', icon: Compass, text: "Sales & Strategy Accelerator", contentKey: 'sa_content_main' },
 ];
 
 const howToUsePurposeItems: PurposeBoxItem[] = [
@@ -214,9 +204,6 @@ export function AppSidebar() {
   } else if (pathname.startsWith("/estimator")) {
     currentPurposeItems = estimatorPurposeItems;
     currentPageTitle = "Estimator: Purpose";
-  } else if (pathname.startsWith("/sales-accelerator") && branchInfo?.role === 'manager') {
-    currentPurposeItems = salesAcceleratorPurposeItems;
-    currentPageTitle = "Accelerator: Purpose";
   } else if (pathname.startsWith("/how-to-use")) {
     currentPurposeItems = howToUsePurposeItems;
     currentPageTitle = "How to Use: Guide Sections";

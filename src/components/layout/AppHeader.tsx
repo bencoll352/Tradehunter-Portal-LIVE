@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Calculator, Compass, Users, Columns } from "lucide-react"; 
+import { Home, LayoutDashboard, Calculator, Users, Columns } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from 'react';
 import { getBranchInfo, type BranchInfo } from '@/types';
@@ -15,7 +15,6 @@ const getPathTitle = (path: string) => {
   if (path.startsWith("/tradehunter")) return "TradeHunter Hub";
   if (path.startsWith("/buildwise-intel")) return "BuildWise Intel";
   if (path.startsWith("/estimator")) return "Materials Estimator";
-  if (path.startsWith("/sales-accelerator")) return "Sales & Strategy Accelerator";
   if (path.startsWith("/how-to-use")) return "How to Use Guide";
   return "TradeHunter Pro Portal";
 };
@@ -104,24 +103,6 @@ export function AppHeader() {
             Estimator
           </Link>
         </Button>
-        {branchInfo?.role === 'manager' && (
-          <Button
-            asChild
-            size="lg"
-            variant={pathname === "/sales-accelerator" ? "default" : "ghost"}
-            className={cn(
-              "font-medium",
-              pathname === "/sales-accelerator"
-                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" 
-                : "text-destructive/90 hover:bg-destructive/10 hover:text-destructive-foreground/80"
-            )}
-          >
-            <Link href="/sales-accelerator" className="flex items-center gap-2">
-              <Compass className="h-5 w-5" />
-              Sales Accelerator
-            </Link>
-          </Button>
-        )}
       </nav>
     </header>
   );

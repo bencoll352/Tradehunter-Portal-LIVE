@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Compass, Briefcase, Home, Calculator } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator } from "lucide-react";
 
 const faqs = [
   {
@@ -42,12 +42,6 @@ const faqs = [
     answer: "The Branch Booster helps analyse trader and customer data. It's on the 'TradeHunter' Hub page and the 'BuildWise Intel' page. Use Quick Actions, type questions, or upload customer files for insights. It uses your branch's current trader data and any uploaded file.\n" +
             "On the BuildWise Intel page, ask questions bridging Intel portal insights with your trader data.",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
-  },
-  {
-    value: "item-7",
-    question: "What is the Sales & Strategy Accelerator? (Managers Only)",
-    answer: "Manager logins (e.g., PURLEYMANAGER) will find the Sales & Strategy Accelerator on its dedicated 'Sales Accelerator' page (tab in header). This tool connects to an external service for in-depth strategic analysis, supporting complex queries, document uploads, and system-driven recommendations.",
-    icon: <Compass className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-8",
@@ -158,15 +152,8 @@ export default function HowToUsePage() {
               <li><strong>On BuildWise Intel Page:</strong> Example queries: "Using BuildWise Intel, suggest cross-selling opportunities for active traders."</li>
             </ul>
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">5. Using the Sales & Strategy Accelerator (Managers Only)</h3>
-            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>Access via "Sales Accelerator" tab in header (if logged in with Manager ID).</li>
-              <li>Use "Strategic Quick Actions", enter complex queries, or upload supplemental data.</li>
-            </ul>
-          </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">6. Accessing & Utilising BuildWise Intel Portal</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">5. Accessing & Utilising BuildWise Intel Portal</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "BuildWise Intel" tab in the main header.</li>
               <li>Interact with the embedded external portal.</li>
@@ -174,14 +161,14 @@ export default function HowToUsePage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Materials Estimator</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">6. Using the Materials Estimator</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "Estimator" tab in the main header.</li>
               <li>Interact with the embedded external tool.</li>
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">8. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">7. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All trader data is stored securely in Firebase Firestore, specific to your branch.</li>
               <li>Changes are persistent across sessions.</li>
