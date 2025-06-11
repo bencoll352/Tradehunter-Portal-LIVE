@@ -57,16 +57,18 @@ import {
   Link as LinkIcon, 
   Zap,
   Paperclip,
-  Columns, 
+  Columns,
+  Compass, 
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
 import { getBranchInfo, type BranchInfo } from "@/types";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+const baseNavItems = [
   { href: "/dashboard", icon: Columns, label: "Dashboard", tooltip: "Portal Overview" },
   { href: "/tradehunter", icon: Users, label: "TradeHunter", tooltip: "TradeHunter Hub" },
+  // Dover Sales Navigator will be added conditionally
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
 
@@ -82,6 +84,7 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'do1c1', icon: Info, text: "Welcome to TradeHunter Pro! This is your main overview." },
     { id: 'do1c2', icon: LinkIcon, text: "Quickly navigate to key sections like TradeHunter Hub, BuildWise Intel, and the Materials Estimator using the cards on this page or the header/sidebar navigation." },
     { id: 'do1c3', icon: Columns, text: "Get a bird's-eye view of the tools available to help manage your branch effectively." },
+    { id: 'do1c4', icon: Compass, text: "If you are the Dover Manager, a 'Dover Sales Navigator' tab will also be available in the header and sidebar." },
   ],
   'do2_content': [
     { id: 'do2c1', icon: Users, text: "Dive into detailed trader management: view, add, edit, and delete traders." },
@@ -134,7 +137,13 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'htuc1', icon: HelpCircle, text: "Find answers to Frequently Asked Questions." },
     { id: 'htuc2', icon: ListChecks, text: "Follow detailed step-by-step instructions for portal features." },
     { id: 'htuc3', icon: BookOpenText, text: "Learn about all core functionalities and how to use them effectively." },
-  ]
+    { id: 'htuc4', icon: Compass, text: "Dover Managers: Find a dedicated 'Dover Sales Navigator' tab providing access to a specialized tool." },
+  ],
+  'dsn_content_main': [
+    { id: 'dsnc1', icon: Compass, text: "Access the Dover-specific Sales & Strategy Navigator tool." },
+    { id: 'dsnc2', icon: TrendingUp, text: "Explore sales insights and strategic opportunities for the Dover branch." },
+    { id: 'dsnc3', icon: ShieldCheck, text: "This tool is exclusively available to the Dover Manager account." },
+  ],
 };
 
 const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
@@ -164,6 +173,10 @@ const howToUsePurposeItems: PurposeBoxItem[] = [
   { id: 'htu_main', icon: HelpCircle, text: "Portal Usage Guide & FAQs", contentKey: 'htu_content_main' },
 ];
 
+const doverSalesNavigatorPurposeItems: PurposeBoxItem[] = [
+  { id: 'dsn_main', icon: Compass, text: "Dover Sales Navigator Tool", contentKey: 'dsn_content_main' },
+];
+
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -191,6 +204,27 @@ export function AppSidebar() {
 
   let currentPurposeItems: PurposeBoxItem[] = [];
   let currentPageTitle = "Page Info";
+  let navItems = [...baseNavItems];
+
+  if (branchInfo?.displayLoginId === 'DOVERMANAGER') {
+    // Insert Dover Sales Navigator before "How to Use"
+    const howToUseIndex = navItems.findIndex(item => item.href === "/how-to-use");
+    if (howToUseIndex !== -1) {
+      navItems.splice(howToUseIndex, 0, {
+        href: "/dover-sales-navigator",
+        icon: Compass,
+        label: "Dover Sales Nav",
+        tooltip: "Dover Sales & Strategy Navigator",
+      });
+    } else { // Fallback if "How to Use" is not found (should not happen)
+      navItems.push({
+        href: "/dover-sales-navigator",
+        icon: Compass,
+        label: "Dover Sales Nav",
+        tooltip: "Dover Sales & Strategy Navigator",
+      });
+    }
+  }
 
   if (pathname === "/dashboard") {
     currentPurposeItems = dashboardOverviewPurposeItems;
@@ -204,7 +238,11 @@ export function AppSidebar() {
   } else if (pathname.startsWith("/estimator")) {
     currentPurposeItems = estimatorPurposeItems;
     currentPageTitle = "Estimator: Purpose";
-  } else if (pathname.startsWith("/how-to-use")) {
+  } else if (pathname.startsWith("/dover-sales-navigator") && branchInfo?.displayLoginId === 'DOVERMANAGER') {
+    currentPurposeItems = doverSalesNavigatorPurposeItems;
+    currentPageTitle = "Dover Sales Nav: Purpose";
+  }
+   else if (pathname.startsWith("/how-to-use")) {
     currentPurposeItems = howToUsePurposeItems;
     currentPageTitle = "How to Use: Guide Sections";
   }
@@ -229,6 +267,11 @@ export function AppSidebar() {
         <ScrollArea className="flex-1 px-3 py-2">
           <SidebarMenu className="mb-4">
             {navItems.map((item) => {
+              // Conditional rendering for Dover Sales Navigator
+              if (item.href === "/dover-sales-navigator" && branchInfo?.displayLoginId !== 'DOVERMANAGER') {
+                return null;
+              }
+
               let isActive = false;
               if (item.href === "/dashboard") {
                 isActive = pathname === item.href;
