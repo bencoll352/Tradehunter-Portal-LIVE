@@ -31,7 +31,7 @@ const EXPECTED_HEADERS = [
   "Name", "Total Sales", "Status", "Last Activity", "Description",
   "Reviews", "Rating", "🌐Website", "📞 Phone", "Owner Name",
   "Main Category", "Categories", "Workday Timing", "Address", "Link", "Notes", "Actions",
-  "Annual Turnover", "Total Assets" // Added new headers
+  "Annual Turnover", "Total Assets"
 ];
 
 const FIRESTORE_BATCH_LIMIT = 500;
@@ -587,3 +587,5 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
+
+    
