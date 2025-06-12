@@ -49,7 +49,7 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate'>;
+type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'annualTurnover' | 'totalAssets'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -343,6 +343,8 @@ export function TraderTableClient({
       "Name": trader.name,
       "Branch ID": trader.branchId,
       "Total Sales (£)": trader.totalSales,
+      "Annual Turnover (£)": trader.annualTurnover,
+      "Total Assets (£)": trader.totalAssets,
       "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
       "Last Activity": trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy HH:mm:ss') : '',
@@ -360,7 +362,6 @@ export function TraderTableClient({
       "Closed On": trader.closedOn || '',
       "Review Keywords": trader.reviewKeywords || '',
       "Notes": trader.notes || '',
-      // Removed Annual Turnover and Total Assets from export
     }));
 
     try {
@@ -547,7 +548,8 @@ export function TraderTableClient({
               </TableHead>
               <SortableHeader sortKey="name" label="Name" />
               <SortableHeader sortKey="totalSales" label="Total Sales" />
-              {/* Removed Annual Turnover and Total Assets headers */}
+              <SortableHeader sortKey="annualTurnover" label="Annual Turnover" />
+              <SortableHeader sortKey="totalAssets" label="Total Assets" />
               <SortableHeader sortKey="status" label="Status" />
               <SortableHeader sortKey="lastActivity" label="Last Activity" />
               <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
@@ -601,7 +603,8 @@ export function TraderTableClient({
                   </TooltipProvider>
                 </TableCell>
                 <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
-                {/* Removed Annual Turnover and Total Assets cells */}
+                <TableCell className="whitespace-nowrap">{renderCellContent(trader.annualTurnover, 0, false, true)}</TableCell>
+                <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalAssets, 0, false, true)}</TableCell>
                 <TableCell>
                    <Button
                       variant="ghost" size="sm"
@@ -671,7 +674,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-    
-
-    
