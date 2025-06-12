@@ -130,7 +130,9 @@ export function TraderTableClient({
         (trader.categories && trader.categories.toLowerCase().includes(searchTermLower)) ||
         (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower)) ||
         (trader.notes && trader.notes.toLowerCase().includes(searchTermLower)) ||
-        (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower))
+        (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower)) ||
+        (trader.annualTurnover && String(trader.annualTurnover).includes(searchTermLower)) ||
+        (trader.totalAssets && String(trader.totalAssets).includes(searchTermLower))
       );
     }
 
