@@ -534,8 +534,8 @@ export function TraderTableClient({
           </p>
         </div>
       ) : (
-      <div className="rounded-md border shadow-sm overflow-x-auto">
-        <Table>
+      <div className="rounded-md border shadow-sm">
+        <Table className="min-w-max">
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">
@@ -674,3 +674,5 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+    
