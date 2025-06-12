@@ -30,9 +30,21 @@ export type BranchLoginId =
   | 'BRANCH_B' | 'BRANCH_BMANAGER'
   | 'BRANCH_C' | 'BRANCH_CMANAGER'
   | 'BRANCH_D' | 'BRANCH_DMANAGER'
-  | 'DOVER' | 'DOVERMANAGER';
+  | 'DOVER' | 'DOVERMANAGER'
+  | 'COLCHESTER' | 'COLCHESTERMANAGER'
+  | 'CHELMSFORD' | 'CHELMSFORDMANAGER'
+  | 'SITTINGBOURNE' | 'SITTINGBOURNEMANAGER';
 
-export type BaseBranchId = 'PURLEY' | 'BRANCH_B' | 'BRANCH_C' | 'BRANCH_D' | 'DOVER';
+export type BaseBranchId = 
+  | 'PURLEY' 
+  | 'BRANCH_B' 
+  | 'BRANCH_C' 
+  | 'BRANCH_D' 
+  | 'DOVER'
+  | 'COLCHESTER'
+  | 'CHELMSFORD'
+  | 'SITTINGBOURNE';
+
 export type UserRole = 'team' | 'manager' | 'unknown';
 
 export const VALID_LOGIN_IDS: BranchLoginId[] = [
@@ -40,10 +52,22 @@ export const VALID_LOGIN_IDS: BranchLoginId[] = [
   'BRANCH_B', 'BRANCH_BMANAGER',
   'BRANCH_C', 'BRANCH_CMANAGER',
   'BRANCH_D', 'BRANCH_DMANAGER',
-  'DOVER', 'DOVERMANAGER'
+  'DOVER', 'DOVERMANAGER',
+  'COLCHESTER', 'COLCHESTERMANAGER',
+  'CHELMSFORD', 'CHELMSFORDMANAGER',
+  'SITTINGBOURNE', 'SITTINGBOURNEMANAGER'
 ];
 
-export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = ['PURLEY', 'BRANCH_B', 'BRANCH_C', 'BRANCH_D', 'DOVER'];
+export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = [
+  'PURLEY', 
+  'BRANCH_B', 
+  'BRANCH_C', 
+  'BRANCH_D', 
+  'DOVER',
+  'COLCHESTER',
+  'CHELMSFORD',
+  'SITTINGBOURNE'
+];
 
 export interface BranchInfo {
   baseBranchId: BaseBranchId | null;
@@ -52,7 +76,7 @@ export interface BranchInfo {
 }
 
 export function getBranchInfo(loginId: string | null): BranchInfo {
-  if (!loginId || !VALID_LOGIN_IDS.includes(loginId as BranchLoginId)) {
+  if (!loginId || !VALID_LOGIN_IDS.includes(loginId.toUpperCase() as BranchLoginId)) {
     return { baseBranchId: null, role: 'unknown', displayLoginId: null };
   }
 
@@ -61,14 +85,14 @@ export function getBranchInfo(loginId: string | null): BranchInfo {
   if (upperLoginId.endsWith('MANAGER')) {
     const baseId = upperLoginId.replace('MANAGER', '') as BaseBranchId;
     if (VALID_BASE_BRANCH_IDS.includes(baseId)) {
-      return { baseBranchId: baseId, role: 'manager', displayLoginId: loginId as BranchLoginId };
+      return { baseBranchId: baseId, role: 'manager', displayLoginId: loginId.toUpperCase() as BranchLoginId };
     }
   } else {
     if (VALID_BASE_BRANCH_IDS.includes(upperLoginId as BaseBranchId)) {
-      return { baseBranchId: upperLoginId as BaseBranchId, role: 'team', displayLoginId: loginId as BranchLoginId };
+      return { baseBranchId: upperLoginId as BaseBranchId, role: 'team', displayLoginId: loginId.toUpperCase() as BranchLoginId };
     }
   }
-  return { baseBranchId: null, role: 'unknown', displayLoginId: loginId as BranchLoginId };
+  return { baseBranchId: null, role: 'unknown', displayLoginId: loginId.toUpperCase() as BranchLoginId };
 }
 
 
@@ -100,3 +124,4 @@ export interface BulkDeleteTradersResult {
   failureCount: number;
   error?: string | null;
 }
+
