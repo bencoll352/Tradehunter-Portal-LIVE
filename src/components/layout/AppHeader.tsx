@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Calculator, Users, Columns, Compass, UsersRound } from "lucide-react"; 
+import { Home, LayoutDashboard, Calculator, Users, Columns, Compass } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from 'react';
 import { getBranchInfo, type BranchInfo } from '@/types';
@@ -14,7 +14,6 @@ const getPathTitle = (path: string) => {
   if (path === "/dashboard") return "Portal Overview"; 
   if (path.startsWith("/tradehunter")) return "TradeHunter Hub";
   if (path.startsWith("/buildwise-intel")) return "BuildWise Intel";
-  if (path.startsWith("/competitor-insights")) return "Competitor Insights";
   if (path.startsWith("/estimator")) return "Materials Estimator";
   if (path.startsWith("/dover-sales-navigator")) return "Dover Sales Navigator";
   if (path.startsWith("/how-to-use")) return "How to Use Guide";
@@ -71,22 +70,6 @@ export function AppHeader() {
           <Link href="/tradehunter" className="flex items-center gap-2">
             <Users className="h-5 w-5" /> 
             TradeHunter
-          </Link>
-        </Button>
-        <Button
-          asChild
-          size="lg" 
-          variant={pathname.startsWith("/competitor-insights") ? "default" : "ghost"}
-          className={cn(
-            "font-medium", 
-            pathname.startsWith("/competitor-insights") 
-              ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-              : "text-primary/90 hover:bg-primary/10 hover:text-primary"
-          )}
-        >
-          <Link href="/competitor-insights" className="flex items-center gap-2">
-            <UsersRound className="h-5 w-5" /> 
-            Compete Intel
           </Link>
         </Button>
         <Button
