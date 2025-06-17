@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const formSchema = z.object({
   urls: z.string()
-    .min(10, { message: "Please enter at least one URL." }) // Min length for the whole string, could be more refined
+    .min(10, { message: "Please enter at least one URL." }) 
     .refine(value => {
       const lines = value.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       return lines.length > 0 && lines.length <= 10;
@@ -31,6 +31,94 @@ const formSchema = z.object({
       }
     }, { message: "One or more inputs are not valid URLs. Ensure each URL is correctly formatted (e.g., https://example.com) and on its own line." }),
 });
+
+// Helper function to process and format the analysis text
+function FormatAnalysisResult({ analysisText }: { analysisText: string | null }) {
+  if (!analysisText) return null;
+
+  const cleanedText = analysisText.replace(/\*/g, ''); // Remove all asterisks globally
+
+  const sections: React.ReactNode[] = [];
+  let overallAnalysisContent: React.ReactNode = null;
+
+  const overallAnalysisMarker = "Provide your overall analysis:";
+  const overallAnalysisMarkerLower = overallAnalysisMarker.toLowerCase();
+  const overallAnalysisIndex = cleanedText.toLowerCase().indexOf(overallAnalysisMarkerLower);
+
+  let competitorReportsText = cleanedText;
+  if (overallAnalysisIndex !== -1) {
+    competitorReportsText = cleanedText.substring(0, overallAnalysisIndex);
+    const overallText = cleanedText.substring(overallAnalysisIndex + overallAnalysisMarker.length).trim();
+    if (overallText) {
+      overallAnalysisContent = (
+        <div className="mt-6 pt-4 border-t border-border/30">
+          <h3 className="text-lg font-semibold mb-2 text-primary">Overall Analysis</h3>
+          {overallText.split('\n').filter(line => line.trim()).map((paragraph, idx) => (
+            <p key={`overall-${idx}`} className="mb-2 text-sm">{paragraph}</p>
+          ))}
+        </div>
+      );
+    }
+  }
+  
+  // Split by "---" delimiter first, then process each block for "Website URL:"
+  const blocks = competitorReportsText.split('---').map(b => b.trim()).filter(b => b);
+
+  blocks.forEach((block, index) => {
+    const urlMatch = block.match(/^Website URL:\s*(https?:\/\/[^\s]+)/i);
+    let urlDisplay: React.ReactNode = null;
+    let analysisLinesForBlock: string[] = [];
+    let blockContentToParse = block;
+
+    if (urlMatch && urlMatch[1]) {
+      const currentUrl = urlMatch[1];
+      urlDisplay = <strong className="text-primary">{currentUrl}</strong>;
+      blockContentToParse = block.substring(urlMatch[0].length).trim();
+    }
+    
+    // Process lines within the block (whether URL was found or it's a general block)
+    analysisLinesForBlock = blockContentToParse.split('\n').map(line => line.trim()).filter(line => line && line.toLowerCase() !== "content summary:");
+
+
+    if (analysisLinesForBlock.length > 0 || urlDisplay) {
+      sections.push(
+        <div key={`section-${index}`} className="mb-4 pb-2 border-b border-border/30 last:border-b-0">
+          {urlDisplay && <p className="mb-1 text-md">{urlDisplay}</p>}
+          {analysisLinesForBlock.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              {analysisLinesForBlock.map((line, lineIdx) => {
+                // Remove leading hyphens/bullets if LLM adds them, as we use <li>
+                const cleanLine = line.replace(/^-\s*/, '').replace(/^\*\s*/, '').replace(/^\d+\.\s*/, '');
+                if (cleanLine.trim()) {
+                    return <li key={`line-${index}-${lineIdx}`}>{cleanLine}</li>;
+                }
+                return null;
+              })}
+            </ul>
+          ) : (
+             urlDisplay && <p className="text-sm text-muted-foreground italic mt-1">No specific analysis points provided, or content was fetched with an error.</p>
+          )}
+        </div>
+      );
+    }
+  });
+
+
+  if (sections.length === 0 && !overallAnalysisContent && cleanedText.trim()) {
+    // Fallback for unparsable text if no sections were created: show as paragraphs
+    return cleanedText.split('\n').filter(line => line.trim()).map((paragraph, idx) => (
+        <p key={`fallback-${idx}`} className="mb-2 text-sm">{paragraph}</p>
+    ));
+  }
+
+  return (
+    <>
+      {sections}
+      {overallAnalysisContent}
+    </>
+  );
+}
+
 
 export default function CompetitorInsightsPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +138,7 @@ export default function CompetitorInsightsPage() {
     setAnalysisResult(null);
     setError(null);
 
-    const urlsArray = values.urls.split('\n') // Corrected split character
+    const urlsArray = values.urls.split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0);
 
@@ -64,7 +152,6 @@ export default function CompetitorInsightsPage() {
       setIsLoading(false);
       return;
     }
-
 
     try {
       const result = await analyzeCompetitorWebsitesAction(urlsArray);
@@ -176,8 +263,8 @@ export default function CompetitorInsightsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[400px] w-full rounded-md border p-4 bg-muted/30">
-              <pre className="text-sm text-foreground whitespace-pre-wrap break-words">{analysisResult}</pre>
+            <ScrollArea className="h-auto max-h-[600px] w-full rounded-md border p-4 bg-muted/30">
+              <FormatAnalysisResult analysisText={analysisResult} />
             </ScrollArea>
           </CardContent>
         </Card>
@@ -185,3 +272,4 @@ export default function CompetitorInsightsPage() {
     </div>
   );
 }
+
