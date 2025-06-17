@@ -33,7 +33,8 @@ export type BranchLoginId =
   | 'DOVER' | 'DOVERMANAGER'
   | 'COLCHESTER' | 'COLCHESTERMANAGER'
   | 'CHELMSFORD' | 'CHELMSFORDMANAGER'
-  | 'SITTINGBOURNE' | 'SITTINGBOURNEMANAGER';
+  | 'SITTINGBOURNE' | 'SITTINGBOURNEMANAGER'
+  | 'MARGATE' | 'MARGATEMANAGER';
 
 export type BaseBranchId = 
   | 'PURLEY' 
@@ -43,7 +44,8 @@ export type BaseBranchId =
   | 'DOVER'
   | 'COLCHESTER'
   | 'CHELMSFORD'
-  | 'SITTINGBOURNE';
+  | 'SITTINGBOURNE'
+  | 'MARGATE';
 
 export type UserRole = 'team' | 'manager' | 'unknown';
 
@@ -55,7 +57,8 @@ export const VALID_LOGIN_IDS: BranchLoginId[] = [
   'DOVER', 'DOVERMANAGER',
   'COLCHESTER', 'COLCHESTERMANAGER',
   'CHELMSFORD', 'CHELMSFORDMANAGER',
-  'SITTINGBOURNE', 'SITTINGBOURNEMANAGER'
+  'SITTINGBOURNE', 'SITTINGBOURNEMANAGER',
+  'MARGATE', 'MARGATEMANAGER'
 ];
 
 export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = [
@@ -66,7 +69,8 @@ export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = [
   'DOVER',
   'COLCHESTER',
   'CHELMSFORD',
-  'SITTINGBOURNE'
+  'SITTINGBOURNE',
+  'MARGATE'
 ];
 
 export interface BranchInfo {
@@ -124,4 +128,3 @@ export interface BulkDeleteTradersResult {
   failureCount: number;
   error?: string | null;
 }
-

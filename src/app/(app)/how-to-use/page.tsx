@@ -13,8 +13,8 @@ const faqs = [
     value: "item-1",
     question: "How do I log in?",
     answer: "Navigate to the login page and enter your unique Login ID. \n" +
-            "Team Login Examples: DOVER, PURLEY, COLCHESTER, CHELMSFORD, SITTINGBOURNE, BRANCH_B, BRANCH_C, BRANCH_D. \n" +
-            "Manager Login Examples: DOVERMANAGER, PURLEYMANAGER, COLCHESTERMANAGER, CHELMSFORDMANAGER, SITTINGBOURNEMANAGER, etc. (append 'MANAGER' to your branch's base ID). \n" +
+            "Team Login Examples: DOVER, PURLEY, COLCHESTER, CHELMSFORD, SITTINGBOURNE, MARGATE, BRANCH_B, BRANCH_C, BRANCH_D. \n" +
+            "Manager Login Examples: DOVERMANAGER, PURLEYMANAGER, COLCHESTERMANAGER, CHELMSFORDMANAGER, SITTINGBOURNEMANAGER, MARGATEMANAGER, etc. (append 'MANAGER' to your branch's base ID). \n" +
             "After login, you will land on the main Dashboard (Portal Overview).",
     icon: <HelpCircle className="h-5 w-5 text-primary mr-2" />
   },
@@ -120,8 +120,8 @@ export default function HowToUsePage() {
               <li>Go to the main page. You will be redirected to the login screen.</li>
               <li>Enter your assigned Login ID.
                 <ul className="list-disc list-inside text-muted-foreground space-y-0.5 pl-6 text-sm">
-                    <li>Team examples: "DOVER", "PURLEY", "COLCHESTER", "CHELMSFORD", "SITTINGBOURNE", "BRANCH_B", "BRANCH_C", "BRANCH_D".</li>
-                    <li>Manager examples: "DOVERMANAGER", "PURLEYMANAGER", "COLCHESTERMANAGER", "CHELMSFORDMANAGER", "SITTINGBOURNEMANAGER", "BRANCH_BMANAGER", "BRANCH_CMANAGER", "BRANCH_DMANAGER".</li>
+                    <li>Team examples: "DOVER", "PURLEY", "COLCHESTER", "CHELMSFORD", "SITTINGBOURNE", "MARGATE", "BRANCH_B", "BRANCH_C", "BRANCH_D".</li>
+                    <li>Manager examples: "DOVERMANAGER", "PURLEYMANAGER", "COLCHESTERMANAGER", "CHELMSFORDMANAGER", "SITTINGBOURNEMANAGER", "MARGATEMANAGER", "BRANCH_BMANAGER", "BRANCH_CMANAGER", "BRANCH_DMANAGER".</li>
                 </ul>
               </li>
               <li>Click "Sign In". You will be taken to the main Dashboard (Portal Overview).</li>
