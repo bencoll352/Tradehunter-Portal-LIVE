@@ -4,15 +4,15 @@
  * @fileOverview A Genkit flow to analyze competitor websites.
  *
  * - analyzeCompetitors - A function that handles the competitor analysis process.
- * - CompetitionAnalysisInputSchema - The input type for the analyzeCompetitors function.
- * - CompetitionAnalysisOutputSchema - The return type for the analyzeCompetitors function.
+ * - CompetitionAnalysisInput - The input type for the analyzeCompetitors function.
+ * - CompetitionAnalysisOutput - The return type for the analyzeCompetitors function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { fetchWebsiteContentTool, type FetchWebsiteContentOutput } from '@/ai/tools/fetch-website-content-tool';
 
-export const CompetitionAnalysisInputSchema = z.object({
+const CompetitionAnalysisInputSchema = z.object({
   websiteUrls: z.array(z.string().url({ message: "Please provide valid URLs."}))
     .min(1, { message: "Please provide at least one website URL." })
     .max(10, { message: "You can analyze a maximum of 10 websites at a time." })
@@ -29,7 +29,7 @@ const WebsiteContentsSchema = z.array(
   })
 );
 
-export const CompetitionAnalysisOutputSchema = z.object({
+const CompetitionAnalysisOutputSchema = z.object({
   analysis: z.string().describe('The textual analysis of the competitor websites.'),
 });
 export type CompetitionAnalysisOutput = z.infer<typeof CompetitionAnalysisOutputSchema>;
