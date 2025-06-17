@@ -44,17 +44,20 @@ const competitionAnalysisMainPrompt = ai.definePrompt({
   output: { schema: CompetitionAnalysisOutputSchema },
   prompt: `You are a local market analyst for a builders' merchant.
 You have been provided with content (or error messages if content fetching failed) from several competitor websites.
-Your task is to analyze this information and provide a summary of the local competitive landscape.
+Your task is to analyze this information and provide a summary of the local competitive landscape, with a strong emphasis on current offers and promotions.
 
-Focus on:
-- Key services or products being prominently promoted by each competitor.
-- Special offers, discounts, or unique selling propositions mentioned.
-- Recent news, blog posts, events, or community involvement highlighted on their sites.
-- The general tone, style, and target audience apparent from their website content.
-- Any discernible local market trends, common themes, or areas of intense competition based on the collective information.
-- Identify any unique strengths or weaknesses you can infer for each competitor based *solely* on the provided text.
+Focus primarily on:
+- **The latest offers, promotions, discounts, or special deals** being advertised. Detail these clearly for each competitor.
+- Key services or products being prominently promoted alongside these offers.
+- Any unique selling propositions highlighted in relation to current promotions.
 
-Structure your analysis clearly. You can provide a brief summary for each website first, then an overall synthesis.
+Also consider:
+- Recent news, blog posts, or events that might tie into current offers.
+- The general tone and target audience for these promotions.
+- Any discernible local market trends related to promotional activities based on the collective information.
+- Identify any unique strengths or weaknesses you can infer for each competitor based *solely* on the provided text and their promotional strategies.
+
+Structure your analysis clearly. For each website, first list its offers and promotions, then provide a brief summary of other relevant points. Conclude with an overall synthesis of the competitive promotional landscape.
 Be concise and focus on actionable insights that would be valuable to a builders' merchant manager.
 If content for a website is missing, insufficient, or an error message is provided instead of content, acknowledge this in your analysis for that specific URL and explain that you cannot analyze it deeply. Do not attempt to guess or fetch information yourself. Base your analysis *only* on the provided text.
 
@@ -64,8 +67,8 @@ Website URL: {{{url}}}
 {{#if error}}
 Error Fetching Content: {{{error}}}
 {{else if content}}
-Content Summary:
-(Provide a brief summary of the key points from the website content below if available and relevant, otherwise state if content is minimal or uninformative)
+Content Summary & Promotions:
+(Provide a brief summary of the key points, focusing on offers and promotions from the website content below if available and relevant, otherwise state if content is minimal or uninformative)
 """
 {{{content}}}
 """
@@ -75,7 +78,7 @@ Content: No content provided or content was empty.
 ---
 {{/each}}
 
-Provide your overall analysis:
+Provide your overall analysis of the competitive promotional landscape:
 `,
   // Model configuration can be added here if needed, e.g., temperature
   // config: { temperature: 0.5 }
@@ -134,3 +137,4 @@ const competitionAnalysisFlow = ai.defineFlow(
     }
   }
 );
+
