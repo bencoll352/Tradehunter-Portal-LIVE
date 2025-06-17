@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -58,6 +59,10 @@ import {
   Paperclip,
   Columns,
   Compass, 
+  UsersRound,
+  ClipboardSearch,
+  Globe,
+  ReplaceAll,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -67,6 +72,7 @@ import { cn } from "@/lib/utils";
 const baseNavItems = [
   { href: "/dashboard", icon: Columns, label: "Dashboard", tooltip: "Portal Overview" },
   { href: "/tradehunter", icon: Users, label: "TradeHunter", tooltip: "TradeHunter Hub" },
+  { href: "/competitor-insights", icon: UsersRound, label: "Compete Intel", tooltip: "Competitor Insights" },
   // Dover Sales Navigator will be added conditionally
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
@@ -81,7 +87,7 @@ interface PurposeBoxItem {
 const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   'do1_content': [
     { id: 'do1c1', icon: Info, text: "Welcome to TradeHunter Pro! This is your main overview." },
-    { id: 'do1c2', icon: LinkIcon, text: "Quickly navigate to key sections like TradeHunter Hub, BuildWise Intel, and the Materials Estimator using the cards on this page or the header/sidebar navigation." },
+    { id: 'do1c2', icon: LinkIcon, text: "Quickly navigate to key sections like TradeHunter Hub, Competitor Insights, BuildWise Intel, and the Materials Estimator using the cards on this page or the header/sidebar navigation." },
     { id: 'do1c3', icon: Columns, text: "Get a bird's-eye view of the tools available to help manage your branch effectively." },
     { id: 'do1c4', icon: Compass, text: "If you are the Dover Manager, a 'Dover Sales Navigator' tab will also be available in the header and sidebar." },
   ],
@@ -89,6 +95,9 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'do2c1', icon: Users, text: "Dive into detailed trader management: view, add, edit, and delete traders." },
     { id: 'do2c2', icon: Rocket, text: "Utilise the Branch Booster for system-driven insights on your trader data." },
     { id: 'do2c3', icon: UploadCloud, text: "Perform bulk operations like CSV uploads and deletions." },
+  ],
+  'do_compete_intel_content': [
+    { id: 'doci1', icon: UsersRound, text: "Access the 'Competitor Insights' page to analyze local competitor websites and gain market understanding." },
   ],
   'do3_content': [
     { id: 'do3c1', icon: Briefcase, text: "Access an external portal for specialised industry data and insights." },
@@ -122,6 +131,12 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   'th5_content': [
     { id: 'th5c1', icon: LinkIcon, text: "Navigate to the main 'How to Use' page (sidebar link) for complete portal documentation and FAQs." }
   ],
+  'ci_content_main': [
+    { id: 'cic1', icon: Globe, text: "Input up to 10 competitor website URLs (one per line)." },
+    { id: 'cic2', icon: ClipboardSearch, text: "The system will attempt to fetch content from these sites." },
+    { id: 'cic3', icon: ReplaceAll, text: "Receive an analysis summarizing local competitive activities, offers, and trends based on the fetched website content." },
+    { id: 'cic4', icon: Lightbulb, text: "Use these insights to better understand your local market." },
+  ],
   'bwi_content_main': [
     { id: 'bwic1', icon: Briefcase, text: "Access the external BuildWise Intel application." },
     { id: 'bwic2', icon: Lightbulb, text: "Gain specialised industry data and insights from their portal." }, 
@@ -135,7 +150,7 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   'htu_content_main': [
     { id: 'htuc1', icon: HelpCircle, text: "Find answers to Frequently Asked Questions." },
     { id: 'htuc2', icon: ListChecks, text: "Follow detailed step-by-step instructions for portal features." },
-    { id: 'htuc3', icon: BookOpenText, text: "Learn about all core functionalities and how to use them effectively." },
+    { id: 'htuc3', icon: BookOpenText, text: "Learn about all core functionalities and how to use them effectively, including the new Competitor Insights page." },
     { id: 'htuc4', icon: Compass, text: "Dover Managers: Find a dedicated 'Dover Sales Navigator' tab providing access to a specialized tool." },
   ],
   'dsn_content_main': [
@@ -148,6 +163,7 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
 const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
   { id: 'do1', icon: Eye, text: "Portal Overview & Navigation", contentKey: 'do1_content' },
   { id: 'do2', icon: Users, text: "Go to: TradeHunter Hub", contentKey: 'do2_content' },
+  { id: 'do_compete_intel', icon: UsersRound, text: "Go to: Competitor Insights", contentKey: 'do_compete_intel_content'},
   { id: 'do3', icon: Briefcase, text: "Go to: BuildWise Intel", contentKey: 'do3_content' },
   { id: 'do4', icon: Calculator, text: "Go to: Materials Estimator", contentKey: 'do4_content' },
 ];
@@ -158,6 +174,10 @@ const tradeHunterPurposeItems: PurposeBoxItem[] = [
   { id: 'th3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'th3_content' }, 
   { id: 'th4', icon: BarChart2, text: "View Hub Statistics", contentKey: 'th4_content'},
   { id: 'th5', icon: BookOpenText, text: "Comprehensive 'How to Use' Guide", contentKey: 'th5_content' }
+];
+
+const competitorInsightsPurposeItems: PurposeBoxItem[] = [
+    { id: 'ci_main', icon: ClipboardSearch, text: "Competitor Website Analysis", contentKey: 'ci_content_main'}
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
@@ -203,7 +223,7 @@ export function AppSidebar() {
 
   let currentPurposeItems: PurposeBoxItem[] = [];
   let currentPageTitle = "Page Info";
-  let navItems = [...baseNavItems];
+  let navItems = [...baseNavItems]; // Use a mutable copy
 
   if (branchInfo?.displayLoginId === 'DOVERMANAGER') {
     const howToUseIndex = navItems.findIndex(item => item.href === "/how-to-use");
@@ -213,19 +233,23 @@ export function AppSidebar() {
       label: "Dover Sales Nav",
       tooltip: "Dover: Advanced Sales & Strategy Hub",
     };
+    // Insert before "How to Use" or at the end if "How to Use" isn't found (though it should be)
     if (howToUseIndex !== -1) {
       navItems.splice(howToUseIndex, 0, doverNavItem);
     } else { 
       navItems.push(doverNavItem);
     }
   }
-
+  
   if (pathname === "/dashboard") {
     currentPurposeItems = dashboardOverviewPurposeItems;
     currentPageTitle = "Dashboard: Overview & Purpose";
   } else if (pathname.startsWith("/tradehunter")) {
     currentPurposeItems = tradeHunterPurposeItems;
     currentPageTitle = "TradeHunter Hub: Purpose & How-To's";
+  } else if (pathname.startsWith("/competitor-insights")) {
+    currentPurposeItems = competitorInsightsPurposeItems;
+    currentPageTitle = "Competitor Insights: Purpose";
   } else if (pathname.startsWith("/buildwise-intel")) {
     currentPurposeItems = buildwiseIntelPurposeItems;
     currentPageTitle = "BuildWise Intel: Purpose";
@@ -266,9 +290,9 @@ export function AppSidebar() {
               }
 
               let isActive = false;
-              if (item.href === "/dashboard") {
+              if (item.href === "/dashboard" || item.href === "/how-to-use") { // Exact match for these
                 isActive = pathname === item.href;
-              } else {
+              } else { // StartsWith for others like /tradehunter, /competitor-insights
                 isActive = pathname.startsWith(item.href);
               }
               return (
@@ -391,4 +415,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
