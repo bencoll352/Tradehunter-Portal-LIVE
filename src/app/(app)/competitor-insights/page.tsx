@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,8 +11,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2, ClipboardCheck, Sparkles, AlertTriangle } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast';
-import { analyzeCompetitorWebsitesAction } from './actions';
+import { analyzeCompetitorWebsitesAction, saveCompetitorUrlsAction, getSavedCompetitorUrlsAction } from './actions';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getBranchInfo, type BranchInfo, type BaseBranchId, type BranchLoginId } from '@/types';
 
 const formSchema = z.object({
   urls: z.string()
@@ -27,6 +28,8 @@ const formSchema = z.object({
         lines.forEach(line => z.string().url({ message: `Invalid URL: ${line.length > 30 ? line.substring(0,27) + "..." : line}` }).parse(line));
         return true;
       } catch (e) {
+        // This validation message is tricky with react-hook-form showing it for the whole textarea.
+        // Individual line errors are better handled by user feedback, but this basic check helps.
         return false;
       }
     }, { message: "One or more inputs are not valid URLs. Ensure each URL is correctly formatted (e.g., https://example.com) and on its own line." }),
@@ -36,7 +39,7 @@ const formSchema = z.object({
 function FormatAnalysisResult({ analysisText }: { analysisText: string | null }) {
   if (!analysisText) return null;
 
-  const cleanedText = analysisText.replace(/\*/g, ''); // Remove all asterisks globally
+  const cleanedText = analysisText.replace(/\*/g, ''); 
 
   const sections: React.ReactNode[] = [];
   let overallAnalysisContent: React.ReactNode = null;
@@ -61,7 +64,6 @@ function FormatAnalysisResult({ analysisText }: { analysisText: string | null })
     }
   }
   
-  // Split by "---" delimiter first, then process each block for "Website URL:"
   const blocks = competitorReportsText.split('---').map(b => b.trim()).filter(b => b);
 
   blocks.forEach((block, index) => {
@@ -76,9 +78,7 @@ function FormatAnalysisResult({ analysisText }: { analysisText: string | null })
       blockContentToParse = block.substring(urlMatch[0].length).trim();
     }
     
-    // Process lines within the block (whether URL was found or it's a general block)
     analysisLinesForBlock = blockContentToParse.split('\n').map(line => line.trim()).filter(line => line && line.toLowerCase() !== "content summary:");
-
 
     if (analysisLinesForBlock.length > 0 || urlDisplay) {
       sections.push(
@@ -87,7 +87,6 @@ function FormatAnalysisResult({ analysisText }: { analysisText: string | null })
           {analysisLinesForBlock.length > 0 ? (
             <ul className="list-disc pl-5 space-y-1 text-sm">
               {analysisLinesForBlock.map((line, lineIdx) => {
-                // Remove leading hyphens/bullets if LLM adds them, as we use <li>
                 const cleanLine = line.replace(/^-\s*/, '').replace(/^\*\s*/, '').replace(/^\d+\.\s*/, '');
                 if (cleanLine.trim()) {
                     return <li key={`line-${index}-${lineIdx}`}>{cleanLine}</li>;
@@ -103,9 +102,7 @@ function FormatAnalysisResult({ analysisText }: { analysisText: string | null })
     }
   });
 
-
   if (sections.length === 0 && !overallAnalysisContent && cleanedText.trim()) {
-    // Fallback for unparsable text if no sections were created: show as paragraphs
     return cleanedText.split('\n').filter(line => line.trim()).map((paragraph, idx) => (
         <p key={`fallback-${idx}`} className="mb-2 text-sm">{paragraph}</p>
     ));
@@ -124,6 +121,8 @@ export default function CompetitorInsightsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
+  const [isLoadingSavedUrls, setIsLoadingSavedUrls] = useState(true);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -132,6 +131,39 @@ export default function CompetitorInsightsPage() {
       urls: "",
     },
   });
+
+  useEffect(() => {
+    const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
+    const info = getBranchInfo(storedLoggedInId);
+    setBranchInfo(info);
+  }, []);
+
+  useEffect(() => {
+    if (branchInfo?.baseBranchId) {
+      setIsLoadingSavedUrls(true);
+      getSavedCompetitorUrlsAction(branchInfo.baseBranchId)
+        .then(result => {
+          if (result.urls && result.urls.length > 0) {
+            form.reset({ urls: result.urls.join('\n') });
+          } else {
+            form.reset({ urls: "" }); // Explicitly clear if no URLs or null
+          }
+          if (result.error) {
+            // Non-critical, just log or subtle toast
+            console.warn("Could not load saved competitor URLs:", result.error);
+             toast({ variant: "default", title: "Note", description: "Could not retrieve previously saved URLs.", duration: 3000});
+          }
+        })
+        .catch(err => {
+          console.error("Client error fetching saved URLs:", err);
+          toast({ variant: "destructive", title: "Client Error", description: "Error fetching saved URLs on client."});
+        })
+        .finally(() => setIsLoadingSavedUrls(false));
+    } else {
+      setIsLoadingSavedUrls(false); // No branch ID, so nothing to load
+    }
+  }, [branchInfo, form, toast]);
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -154,20 +186,34 @@ export default function CompetitorInsightsPage() {
     }
 
     try {
-      const result = await analyzeCompetitorWebsitesAction(urlsArray);
-      if (result.error) {
-        setError(result.error);
+      const analysisOp = await analyzeCompetitorWebsitesAction(urlsArray);
+      if (analysisOp.error) {
+        setError(analysisOp.error);
         toast({
           variant: "destructive",
           title: "Analysis Failed",
-          description: result.error,
+          description: analysisOp.error,
         });
       } else {
-        setAnalysisResult(result.analysis);
+        setAnalysisResult(analysisOp.analysis);
         toast({
           title: "Analysis Complete",
           description: "Competitor insights generated successfully.",
         });
+        // Save the successfully analyzed URLs
+        if (branchInfo?.baseBranchId) {
+          const saveResult = await saveCompetitorUrlsAction(branchInfo.baseBranchId, urlsArray);
+          if (saveResult.error) {
+            toast({
+              variant: "destructive",
+              title: "Failed to Save URLs",
+              description: saveResult.error,
+            });
+          } else {
+            // Optionally, a success toast for saving, or just let it be silent
+            // toast({ title: "URLs Saved", description: "Analyzed URLs have been saved for this branch."});
+          }
+        }
       }
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "An unexpected client-side error occurred.";
@@ -191,7 +237,7 @@ export default function CompetitorInsightsPage() {
             <div>
               <CardTitle className="text-3xl font-bold text-primary">Competitor Insights</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Analyze local competitor websites. Enter up to 10 URLs (one per line) to get an overview of their offerings, promotions, and local activities.
+                Analyze local competitor websites. Enter up to 10 URLs (one per line) to get an overview of their offerings, promotions, and local activities. Previously analyzed URLs for your branch will be loaded.
               </CardDescription>
             </div>
           </div>
@@ -207,17 +253,17 @@ export default function CompetitorInsightsPage() {
                     <FormLabel>Competitor Website URLs (One per line, max 10)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="https://competitor1.com\nhttps://competitor2.co.uk\n..."
+                        placeholder={isLoadingSavedUrls ? "Loading saved URLs..." : "https://competitor1.com\nhttps://competitor2.co.uk\n..."}
                         className="min-h-[120px] resize-y"
                         {...field}
-                        disabled={isLoading}
+                        disabled={isLoading || isLoadingSavedUrls}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button type="submit" disabled={isLoading || isLoadingSavedUrls} className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground">
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -272,4 +318,3 @@ export default function CompetitorInsightsPage() {
     </div>
   );
 }
-
