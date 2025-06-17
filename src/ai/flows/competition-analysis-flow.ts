@@ -44,20 +44,21 @@ const competitionAnalysisMainPrompt = ai.definePrompt({
   output: { schema: CompetitionAnalysisOutputSchema },
   prompt: `You are a local market analyst for a builders' merchant.
 You have been provided with content (or error messages if content fetching failed) from several competitor websites.
-Your task is to analyze this information and provide a summary of the local competitive landscape, with a strong emphasis on current offers and promotions.
+Your task is to analyze this information and provide a summary of the local competitive landscape, with a strong emphasis on current offers, promotions, and the specific products or services they relate to.
 
 Focus primarily on:
 - **The latest offers, promotions, discounts, or special deals** being advertised. Detail these clearly for each competitor.
-- Key services or products being prominently promoted alongside these offers.
-- Any unique selling propositions highlighted in relation to current promotions.
+- **Crucially, identify the specific products or services these promotions apply to.** For example, if there's a "20% off sale", specify what products or service categories are included in that sale.
+- Key services or products being prominently promoted, especially if they are mentioned alongside offers or discounts.
+- Any unique selling propositions highlighted in relation to current promotions or promoted products/services.
 
 Also consider:
-- Recent news, blog posts, or events that might tie into current offers.
-- The general tone and target audience for these promotions.
-- Any discernible local market trends related to promotional activities based on the collective information.
-- Identify any unique strengths or weaknesses you can infer for each competitor based *solely* on the provided text and their promotional strategies.
+- Recent news, blog posts, or events that might tie into current offers on specific products/services.
+- The general tone and target audience for these promotions and the products/services they feature.
+- Any discernible local market trends related to promotional activities and product/service focus based on the collective information.
+- Identify any unique strengths or weaknesses you can infer for each competitor based *solely* on the provided text and their promotional strategies for specific products/services.
 
-Structure your analysis clearly. For each website, first list its offers and promotions, then provide a brief summary of other relevant points. Conclude with an overall synthesis of the competitive promotional landscape.
+Structure your analysis clearly. For each website, first list its offers/promotions and the **specific products/services involved**, then provide a brief summary of other relevant points about their promoted offerings. Conclude with an overall synthesis of the competitive promotional landscape, emphasizing product/service focus.
 Be concise and focus on actionable insights that would be valuable to a builders' merchant manager.
 If content for a website is missing, insufficient, or an error message is provided instead of content, acknowledge this in your analysis for that specific URL and explain that you cannot analyze it deeply. Do not attempt to guess or fetch information yourself. Base your analysis *only* on the provided text.
 
@@ -67,8 +68,8 @@ Website URL: {{{url}}}
 {{#if error}}
 Error Fetching Content: {{{error}}}
 {{else if content}}
-Content Summary & Promotions:
-(Provide a brief summary of the key points, focusing on offers and promotions from the website content below if available and relevant, otherwise state if content is minimal or uninformative)
+Content Summary & Promotions (with focus on products/services):
+(Provide a brief summary of the key points, focusing on offers, promotions and the specific products/services they apply to from the website content below if available and relevant. State if content is minimal or uninformative regarding promoted products/services.)
 """
 {{{content}}}
 """
@@ -78,10 +79,8 @@ Content: No content provided or content was empty.
 ---
 {{/each}}
 
-Provide your overall analysis of the competitive promotional landscape:
+Provide your overall analysis of the competitive promotional landscape, focusing on promoted products/services:
 `,
-  // Model configuration can be added here if needed, e.g., temperature
-  // config: { temperature: 0.5 }
 });
 
 const competitionAnalysisFlow = ai.defineFlow(
@@ -89,7 +88,7 @@ const competitionAnalysisFlow = ai.defineFlow(
     name: 'competitionAnalysisFlow',
     inputSchema: CompetitionAnalysisInputSchema,
     outputSchema: CompetitionAnalysisOutputSchema,
-    tools: [fetchWebsiteContentTool] // Make the tool available to the flow context, though we call it directly here.
+    tools: [fetchWebsiteContentTool] // Make the tool available to the flow context
   },
   async (input: CompetitionAnalysisInput): Promise<CompetitionAnalysisOutput> => {
     console.log(`[competitionAnalysisFlow] Starting analysis for ${input.websiteUrls.length} URLs.`);
@@ -99,7 +98,6 @@ const competitionAnalysisFlow = ai.defineFlow(
     for (const url of input.websiteUrls) {
       try {
         // Explicitly call the tool for each URL.
-        // The tool itself is defined with input and output schemas.
         const fetchResult = await fetchWebsiteContentTool({ url });
         sitesData.push(fetchResult);
         if (fetchResult.error) {
