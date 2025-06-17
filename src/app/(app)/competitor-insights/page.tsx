@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, ClipboardSearch, Sparkles, AlertTriangle } from 'lucide-react';
+import { Loader2, ClipboardCheck, Sparkles, AlertTriangle } from 'lucide-react'; 
 import { useToast } from '@/hooks/use-toast';
 import { analyzeCompetitorWebsitesAction } from './actions';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -100,7 +100,7 @@ export default function CompetitorInsightsPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <ClipboardSearch className="h-10 w-10 text-primary" />
+            <ClipboardCheck className="h-10 w-10 text-primary" /> 
             <div>
               <CardTitle className="text-3xl font-bold text-primary">Competitor Insights</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">

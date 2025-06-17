@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, ClipboardSearch, Globe, ReplaceAll } from "lucide-react";
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, ClipboardCheck, Globe, ReplaceAll } from "lucide-react"; 
 
 const faqs = [
   {
@@ -47,7 +47,7 @@ const faqs = [
     value: "item-7",
     question: "What is the Competitor Insights (Compete Intel) page?",
     answer: "The 'Compete Intel' page (tab in header/sidebar) allows you to analyze local competitor websites. Enter up to 10 URLs (one per line), and the system will provide an overview of their offerings, promotions, and local activities based on the content it can fetch from their sites.",
-    icon: <UsersRound className="h-5 w-5 text-primary mr-2" />
+    icon: <ClipboardCheck className="h-5 w-5 text-primary mr-2" /> 
   },
   {
     value: "item-8",

@@ -60,7 +60,7 @@ import {
   Columns,
   Compass, 
   UsersRound,
-  ClipboardSearch,
+  ClipboardCheck, 
   Globe,
   ReplaceAll,
 } from "lucide-react";
@@ -72,7 +72,7 @@ import { cn } from "@/lib/utils";
 const baseNavItems = [
   { href: "/dashboard", icon: Columns, label: "Dashboard", tooltip: "Portal Overview" },
   { href: "/tradehunter", icon: Users, label: "TradeHunter", tooltip: "TradeHunter Hub" },
-  { href: "/competitor-insights", icon: UsersRound, label: "Compete Intel", tooltip: "Competitor Insights" },
+  { href: "/competitor-insights", icon: ClipboardCheck, label: "Compete Intel", tooltip: "Competitor Insights" }, 
   // Dover Sales Navigator will be added conditionally
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
@@ -131,9 +131,9 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   'th5_content': [
     { id: 'th5c1', icon: LinkIcon, text: "Navigate to the main 'How to Use' page (sidebar link) for complete portal documentation and FAQs." }
   ],
-  'ci_content_main': [
+  'ci_content_main': [ 
     { id: 'cic1', icon: Globe, text: "Input up to 10 competitor website URLs (one per line)." },
-    { id: 'cic2', icon: ClipboardSearch, text: "The system will attempt to fetch content from these sites." },
+    { id: 'cic2', icon: ClipboardCheck, text: "The system will attempt to fetch content from these sites." }, 
     { id: 'cic3', icon: ReplaceAll, text: "Receive an analysis summarizing local competitive activities, offers, and trends based on the fetched website content." },
     { id: 'cic4', icon: Lightbulb, text: "Use these insights to better understand your local market." },
   ],
@@ -163,9 +163,9 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
 const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
   { id: 'do1', icon: Eye, text: "Portal Overview & Navigation", contentKey: 'do1_content' },
   { id: 'do2', icon: Users, text: "Go to: TradeHunter Hub", contentKey: 'do2_content' },
-  { id: 'do_compete_intel', icon: UsersRound, text: "Go to: Competitor Insights", contentKey: 'do_compete_intel_content'},
-  { id: 'do3', icon: Briefcase, text: "Go to: BuildWise Intel", contentKey: 'do3_content' },
-  { id: 'do4', icon: Calculator, text: "Go to: Materials Estimator", contentKey: 'do4_content' },
+  { id: 'do_compete_intel', icon: ClipboardCheck, text: "Go to: Competitor Insights", contentKey: 'ci_content_main'}, 
+  { id: 'do3', icon: Briefcase, text: "Go to: BuildWise Intel", contentKey: 'bwi_content_main' }, 
+  { id: 'do4', icon: Calculator, text: "Go to: Materials Estimator", contentKey: 'est_content_main' }, 
 ];
 
 const tradeHunterPurposeItems: PurposeBoxItem[] = [
@@ -177,7 +177,7 @@ const tradeHunterPurposeItems: PurposeBoxItem[] = [
 ];
 
 const competitorInsightsPurposeItems: PurposeBoxItem[] = [
-    { id: 'ci_main', icon: ClipboardSearch, text: "Competitor Website Analysis", contentKey: 'ci_content_main'}
+    { id: 'ci_main', icon: ClipboardCheck, text: "Competitor Website Analysis", contentKey: 'ci_content_main'} 
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
