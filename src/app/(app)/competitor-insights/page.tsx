@@ -16,20 +16,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const formSchema = z.object({
   urls: z.string()
-    .min(10, { message: "Please enter at least one URL." })
+    .min(10, { message: "Please enter at least one URL." }) // Min length for the whole string, could be more refined
     .refine(value => {
-      const lines = value.split('\\n').map(line => line.trim()).filter(line => line.length > 0);
+      const lines = value.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       return lines.length > 0 && lines.length <= 10;
     }, { message: "Enter between 1 and 10 URLs, each on a new line." })
     .refine(value => {
-      const lines = value.split('\\n').map(line => line.trim()).filter(line => line.length > 0);
+      const lines = value.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       try {
-        lines.forEach(line => z.string().url().parse(line));
+        lines.forEach(line => z.string().url({ message: `Invalid URL: ${line.length > 30 ? line.substring(0,27) + "..." : line}` }).parse(line));
         return true;
       } catch (e) {
         return false;
       }
-    }, { message: "One or more inputs are not valid URLs. Ensure each URL is correctly formatted (e.g., https://example.com)." }),
+    }, { message: "One or more inputs are not valid URLs. Ensure each URL is correctly formatted (e.g., https://example.com) and on its own line." }),
 });
 
 export default function CompetitorInsightsPage() {
@@ -50,7 +50,7 @@ export default function CompetitorInsightsPage() {
     setAnalysisResult(null);
     setError(null);
 
-    const urlsArray = values.urls.split('\\n')
+    const urlsArray = values.urls.split('\n') // Corrected split character
       .map(line => line.trim())
       .filter(line => line.length > 0);
 
