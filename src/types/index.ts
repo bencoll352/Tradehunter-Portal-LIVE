@@ -49,8 +49,6 @@ export type BaseBranchId =
   | 'MARGATE'
   | 'LEATHERHEAD';
 
-export type UserRole = 'team' | 'manager' | 'unknown';
-
 export const VALID_LOGIN_IDS: BranchLoginId[] = [
   'PURLEY', 'PURLEYMANAGER',
   'BRANCH_B', 'BRANCH_BMANAGER',

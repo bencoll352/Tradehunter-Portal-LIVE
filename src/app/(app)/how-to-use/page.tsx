@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll } from "lucide-react"; 
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll, ClipboardCheck } from "lucide-react"; 
 
 const faqs = [
   {
@@ -43,14 +43,8 @@ const faqs = [
             "On the BuildWise Intel page, ask questions bridging Intel portal insights with your trader data.",
     icon: <Rocket className="h-5 w-5 text-primary mr-2" />
   },
-  // { // REMOVED
-  //   value: "item-7",
-  //   question: "What is the Competitor Insights (Compete Intel) page?",
-  //   answer: "The 'Compete Intel' page (tab in header/sidebar) allows you to analyze local competitor websites. Enter up to 10 URLs (one per line), and the system will provide an overview of their offerings, promotions, and local activities based on the content it can fetch from their sites.",
-  //   icon: <ClipboardCheck className="h-5 w-5 text-primary mr-2" /> 
-  // },
-  {
-    value: "item-8",
+  { // Item 7 was previously for Competitor Insights, now removed
+    value: "item-8", // Keep original value for existing item, or re-number if desired
     question: "What is the BuildWise Intel page?",
     answer: "The 'BuildWise Intel' page (tab in header) embeds an external application for specialised industry data. The Branch Booster is also on this page for combined analysis.",
     icon: <Briefcase className="h-5 w-5 text-primary mr-2" />
@@ -138,7 +132,6 @@ export default function HowToUsePage() {
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li><strong>Dashboard (Overview):</strong> The first page after login. Provides quick links and portal summary. Access via "Dashboard" tab in header/sidebar.</li>
               <li><strong>TradeHunter Hub:</strong> Click the "TradeHunter" tab in header/sidebar to view and manage traders, and use analytical tools.</li>
-              {/* <li><strong>Competitor Insights (Compete Intel):</strong> Click the "Compete Intel" tab in header/sidebar. Analyze competitor websites.</li> */}
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in header to access the external insights portal.</li>
               <li><strong>Estimator:</strong> Click the "Estimator" tab in header to access the external Building Materials Estimator tool.</li>
               <li><strong>Dover Sales Navigator (Dover Manager Only):</strong> If logged in as "DOVERMANAGER", a "Dover Sales Nav" tab appears in the header/sidebar. This leads to a specialized tool for Dover branch.</li>
@@ -166,15 +159,6 @@ export default function HowToUsePage() {
               <li><strong>On BuildWise Intel Page:</strong> Example queries: "Using BuildWise Intel, suggest cross-selling opportunities for active traders."</li>
             </ul>
           </div>
-          {/* <div> // REMOVED
-            <h3 className="text-xl font-semibold text-foreground mb-1">5. Using Competitor Insights (Compete Intel)</h3>
-            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>Navigate to the "Compete Intel" tab.</li>
-              <li>Enter up to 10 competitor website URLs, each on a new line, into the provided text area.</li>
-              <li>Click "Analyze Competitors". The system will attempt to fetch content from these sites.</li>
-              <li>Review the generated analysis, which will summarize findings about local competition based on the website content. This may take a few moments.</li>
-            </ul>
-          </div> */}
            <div>
             <h3 className="text-xl font-semibold text-foreground mb-1">5. Accessing & Utilising BuildWise Intel Portal</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
