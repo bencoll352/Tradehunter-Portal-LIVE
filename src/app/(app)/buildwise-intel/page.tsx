@@ -83,8 +83,7 @@ export default function BuildwiseIntelPage() {
               <div>
                   <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle>
                   <CardDescription>
-                      Use the Branch Booster to ask questions and analyse your current trader data.
-                      You can also ask questions that bridge insights from the Intel portal above with your trader data.
+                      Use the Branch Booster below to ask questions. When framing your query, feel free to reference specific data or trends you observe in the BuildWise Intel portal above. The Booster will then analyze this alongside your local trader data.
                   </CardDescription>
               </div>
           </div>
