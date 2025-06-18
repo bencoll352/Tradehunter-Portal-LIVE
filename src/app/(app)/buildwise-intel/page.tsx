@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Rocket, Home } from "lucide-react"; 
+import { Loader2, Rocket, Home, AlertTriangle } from "lucide-react"; 
 import { ProfitPartnerAgentClient } from '@/components/dashboard/ProfitPartnerAgentClient';
 import { getTradersAction } from '@/app/(app)/tradehunter/actions'; 
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
@@ -58,7 +58,10 @@ export default function BuildwiseIntelPage() {
                   <CardTitle className="text-2xl text-primary">BuildWise Intel Portal</CardTitle>
                   <CardDescription>
                       Access specialised data and insights from the BuildWise Intel external application.
-                      Use the Branch Booster below to analyse this information alongside your trader data.
+                      <span className="block mt-1 text-xs text-muted-foreground italic">
+                        <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
+                        Note: Data accuracy within this portal is managed by the external provider. Verify critical information.
+                      </span>
                   </CardDescription>
               </div>
           </div>
@@ -83,7 +86,7 @@ export default function BuildwiseIntelPage() {
               <div>
                   <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle>
                   <CardDescription>
-                      Use the Branch Booster below to ask questions. When framing your query, feel free to reference specific data or trends you observe in the BuildWise Intel portal above. The Booster will then analyze this alongside your local trader data.
+                       Use the Branch Booster to ask questions. When framing your query, you can reference specific data or trends you observe in the BuildWise Intel portal above (e.g., "Analyse project LE/001/2025/PL from the portal for opportunities with my traders"). The Booster will analyze this alongside your local trader data for the <span className="font-semibold">{branchInfo?.displayLoginId || 'current'}</span> branch.
                   </CardDescription>
               </div>
           </div>
