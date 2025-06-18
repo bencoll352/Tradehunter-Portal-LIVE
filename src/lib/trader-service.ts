@@ -32,20 +32,20 @@ function cleanDataForFirestoreWrite<T extends Record<string, any>>(data: T): Rec
   return cleaned;
 }
 
-// Standardized categories
+// Standardized categories based on user's definitive list
 const StandardCategories = {
   CARPENTERS_JOINERS: "Carpenters & Joiners",
-  GENERAL_BUILDERS: "General Builders",
+  GENERAL_BUILDERS: "General Builders", // "General Builders / Builders" -> will use "General Builders"
   GROUNDWORKERS: "Groundworkers",
   ROOFING_SPECIALISTS: "Roofing Specialists",
   INTERIOR_DESIGNER: "Interior Designer",
   PROPERTY_MAINTENANCE: "Property Maintenance",
   PLASTERERS: "Plasterers",
-  LANDSCAPERS: "Landscapers",
+  LANDSCAPERS: "Landscapers", // "Landscapers or Landscaping" -> will use "Landscapers"
   HANDYMAN_HOME_IMPROVEMENTS: "Handy Man - Home Improvements",
-  PROPERTY_DEVELOPERS: "Property Developers",
+  PROPERTY_DEVELOPERS: "Property Developers", // "Property developers" -> "Property Developers"
   PAINTERS_DECORATORS: "Painters & Decorators",
-  KITCHEN_BATHROOM_INSTALLERS: "Kitchen and Bathroom Installers",
+  KITCHEN_BATHROOM_INSTALLERS: "Kitchen and Bathroom Installers", // "Kitchen and Bathroom installers" -> "Kitchen and Bathroom Installers"
 };
 
 
@@ -84,7 +84,6 @@ const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
   { name: 'Elara Vance', branchId: 'LEATHERHEAD', totalSales: 22000, tradesMade: 15, status: 'New Lead', description: 'Provides cartography services and exploration planning. New to the area.', rating: null, phone: '01372 100204', 
     mainCategory: StandardCategories.GROUNDWORKERS, categories: StandardCategories.GROUNDWORKERS, address: "The Map Room, Leatherhead", ownerName: "Elara Vance", workdayTiming: "Mon-Fri 10am-4pm", website: 'https://elarasmaps.example.com', ownerProfileLink: null, closedOn: "Weekends", notes: "New lead, interested in surveying equipment.", callBackDate: null, annualTurnover: 30000, totalAssets: 10000 },
   
-  // Adding a few more to better utilize other categories
   { name: 'Pete The Plasterer', branchId: 'PURLEY', totalSales: 60000, tradesMade: 80, status: 'Active', description: 'Smooth finishes every time. Residential and commercial plastering.', rating: 4.6, phone: '01234 567812',
     mainCategory: StandardCategories.PLASTERERS, categories: StandardCategories.PLASTERERS, address: "1 Skim Coat Close, Purley", ownerName: "Pete Smooth", workdayTiming: "Mon-Fri 8am-5pm", website: null, ownerProfileLink: null, closedOn: "Weekends", reviewKeywords: "smooth, plaster, reliable", notes: "Orders specific brand of plaster.", callBackDate: null, annualTurnover: 90000, totalAssets: 40000 },
 
@@ -185,10 +184,10 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
   try {
     let querySnapshot = await getDocs(q);
 
-    // If Firestore is empty for this branch, perform a one-time seed operation.
-    // This ensures that new branches (or existing ones if their Firestore collection is somehow empty)
-    // get initial sample data. Subsequent calls will use the live Firestore data.
-    // This seeding is a ONE-TIME operation per empty branch.
+    // ONE-TIME SEEDING LOGIC:
+    // If Firestore is empty for this branch (first time access or data manually cleared),
+    // this seeds initial sample data. This is a ONE-TIME operation per empty branch.
+    // Subsequent calls will use the live Firestore data.
     if (querySnapshot.empty) {
       const seedDataForBranch = INITIAL_SEED_TRADERS_DATA.filter(t => t.branchId === baseBranchId);
       if (seedDataForBranch.length > 0) {
