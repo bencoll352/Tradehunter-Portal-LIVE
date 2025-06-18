@@ -126,12 +126,15 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
     throw new Error("Firestore not initialised. Cannot fetch traders.");
   }
   const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
-  // Queries Firestore using the baseBranchId (e.g., "PURLEY")
+  // Queries Firestore using the baseBranchId (e.g., "PURLEY", "LEATHERHEAD")
   const q = query(tradersCollectionRef, where("branchId", "==", baseBranchId));
 
   try {
     let querySnapshot = await getDocs(q);
 
+    // If Firestore is empty for this branch, perform a one-time seed operation.
+    // This ensures that new branches (or existing ones if their Firestore collection is somehow empty)
+    // get initial sample data. Subsequent calls will use the live Firestore data.
     if (querySnapshot.empty) {
       const seedDataForBranch = INITIAL_SEED_TRADERS_DATA.filter(t => t.branchId === baseBranchId);
       if (seedDataForBranch.length > 0) {
@@ -143,11 +146,15 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
         });
         await batch.commit();
         console.log(`[TraderService:getTradersByBranch] Seeded ${seedDataForBranch.length} traders for branch ${baseBranchId}. Refetching...`);
+        // Re-fetch after seeding to get the now live data
         querySnapshot = await getDocs(q);
       } else {
         console.log(`[TraderService:getTradersByBranch] No traders found for branch ${baseBranchId} and no seed data configured. Returning empty list.`);
         return [];
       }
+    } else {
+      // If data exists, log that it's being fetched directly from Firestore
+      console.log(`[TraderService:getTradersByBranch] Fetched ${querySnapshot.docs.length} traders directly from Firestore for branch ${baseBranchId}.`);
     }
 
     return querySnapshot.docs.map(doc => mapDocToTrader(doc.data(), doc.id));
@@ -315,3 +322,4 @@ export async function bulkAddTradersToDb(
     throw error;
   }
 }
+
