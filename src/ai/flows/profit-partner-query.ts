@@ -14,7 +14,7 @@ import {z} from 'genkit';
 
 const ProfitPartnerQueryInputSchema = z.object({
   query: z.string().describe('The question about trader performance or a predefined quick action.'),
-  traderData: z.string().describe('The current trader data CSV string to use when answering the question.'),
+  traderData: z.string().describe('The current trader data CSV string to use when answering the question. This data pertains to a specific UK branch.'),
   uploadedFileContent: z.string().optional().describe('Optional: Content of an uploaded file (e.g., CSV of customers) for analysis. Expected format: raw text content of the file.'),
 });
 export type ProfitPartnerQueryInput = z.infer<typeof ProfitPartnerQueryInputSchema>;
@@ -33,15 +33,20 @@ const profitPartnerAnalysisPrompt = ai.definePrompt({
   name: 'profitPartnerAnalysisPrompt',
   input: { schema: ProfitPartnerQueryInputSchema },
   output: { schema: ProfitPartnerQueryOutputSchema },
-  prompt: `You are a helpful assistant for a building supplies company's branch manager.
-Your goal is to analyse trader data and provide actionable insights based on the user's query.
-You will be given a query, a string of current trader data for the branch, and optionally, content from an uploaded customer file.
+  prompt: `You are a helpful assistant for a UK-based building supplies company's branch manager.
+Your primary goal is to analyse trader data and provide actionable insights relevant to the United Kingdom market and the specific operational area of the branch.
+You will be given a query, a string of current trader data for the branch (assume this data is from a UK branch), and optionally, content from an uploaded customer file.
 The user's query might also contain observations or data points they've gathered from an external insights portal (like the BuildWise Intel portal they might be viewing). If such context is provided in the query, please integrate it carefully into your analysis along with the trader data and any uploaded files to provide comprehensive insights.
+
+Key Instructions:
+1.  **UK Context**: All analysis, recommendations, and information provided must be tailored to the UK market, business practices, and typical customer behaviours in the UK building trade.
+2.  **Local Branch Focus**: The provided trader data is for a specific local UK branch. Your insights should be relevant to this local context. If the query implies a specific town, city, or region (or if this can be inferred from the trader data itself, e.g., addresses), make your analysis as locally relevant as possible.
+3.  **Actionable Insights**: Focus on providing actionable insights, identifying trends, or suggesting specific actions the branch manager can take within their UK operational context.
 
 User's Query:
 {{{query}}}
 
-Trader Data (summary format):
+Trader Data (summary format, specific to a UK branch):
 {{{traderData}}}
 
 {{#if uploadedFileContent}}
@@ -50,11 +55,10 @@ Additional Uploaded Data (e.g., customer list, sales records):
 {{/if}}
 
 Based on all the provided information, please generate a concise and helpful answer to the user's query.
-Focus on providing actionable insights, identifying trends, or suggesting specific actions the branch manager can take.
 If the query asks for a list (e.g., "list all active traders"), provide the list.
 If the query is about totals or averages, calculate and provide them.
-If the query is open-ended (e.g., "suggest strategies"), provide thoughtful suggestions.
-If the query is explicitly asking to 'estimate project materials' or similar, focus on that estimation task. You should ask for project details (like type of project, dimensions, specific material preferences if any) if they are not provided in the query. Your primary goal for such queries is to list typical materials and quantities for the specified project. Do not primarily use the trader data sheet to come up with project ideas for estimation unless the user's query explicitly suggests linking it to a trader or a trend from the trader data.
+If the query is open-ended (e.g., "suggest strategies"), provide thoughtful suggestions applicable to a UK building supplies branch.
+If the query is explicitly asking to 'estimate project materials' or similar, focus on that estimation task. You should ask for project details (like type of project, dimensions, specific material preferences if any) if they are not provided in the query. Your primary goal for such queries is to list typical materials and quantities for the specified project, using UK common building practices and material names. Do not primarily use the trader data sheet to come up with project ideas for estimation unless the user's query explicitly suggests linking it to a trader or a trend from the trader data.
 Be specific and refer to the data where possible.
 If the uploaded file content is relevant to the query, incorporate it into your analysis.
 If the data seems insufficient to answer the query fully, politely state that and explain what additional information might be needed.
@@ -121,3 +125,4 @@ const profitPartnerQueryFlow = ai.defineFlow(
     }
   }
 );
+
