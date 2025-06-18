@@ -34,7 +34,8 @@ export type BranchLoginId =
   | 'COLCHESTER' | 'COLCHESTERMANAGER'
   | 'CHELMSFORD' | 'CHELMSFORDMANAGER'
   | 'SITTINGBOURNE' | 'SITTINGBOURNEMANAGER'
-  | 'MARGATE' | 'MARGATEMANAGER';
+  | 'MARGATE' | 'MARGATEMANAGER'
+  | 'LEATHERHEAD' | 'LEATHERHEADMANAGER';
 
 export type BaseBranchId = 
   | 'PURLEY' 
@@ -45,7 +46,8 @@ export type BaseBranchId =
   | 'COLCHESTER'
   | 'CHELMSFORD'
   | 'SITTINGBOURNE'
-  | 'MARGATE';
+  | 'MARGATE'
+  | 'LEATHERHEAD';
 
 export type UserRole = 'team' | 'manager' | 'unknown';
 
@@ -58,7 +60,8 @@ export const VALID_LOGIN_IDS: BranchLoginId[] = [
   'COLCHESTER', 'COLCHESTERMANAGER',
   'CHELMSFORD', 'CHELMSFORDMANAGER',
   'SITTINGBOURNE', 'SITTINGBOURNEMANAGER',
-  'MARGATE', 'MARGATEMANAGER'
+  'MARGATE', 'MARGATEMANAGER',
+  'LEATHERHEAD', 'LEATHERHEADMANAGER'
 ];
 
 export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = [
@@ -70,7 +73,8 @@ export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = [
   'COLCHESTER',
   'CHELMSFORD',
   'SITTINGBOURNE',
-  'MARGATE'
+  'MARGATE',
+  'LEATHERHEAD'
 ];
 
 export interface BranchInfo {
