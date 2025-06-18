@@ -75,6 +75,8 @@ export const VALID_BASE_BRANCH_IDS: BaseBranchId[] = [
   'LEATHERHEAD'
 ];
 
+export type UserRole = 'manager' | 'team' | 'unknown';
+
 export interface BranchInfo {
   baseBranchId: BaseBranchId | null;
   role: UserRole;
