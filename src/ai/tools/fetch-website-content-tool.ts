@@ -27,10 +27,8 @@ export const fetchWebsiteContent = ai.defineTool(
       }
       // Return the raw HTML text. The LLM is capable of parsing this.
       const textContent = await response.text();
-      // Truncate for performance and to avoid overly large payloads.
-      const truncatedContent = textContent.substring(0, 20000);
-      console.log(`[fetchWebsiteContent Tool] Successfully fetched content (truncated to ${truncatedContent.length} chars).`);
-      return truncatedContent;
+      console.log(`[fetchWebsiteContent Tool] Successfully fetched full content (${textContent.length} chars).`);
+      return textContent;
     } catch (error) {
       console.error(`[fetchWebsiteContent Tool] Error fetching URL ${input.url}:`, error);
       if (error instanceof Error) {
