@@ -3,27 +3,58 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Compass, AlertTriangle } from "lucide-react"; 
-import { getBranchInfo, type BranchInfo } from '@/types';
+import { Compass, AlertTriangle, Loader2, Rocket } from "lucide-react"; 
+import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
+import { ProfitPartnerAgentClient } from '@/components/dashboard/ProfitPartnerAgentClient';
+import { getTradersAction } from '@/app/(app)/tradehunter/actions'; 
+import { useToast } from '@/hooks/use-toast';
 
 export default function DoverSalesNavigatorPage() {
   const navigatorAppUrl = "https://sales-and-strategy-navigator-dover-302177537641.us-west1.run.app/";
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
+  const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingTraders, setIsLoadingTraders] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const loggedInId = localStorage.getItem('loggedInId');
-      const info = getBranchInfo(loggedInId);
-      setBranchInfo(info);
-      setIsLoading(false);
-    }
-  }, []);
+    const initializeData = async () => {
+      if (typeof window !== 'undefined') {
+        const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
+        const info = getBranchInfo(storedLoggedInId);
+        setBranchInfo(info);
+        setIsLoading(false); // Done loading user info
+
+        if (info.displayLoginId === 'DOVERMANAGER' && info.baseBranchId) {
+          setIsLoadingTraders(true);
+          try {
+            const result = await getTradersAction(info.baseBranchId);
+            if (result.data) {
+              setTraders(result.data);
+            } else {
+              setTraders([]);
+              toast({ variant: "destructive", title: "Error Loading Trader Data", description: result.error || "Could not load trader data for the Branch Booster." });
+            }
+          } catch (error) {
+            console.error("Error fetching traders for Dover Sales Navigator page:", error);
+            setTraders([]);
+            toast({ variant: "destructive", title: "Error Loading Trader Data", description: "Failed to load trader data for the Branch Booster due to an unexpected error." });
+          } finally {
+            setIsLoadingTraders(false);
+          }
+        } else {
+          setIsLoadingTraders(false);
+        }
+      }
+    };
+    initializeData();
+  }, [toast]);
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <p>Loading user information...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-2">Loading user information...</p>
       </div>
     );
   }
@@ -75,7 +106,34 @@ export default function DoverSalesNavigatorPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Card className="shadow-lg w-full">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+              <Rocket className="h-8 w-8 text-primary" />
+              <div>
+                  <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle>
+                  <CardDescription>
+                       Use the Branch Booster to ask questions. You can reference specific data you observe in the Dover Navigator above (e.g., "Analyze the 'High Growth Potential' segment from the navigator for opportunities with my Dover traders"). The Booster will analyze this alongside your local trader data.
+                  </CardDescription>
+              </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoadingTraders ? (
+            <div className="flex flex-col items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+              <p className="text-muted-foreground">Loading Branch Booster...</p>
+            </div>
+          ) : traders.length > 0 ? (
+            <ProfitPartnerAgentClient traders={traders} />
+          ) : (
+            <p className="text-muted-foreground p-4 text-center">
+              Trader data for Dover could not be loaded. The Branch Booster requires trader data to function.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
