@@ -11,6 +11,9 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { fetchWebsiteContent } from '@/ai/tools/fetch-website-content-tool';
+
+const BUILDWISE_INTEL_URL = "https://studio--buildwise-intel.us-central1.hosted.app/";
 
 const ProfitPartnerQueryInputSchema = z.object({
   query: z.string().describe('The question about trader performance or a predefined quick action.'),
@@ -33,15 +36,19 @@ const profitPartnerAnalysisPrompt = ai.definePrompt({
   name: 'profitPartnerAnalysisPrompt',
   input: { schema: ProfitPartnerQueryInputSchema },
   output: { schema: ProfitPartnerQueryOutputSchema },
+  tools: [fetchWebsiteContent],
   prompt: `You are a helpful assistant for a UK-based building supplies company's branch manager.
 Your primary goal is to analyse trader data and provide actionable insights relevant to the United Kingdom market and the specific operational area of the branch.
 You will be given a query, a string of current trader data for the branch (assume this data is from a UK branch), and optionally, content from an uploaded customer file.
-The user's query might also contain observations or data points they've gathered from an external insights portal (like the BuildWise Intel portal they might be viewing). If such context is provided in the query, please integrate it carefully into your analysis along with the trader data and any uploaded files to provide comprehensive insights.
+
+New Capability: You can now access external websites using the 'fetchWebsiteContent' tool. This is particularly useful for analyzing the BuildWise Intel portal.
+The URL for the BuildWise Intel portal is: ${BUILDWISE_INTEL_URL}
 
 Key Instructions:
 1.  **UK Context**: All analysis, recommendations, and information provided must be tailored to the UK market, business practices, and typical customer behaviours in the UK building trade.
 2.  **Local Branch Focus & Geographic Relevance**: The provided trader data pertains to a specific local UK branch. Your insights must be highly relevant to this local context. Pay close attention to any geographic indicators within the user's query or the trader data (such as addresses, city names, or postcodes). If such information is available, ensure your analysis is tailored to that specific town, city, region, or postcode area. For example, if analyzing opportunities based on postcodes mentioned in the data, focus on trends or customer segments within those specific postcode areas.
-3.  **Actionable Insights**: Focus on providing actionable insights, identifying trends, or suggesting specific actions the branch manager can take within their UK operational context.
+3.  **Tool Use for External Data**: If the user's query requires information from the BuildWise Intel portal (e.g., "Analyze project LE/001/2025/PL from the portal..."), you MUST use the \`fetchWebsiteContent\` tool with the URL '${BUILDWISE_INTEL_URL}' to get the portal's content. Integrate the fetched content from the portal with the local trader data to provide comprehensive insights.
+4.  **Actionable Insights**: Focus on providing actionable insights, identifying trends, or suggesting specific actions the branch manager can take within their UK operational context.
 
 User's Query:
 {{{query}}}
@@ -125,4 +132,3 @@ const profitPartnerQueryFlow = ai.defineFlow(
     }
   }
 );
-
