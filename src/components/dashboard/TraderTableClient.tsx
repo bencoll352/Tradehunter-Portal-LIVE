@@ -349,7 +349,7 @@ export function TraderTableClient({
       "Branch ID": trader.branchId,
       "Total Sales (£)": trader.totalSales,
       "Est. Annual Revenue (£)": trader.estimatedAnnualRevenue,
-      "Estimated Company Value (£)": trader.estimatedCompanyValue,
+      "Est. Company Value (£)": trader.estimatedCompanyValue,
       "Employee Count": trader.employeeCount,
       "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
@@ -406,7 +406,7 @@ export function TraderTableClient({
   const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false, isCurrency = false) => {
     if (isCurrency) {
         if (typeof content === 'number') {
-            return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(content);
+            return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(content);
         }
         return <span className="text-muted-foreground/50">-</span>;
     }
