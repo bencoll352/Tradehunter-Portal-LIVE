@@ -41,11 +41,11 @@ const StandardCategories = {
   INTERIOR_DESIGNER: "Interior Designer",
   PROPERTY_MAINTENANCE: "Property Maintenance",
   PLASTERERS: "Plasterers",
-  LANDSCAPERS: "Landscapers",
+  LANDSCAPERS: "Landscapers or Landscaping",
   HANDYMAN_HOME_IMPROVEMENTS: "Handy Man - Home Improvements",
-  PROPERTY_DEVELOPERS: "Property Developers",
+  PROPERTY_DEVELOPERS: "Property developers",
   PAINTERS_DECORATORS: "Painters & Decorators",
-  KITCHEN_BATHROOM_INSTALLERS: "Kitchen and Bathroom Installers",
+  KITCHEN_BATHROOM_INSTALLERS: "Kitchen and Bathroom installers",
 };
 
 
