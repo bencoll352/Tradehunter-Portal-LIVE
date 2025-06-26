@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -291,18 +290,18 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         totalSales: parseNumericValue(getRowValue(row, ["Total Sales"]), "Total Sales", name),
         status: parsedStatus,
         lastActivity: lastActivityValue,
-        description: getRowValue(row, ["Description"]) || undefined, 
+        description: getRowValue(row, ["Description"]),
         tradesMade: parseIntValue(getRowValue(row, ["Reviews"]), "Reviews", name),
         rating: parseNumericValue(getRowValue(row, ["Rating"]), "Rating", name),
-        website: getRowValue(row, ["🌐Website", "Website"]) || undefined,
-        phone: phoneValue || undefined,
-        ownerName: ownerNameValue || undefined,
-        mainCategory: mainCategoryValue || undefined,
-        categories: getRowValue(row, ["Categories"]) || undefined,
-        workdayTiming: workdayTimingValue || undefined,
-        address: getRowValue(row, ["Address"]) || undefined,
-        ownerProfileLink: getRowValue(row, ["Link"]) || undefined,
-        notes: getRowValue(row, ["Notes"]) || undefined,
+        website: getRowValue(row, ["🌐Website", "Website"]),
+        phone: phoneValue,
+        ownerName: ownerNameValue,
+        mainCategory: mainCategoryValue,
+        categories: getRowValue(row, ["Categories"]),
+        workdayTiming: workdayTimingValue,
+        address: getRowValue(row, ["Address"]),
+        ownerProfileLink: getRowValue(row, ["Link"]),
+        notes: getRowValue(row, ["Notes"]),
         annualTurnover: parseNumericValue(getRowValue(row, ["Annual Turnover"]), "Annual Turnover", name),
         totalAssets: parseNumericValue(getRowValue(row, ["Total Assets"]), "Total Assets", name),
         employeeCount: parseIntValue(getRowValue(row, ["Employee Count"]), "Employee Count", name),
@@ -535,7 +534,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ..., Annual Turnover, Total Assets, Employee Count</code>
             <br/>(See full list of expected headers by expanding this dialogue or checking "How to Use").
             <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back' (Hot Lead 🔥), or 'New Lead'.
-            <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "Main St, Suite 100").
+            <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "123 Main St, Suite 100").
             <br/>Max {FIRESTORE_BATCH_LIMIT} traders per file.
           </DialogDescription>
           <div className="text-sm text-muted-foreground mt-2 text-left">
