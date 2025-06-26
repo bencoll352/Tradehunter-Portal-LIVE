@@ -73,8 +73,8 @@ export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infe
       workdayTiming: values.workdayTiming === undefined ? null : values.workdayTiming,
       notes: values.notes === undefined ? null : values.notes,
       callBackDate: values.callBackDate === undefined ? null : values.callBackDate,
-      annualTurnover: values.annualTurnover === undefined ? null : values.annualTurnover,
-      totalAssets: values.totalAssets === undefined ? null : values.totalAssets,
+      estimatedAnnualRevenue: values.estimatedAnnualRevenue === undefined ? null : values.estimatedAnnualRevenue,
+      estimatedCompanyValue: values.estimatedCompanyValue === undefined ? null : values.estimatedCompanyValue,
       employeeCount: values.employeeCount === undefined ? null : values.employeeCount,
       closedOn: null, 
       reviewKeywords: null, 
@@ -117,8 +117,8 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       workdayTiming: values.workdayTiming === undefined ? existingTrader.workdayTiming : values.workdayTiming,
       notes: values.notes === undefined ? existingTrader.notes : values.notes,
       callBackDate: values.callBackDate === undefined ? existingTrader.callBackDate : values.callBackDate,
-      annualTurnover: values.annualTurnover === undefined ? existingTrader.annualTurnover : values.annualTurnover,
-      totalAssets: values.totalAssets === undefined ? existingTrader.totalAssets : values.totalAssets,
+      estimatedAnnualRevenue: values.estimatedAnnualRevenue === undefined ? existingTrader.estimatedAnnualRevenue : values.estimatedAnnualRevenue,
+      estimatedCompanyValue: values.estimatedCompanyValue === undefined ? existingTrader.estimatedCompanyValue : values.estimatedCompanyValue,
       employeeCount: values.employeeCount === undefined ? existingTrader.employeeCount : values.employeeCount,
     };
     const updatedTrader = await updateTraderInDb(traderToUpdate);

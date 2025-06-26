@@ -49,7 +49,7 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'annualTurnover' | 'totalAssets' | 'employeeCount'>;
+type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -131,8 +131,8 @@ export function TraderTableClient({
         (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower)) ||
         (trader.notes && trader.notes.toLowerCase().includes(searchTermLower)) ||
         (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower)) ||
-        (trader.annualTurnover && String(trader.annualTurnover).includes(searchTermLower)) ||
-        (trader.totalAssets && String(trader.totalAssets).includes(searchTermLower)) ||
+        (trader.estimatedAnnualRevenue && String(trader.estimatedAnnualRevenue).includes(searchTermLower)) ||
+        (trader.estimatedCompanyValue && String(trader.estimatedCompanyValue).includes(searchTermLower)) ||
         (trader.employeeCount && String(trader.employeeCount).includes(searchTermLower))
       );
     }
@@ -259,8 +259,8 @@ export function TraderTableClient({
       ownerName: trader.ownerName || undefined, ownerProfileLink: trader.ownerProfileLink || undefined,
       categories: trader.categories || undefined, workdayTiming: trader.workdayTiming || undefined, notes: trader.notes || undefined,
       callBackDate: trader.callBackDate || undefined,
-      annualTurnover: trader.annualTurnover,
-      totalAssets: trader.totalAssets,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
+      estimatedCompanyValue: trader.estimatedCompanyValue,
       employeeCount: trader.employeeCount,
     };
     await onUpdate(trader.id, formValues);
@@ -284,8 +284,8 @@ export function TraderTableClient({
       workdayTiming: trader.workdayTiming || undefined,
       notes: trader.notes || undefined,
       callBackDate: trader.callBackDate || undefined,
-      annualTurnover: trader.annualTurnover,
-      totalAssets: trader.totalAssets,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
+      estimatedCompanyValue: trader.estimatedCompanyValue,
       employeeCount: trader.employeeCount,
     };
     await onUpdate(trader.id, formValues);
@@ -348,8 +348,8 @@ export function TraderTableClient({
       "Name": trader.name,
       "Branch ID": trader.branchId,
       "Total Sales (£)": trader.totalSales,
-      "Annual Turnover (£)": trader.annualTurnover,
-      "Total Assets (£)": trader.totalAssets,
+      "Est. Annual Revenue (£)": trader.estimatedAnnualRevenue,
+      "Estimated Company Value (£)": trader.estimatedCompanyValue,
       "Employee Count": trader.employeeCount,
       "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
@@ -554,8 +554,8 @@ export function TraderTableClient({
               </TableHead>
               <SortableHeader sortKey="name" label="Name" />
               <SortableHeader sortKey="totalSales" label="Total Sales" />
-              <SortableHeader sortKey="annualTurnover" label="Annual Turnover" />
-              <SortableHeader sortKey="totalAssets" label="Total Assets" />
+              <SortableHeader sortKey="estimatedAnnualRevenue" label="Est. Annual Revenue" />
+              <SortableHeader sortKey="estimatedCompanyValue" label="Est. Company Value" />
               <SortableHeader sortKey="employeeCount" label="Employees" />
               <SortableHeader sortKey="status" label="Status" />
               <SortableHeader sortKey="lastActivity" label="Last Activity" />
@@ -610,8 +610,8 @@ export function TraderTableClient({
                   </TooltipProvider>
                 </TableCell>
                 <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
-                <TableCell className="whitespace-nowrap">{renderCellContent(trader.annualTurnover, 0, false, true)}</TableCell>
-                <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalAssets, 0, false, true)}</TableCell>
+                <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedAnnualRevenue, 0, false, true)}</TableCell>
+                <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedCompanyValue, 0, false, true)}</TableCell>
                 <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
                 <TableCell>
                    <Button

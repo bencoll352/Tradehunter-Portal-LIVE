@@ -21,8 +21,8 @@ export interface Trader {
   reviewKeywords?: string | null;
   notes?: string | null;
   callBackDate?: string | null; 
-  annualTurnover?: number | null;
-  totalAssets?: number | null;
+  estimatedAnnualRevenue?: number | null;
+  estimatedCompanyValue?: number | null;
   employeeCount?: number | null;
 }
 
@@ -124,8 +124,8 @@ export type ParsedTraderData = {
   ownerProfileLink?: string | null;
   notes?: string | null;
   callBackDate?: string | null; 
-  annualTurnover?: number | null;
-  totalAssets?: number | null;
+  estimatedAnnualRevenue?: number | null;
+  estimatedCompanyValue?: number | null;
   employeeCount?: number;
 };
 

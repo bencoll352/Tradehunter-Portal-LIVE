@@ -30,7 +30,7 @@ const EXPECTED_HEADERS = [
   "Name", "Total Sales", "Status", "Last Activity", "Description",
   "Reviews", "Rating", "🌐Website", "📞 Phone", "Owner Name",
   "Main Category", "Categories", "Workday Timing", "Address", "Link", "Notes",
-  "Annual Turnover", "Total Assets", "Employee Count", "Actions"
+  "Est. Annual Revenue", "Estimated Company Value", "Employee Count", "Actions"
 ];
 
 const FIRESTORE_BATCH_LIMIT = 500;
@@ -225,7 +225,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
-    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "total sales", "owner name", "main category", "reviews", "rating", "website", "notes", "annual turnover", "total assets", "employee count"];
+    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "total sales", "owner name", "main category", "reviews", "rating", "website", "notes", "est. annual revenue", "estimated company value", "employee count"];
     const foundCommonHeadersCount = actualHeaders.filter(h =>
         commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
     ).length;
@@ -235,7 +235,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         toast({
             variant: "default", 
             title: "Unusual CSV Headers Detected",
-            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Total Sales, Notes, Annual Turnover, Total Assets, Employee Count). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
+            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Total Sales, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
             duration: 10000,
         });
     }
@@ -302,8 +302,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         address: getRowValue(row, ["Address"]),
         ownerProfileLink: getRowValue(row, ["Link"]),
         notes: getRowValue(row, ["Notes"]),
-        annualTurnover: parseNumericValue(getRowValue(row, ["Annual Turnover"]), "Annual Turnover", name),
-        totalAssets: parseNumericValue(getRowValue(row, ["Total Assets"]), "Total Assets", name),
+        estimatedAnnualRevenue: parseNumericValue(getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue", "Annual Revenue"]), "Est. Annual Revenue", name),
+        estimatedCompanyValue: parseNumericValue(getRowValue(row, ["Estimated Company Value", "Est. Company Value", "Company Value", "Total Assets"]), "Estimated Company Value", name),
         employeeCount: parseIntValue(getRowValue(row, ["Employee Count"]), "Employee Count", name),
       };
       tradersToProcess.push(trader);
@@ -467,7 +467,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         toast({
           variant: "destructive",
           title: "Client Upload Error",
-          description: `An unexpected client-error occurred: ${clientErrorMessage}. Check console.`,
+          description: `An unexpected client-side error occurred: ${clientErrorMessage}. Check console.`,
         });
         setIsLoading(false);
         return;
@@ -531,14 +531,14 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             Upload a CSV file. <strong>The first row MUST be a header row.</strong> The system uses these header names (case-insensitive, flexible column order) to identify data columns.
             <br/>The <strong>'Name'</strong> header is mandatory and its column must contain data for each trader.
             <br/>Other common headers (examples):
-            <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ..., Annual Turnover, Total Assets, Employee Count</code>
+            <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ..., Est. Annual Revenue, Estimated Company Value, Employee Count</code>
             <br/>(See full list of expected headers by expanding this dialogue or checking "How to Use").
             <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back' (Hot Lead 🔥), or 'New Lead'.
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "123 Main St, Suite 100").
             <br/>Max {FIRESTORE_BATCH_LIMIT} traders per file.
           </DialogDescription>
           <div className="text-sm text-muted-foreground mt-2 text-left">
-            <strong>If fields like 'Owner Name', 'Main Category', 'Workday Timing', 'Notes', 'Annual Turnover', 'Total Assets', or 'Employee Count' are not loading:</strong>
+            <strong>If fields like 'Owner Name', 'Main Category', 'Workday Timing', 'Notes', 'Est. Annual Revenue', 'Estimated Company Value', or 'Employee Count' are not loading:</strong>
             <ol className="list-decimal list-inside pl-4 text-xs mt-1">
               <li>Double-check the exact spelling of these headers in your <strong>raw CSV file</strong> (not just how they appear in Excel or other spreadsheet software).</li>
               <li>After an upload attempt, open your browser's developer console (usually by right-clicking on the page, selecting 'Inspect' or 'Inspect Element', then finding the 'Console' tab). Look for messages starting with "[CSV Parsing Debug]". These messages will show the headers the system actually detected for problematic rows, and any specific parsing issues for values.</li>
