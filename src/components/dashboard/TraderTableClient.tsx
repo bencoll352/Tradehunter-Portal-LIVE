@@ -643,7 +643,7 @@ export function TraderTableClient({
                 <TableCell>{renderCellContent(trader.workdayTiming, 20)}</TableCell>
                 <TableCell>{renderCellContent(trader.address, 25)}</TableCell>
                 <TableCell className="whitespace-nowrap">
-                  {trader.ownerProfileLink ? (<a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://${trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Profile <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
+                  {trader.ownerProfileLink ? (<a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://$\{trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Profile <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
                 </TableCell>
                 <TableCell className="flex gap-1 whitespace-nowrap">
                   <EditTraderDialog trader={trader} onUpdateTrader={(traderId, values) => handleUpdateTrader(traderId, values)} />
