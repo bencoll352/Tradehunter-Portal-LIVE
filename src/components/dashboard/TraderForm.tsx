@@ -49,6 +49,7 @@ export const traderFormSchema = z.object({
   callBackDate: z.string().optional().nullable(), // ISO date string
   annualTurnover: z.coerce.number().min(0, { message: "Annual Turnover must be a positive number." }).optional().nullable(),
   totalAssets: z.coerce.number().min(0, { message: "Total Assets must be a positive number." }).optional().nullable(),
+  employeeCount: z.coerce.number().int().min(0, { message: "Employee count must be a positive integer." }).optional().nullable(),
 });
 
 interface TraderFormProps {
@@ -80,6 +81,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
       callBackDate: defaultValues?.callBackDate ?? null,
       annualTurnover: defaultValues?.annualTurnover ?? null,
       totalAssets: defaultValues?.totalAssets ?? null,
+      employeeCount: defaultValues?.employeeCount ?? null,
     },
   });
 
@@ -170,7 +172,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="annualTurnover"
@@ -192,6 +194,19 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
                 <FormLabel>Total Assets (£)</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="250000" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
+            control={form.control}
+            name="employeeCount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Employee Count</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="10" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseInt(e.target.value, 10))} value={field.value ?? ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

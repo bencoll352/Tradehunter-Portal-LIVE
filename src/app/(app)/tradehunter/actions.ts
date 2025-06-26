@@ -75,6 +75,7 @@ export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infe
       callBackDate: values.callBackDate === undefined ? null : values.callBackDate,
       annualTurnover: values.annualTurnover === undefined ? null : values.annualTurnover,
       totalAssets: values.totalAssets === undefined ? null : values.totalAssets,
+      employeeCount: values.employeeCount === undefined ? null : values.employeeCount,
       closedOn: null, 
       reviewKeywords: null, 
     };
@@ -118,6 +119,7 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       callBackDate: values.callBackDate === undefined ? existingTrader.callBackDate : values.callBackDate,
       annualTurnover: values.annualTurnover === undefined ? existingTrader.annualTurnover : values.annualTurnover,
       totalAssets: values.totalAssets === undefined ? existingTrader.totalAssets : values.totalAssets,
+      employeeCount: values.employeeCount === undefined ? existingTrader.employeeCount : values.employeeCount,
     };
     const updatedTrader = await updateTraderInDb(traderToUpdate);
     return { data: updatedTrader, error: null };

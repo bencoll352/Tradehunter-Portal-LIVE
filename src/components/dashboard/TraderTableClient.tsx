@@ -49,7 +49,7 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'annualTurnover' | 'totalAssets'>;
+type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'annualTurnover' | 'totalAssets' | 'employeeCount'>;
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -132,7 +132,8 @@ export function TraderTableClient({
         (trader.notes && trader.notes.toLowerCase().includes(searchTermLower)) ||
         (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower)) ||
         (trader.annualTurnover && String(trader.annualTurnover).includes(searchTermLower)) ||
-        (trader.totalAssets && String(trader.totalAssets).includes(searchTermLower))
+        (trader.totalAssets && String(trader.totalAssets).includes(searchTermLower)) ||
+        (trader.employeeCount && String(trader.employeeCount).includes(searchTermLower))
       );
     }
 
@@ -260,6 +261,7 @@ export function TraderTableClient({
       callBackDate: trader.callBackDate || undefined,
       annualTurnover: trader.annualTurnover,
       totalAssets: trader.totalAssets,
+      employeeCount: trader.employeeCount,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -284,6 +286,7 @@ export function TraderTableClient({
       callBackDate: trader.callBackDate || undefined,
       annualTurnover: trader.annualTurnover,
       totalAssets: trader.totalAssets,
+      employeeCount: trader.employeeCount,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -347,6 +350,7 @@ export function TraderTableClient({
       "Total Sales (£)": trader.totalSales,
       "Annual Turnover (£)": trader.annualTurnover,
       "Total Assets (£)": trader.totalAssets,
+      "Employee Count": trader.employeeCount,
       "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
       "Last Activity": trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy HH:mm:ss') : '',
@@ -552,6 +556,7 @@ export function TraderTableClient({
               <SortableHeader sortKey="totalSales" label="Total Sales" />
               <SortableHeader sortKey="annualTurnover" label="Annual Turnover" />
               <SortableHeader sortKey="totalAssets" label="Total Assets" />
+              <SortableHeader sortKey="employeeCount" label="Employees" />
               <SortableHeader sortKey="status" label="Status" />
               <SortableHeader sortKey="lastActivity" label="Last Activity" />
               <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
@@ -607,6 +612,7 @@ export function TraderTableClient({
                 <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
                 <TableCell className="whitespace-nowrap">{renderCellContent(trader.annualTurnover, 0, false, true)}</TableCell>
                 <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalAssets, 0, false, true)}</TableCell>
+                <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
                 <TableCell>
                    <Button
                       variant="ghost" size="sm"

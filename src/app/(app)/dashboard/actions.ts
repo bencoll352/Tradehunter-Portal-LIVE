@@ -79,6 +79,7 @@ export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infe
       callBackDate: values.callBackDate === undefined ? null : values.callBackDate,
       annualTurnover: values.annualTurnover === undefined ? null : values.annualTurnover,
       totalAssets: values.totalAssets === undefined ? null : values.totalAssets,
+      employeeCount: values.employeeCount === undefined ? null : values.employeeCount,
       closedOn: null, 
       reviewKeywords: null, 
     };
@@ -123,6 +124,7 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       callBackDate: values.callBackDate === undefined ? existingTrader.callBackDate : values.callBackDate,
       annualTurnover: values.annualTurnover === undefined ? existingTrader.annualTurnover : values.annualTurnover,
       totalAssets: values.totalAssets === undefined ? existingTrader.totalAssets : values.totalAssets,
+      employeeCount: values.employeeCount === undefined ? existingTrader.employeeCount : values.employeeCount,
       // branchId remains from existingTrader, ensuring it's the BaseBranchId
     };
     const updatedTrader = await updateTraderInDb(traderToUpdate);
@@ -198,4 +200,3 @@ export async function bulkDeleteTradersAction(baseBranchId: BaseBranchId, trader
     return { successCount: 0, failureCount, error: errorMessage };
   }
 }
-

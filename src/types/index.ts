@@ -23,6 +23,7 @@ export interface Trader {
   callBackDate?: string | null; 
   annualTurnover?: number | null;
   totalAssets?: number | null;
+  employeeCount?: number | null;
 }
 
 export type BranchLoginId = 
@@ -125,6 +126,7 @@ export type ParsedTraderData = {
   callBackDate?: string | null; 
   annualTurnover?: number | null;
   totalAssets?: number | null;
+  employeeCount?: number;
 };
 
 export interface BulkDeleteTradersResult {
