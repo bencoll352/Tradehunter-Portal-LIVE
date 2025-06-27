@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react"; 
@@ -541,118 +540,120 @@ export function TraderTableClient({
         </div>
       ) : (
       <div className="rounded-md border shadow-sm">
-        <Table className="min-w-max">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">
-                <Checkbox
-                  checked={isAllPaginatedSelected}
-                  onCheckedChange={handleSelectAllPaginatedTraders}
-                  aria-label="Select all traders on this page"
-                  disabled={paginatedTraders.length === 0}
-                />
-              </TableHead>
-              <SortableHeader sortKey="name" label="Name" />
-              <SortableHeader sortKey="totalSales" label="Total Sales" />
-              <SortableHeader sortKey="estimatedAnnualRevenue" label="Est. Annual Revenue" />
-              <SortableHeader sortKey="estimatedCompanyValue" label="Est. Company Value" />
-              <SortableHeader sortKey="employeeCount" label="Employees" />
-              <SortableHeader sortKey="status" label="Status" />
-              <SortableHeader sortKey="lastActivity" label="Last Activity" />
-              <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
-              <SortableHeader sortKey="description" label="Description" />
-              <TableHead>Notes</TableHead>
-              <SortableHeader sortKey="tradesMade" label="Reviews" />
-              <SortableHeader sortKey="rating" label="Rating" />
-              <TableHead className="whitespace-nowrap">🌐Website</TableHead>
-              <TableHead className="whitespace-nowrap">📞 Phone</TableHead>
-              <SortableHeader sortKey="ownerName" label="Owner Name" />
-              <SortableHeader sortKey="mainCategory" label="Main Category" />
-              <TableHead>Categories</TableHead>
-              <TableHead>Workday Timing</TableHead>
-              <SortableHeader sortKey="address" label="Address" />
-              <TableHead>Link</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedTraders.map((trader) => (
-              <TableRow 
-                key={trader.id} 
-                data-state={selectedTraderIds.has(trader.id) ? "selected" : ""}
-              >
-                <TableCell>
+        <div className="relative w-full overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">
                   <Checkbox
-                    checked={selectedTraderIds.has(trader.id)}
-                    onCheckedChange={() => handleSelectTrader(trader.id)}
-                    aria-label={`Select trader ${trader.name}`}
+                    checked={isAllPaginatedSelected}
+                    onCheckedChange={handleSelectAllPaginatedTraders}
+                    aria-label="Select all traders on this page"
+                    disabled={paginatedTraders.length === 0}
                   />
-                </TableCell>
-                <TableCell className="font-medium whitespace-nowrap">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span 
-                          onClick={() => handleMarkAsHotLead(trader)}
-                          className="cursor-pointer text-primary hover:underline"
-                          title={`Mark ${trader.name} as Hot Lead`}
-                        >
-                          {trader.name.length > 20 ? `${trader.name.substring(0, 20)}...` : trader.name}
-                          {trader.status === 'Call-Back' && <Flame className="inline h-4 w-4 ml-1 text-orange-500" />}
-                        </span>
-                      </TooltipTrigger>
-                      {trader.name.length > 20 && (
-                        <TooltipContent className="max-w-md break-words bg-background border text-foreground p-2 rounded-md shadow-lg z-50">
-                          <p>{trader.name}</p>
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </TooltipProvider>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
-                <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedAnnualRevenue, 0, false, true)}</TableCell>
-                <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedCompanyValue, 0, false, true)}</TableCell>
-                <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
-                <TableCell>
-                   <Button
-                      variant="ghost" size="sm"
-                      className={`p-1 h-auto hover:opacity-80 ${getStatusBadgeClass(trader.status).split(' ').find(c => c.startsWith('hover:bg-'))}`}
-                      onClick={() => handleStatusToggle(trader)}
-                    >
-                    <Badge variant={'outline'} className={`${getStatusBadgeClass(trader.status)} cursor-pointer flex items-center gap-1`}>
-                      {trader.status === 'Call-Back' && <Flame className="h-3 w-3 text-orange-500" />}
-                      {trader.status}
-                    </Badge>
-                  </Button>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
-                <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
-                <TableCell>{renderCellContent(trader.description)}</TableCell>
-                <TableCell>{renderCellContent(trader.notes, 25, true)}</TableCell>
-                <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
-                <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {trader.website ? (<a href={trader.website.startsWith('http') ? trader.website : `https://${trader.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Visit <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {trader.phone ? (<a href={`tel:${trader.phone}`} className="text-primary hover:underline">{renderCellContent(trader.phone, 15)}</a>) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
-                <TableCell>{renderCellContent(trader.ownerName, 20)}</TableCell>
-                <TableCell>{renderCellContent(trader.mainCategory, 15)}</TableCell>
-                <TableCell>{renderCellContent(trader.categories, 20)}</TableCell>
-                <TableCell>{renderCellContent(trader.workdayTiming, 20)}</TableCell>
-                <TableCell>{renderCellContent(trader.address, 25)}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {trader.ownerProfileLink ? (<a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://${trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Profile <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
-                <TableCell className="flex gap-1 whitespace-nowrap">
-                  <EditTraderDialog trader={trader} onUpdateTrader={(traderId, values) => handleUpdateTrader(traderId, values)} />
-                  <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => handleDeleteTrader(trader.id)} />
-                </TableCell>
+                </TableHead>
+                <SortableHeader sortKey="name" label="Name" />
+                <SortableHeader sortKey="totalSales" label="Total Sales" />
+                <SortableHeader sortKey="estimatedAnnualRevenue" label="Est. Annual Revenue" />
+                <SortableHeader sortKey="estimatedCompanyValue" label="Est. Company Value" />
+                <SortableHeader sortKey="employeeCount" label="Employees" />
+                <SortableHeader sortKey="status" label="Status" />
+                <SortableHeader sortKey="lastActivity" label="Last Activity" />
+                <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
+                <SortableHeader sortKey="description" label="Description" />
+                <TableHead>Notes</TableHead>
+                <SortableHeader sortKey="tradesMade" label="Reviews" />
+                <SortableHeader sortKey="rating" label="Rating" />
+                <TableHead className="whitespace-nowrap">🌐Website</TableHead>
+                <TableHead className="whitespace-nowrap">📞 Phone</TableHead>
+                <SortableHeader sortKey="ownerName" label="Owner Name" />
+                <SortableHeader sortKey="mainCategory" label="Main Category" />
+                <TableHead>Categories</TableHead>
+                <TableHead>Workday Timing</TableHead>
+                <SortableHeader sortKey="address" label="Address" />
+                <TableHead>Link</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginatedTraders.map((trader) => (
+                <TableRow 
+                  key={trader.id} 
+                  data-state={selectedTraderIds.has(trader.id) ? "selected" : ""}
+                >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedTraderIds.has(trader.id)}
+                      onCheckedChange={() => handleSelectTrader(trader.id)}
+                      aria-label={`Select trader ${trader.name}`}
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span 
+                            onClick={() => handleMarkAsHotLead(trader)}
+                            className="cursor-pointer text-primary hover:underline"
+                            title={`Mark ${trader.name} as Hot Lead`}
+                          >
+                            {trader.name.length > 20 ? `${trader.name.substring(0, 20)}...` : trader.name}
+                            {trader.status === 'Call-Back' && <Flame className="inline h-4 w-4 ml-1 text-orange-500" />}
+                          </span>
+                        </TooltipTrigger>
+                        {trader.name.length > 20 && (
+                          <TooltipContent className="max-w-md break-words bg-background border text-foreground p-2 rounded-md shadow-lg z-50">
+                            <p>{trader.name}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
+                  <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedAnnualRevenue, 0, false, true)}</TableCell>
+                  <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedCompanyValue, 0, false, true)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
+                  <TableCell>
+                     <Button
+                        variant="ghost" size="sm"
+                        className={`p-1 h-auto hover:opacity-80 ${getStatusBadgeClass(trader.status).split(' ').find(c => c.startsWith('hover:bg-'))}`}
+                        onClick={() => handleStatusToggle(trader)}
+                      >
+                      <Badge variant={'outline'} className={`${getStatusBadgeClass(trader.status)} cursor-pointer flex items-center gap-1`}>
+                        {trader.status === 'Call-Back' && <Flame className="h-3 w-3 text-orange-500" />}
+                        {trader.status}
+                      </Badge>
+                    </Button>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
+                  <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
+                  <TableCell>{renderCellContent(trader.description)}</TableCell>
+                  <TableCell>{renderCellContent(trader.notes, 25, true)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {trader.website ? (<a href={trader.website.startsWith('http') ? trader.website : `https://${trader.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Visit <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {trader.phone ? (<a href={`tel:${trader.phone}`} className="text-primary hover:underline">{renderCellContent(trader.phone, 15)}</a>) : <span className="text-muted-foreground/50">-</span>}
+                  </TableCell>
+                  <TableCell>{renderCellContent(trader.ownerName, 20)}</TableCell>
+                  <TableCell>{renderCellContent(trader.mainCategory, 15)}</TableCell>
+                  <TableCell>{renderCellContent(trader.categories, 20)}</TableCell>
+                  <TableCell>{renderCellContent(trader.workdayTiming, 20)}</TableCell>
+                  <TableCell>{renderCellContent(trader.address, 25)}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {trader.ownerProfileLink ? (<a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://${trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Profile <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
+                  </TableCell>
+                  <TableCell className="flex gap-1 whitespace-nowrap">
+                    <EditTraderDialog trader={trader} onUpdateTrader={(traderId, values) => handleUpdateTrader(traderId, values)} />
+                    <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => handleDeleteTrader(trader.id)} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       )}
 
@@ -682,7 +683,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-    
-
-    

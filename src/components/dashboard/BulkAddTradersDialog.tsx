@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -167,7 +166,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       // Find a key in the row that matches a variation (case-insensitive, space-trimmed)
       const foundKey = keys.find(key => key.trim().toLowerCase() === variation.trim().toLowerCase());
       if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null) {
-        return String(row[foundKey]).trim(); // Trim the value as well
+        return String(row[foundKey]); // Do not trim here, preserve original whitespace from cell
       }
     }
     return undefined;
@@ -182,7 +181,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       header: true, // Automatically uses the first row as headers
       skipEmptyLines: 'greedy', // Skips lines that are empty or only contain whitespace
       transformHeader: header => header.trim(), // Trim whitespace from headers
-      // dynamicTyping: true, // PapaParse attempts to convert numbers and booleans
     });
 
     console.log("[CSV Parsing Debug] Detected headers by PapaParse:", parseResults.meta.fields);
@@ -243,13 +241,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
 
     for (const row of parseResults.data as any[]) { 
-      const name = getRowValue(row, ["Name"]);
+      const name = getRowValue(row, ["Name"])?.trim();
       if (!name) {
         console.warn("[CSV Parsing Debug] Skipping row due to missing 'Name'. Row data:", row);
         continue;
       }
 
-      const statusValueRaw = getRowValue(row, ["Status"]);
+      const statusValueRaw = getRowValue(row, ["Status"])?.trim();
       let parsedStatus : ParsedTraderData['status'] = 'New Lead'; 
       if (statusValueRaw) {
         const statusValueLower = statusValueRaw.toLowerCase();
