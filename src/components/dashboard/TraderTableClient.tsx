@@ -26,7 +26,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   Select,
@@ -561,7 +560,6 @@ export function TraderTableClient({
                 </TableHead>
                 <SortableHeader sortKey="name" label="Name" />
                 <SortableHeader sortKey="totalSales" label="Total Sales" />
-                {/* UPDATED: Added headers for new columns */}
                 <SortableHeader sortKey="estimatedAnnualRevenue" label="Est. Annual Revenue" />
                 <SortableHeader sortKey="estimatedCompanyValue" label="Est. Company Value" />
                 <SortableHeader sortKey="employeeCount" label="Employees" />
@@ -618,7 +616,6 @@ export function TraderTableClient({
                     </TooltipProvider>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
-                  {/* UPDATED: Added cells for new columns */}
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedAnnualRevenue, 0, false, true)}</TableCell>
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedCompanyValue, 0, false, true)}</TableCell>
                   <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
