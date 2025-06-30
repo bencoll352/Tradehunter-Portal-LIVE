@@ -49,7 +49,6 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-// UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount
 type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount'>;
 
 interface TraderTableClientProps {
@@ -123,7 +122,6 @@ export function TraderTableClient({
 
     if (searchTerm) {
       const searchTermLower = searchTerm.toLowerCase();
-      // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount to search
       searchableTraders = searchableTraders.filter(trader =>
         trader.name.toLowerCase().includes(searchTermLower) ||
         (trader.description && trader.description.toLowerCase().includes(searchTermLower)) ||
@@ -133,9 +131,9 @@ export function TraderTableClient({
         (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower)) ||
         (trader.notes && trader.notes.toLowerCase().includes(searchTermLower)) ||
         (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower)) ||
-        (trader.estimatedAnnualRevenue && String(trader.estimatedAnnualRevenue).includes(searchTermLower)) ||
-        (trader.estimatedCompanyValue && String(trader.estimatedCompanyValue).includes(searchTermLower)) ||
-        (trader.employeeCount && String(trader.employeeCount).includes(searchTermLower))
+        (trader.estimatedAnnualRevenue != null && String(trader.estimatedAnnualRevenue).includes(searchTermLower)) ||
+        (trader.estimatedCompanyValue != null && String(trader.estimatedCompanyValue).includes(searchTermLower)) ||
+        (trader.employeeCount != null && String(trader.employeeCount).includes(searchTermLower))
       );
     }
 
@@ -254,7 +252,6 @@ export function TraderTableClient({
       default: newStatus = 'Active'; 
     }
 
-    // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name, totalSales: trader.totalSales, tradesMade: trader.tradesMade, status: newStatus,
       description: trader.description || undefined, rating: trader.rating, website: trader.website || undefined,
@@ -270,7 +267,6 @@ export function TraderTableClient({
   };
 
   const handleMarkAsHotLead = async (trader: Trader) => {
-    // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       totalSales: trader.totalSales,
@@ -347,7 +343,6 @@ export function TraderTableClient({
       return;
     }
 
-    // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount to CSV export
     const csvData = filteredTraders.map(trader => ({
       "ID": trader.id,
       "Name": trader.name,
@@ -408,7 +403,6 @@ export function TraderTableClient({
     </TableHead>
   );
 
-  // UPDATED: Added isCurrency flag for currency formatting
   const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false, isCurrency = false) => {
     if (isCurrency) {
         if (typeof content === 'number') {
@@ -690,4 +684,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
