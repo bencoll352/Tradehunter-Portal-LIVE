@@ -253,40 +253,47 @@ export function TraderTableClient({
     }
 
     const formValues: z.infer<typeof traderFormSchema> = {
-      name: trader.name, totalSales: trader.totalSales, tradesMade: trader.tradesMade, status: newStatus,
-      description: trader.description || undefined, rating: trader.rating, website: trader.website || undefined,
-      phone: trader.phone || undefined, address: trader.address || undefined, mainCategory: trader.mainCategory || undefined,
-      ownerName: trader.ownerName || undefined, ownerProfileLink: trader.ownerProfileLink || undefined,
-      categories: trader.categories || undefined, workdayTiming: trader.workdayTiming || undefined, notes: trader.notes || undefined,
-      callBackDate: trader.callBackDate || undefined,
-      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
-      estimatedCompanyValue: trader.estimatedCompanyValue,
-      employeeCount: trader.employeeCount,
+      ...trader, // Start with all existing data to prevent data loss
+      status: newStatus, // Override just the status
+      // Ensure optional fields that might be null are handled correctly if schema expects undefined
+      description: trader.description ?? undefined,
+      rating: trader.rating ?? undefined,
+      website: trader.website ?? undefined,
+      phone: trader.phone ?? undefined,
+      address: trader.address ?? undefined,
+      mainCategory: trader.mainCategory ?? undefined,
+      ownerName: trader.ownerName ?? undefined,
+      ownerProfileLink: trader.ownerProfileLink ?? undefined,
+      categories: trader.categories ?? undefined,
+      workdayTiming: trader.workdayTiming ?? undefined,
+      notes: trader.notes ?? undefined,
+      callBackDate: trader.callBackDate ?? undefined,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue ?? undefined,
+      estimatedCompanyValue: trader.estimatedCompanyValue ?? undefined,
+      employeeCount: trader.employeeCount ?? undefined,
     };
     await onUpdate(trader.id, formValues);
   };
 
   const handleMarkAsHotLead = async (trader: Trader) => {
     const formValues: z.infer<typeof traderFormSchema> = {
-      name: trader.name,
-      totalSales: trader.totalSales,
-      tradesMade: trader.tradesMade,
+      ...trader, // Start with all existing data
       status: 'Call-Back', // Set status to Call-Back
-      description: trader.description || undefined,
-      rating: trader.rating,
-      website: trader.website || undefined,
-      phone: trader.phone || undefined,
-      address: trader.address || undefined,
-      mainCategory: trader.mainCategory || undefined,
-      ownerName: trader.ownerName || undefined,
-      ownerProfileLink: trader.ownerProfileLink || undefined,
-      categories: trader.categories || undefined,
-      workdayTiming: trader.workdayTiming || undefined,
-      notes: trader.notes || undefined,
-      callBackDate: trader.callBackDate || undefined,
-      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
-      estimatedCompanyValue: trader.estimatedCompanyValue,
-      employeeCount: trader.employeeCount,
+      description: trader.description ?? undefined,
+      rating: trader.rating ?? undefined,
+      website: trader.website ?? undefined,
+      phone: trader.phone ?? undefined,
+      address: trader.address ?? undefined,
+      mainCategory: trader.mainCategory ?? undefined,
+      ownerName: trader.ownerName ?? undefined,
+      ownerProfileLink: trader.ownerProfileLink ?? undefined,
+      categories: trader.categories ?? undefined,
+      workdayTiming: trader.workdayTiming ?? undefined,
+      notes: trader.notes ?? undefined,
+      callBackDate: trader.callBackDate ?? undefined,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue ?? undefined,
+      estimatedCompanyValue: trader.estimatedCompanyValue ?? undefined,
+      employeeCount: trader.employeeCount ?? undefined,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -684,3 +691,5 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+    
