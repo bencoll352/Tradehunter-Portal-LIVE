@@ -252,7 +252,6 @@ export function TraderTableClient({
       default: newStatus = 'Active'; 
     }
 
-    // THIS IS THE CRITICAL FIX for data preservation on status change
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       status: newStatus,
