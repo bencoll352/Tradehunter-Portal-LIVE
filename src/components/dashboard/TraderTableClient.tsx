@@ -49,7 +49,7 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount'>;
+type SortKey = 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -694,5 +694,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-    
