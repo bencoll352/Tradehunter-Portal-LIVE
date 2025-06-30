@@ -252,48 +252,52 @@ export function TraderTableClient({
       default: newStatus = 'Active'; 
     }
 
+    // THIS IS THE CRITICAL FIX for data preservation on status change
     const formValues: z.infer<typeof traderFormSchema> = {
-      ...trader, // Start with all existing data to prevent data loss
-      status: newStatus, // Override just the status
-      // Ensure optional fields that might be null are handled correctly if schema expects undefined
-      description: trader.description ?? undefined,
-      rating: trader.rating ?? undefined,
-      website: trader.website ?? undefined,
-      phone: trader.phone ?? undefined,
-      address: trader.address ?? undefined,
-      mainCategory: trader.mainCategory ?? undefined,
-      ownerName: trader.ownerName ?? undefined,
-      ownerProfileLink: trader.ownerProfileLink ?? undefined,
-      categories: trader.categories ?? undefined,
-      workdayTiming: trader.workdayTiming ?? undefined,
-      notes: trader.notes ?? undefined,
-      callBackDate: trader.callBackDate ?? undefined,
-      estimatedAnnualRevenue: trader.estimatedAnnualRevenue ?? undefined,
-      estimatedCompanyValue: trader.estimatedCompanyValue ?? undefined,
-      employeeCount: trader.employeeCount ?? undefined,
+      name: trader.name,
+      status: newStatus,
+      totalSales: trader.totalSales,
+      tradesMade: trader.tradesMade,
+      description: trader.description,
+      rating: trader.rating,
+      website: trader.website,
+      phone: trader.phone,
+      address: trader.address,
+      mainCategory: trader.mainCategory,
+      ownerName: trader.ownerName,
+      ownerProfileLink: trader.ownerProfileLink,
+      categories: trader.categories,
+      workdayTiming: trader.workdayTiming,
+      notes: trader.notes,
+      callBackDate: trader.callBackDate,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
+      estimatedCompanyValue: trader.estimatedCompanyValue,
+      employeeCount: trader.employeeCount,
     };
     await onUpdate(trader.id, formValues);
   };
 
   const handleMarkAsHotLead = async (trader: Trader) => {
     const formValues: z.infer<typeof traderFormSchema> = {
-      ...trader, // Start with all existing data
-      status: 'Call-Back', // Set status to Call-Back
-      description: trader.description ?? undefined,
-      rating: trader.rating ?? undefined,
-      website: trader.website ?? undefined,
-      phone: trader.phone ?? undefined,
-      address: trader.address ?? undefined,
-      mainCategory: trader.mainCategory ?? undefined,
-      ownerName: trader.ownerName ?? undefined,
-      ownerProfileLink: trader.ownerProfileLink ?? undefined,
-      categories: trader.categories ?? undefined,
-      workdayTiming: trader.workdayTiming ?? undefined,
-      notes: trader.notes ?? undefined,
-      callBackDate: trader.callBackDate ?? undefined,
-      estimatedAnnualRevenue: trader.estimatedAnnualRevenue ?? undefined,
-      estimatedCompanyValue: trader.estimatedCompanyValue ?? undefined,
-      employeeCount: trader.employeeCount ?? undefined,
+      name: trader.name,
+      status: 'Call-Back',
+      totalSales: trader.totalSales,
+      tradesMade: trader.tradesMade,
+      description: trader.description,
+      rating: trader.rating,
+      website: trader.website,
+      phone: trader.phone,
+      address: trader.address,
+      mainCategory: trader.mainCategory,
+      ownerName: trader.ownerName,
+      ownerProfileLink: trader.ownerProfileLink,
+      categories: trader.categories,
+      workdayTiming: trader.workdayTiming,
+      notes: trader.notes,
+      callBackDate: trader.callBackDate,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
+      estimatedCompanyValue: trader.estimatedCompanyValue,
+      employeeCount: trader.employeeCount,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -691,5 +695,7 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+    
 
     
