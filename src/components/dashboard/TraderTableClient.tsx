@@ -49,6 +49,7 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
+// UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount
 type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount'>;
 
 interface TraderTableClientProps {
@@ -122,6 +123,7 @@ export function TraderTableClient({
 
     if (searchTerm) {
       const searchTermLower = searchTerm.toLowerCase();
+      // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount to search
       searchableTraders = searchableTraders.filter(trader =>
         trader.name.toLowerCase().includes(searchTermLower) ||
         (trader.description && trader.description.toLowerCase().includes(searchTermLower)) ||
@@ -252,6 +254,7 @@ export function TraderTableClient({
       default: newStatus = 'Active'; 
     }
 
+    // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name, totalSales: trader.totalSales, tradesMade: trader.tradesMade, status: newStatus,
       description: trader.description || undefined, rating: trader.rating, website: trader.website || undefined,
@@ -267,6 +270,7 @@ export function TraderTableClient({
   };
 
   const handleMarkAsHotLead = async (trader: Trader) => {
+    // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       totalSales: trader.totalSales,
@@ -343,6 +347,7 @@ export function TraderTableClient({
       return;
     }
 
+    // UPDATED: Added estimatedAnnualRevenue, estimatedCompanyValue, employeeCount to CSV export
     const csvData = filteredTraders.map(trader => ({
       "ID": trader.id,
       "Name": trader.name,
@@ -403,6 +408,7 @@ export function TraderTableClient({
     </TableHead>
   );
 
+  // UPDATED: Added isCurrency flag for currency formatting
   const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false, isCurrency = false) => {
     if (isCurrency) {
         if (typeof content === 'number') {
@@ -555,6 +561,7 @@ export function TraderTableClient({
                 </TableHead>
                 <SortableHeader sortKey="name" label="Name" />
                 <SortableHeader sortKey="totalSales" label="Total Sales" />
+                {/* UPDATED: Added headers for new columns */}
                 <SortableHeader sortKey="estimatedAnnualRevenue" label="Est. Annual Revenue" />
                 <SortableHeader sortKey="estimatedCompanyValue" label="Est. Company Value" />
                 <SortableHeader sortKey="employeeCount" label="Employees" />
@@ -611,6 +618,7 @@ export function TraderTableClient({
                     </TooltipProvider>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
+                  {/* UPDATED: Added cells for new columns */}
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedAnnualRevenue, 0, false, true)}</TableCell>
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedCompanyValue, 0, false, true)}</TableCell>
                   <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
@@ -684,5 +692,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-    
