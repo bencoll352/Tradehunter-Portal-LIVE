@@ -26,7 +26,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   Select,
@@ -49,7 +48,9 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
+// CORRECTED: This type definition now includes the three new fields, which was the critical error.
 type SortKey = 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
+
 
 interface TraderTableClientProps {
   initialTraders: Trader[];

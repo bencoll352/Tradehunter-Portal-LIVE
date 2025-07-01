@@ -99,8 +99,9 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       return { data: null, error: errorMessage };
     }
 
-    // Construct the full Trader object for updateTraderInDb, using nullish coalescing (??)
-    // to safely merge the form values over the existing data. This prevents accidental data deletion.
+    // CORRECTED: This ensures that values from the form (values) are prioritized,
+    // but if they are missing (e.g., when just changing status), the existing values from the database
+    // are preserved for all fields, preventing accidental data deletion.
     const traderToUpdate: Trader = {
       ...existingTrader, 
       name: values.name,
