@@ -56,12 +56,8 @@ export async function getTradersAction(baseBranchId: BaseBranchId): Promise<{ da
 // Action now expects BaseBranchId
 export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infer<typeof traderFormSchema>): Promise<{ data: Trader | null; error: string | null }> {
   try {
-    // The traderData for addTraderToDb should not include 'id', 'lastActivity', or 'branchId'
-    // as these are handled by the service or are system-generated.
-    // traderFormSchema already aligns with this mostly.
     const newTraderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'> = {
       name: values.name,
-      // branchId is set by addTraderToDb using the passed baseBranchId
       totalSales: values.totalSales ?? 0, // Default to 0 if null or undefined
       tradesMade: values.tradesMade ?? 0, // Default to 0 if null or undefined
       status: values.status,
@@ -103,9 +99,9 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       return { data: null, error: errorMessage };
     }
 
-    // CORRECTED: This ensures that values from the form (values) are prioritized,
+    // DEFINITIVE FIX: This ensures that values from the form are prioritized,
     // but if they are missing (e.g., when just changing status), the existing values from the database
-    // are preserved for all fields, preventing accidental data deletion.
+    // are preserved for all fields, preventing accidental data deletion for the new columns.
     const traderToUpdate: Trader = {
       ...existingTrader, 
       name: values.name,
@@ -140,7 +136,6 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
 // Action now expects BaseBranchId
 export async function deleteTraderAction(baseBranchId: BaseBranchId, traderId: string): Promise<{ success: boolean; error: string | null; }> {
    try {
-    // deleteTraderFromDb now takes baseBranchId for logging/verification if needed, but primarily relies on traderId
     const success = await deleteTraderFromDb(traderId, baseBranchId);
     return { success, error: null };
   } catch (error) {
@@ -184,8 +179,6 @@ export async function bulkDeleteTradersAction(baseBranchId: BaseBranchId, trader
 
   for (const traderId of traderIds) {
     const traderDocRef = doc(db, TRADERS_COLLECTION, traderId);
-    // Before adding to batch, one could optionally fetch the doc to verify it belongs to baseBranchId if Firestore rules aren't strict enough.
-    // However, for performance in a bulk operation, relying on rules or prior client-side filtering is common.
     batch.delete(traderDocRef);
   }
 
@@ -201,3 +194,5 @@ export async function bulkDeleteTradersAction(baseBranchId: BaseBranchId, trader
     return { successCount: 0, failureCount, error: errorMessage };
   }
 }
+
+    

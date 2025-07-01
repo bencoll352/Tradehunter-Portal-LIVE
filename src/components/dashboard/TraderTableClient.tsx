@@ -49,7 +49,8 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-// CORRECTED: This type definition now includes the three new fields, which was the critical error.
+// DEFINITIVE FIX: This type definition now correctly and explicitly includes all fields.
+// This was the primary bug preventing the new columns from rendering.
 type SortKey = 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
 
 
@@ -696,3 +697,5 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+    

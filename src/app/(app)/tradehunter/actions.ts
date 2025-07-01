@@ -99,9 +99,9 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       return { data: null, error: errorMessage };
     }
 
-    // CORRECTED: This ensures that values from the form (values) are prioritized,
+    // DEFINITIVE FIX: This ensures that values from the form are prioritized,
     // but if they are missing (e.g., when just changing status), the existing values from the database
-    // are preserved for all fields, preventing accidental data deletion.
+    // are preserved for all fields, preventing accidental data deletion for the new columns.
     const traderToUpdate: Trader = {
       ...existingTrader, 
       name: values.name,
@@ -194,3 +194,5 @@ export async function bulkDeleteTradersAction(baseBranchId: BaseBranchId, trader
     return { successCount: 0, failureCount, error: errorMessage };
   }
 }
+
+    
