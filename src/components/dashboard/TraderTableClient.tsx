@@ -589,7 +589,10 @@ export function TraderTableClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedTraders.map((trader) => (
+              {paginatedTraders.map((trader) => {
+                // DEBUGGING LOG
+                // console.log("Rendering Trader:", trader.id, "Est Annual Revenue:", trader.estimatedAnnualRevenue);
+                return (
                 <TableRow 
                   key={trader.id} 
                   data-state={selectedTraderIds.has(trader.id) ? "selected" : ""}
@@ -663,7 +666,7 @@ export function TraderTableClient({
                     <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => handleDeleteTrader(trader.id)} />
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         </div>
