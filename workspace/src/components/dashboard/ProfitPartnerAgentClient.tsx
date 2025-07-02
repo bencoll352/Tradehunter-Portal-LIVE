@@ -14,6 +14,7 @@ import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch
 import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query"; // Genkit flow
 import type { Trader } from "@/types"; // Trader type
 import { formatTraderDataForAnalysis } from "@/lib/utils"; // Utility function
+import { ScrollArea } from "@/components/ui/scroll-area"; // ShadCN ScrollArea
 import { useToast } from "@/hooks/use-toast"; // Toast hook
 
 // Schema for the agent form
@@ -174,7 +175,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
                   <FormLabel>Your Question or Analysis Request</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="e.g., What is the total sales volume? Who are the top 3 traders by sales? Or use a quick action."
+                      placeholder="e.g., Who are the top 3 traders by estimated annual revenue? Or use a quick action."
                       className="resize-none"
                       rows={3}
                       {...field}
@@ -231,9 +232,9 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
          <CardContent className="mt-4 border-t pt-4">
           <h3 className="text-lg font-semibold mb-2 text-foreground">Analysis Result:</h3>
           {analysisResponse && (
-            <div className="rounded-md border p-3 bg-muted/50">
+            <ScrollArea className="h-[250px] rounded-md border p-3 bg-muted/50">
               <p className="text-sm text-foreground whitespace-pre-wrap">{analysisResponse}</p>
-            </div>
+            </ScrollArea>
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}
         </CardContent>

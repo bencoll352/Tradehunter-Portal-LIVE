@@ -139,8 +139,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             )}
             />
         </div>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
+        <FormField
             control={form.control}
             name="employeeCount"
             render={({ field }) => (
@@ -153,7 +152,6 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
               </FormItem>
             )}
           />
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField

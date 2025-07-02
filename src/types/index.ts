@@ -122,7 +122,7 @@ export type ParsedTraderData = {
   callBackDate?: string | null; 
   estimatedAnnualRevenue?: number | null;
   estimatedCompanyValue?: number | null;
-  employeeCount?: number;
+  employeeCount?: number | null;
 };
 
 export interface BulkDeleteTradersResult {

@@ -97,9 +97,7 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       return { data: null, error: errorMessage };
     }
 
-    // DEFINITIVE FIX: This ensures that values from the form are prioritized,
-    // but if they are missing (e.g., when just changing status), the existing values from the database
-    // are preserved for all fields, preventing accidental data deletion for the new columns.
+    // This ensures that values from the form are merged with existing data to prevent data loss.
     const traderToUpdate: Trader = {
       ...existingTrader, 
       name: values.name,

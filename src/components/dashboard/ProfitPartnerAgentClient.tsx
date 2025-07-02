@@ -175,7 +175,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
                   <FormLabel>Your Question or Analysis Request</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="e.g., What is the total sales volume? Who are the top 3 traders by sales? Or use a quick action."
+                      placeholder="e.g., Who are the top 3 traders by estimated annual revenue? Or use a quick action."
                       className="resize-none"
                       rows={3}
                       {...field}
