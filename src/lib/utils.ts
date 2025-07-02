@@ -22,7 +22,7 @@ export const formatTraderDataForAnalysis = (traders: Trader[]): string => {
     return "No trader data available for this branch.";
   }
   return traders.map(trader => {
-    let details = `Trader: ${trader.name}, Trades: ${trader.tradesMade ?? 0}, Status: ${trader.status}, Last Activity: ${format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}`;
+    let details = `Trader: ${trader.name}, Status: ${trader.status}, Last Activity: ${format(parseISO(trader.lastActivity), 'dd/MM/yyyy')}`;
     if (trader.callBackDate) details += `, Call-Back Date: ${format(parseISO(trader.callBackDate), 'dd/MM/yyyy')}`;
     if (trader.estimatedAnnualRevenue) details += `, Est. Annual Revenue: £${trader.estimatedAnnualRevenue.toLocaleString('en-GB')}`;
     if (trader.estimatedCompanyValue) details += `, Est. Company Value: £${trader.estimatedCompanyValue.toLocaleString('en-GB')}`;

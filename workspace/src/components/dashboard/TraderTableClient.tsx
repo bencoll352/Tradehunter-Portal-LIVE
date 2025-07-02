@@ -49,8 +49,8 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-// DEFINITIVE FIX: This type definition now correctly and explicitly includes all fields.
-type SortKey = 'name' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
+// DEFINITIVE FIX: The SortKey type now correctly reflects the new data structure.
+type SortKey = 'name' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
 
 
 interface TraderTableClientProps {
@@ -257,7 +257,6 @@ export function TraderTableClient({
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       status: newStatus,
-      tradesMade: trader.tradesMade,
       description: trader.description,
       rating: trader.rating,
       website: trader.website,
@@ -281,7 +280,6 @@ export function TraderTableClient({
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       status: 'Call-Back',
-      tradesMade: trader.tradesMade,
       description: trader.description,
       rating: trader.rating,
       website: trader.website,
@@ -360,7 +358,6 @@ export function TraderTableClient({
       "Est. Annual Revenue (£)": trader.estimatedAnnualRevenue,
       "Est. Company Value (£)": trader.estimatedCompanyValue,
       "Employee Count": trader.employeeCount,
-      "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
       "Last Activity": trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy HH:mm:ss') : '',
       "Call-Back Date": trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : '',
@@ -571,7 +568,6 @@ export function TraderTableClient({
                 <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
                 <SortableHeader sortKey="description" label="Description" />
                 <TableHead>Notes</TableHead>
-                <SortableHeader sortKey="tradesMade" label="Reviews" />
                 <SortableHeader sortKey="rating" label="Rating" />
                 <TableHead className="whitespace-nowrap">🌐Website</TableHead>
                 <TableHead className="whitespace-nowrap">📞 Phone</TableHead>
@@ -638,7 +634,6 @@ export function TraderTableClient({
                   <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
                   <TableCell>{renderCellContent(trader.description)}</TableCell>
                   <TableCell>{renderCellContent(trader.notes, 25, true)}</TableCell>
-                  <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
                   <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     {trader.website ? (<a href={trader.website.startsWith('http') ? trader.website : `https://${trader.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Visit <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}

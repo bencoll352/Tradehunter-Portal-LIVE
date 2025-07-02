@@ -58,7 +58,6 @@ export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infe
   try {
     const newTraderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'> = {
       name: values.name,
-      tradesMade: values.tradesMade ?? 0, // Default to 0 if null or undefined
       status: values.status,
       description: values.description ?? null,
       rating: values.rating ?? null,
@@ -105,7 +104,6 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       ...existingTrader, 
       name: values.name,
       status: values.status,
-      tradesMade: values.tradesMade ?? existingTrader.tradesMade,
       description: values.description ?? existingTrader.description,
       rating: values.rating ?? existingTrader.rating,
       website: values.website ?? existingTrader.website,

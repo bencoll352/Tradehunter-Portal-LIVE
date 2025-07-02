@@ -29,7 +29,7 @@ interface BulkAddTradersDialogProps {
 
 const EXPECTED_HEADERS = [
   "Name", "Status", "Last Activity", "Description",
-  "Reviews", "Rating", "🌐Website", "📞 Phone", "Owner Name",
+  "Rating", "🌐Website", "📞 Phone", "Owner Name",
   "Main Category", "Categories", "Workday Timing", "Address", "Link", "Notes",
   "Est. Annual Revenue", "Estimated Company Value", "Employee Count", "Actions"
 ];
@@ -225,7 +225,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
-    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "owner name", "main category", "reviews", "rating", "website", "notes", "est. annual revenue", "estimated company value", "employee count"];
+    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "owner name", "main category", "rating", "website", "notes", "est. annual revenue", "estimated company value", "employee count"];
     const foundCommonHeadersCount = actualHeaders.filter(h =>
         commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
     ).length;
@@ -290,7 +290,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         status: parsedStatus,
         lastActivity: lastActivityValue,
         description: getRowValue(row, ["Description"]),
-        tradesMade: parseIntValue(getRowValue(row, ["Reviews"]), "Reviews", name),
         rating: parseNumericValue(getRowValue(row, ["Rating"]), "Rating", name),
         website: getRowValue(row, ["🌐Website", "Website"]),
         phone: phoneValue,

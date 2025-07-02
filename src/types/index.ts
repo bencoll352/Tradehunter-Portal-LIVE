@@ -3,7 +3,6 @@ export interface Trader {
   id: string;
   name: string;
   branchId: string; // This will store the BaseBranchId
-  tradesMade: number;
   status: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead';
   lastActivity: string; 
   description?: string | null;
@@ -110,7 +109,6 @@ export type ParsedTraderData = {
   status?: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead';
   lastActivity?: string; 
   description?: string | null;
-  tradesMade?: number; 
   rating?: number | null;
   website?: string | null;
   phone?: string | null;

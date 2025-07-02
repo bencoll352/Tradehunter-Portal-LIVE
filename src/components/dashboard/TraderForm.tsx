@@ -32,7 +32,6 @@ import { format as formatDateFns, parseISO } from "date-fns";
 // Schema now includes all fields present in the TraderTable overview
 export const traderFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  tradesMade: z.coerce.number().int().min(0, { message: "Trades made (Reviews) must be a positive integer." }).optional().nullable(),
   status: z.enum(["Active", "Inactive", "Call-Back", "New Lead"]),
   description: z.string().optional().nullable(),
   rating: z.coerce.number().min(0).max(5).optional().nullable(),
@@ -63,7 +62,6 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
     resolver: zodResolver(traderFormSchema),
     defaultValues: {
       name: defaultValues?.name || "",
-      tradesMade: defaultValues?.tradesMade ?? null,
       status: defaultValues?.status || "Active",
       description: defaultValues?.description ?? null,
       rating: defaultValues?.rating ?? null, 
@@ -102,19 +100,6 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <FormField
             control={form.control}
-            name="tradesMade"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Reviews (Trades Made)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="100" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseInt(e.target.value, 10))} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
             name="rating"
             render={({ field }) => (
                 <FormItem>
@@ -126,8 +111,6 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
                 </FormItem>
             )}
             />
-        </div>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
             control={form.control}
             name="status"
@@ -155,6 +138,8 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
                 </FormItem>
             )}
             />
+        </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
             control={form.control}
             name="employeeCount"
