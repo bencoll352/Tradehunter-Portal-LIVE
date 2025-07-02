@@ -590,8 +590,6 @@ export function TraderTableClient({
             </TableHeader>
             <TableBody>
               {paginatedTraders.map((trader) => {
-                // DEBUGGING LOG
-                // console.log("Rendering Trader:", trader.id, "Est Annual Revenue:", trader.estimatedAnnualRevenue);
                 return (
                 <TableRow 
                   key={trader.id} 
@@ -699,5 +697,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-
-    
