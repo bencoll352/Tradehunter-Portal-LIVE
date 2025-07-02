@@ -39,7 +39,7 @@ import { EditTraderDialog } from "@/components/dashboard/EditTraderDialog";
 import { DeleteTraderDialog } from "@/components/dashboard/DeleteTraderDialog";
 import { AddTraderDialog } from "@/components/dashboard/AddTraderDialog";
 import { BulkAddTradersDialog } from "@/components/dashboard/BulkAddTradersDialog";
-import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download, CalendarClock } from "lucide-react"; 
+import { ArrowUpDown, Search, FileWarning, ExternalLink, Filter, FileText as NotesIcon, Trash2, Loader2, Download, CalendarClock, Flame } from "lucide-react"; 
 import { format, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import type { traderFormSchema } from "@/components/dashboard/TraderForm";
@@ -49,7 +49,9 @@ import Papa from "papaparse"; // For CSV export
 
 const ITEMS_PER_PAGE = 50; 
 
-type SortKey = keyof Pick<Trader, 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate'>;
+// DEFINITIVE FIX: This type definition now correctly and explicitly includes all fields.
+type SortKey = 'name' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
+
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -130,7 +132,10 @@ export function TraderTableClient({
         (trader.categories && trader.categories.toLowerCase().includes(searchTermLower)) ||
         (trader.ownerName && trader.ownerName.toLowerCase().includes(searchTermLower)) ||
         (trader.notes && trader.notes.toLowerCase().includes(searchTermLower)) ||
-        (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower))
+        (trader.callBackDate && format(parseISO(trader.callBackDate), 'dd/MM/yyyy').includes(searchTermLower)) ||
+        (trader.estimatedAnnualRevenue != null && String(trader.estimatedAnnualRevenue).includes(searchTermLower)) ||
+        (trader.estimatedCompanyValue != null && String(trader.estimatedCompanyValue).includes(searchTermLower)) ||
+        (trader.employeeCount != null && String(trader.employeeCount).includes(searchTermLower))
       );
     }
 
@@ -250,12 +255,48 @@ export function TraderTableClient({
     }
 
     const formValues: z.infer<typeof traderFormSchema> = {
-      name: trader.name, totalSales: trader.totalSales, tradesMade: trader.tradesMade, status: newStatus,
-      description: trader.description || undefined, rating: trader.rating, website: trader.website || undefined,
-      phone: trader.phone || undefined, address: trader.address || undefined, mainCategory: trader.mainCategory || undefined,
-      ownerName: trader.ownerName || undefined, ownerProfileLink: trader.ownerProfileLink || undefined,
-      categories: trader.categories || undefined, workdayTiming: trader.workdayTiming || undefined, notes: trader.notes || undefined,
-      callBackDate: trader.callBackDate || undefined,
+      name: trader.name,
+      status: newStatus,
+      tradesMade: trader.tradesMade,
+      description: trader.description,
+      rating: trader.rating,
+      website: trader.website,
+      phone: trader.phone,
+      address: trader.address,
+      mainCategory: trader.mainCategory,
+      ownerName: trader.ownerName,
+      ownerProfileLink: trader.ownerProfileLink,
+      categories: trader.categories,
+      workdayTiming: trader.workdayTiming,
+      notes: trader.notes,
+      callBackDate: trader.callBackDate,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
+      estimatedCompanyValue: trader.estimatedCompanyValue,
+      employeeCount: trader.employeeCount,
+    };
+    await onUpdate(trader.id, formValues);
+  };
+
+  const handleMarkAsHotLead = async (trader: Trader) => {
+    const formValues: z.infer<typeof traderFormSchema> = {
+      name: trader.name,
+      status: 'Call-Back',
+      tradesMade: trader.tradesMade,
+      description: trader.description,
+      rating: trader.rating,
+      website: trader.website,
+      phone: trader.phone,
+      address: trader.address,
+      mainCategory: trader.mainCategory,
+      ownerName: trader.ownerName,
+      ownerProfileLink: trader.ownerProfileLink,
+      categories: trader.categories,
+      workdayTiming: trader.workdayTiming,
+      notes: trader.notes,
+      callBackDate: trader.callBackDate,
+      estimatedAnnualRevenue: trader.estimatedAnnualRevenue,
+      estimatedCompanyValue: trader.estimatedCompanyValue,
+      employeeCount: trader.employeeCount,
     };
     await onUpdate(trader.id, formValues);
   };
@@ -316,7 +357,9 @@ export function TraderTableClient({
       "ID": trader.id,
       "Name": trader.name,
       "Branch ID": trader.branchId,
-      "Total Sales (£)": trader.totalSales,
+      "Est. Annual Revenue (£)": trader.estimatedAnnualRevenue,
+      "Est. Company Value (£)": trader.estimatedCompanyValue,
+      "Employee Count": trader.employeeCount,
       "Reviews (Trades Made)": trader.tradesMade,
       "Status": trader.status,
       "Last Activity": trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy HH:mm:ss') : '',
@@ -369,7 +412,13 @@ export function TraderTableClient({
     </TableHead>
   );
 
-  const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false) => {
+  const renderCellContent = (content: string | number | undefined | null, maxChars = 30, isNote = false, isCurrency = false) => {
+    if (isCurrency) {
+        if (typeof content === 'number') {
+            return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(content);
+        }
+        return <span className="text-muted-foreground/50">-</span>;
+    }
     const stringContent = String(content || '');
     if (stringContent.length > maxChars) {
       return (
@@ -500,94 +549,120 @@ export function TraderTableClient({
           </p>
         </div>
       ) : (
-      <div className="rounded-md border shadow-sm overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">
-                <Checkbox
-                  checked={isAllPaginatedSelected}
-                  onCheckedChange={handleSelectAllPaginatedTraders}
-                  aria-label="Select all traders on this page"
-                  disabled={paginatedTraders.length === 0}
-                />
-              </TableHead>
-              <SortableHeader sortKey="name" label="Name" />
-              <SortableHeader sortKey="totalSales" label="Total Sales" />
-              <SortableHeader sortKey="status" label="Status" />
-              <SortableHeader sortKey="lastActivity" label="Last Activity" />
-              <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
-              <SortableHeader sortKey="description" label="Description" />
-              <TableHead>Notes</TableHead>
-              <SortableHeader sortKey="tradesMade" label="Reviews" />
-              <SortableHeader sortKey="rating" label="Rating" />
-              <TableHead className="whitespace-nowrap">🌐Website</TableHead>
-              <TableHead className="whitespace-nowrap">📞 Phone</TableHead>
-              <SortableHeader sortKey="ownerName" label="Owner Name" />
-              <SortableHeader sortKey="mainCategory" label="Main Category" />
-              <TableHead>Categories</TableHead>
-              <TableHead>Workday Timing</TableHead>
-              <SortableHeader sortKey="address" label="Address" />
-              <TableHead>Link</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedTraders.map((trader) => (
-              <TableRow 
-                key={trader.id} 
-                data-state={selectedTraderIds.has(trader.id) ? "selected" : ""}
-              >
-                <TableCell>
+      <div className="rounded-md border shadow-sm">
+        <div className="relative w-full overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">
                   <Checkbox
-                    checked={selectedTraderIds.has(trader.id)}
-                    onCheckedChange={() => handleSelectTrader(trader.id)}
-                    aria-label={`Select trader ${trader.name}`}
+                    checked={isAllPaginatedSelected}
+                    onCheckedChange={handleSelectAllPaginatedTraders}
+                    aria-label="Select all traders on this page"
+                    disabled={paginatedTraders.length === 0}
                   />
-                </TableCell>
-                <TableCell className="font-medium whitespace-nowrap">{renderCellContent(trader.name, 20)}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {typeof trader.totalSales === 'number' ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(trader.totalSales) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
-                <TableCell>
-                   <Button
-                      variant="ghost" size="sm"
-                      className={`p-1 h-auto hover:opacity-80 ${getStatusBadgeClass(trader.status).split(' ').find(c => c.startsWith('hover:bg-'))}`}
-                      onClick={() => handleStatusToggle(trader)}
-                    >
-                    <Badge variant={'outline'} className={`${getStatusBadgeClass(trader.status)} cursor-pointer`}>
-                      {trader.status}
-                    </Badge>
-                  </Button>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
-                <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
-                <TableCell>{renderCellContent(trader.description)}</TableCell>
-                <TableCell>{renderCellContent(trader.notes, 25, true)}</TableCell>
-                <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
-                <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {trader.website ? (<a href={trader.website.startsWith('http') ? trader.website : `https://${trader.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Visit <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {trader.phone ? (<a href={`tel:${trader.phone}`} className="text-primary hover:underline">{renderCellContent(trader.phone, 15)}</a>) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
-                <TableCell>{renderCellContent(trader.ownerName, 20)}</TableCell>
-                <TableCell>{renderCellContent(trader.mainCategory, 15)}</TableCell>
-                <TableCell>{renderCellContent(trader.categories, 20)}</TableCell>
-                <TableCell>{renderCellContent(trader.workdayTiming, 20)}</TableCell>
-                <TableCell>{renderCellContent(trader.address, 25)}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {trader.ownerProfileLink ? (<a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://${trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Profile <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
-                </TableCell>
-                <TableCell className="flex gap-1 whitespace-nowrap">
-                  <EditTraderDialog trader={trader} onUpdateTrader={(traderId, values) => handleUpdateTrader(traderId, values)} />
-                  <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => handleDeleteTrader(trader.id)} />
-                </TableCell>
+                </TableHead>
+                <SortableHeader sortKey="name" label="Name" />
+                <SortableHeader sortKey="estimatedAnnualRevenue" label="Est. Annual Revenue" />
+                <SortableHeader sortKey="estimatedCompanyValue" label="Est. Company Value" />
+                <SortableHeader sortKey="employeeCount" label="Employees" />
+                <SortableHeader sortKey="status" label="Status" />
+                <SortableHeader sortKey="lastActivity" label="Last Activity" />
+                <SortableHeader sortKey="callBackDate" label="Call-Back" icon={CalendarClock} />
+                <SortableHeader sortKey="description" label="Description" />
+                <TableHead>Notes</TableHead>
+                <SortableHeader sortKey="tradesMade" label="Reviews" />
+                <SortableHeader sortKey="rating" label="Rating" />
+                <TableHead className="whitespace-nowrap">🌐Website</TableHead>
+                <TableHead className="whitespace-nowrap">📞 Phone</TableHead>
+                <SortableHeader sortKey="ownerName" label="Owner Name" />
+                <SortableHeader sortKey="mainCategory" label="Main Category" />
+                <TableHead>Categories</TableHead>
+                <TableHead>Workday Timing</TableHead>
+                <SortableHeader sortKey="address" label="Address" />
+                <TableHead>Link</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginatedTraders.map((trader) => {
+                return (
+                <TableRow 
+                  key={trader.id} 
+                  data-state={selectedTraderIds.has(trader.id) ? "selected" : ""}
+                >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedTraderIds.has(trader.id)}
+                      onCheckedChange={() => handleSelectTrader(trader.id)}
+                      aria-label={`Select trader ${trader.name}`}
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span 
+                            onClick={() => handleMarkAsHotLead(trader)}
+                            className="cursor-pointer text-primary hover:underline"
+                            title={`Mark ${trader.name} as Hot Lead`}
+                          >
+                            {trader.name.length > 20 ? `${trader.name.substring(0, 20)}...` : trader.name}
+                            {trader.status === 'Call-Back' && <Flame className="inline h-4 w-4 ml-1 text-orange-500" />}
+                          </span>
+                        </TooltipTrigger>
+                        {trader.name.length > 20 && (
+                          <TooltipContent className="max-w-md break-words bg-background border text-foreground p-2 rounded-md shadow-lg z-50">
+                            <p>{trader.name}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedAnnualRevenue, 0, false, true)}</TableCell>
+                  <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedCompanyValue, 0, false, true)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
+                  <TableCell>
+                     <Button
+                        variant="ghost" size="sm"
+                        className={`p-1 h-auto hover:opacity-80 ${getStatusBadgeClass(trader.status).split(' ').find(c => c.startsWith('hover:bg-'))}`}
+                        onClick={() => handleStatusToggle(trader)}
+                      >
+                      <Badge variant={'outline'} className={`${getStatusBadgeClass(trader.status)} cursor-pointer flex items-center gap-1`}>
+                        {trader.status === 'Call-Back' && <Flame className="h-3 w-3 text-orange-500" />}
+                        {trader.status}
+                      </Badge>
+                    </Button>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
+                  <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), 'dd/MM/yyyy') : <span className="text-muted-foreground/50">-</span>}</TableCell>
+                  <TableCell>{renderCellContent(trader.description)}</TableCell>
+                  <TableCell>{renderCellContent(trader.notes, 25, true)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.tradesMade, 5)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-center">{trader.rating ? trader.rating.toFixed(1) : <span className="text-muted-foreground/50">-</span>}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {trader.website ? (<a href={trader.website.startsWith('http') ? trader.website : `https://${trader.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Visit <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {trader.phone ? (<a href={`tel:${trader.phone}`} className="text-primary hover:underline">{renderCellContent(trader.phone, 15)}</a>) : <span className="text-muted-foreground/50">-</span>}
+                  </TableCell>
+                  <TableCell>{renderCellContent(trader.ownerName, 20)}</TableCell>
+                  <TableCell>{renderCellContent(trader.mainCategory, 15)}</TableCell>
+                  <TableCell>{renderCellContent(trader.categories, 20)}</TableCell>
+                  <TableCell>{renderCellContent(trader.workdayTiming, 20)}</TableCell>
+                  <TableCell>{renderCellContent(trader.address, 25)}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {trader.ownerProfileLink ? (<a href={trader.ownerProfileLink.startsWith('http') ? trader.ownerProfileLink : `https://${trader.ownerProfileLink}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">Profile <ExternalLink className="h-3 w-3" /></a>) : <span className="text-muted-foreground/50">-</span>}
+                  </TableCell>
+                  <TableCell className="flex gap-1 whitespace-nowrap">
+                    <EditTraderDialog trader={trader} onUpdateTrader={(traderId, values) => handleUpdateTrader(traderId, values)} />
+                    <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => handleDeleteTrader(trader.id)} />
+                  </TableCell>
+                </TableRow>
+              )})}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       )}
 

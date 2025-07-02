@@ -257,7 +257,6 @@ export function TraderTableClient({
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       status: newStatus,
-      totalSales: trader.totalSales,
       tradesMade: trader.tradesMade,
       description: trader.description,
       rating: trader.rating,
@@ -282,7 +281,6 @@ export function TraderTableClient({
     const formValues: z.infer<typeof traderFormSchema> = {
       name: trader.name,
       status: 'Call-Back',
-      totalSales: trader.totalSales,
       tradesMade: trader.tradesMade,
       description: trader.description,
       rating: trader.rating,
@@ -694,3 +692,5 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+    

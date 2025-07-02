@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -101,20 +102,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
           )}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="totalSales"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Total Sales (£)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="50000" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
+           <FormField
             control={form.control}
             name="tradesMade"
             render={({ field }) => (
@@ -127,6 +115,19 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
               </FormItem>
             )}
           />
+           <FormField
+            control={form.control}
+            name="rating"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Rating (0-5)</FormLabel>
+                <FormControl>
+                    <Input type="number" placeholder="4.5" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} step="0.1" min="0" max="5" />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
         </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
@@ -158,20 +159,20 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             />
             <FormField
             control={form.control}
-            name="rating"
+            name="employeeCount"
             render={({ field }) => (
-                <FormItem>
-                <FormLabel>Rating (0-5)</FormLabel>
+              <FormItem>
+                <FormLabel>Employee Count</FormLabel>
                 <FormControl>
-                    <Input type="number" placeholder="4.5" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} step="0.1" min="0" max="5" />
+                  <Input type="number" placeholder="10" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseInt(e.target.value, 10))} value={field.value ?? ''} />
                 </FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
+          />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="estimatedAnnualRevenue"
@@ -193,19 +194,6 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
                 <FormLabel>Est. Company Value (£)</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="250000" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
-            name="employeeCount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Employee Count</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="10" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseInt(e.target.value, 10))} value={field.value ?? ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -403,3 +391,5 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
     </Form>
   );
 }
+
+    

@@ -41,3 +41,5 @@ export const formatTraderDataForAnalysis = (traders: Trader[]): string => {
     return details;
   }).join('; \n');
 };
+
+    
