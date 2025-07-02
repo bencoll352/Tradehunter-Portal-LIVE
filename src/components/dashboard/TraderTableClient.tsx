@@ -50,7 +50,7 @@ import Papa from "papaparse"; // For CSV export
 const ITEMS_PER_PAGE = 50; 
 
 // DEFINITIVE FIX: This type definition now correctly and explicitly includes all fields.
-type SortKey = 'name' | 'totalSales' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
+type SortKey = 'name' | 'tradesMade' | 'status' | 'lastActivity' | 'description' | 'rating' | 'ownerName' | 'mainCategory' | 'address' | 'notes' | 'callBackDate' | 'estimatedAnnualRevenue' | 'estimatedCompanyValue' | 'employeeCount';
 
 
 interface TraderTableClientProps {
@@ -359,7 +359,6 @@ export function TraderTableClient({
       "ID": trader.id,
       "Name": trader.name,
       "Branch ID": trader.branchId,
-      "Total Sales (£)": trader.totalSales,
       "Est. Annual Revenue (£)": trader.estimatedAnnualRevenue,
       "Est. Company Value (£)": trader.estimatedCompanyValue,
       "Employee Count": trader.employeeCount,
@@ -566,7 +565,6 @@ export function TraderTableClient({
                   />
                 </TableHead>
                 <SortableHeader sortKey="name" label="Name" />
-                <SortableHeader sortKey="totalSales" label="Total Sales" />
                 <SortableHeader sortKey="estimatedAnnualRevenue" label="Est. Annual Revenue" />
                 <SortableHeader sortKey="estimatedCompanyValue" label="Est. Company Value" />
                 <SortableHeader sortKey="employeeCount" label="Employees" />
@@ -623,7 +621,6 @@ export function TraderTableClient({
                       </Tooltip>
                     </TooltipProvider>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{renderCellContent(trader.totalSales, 0, false, true)}</TableCell>
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedAnnualRevenue, 0, false, true)}</TableCell>
                   <TableCell className="whitespace-nowrap">{renderCellContent(trader.estimatedCompanyValue, 0, false, true)}</TableCell>
                   <TableCell className="whitespace-nowrap text-center">{renderCellContent(trader.employeeCount, 5)}</TableCell>
