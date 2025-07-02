@@ -3,7 +3,6 @@ export interface Trader {
   id: string;
   name: string;
   branchId: string; // This will store the BaseBranchId
-  totalSales: number; 
   tradesMade: number;
   status: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead';
   lastActivity: string; 
@@ -108,7 +107,6 @@ export function getBranchInfo(loginId: string | null): BranchInfo {
 // For bulk upload parsing
 export type ParsedTraderData = {
   name: string; 
-  totalSales?: number;
   status?: 'Active' | 'Inactive' | 'Call-Back' | 'New Lead';
   lastActivity?: string; 
   description?: string | null;

@@ -32,7 +32,6 @@ import { format as formatDateFns, parseISO } from "date-fns";
 // Schema now includes all fields present in the TraderTable overview
 export const traderFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  totalSales: z.coerce.number().min(0, { message: "Total sales must be a positive number." }).optional().nullable(),
   tradesMade: z.coerce.number().int().min(0, { message: "Trades made (Reviews) must be a positive integer." }).optional().nullable(),
   status: z.enum(["Active", "Inactive", "Call-Back", "New Lead"]),
   description: z.string().optional().nullable(),
@@ -64,7 +63,6 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
     resolver: zodResolver(traderFormSchema),
     defaultValues: {
       name: defaultValues?.name || "",
-      totalSales: defaultValues?.totalSales ?? null,
       tradesMade: defaultValues?.tradesMade ?? null,
       status: defaultValues?.status || "Active",
       description: defaultValues?.description ?? null,
@@ -391,5 +389,3 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
     </Form>
   );
 }
-
-    

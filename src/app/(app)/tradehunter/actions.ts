@@ -58,7 +58,6 @@ export async function addTraderAction(baseBranchId: BaseBranchId, values: z.infe
   try {
     const newTraderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'> = {
       name: values.name,
-      totalSales: values.totalSales ?? 0, // Default to 0 if null
       tradesMade: values.tradesMade ?? 0, // Default to 0 if null
       status: values.status,
       description: values.description ?? null,
@@ -106,7 +105,6 @@ export async function updateTraderAction(baseBranchId: BaseBranchId, traderId: s
       ...existingTrader, 
       name: values.name,
       status: values.status,
-      totalSales: values.totalSales ?? existingTrader.totalSales,
       tradesMade: values.tradesMade ?? existingTrader.tradesMade,
       description: values.description ?? existingTrader.description,
       rating: values.rating ?? existingTrader.rating,
@@ -194,5 +192,3 @@ export async function bulkDeleteTradersAction(baseBranchId: BaseBranchId, trader
     return { successCount: 0, failureCount, error: errorMessage };
   }
 }
-
-    
