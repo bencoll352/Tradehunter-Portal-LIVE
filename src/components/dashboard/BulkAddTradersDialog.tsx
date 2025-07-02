@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -27,7 +28,7 @@ interface BulkAddTradersDialogProps {
 }
 
 const EXPECTED_HEADERS = [
-  "Name", "Total Sales", "Status", "Last Activity", "Description",
+  "Name", "Status", "Last Activity", "Description",
   "Reviews", "Rating", "🌐Website", "📞 Phone", "Owner Name",
   "Main Category", "Categories", "Workday Timing", "Address", "Link", "Notes",
   "Est. Annual Revenue", "Estimated Company Value", "Employee Count", "Actions"
@@ -224,7 +225,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
 
-    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "total sales", "owner name", "main category", "reviews", "rating", "website", "notes", "est. annual revenue", "estimated company value", "employee count"];
+    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "owner name", "main category", "reviews", "rating", "website", "notes", "est. annual revenue", "estimated company value", "employee count"];
     const foundCommonHeadersCount = actualHeaders.filter(h =>
         commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
     ).length;
@@ -234,7 +235,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         toast({
             variant: "default", 
             title: "Unusual CSV Headers Detected",
-            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Total Sales, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
+            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
             duration: 10000,
         });
     }
@@ -286,7 +287,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
       const trader: ParsedTraderData = {
         name: name,
-        totalSales: parseNumericValue(getRowValue(row, ["Total Sales"]), "Total Sales", name),
         status: parsedStatus,
         lastActivity: lastActivityValue,
         description: getRowValue(row, ["Description"]),
