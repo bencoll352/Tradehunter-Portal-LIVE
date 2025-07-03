@@ -50,7 +50,7 @@ const StandardCategories = {
 
 
 // Initial seed data for traders. Used if Firestore is empty for a branch.
-const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity' | 'tradesMade' | 'totalSales'>[] = [
+const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
   { name: 'Alice Wonderland', branchId: 'PURLEY', status: 'Active', description: 'Curiouser and curiouser goods. Specialises in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', 
     mainCategory: StandardCategories.LANDSCAPERS, ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: StandardCategories.LANDSCAPERS, workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5, notes: "Prefers Earl Grey tea for meetings. Important client for seasonal events.", callBackDate: null, estimatedAnnualRevenue: 250000, estimatedCompanyValue: 500000, employeeCount: 15 },
   
@@ -244,7 +244,7 @@ export async function getTraderById(id: string, baseBranchId: BaseBranchId): Pro
 }
 
 export async function addTraderToDb(
-  traderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId' | 'tradesMade' | 'totalSales'>, // branchId will be added here
+  traderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'>, // branchId will be added here
   baseBranchId: BaseBranchId // Use BaseBranchId
 ): Promise<Trader> {
   if (!db) {
@@ -324,52 +324,64 @@ export async function bulkAddTradersToDb(
     throw new Error("Firestore not initialised. Cannot bulk add traders.");
   }
   const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
-  const batch = writeBatch(db);
   const createdTraders: Trader[] = [];
+  const chunkSize = 499; // Firestore batch write limit is 500 operations. Use a safe number.
 
-  console.log(`[TraderService:bulkAddTradersToDb] Attempting to bulk add ${tradersToCreate.length} traders to branch ${baseBranchId}`);
+  console.log(`[TraderService:bulkAddTradersToDb] Attempting to bulk add ${tradersToCreate.length} traders to branch ${baseBranchId} in chunks of up to ${chunkSize}.`);
 
-  tradersToCreate.forEach((parsedData, index) => {
-    const newTraderDocRef = doc(tradersCollectionRef);
+  for (let i = 0; i < tradersToCreate.length; i += chunkSize) {
+    const chunk = tradersToCreate.slice(i, i + chunkSize);
+    const batch = writeBatch(db);
+    
+    console.log(`[TraderService:bulkAddTradersToDb] Processing chunk ${Math.floor(i / chunkSize) + 1}...`);
 
-    const newTraderObject: Omit<Trader, 'id'> = {
-      name: parsedData.name ?? 'Unnamed Trader',
-      branchId: baseBranchId, // Set the baseBranchId
-      status: parsedData.status ?? 'New Lead',
-      lastActivity: parsedData.lastActivity || new Date().toISOString(),
-      description: parsedData.description ?? null,
-      rating: parsedData.rating ?? null,
-      website: parsedData.website ?? null,
-      phone: parsedData.phone ?? null,
-      address: parsedData.address ?? null,
-      mainCategory: parsedData.mainCategory ?? null,
-      ownerName: parsedData.ownerName ?? null,
-      ownerProfileLink: parsedData.ownerProfileLink ?? null,
-      categories: parsedData.categories ?? null,
-      workdayTiming: parsedData.workdayTiming ?? null,
-      notes: parsedData.notes ?? null,
-      callBackDate: parsedData.callBackDate ?? null,
-      estimatedAnnualRevenue: parsedData.estimatedAnnualRevenue ?? null,
-      estimatedCompanyValue: parsedData.estimatedCompanyValue ?? null,
-      employeeCount: parsedData.employeeCount ?? null,
-      closedOn: null,
-      reviewKeywords: null,
-    };
+    chunk.forEach((parsedData, index) => {
+      const newTraderDocRef = doc(tradersCollectionRef); // Firestore auto-generates an ID
 
-    const finalTraderDataForDb = cleanDataForFirestoreWrite(newTraderObject);
-    batch.set(newTraderDocRef, finalTraderDataForDb);
-    createdTraders.push({ ...(finalTraderDataForDb as Omit<Trader, 'id'>), id: newTraderDocRef.id });
-    if (index < 5) {
+      const newTraderObject: Omit<Trader, 'id'> = {
+        name: parsedData.name ?? 'Unnamed Trader',
+        branchId: baseBranchId, // Set the baseBranchId
+        status: parsedData.status ?? 'New Lead',
+        lastActivity: parsedData.lastActivity || new Date().toISOString(),
+        description: parsedData.description ?? null,
+        rating: parsedData.rating ?? null,
+        website: parsedData.website ?? null,
+        phone: parsedData.phone ?? null,
+        address: parsedData.address ?? null,
+        mainCategory: parsedData.mainCategory ?? null,
+        ownerName: parsedData.ownerName ?? null,
+        ownerProfileLink: parsedData.ownerProfileLink ?? null,
+        categories: parsedData.categories ?? null,
+        workdayTiming: parsedData.workdayTiming ?? null,
+        notes: parsedData.notes ?? null,
+        callBackDate: parsedData.callBackDate ?? null,
+        estimatedAnnualRevenue: parsedData.estimatedAnnualRevenue ?? null,
+        estimatedCompanyValue: parsedData.estimatedCompanyValue ?? null,
+        employeeCount: parsedData.employeeCount ?? null,
+        closedOn: null,
+        reviewKeywords: null,
+      };
+
+      const finalTraderDataForDb = cleanDataForFirestoreWrite(newTraderObject);
+      batch.set(newTraderDocRef, finalTraderDataForDb);
+      createdTraders.push({ ...(finalTraderDataForDb as Omit<Trader, 'id'>), id: newTraderDocRef.id });
+       if (index < 5 && i === 0) { // Log first few of the first chunk only
         console.log(`[TraderService:bulkAddTradersToDb] Batching trader for add: ${finalTraderDataForDb.name} to branch ${baseBranchId}`);
-    }
-  });
+      }
+    });
 
-  try {
-    await batch.commit();
-    console.log(`[TraderService:bulkAddTradersToDb] Successfully bulk added ${createdTraders.length} traders to branch ${baseBranchId}.`);
-    return createdTraders;
-  } catch (error) {
-    console.error(`[TraderService:bulkAddTradersToDb] Error bulk adding traders for branch ${baseBranchId}:`, error);
-    throw error;
+    try {
+      await batch.commit();
+      console.log(`[TraderService:bulkAddTradersToDb] Successfully committed chunk of ${chunk.length} traders.`);
+    } catch (error) {
+      console.error(`[TraderService:bulkAddTradersToDb] Error committing chunk for branch ${baseBranchId}:`, error);
+      // If one batch fails, we should stop and report the error.
+      // The `createdTraders` will contain traders from successful batches but the operation is partial.
+      // It's better to throw and let the caller handle it to avoid partial success state.
+      throw new Error(`Failed to commit a batch of traders. Processed ${i} traders before failure. Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
+
+  console.log(`[TraderService:bulkAddTradersToDb] Successfully bulk added a total of ${createdTraders.length} traders to branch ${baseBranchId}.`);
+  return createdTraders;
 }

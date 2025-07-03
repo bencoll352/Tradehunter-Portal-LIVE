@@ -34,7 +34,7 @@ const EXPECTED_HEADERS = [
   "Est. Annual Revenue", "Estimated Company Value", "Employee Count", "Actions"
 ];
 
-const FIRESTORE_BATCH_LIMIT = 500;
+const MAX_UPLOAD_LIMIT = 1000;
 const VALID_STATUSES_LOWER = ["active", "inactive", "call-back", "new lead"];
 
 export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTraders }: BulkAddTradersDialogProps) {
@@ -383,11 +383,11 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return;
     }
 
-    if (validTraders.length > FIRESTORE_BATCH_LIMIT) {
+    if (validTraders.length > MAX_UPLOAD_LIMIT) {
       toast({
         variant: "destructive",
         title: "File Too Large for Single Upload",
-        description: `Your CSV contains ${validTraders.length} traders to add, exceeding the recommended limit of ${FIRESTORE_BATCH_LIMIT} for a single operation. Please split your file into smaller chunks and upload them separately.`,
+        description: `Your CSV contains ${validTraders.length} traders to add, exceeding the recommended limit of ${MAX_UPLOAD_LIMIT} for a single operation. Please split your file into smaller chunks and upload them separately.`,
         duration: 10000,
       });
       setIsLoading(false);
@@ -533,7 +533,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <br/>(See full list of expected headers by expanding this dialogue or checking "How to Use").
             <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back' (Hot Lead 🔥), or 'New Lead'.
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "123 Main St, Suite 100").
-            <br/>Max {FIRESTORE_BATCH_LIMIT} traders per file.
+            <br/>Max {MAX_UPLOAD_LIMIT} traders per file.
           </DialogDescription>
           <div className="text-sm text-muted-foreground mt-2 text-left">
             <strong>If fields like 'Owner Name', 'Main Category', 'Workday Timing', 'Notes', 'Est. Annual Revenue', 'Estimated Company Value', or 'Employee Count' are not loading:</strong>
