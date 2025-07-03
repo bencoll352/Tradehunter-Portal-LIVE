@@ -41,7 +41,7 @@ const StandardCategories = {
   INTERIOR_DESIGNER: "Interior Designer",
   PROPERTY_MAINTENANCE: "Property Maintenance",
   PLASTERERS: "Plasterers",
-  LANDSCAPERS: "Landscapers or Landscaping",
+  LANDSCAPERS: "Landscapers",
   HANDYMAN_HOME_IMPROVEMENTS: "Handy Man - Home Improvements",
   PROPERTY_DEVELOPERS: "Property developers",
   PAINTERS_DECORATORS: "Painters & Decorators",
@@ -50,7 +50,7 @@ const StandardCategories = {
 
 
 // Initial seed data for traders. Used if Firestore is empty for a branch.
-const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
+const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity' | 'tradesMade' | 'totalSales'>[] = [
   { name: 'Alice Wonderland', branchId: 'PURLEY', status: 'Active', description: 'Curiouser and curiouser goods. Specialises in whimsical party supplies and enchanted garden ornaments. Known for excellent customer service.', website: 'https://alice.example.com', phone: '01234 567801', address: '123 Rabbit Hole Lane, Wonderland, WDC 123', 
     mainCategory: StandardCategories.LANDSCAPERS, ownerName: "Mad Hatter", ownerProfileLink: "https://example.com/madhatter", categories: StandardCategories.LANDSCAPERS, workdayTiming: "Mon-Sat 10am-6pm", closedOn: "Sundays", reviewKeywords: "tea, party, fun, whimsical, charming", rating: 4.5, notes: "Prefers Earl Grey tea for meetings. Important client for seasonal events.", callBackDate: null, estimatedAnnualRevenue: 250000, estimatedCompanyValue: 500000, employeeCount: 15 },
   
@@ -244,7 +244,7 @@ export async function getTraderById(id: string, baseBranchId: BaseBranchId): Pro
 }
 
 export async function addTraderToDb(
-  traderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'>, // branchId will be added here
+  traderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId' | 'tradesMade' | 'totalSales'>, // branchId will be added here
   baseBranchId: BaseBranchId // Use BaseBranchId
 ): Promise<Trader> {
   if (!db) {
