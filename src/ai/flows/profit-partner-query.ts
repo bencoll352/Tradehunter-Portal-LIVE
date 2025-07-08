@@ -15,7 +15,7 @@ import { fetchWebsiteContent } from '@/ai/tools/fetch-website-content-tool';
 
 const BUILDWISE_INTEL_URL = "https://studio--buildwise-intel.us-central1.hosted.app/";
 const DOVER_NAVIGATOR_URL = "https://sales-and-strategy-navigator-dover-302177537641.us-west1.run.app/";
-const LEATHERHEAD_NAVIGATOR_URL = "https://sales-and-strategy-navigator-leatherhead-987654321.us-west1.run.app/"; // Placeholder
+const LEATHERHEAD_NAVIGATOR_URL = "https://sales-and-strategy-navigator-leatherhead-302177537641.us-west1.run.app/";
 
 const ProfitPartnerQueryInputSchema = z.object({
   query: z.string().describe('The question about trader performance or a predefined quick action.'),

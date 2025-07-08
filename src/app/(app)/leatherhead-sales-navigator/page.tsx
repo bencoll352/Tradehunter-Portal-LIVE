@@ -10,7 +10,7 @@ import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LeatherheadSalesNavigatorPage() {
-  const navigatorAppUrl = "https://sales-and-strategy-navigator-leatherhead-987654321.us-west1.run.app/"; // Placeholder URL
+  const navigatorAppUrl = "https://sales-and-strategy-navigator-leatherhead-302177537641.us-west1.run.app/";
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -86,7 +86,7 @@ export default function DoverSalesNavigatorPage() {
             <div>
               <CardTitle className="text-3xl font-bold text-primary">Dover Sales & Strategy Navigator</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Your advanced hub for the Dover branch, offering specialized sales insights and strategic planning capabilities.
+                Your advanced dashboard for the Dover branch, offering specialized sales insights and strategic planning tools.
               </CardDescription>
             </div>
           </div>
