@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll, ClipboardCheck } from "lucide-react"; 
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll, ClipboardCheck, MapPin } from "lucide-react"; 
 
 const faqs = [
   {
@@ -60,6 +60,12 @@ const faqs = [
     question: "What is the Dover Sales Navigator (Dover Manager)?",
     answer: "If logged in as 'DOVERMANAGER', an additional 'Dover Sales Nav' tab appears. This page leads to an advanced, specialized Sales & Strategy Navigator tool for the Dover branch, embedding an external application for in-depth analysis, intelligence, and strategic planning.",
     icon: <Compass className="h-5 w-5 text-primary mr-2" />
+  },
+  {
+    value: "item-11",
+    question: "What is the Leatherhead Sales Navigator (Leatherhead Manager)?",
+    answer: "If logged in as 'LEATHERHEADMANAGER', an additional 'Leatherhead Sales Nav' tab appears. This page leads to an advanced, specialized Sales & Strategy Navigator tool for the Leatherhead branch, embedding an external application for in-depth analysis, intelligence, and strategic planning.",
+    icon: <MapPin className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-5",
@@ -135,6 +141,7 @@ export default function HowToUsePage() {
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in header to access the external insights portal.</li>
               <li><strong>Estimator:</strong> Click the "Estimator" tab in header to access the external Building Materials Estimator tool.</li>
               <li><strong>Dover Sales Navigator (Dover Manager Only):</strong> If logged in as "DOVERMANAGER", a "Dover Sales Nav" tab appears in the header/sidebar. This leads to a specialized tool for Dover branch.</li>
+              <li><strong>Leatherhead Sales Navigator (Leatherhead Manager Only):</strong> If logged in as "LEATHERHEADMANAGER", a "Leatherhead Sales Nav" tab appears in the header/sidebar.</li>
               <li><strong>How to Use (this page):</strong> Click "How to Use" in the left sidebar for help and FAQs.</li>
             </ul>
           </div>
@@ -181,8 +188,15 @@ export default function HowToUsePage() {
               <li>Interact with the embedded Dover-specific advanced Sales & Strategy Navigator tool for comprehensive insights.</li>
             </ul>
           </div>
+          <div>
+            <h3 className="text-xl font-semibold text-foreground mb-1">8. Using the Leatherhead Sales Navigator (Leatherhead Manager Only)</h3>
+            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
+              <li>If you are the Leatherhead Manager, click on the "Leatherhead Sales Nav" tab in the header or sidebar.</li>
+              <li>Interact with the embedded Leatherhead-specific advanced Sales & Strategy Navigator tool for comprehensive insights.</li>
+            </ul>
+          </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">8. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">9. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All trader data is stored securely in Firebase Firestore, specific to your branch.</li>
               <li>Changes are persistent across sessions.</li>

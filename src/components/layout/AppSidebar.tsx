@@ -59,8 +59,7 @@ import {
   Paperclip,
   Columns,
   Compass, 
-  // UsersRound, // No longer used for Compete Intel
-  // ClipboardCheck, // No longer used for Compete Intel
+  MapPin,
   Globe,
   ReplaceAll,
 } from "lucide-react";
@@ -72,7 +71,6 @@ import { cn } from "@/lib/utils";
 const baseNavItems = [
   { href: "/dashboard", icon: Columns, label: "Dashboard", tooltip: "Portal Overview" },
   { href: "/tradehunter", icon: Users, label: "TradeHunter", tooltip: "TradeHunter Hub" },
-  // { href: "/competitor-insights", icon: ClipboardCheck, label: "Compete Intel", tooltip: "Competitor Insights" }, // REMOVED
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
 
@@ -148,6 +146,11 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'dsnc2', icon: TrendingUp, text: "Explore comprehensive sales intelligence and strategic opportunities for the Dover branch." },
     { id: 'dsnc3', icon: ShieldCheck, text: "This tool is exclusively available to the Dover Manager account." },
   ],
+  'lsn_content_main': [
+    { id: 'lsnc1', icon: MapPin, text: "Access the advanced Leatherhead Sales & Strategy Navigator." },
+    { id: 'lsnc2', icon: TrendingUp, text: "Explore comprehensive sales intelligence and strategic opportunities for the Leatherhead branch." },
+    { id: 'lsnc3', icon: ShieldCheck, text: "This tool is exclusively available to the Leatherhead Manager account." },
+  ],
 };
 
 const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
@@ -179,6 +182,10 @@ const howToUsePurposeItems: PurposeBoxItem[] = [
 
 const doverSalesNavigatorPurposeItems: PurposeBoxItem[] = [
   { id: 'dsn_main', icon: Compass, text: "Dover Sales Navigator Tool", contentKey: 'dsn_content_main' },
+];
+
+const leatherheadSalesNavigatorPurposeItems: PurposeBoxItem[] = [
+  { id: 'lsn_main', icon: MapPin, text: "Leatherhead Sales Navigator Tool", contentKey: 'lsn_content_main' },
 ];
 
 
@@ -224,6 +231,21 @@ export function AppSidebar() {
       navItems.push(doverNavItem);
     }
   }
+
+  if (branchInfo?.displayLoginId === 'LEATHERHEADMANAGER') {
+    const howToUseIndex = navItems.findIndex(item => item.href === "/how-to-use");
+    const leatherheadNavItem = {
+      href: "/leatherhead-sales-navigator",
+      icon: MapPin,
+      label: "Leatherhead Nav",
+      tooltip: "Leatherhead: Advanced Sales & Strategy Hub",
+    };
+    if (howToUseIndex !== -1) {
+      navItems.splice(howToUseIndex, 0, leatherheadNavItem);
+    } else { 
+      navItems.push(leatherheadNavItem);
+    }
+  }
   
   if (pathname === "/dashboard") {
     currentPurposeItems = dashboardOverviewPurposeItems;
@@ -240,8 +262,10 @@ export function AppSidebar() {
   } else if (pathname.startsWith("/dover-sales-navigator") && branchInfo?.displayLoginId === 'DOVERMANAGER') {
     currentPurposeItems = doverSalesNavigatorPurposeItems;
     currentPageTitle = "Dover Sales Nav: Purpose";
-  }
-   else if (pathname.startsWith("/how-to-use")) {
+  } else if (pathname.startsWith("/leatherhead-sales-navigator") && branchInfo?.displayLoginId === 'LEATHERHEADMANAGER') {
+    currentPurposeItems = leatherheadSalesNavigatorPurposeItems;
+    currentPageTitle = "Leatherhead Nav: Purpose";
+  } else if (pathname.startsWith("/how-to-use")) {
     currentPurposeItems = howToUsePurposeItems;
     currentPageTitle = "How to Use: Guide Sections";
   }
@@ -267,6 +291,9 @@ export function AppSidebar() {
           <SidebarMenu className="mb-4">
             {navItems.map((item) => {
               if (item.href === "/dover-sales-navigator" && branchInfo?.displayLoginId !== 'DOVERMANAGER') {
+                return null;
+              }
+              if (item.href === "/leatherhead-sales-navigator" && branchInfo?.displayLoginId !== 'LEATHERHEADMANAGER') {
                 return null;
               }
 
