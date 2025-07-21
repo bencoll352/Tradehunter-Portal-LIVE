@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"; // ShadCN Textarea
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN Card components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // ShadCN Form components
 import { Input } from "@/components/ui/input"; // ShadCN Input
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon } from "lucide-react"; // Lucide icons
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon, ShieldCheck } from "lucide-react"; // Lucide icons
 import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query"; // Genkit flow
 import type { Trader } from "@/types"; // Trader type
 import { formatTraderDataForAnalysis } from "@/lib/utils"; // Utility function
@@ -37,7 +37,11 @@ const quickActions: QuickAction[] = [
   { label: "High Value Existing Customers", query: "List high-value existing customers and any recent changes in their activity.", icon: Sparkles },
   { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions.", icon: Lightbulb },
   { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons.", icon: XCircle },
-  { label: "List Bricklayers & Sales Campaign", query: "Give me a list of all traders who are 'Bricklayers' or in 'Brickwork' category. Then, suggest a brief sales campaign message to promote our new line of premium mortar to them.", icon: Users },
+    {
+    label: "API Access Instructions",
+    query: `To access trader data programmatically, use the secure API endpoint. Make a GET request to /api/traders/{branchId} (e.g., /api/traders/PURLEY). You MUST include a header 'x-api-key' with the secret API key defined in the server's TRADERS_API_KEY environment variable. This will return a JSON array of all traders for that branch. Please analyze the data for the PURLEY branch.`,
+    icon: ShieldCheck
+  },
   {
     label: "Estimate Project Materials",
     query: "Help me estimate the materials needed for a construction project (e.g., a small extension, a garden wall). Please ask for the project type and necessary details (like dimensions) if not provided, and list typical materials and quantities.",
