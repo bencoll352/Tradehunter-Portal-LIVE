@@ -11,11 +11,14 @@ import { getTradersAction } from '@/app/(app)/tradehunter/actions'; // Adjusted 
 import { useToast } from '@/hooks/use-toast';
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
 import { parseISO } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,16 +36,20 @@ export default function DashboardOverviewPage() {
     const fetchTraderData = async () => {
       if (branchInfo?.baseBranchId && branchInfo.role !== 'unknown') {
         setIsLoadingStats(true);
+        setError(null);
         try {
           const result = await getTradersAction(branchInfo.baseBranchId);
           if (result.data) {
             setTraders(result.data);
           } else {
             setTraders([]);
+            setError(result.error);
             toast({ variant: "destructive", title: "Error Loading Stats Data", description: result.error || "Could not load trader data for dashboard stats." });
           }
         } catch (error) {
           console.error("Error fetching traders for dashboard stats:", error);
+          const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+          setError(errorMessage);
           setTraders([]);
           toast({ variant: "destructive", title: "Error Loading Stats Data", description: "Failed to load trader data for dashboard stats due to an unexpected error." });
         } finally {
@@ -60,8 +67,7 @@ export default function DashboardOverviewPage() {
 
   const newLeadsCount = useMemo(() => traders.filter(t => t.status === 'New Lead').length, [traders]);
   const hotLeadsCount = useMemo(() => traders.filter(t => t.status === 'Call-Back').length, [traders]);
-   const activeTradersCount = useMemo(() => traders.filter(t => t.status === 'Active').length, [traders]);
-
+  const activeTradersCount = useMemo(() => traders.filter(t => t.status === 'Active').length, [traders]);
 
   return (
     <div className="space-y-8">
@@ -89,18 +95,29 @@ export default function DashboardOverviewPage() {
         </CardContent>
       </Card>
 
-      {isLoadingStats && (!branchInfo || branchInfo.role === 'unknown') ? (
+      {error && (
+        <Alert variant="destructive">
+          <Terminal className="h-4 w-4" />
+          <AlertTitle>Database Connection Error</AlertTitle>
+          <AlertDescription>
+            <p>Could not load branch data. The error is: <strong>{error}</strong></p>
+            <p className="mt-2 text-xs">This usually means the Firebase configuration variables are missing or incorrect. Please check your hosting environment variables (e.g., in your `.env.local` file for local development) and ensure they are all set correctly. You may need to restart your development server after making changes.</p>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isLoadingStats ? (
         <div className="flex justify-center items-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="ml-2 text-muted-foreground">Loading branch data for stats...</p>
         </div>
-      ) : branchInfo && branchInfo.role !== 'unknown' ? (
+      ) : !error && branchInfo && branchInfo.role !== 'unknown' ? (
          <DashboardStatsAndGoals
             newLeadsCount={newLeadsCount}
             hotLeadsCount={hotLeadsCount}
             activeTradersGoalInitial={activeTradersCount} /* Pass current active count as potential initial value for goal */
           />
-      ) : (
+      ) : !branchInfo || branchInfo.role === 'unknown' ? (
         <Card className="shadow-md">
             <CardHeader>
                 <CardTitle className="text-lg text-muted-foreground">Branch Statistics & Goals</CardTitle>
@@ -109,7 +126,7 @@ export default function DashboardOverviewPage() {
                 <p className="text-sm text-muted-foreground">Login to view branch-specific statistics and set goals.</p>
             </CardContent>
         </Card>
-      )}
+      ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <FeatureCard
@@ -164,4 +181,3 @@ function FeatureCard({ title, description, icon, link }: FeatureCardProps) {
     </Card>
   );
 }
-
