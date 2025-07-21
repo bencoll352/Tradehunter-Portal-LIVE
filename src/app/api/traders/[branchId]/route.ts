@@ -8,10 +8,14 @@ function extractErrorMessage(error: unknown): string {
   return String(error);
 }
 
+interface RouteParams {
+  params: { branchId: string };
+}
+
 // This function handles GET requests to /api/traders/[branchId]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { branchId: string } }
+  { params }: RouteParams
 ) {
   const { branchId } = params;
   const apiKey = request.headers.get('x-api-key');
