@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from '@/components/ui/button';
 import { Eye, Briefcase, Calculator, Users, ArrowRight, Columns, Loader2 } from "lucide-react";
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
-import { getTradersAction } from '@/app/(app)/tradehunter/actions'; // Adjusted path
+import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
 import { parseISO } from 'date-fns';

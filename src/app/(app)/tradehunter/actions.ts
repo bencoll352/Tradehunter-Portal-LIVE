@@ -1,9 +1,6 @@
 
 'use server';
 
-import { config } from 'dotenv';
-config();
-
 import type { BaseBranchId, Trader, ParsedTraderData, BulkDeleteTradersResult } from "@/types"; // Use BaseBranchId
 import { 
   getTradersByBranch as dbGetTradersByBranch,

@@ -1,7 +1,6 @@
-
 // This file is a Server Component by default in Next.js App Router.
 import { DashboardClientPageContent } from '@/components/dashboard/DashboardClientPageContent';
-import { addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions'; // Ensure this path is correct after moving
+import { addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions';
 import type { Trader, ParsedTraderData, BaseBranchId, BulkDeleteTradersResult } from '@/types';
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
