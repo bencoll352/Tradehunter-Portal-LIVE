@@ -1,4 +1,3 @@
-
 // src/app/api/traders/[branchId]/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { getTradersByBranch } from '@/lib/trader-service';
