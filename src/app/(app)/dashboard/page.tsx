@@ -101,7 +101,7 @@ export default function DashboardOverviewPage() {
           <AlertTitle>Database Connection Error</AlertTitle>
           <AlertDescription>
             <p>Could not load branch data. The error is: <strong>{error}</strong></p>
-            <p className="mt-2 text-xs">This usually means the Firebase configuration variables are missing or incorrect. Please check your hosting environment variables (e.g., in your `.env.local` file for local development) and ensure they are all set correctly. You may need to restart your development server after making changes.</p>
+            <p className="mt-2 text-xs">This usually means the Firebase configuration variables are missing or incorrect. Please check your hosting environment variables (e.g., in your `.env` file for local development) and ensure they are all set correctly. You may need to restart your development server after making changes.</p>
           </AlertDescription>
         </Alert>
       )}
