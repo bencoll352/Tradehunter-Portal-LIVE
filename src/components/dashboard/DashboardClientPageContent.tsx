@@ -6,7 +6,6 @@ import { type BaseBranchId, type Trader, type ParsedTraderData, type BulkDeleteT
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TraderTableClient } from "@/components/dashboard/TraderTableClient";
-import { ProfitPartnerAgentClient } from "@/components/dashboard/ProfitPartnerAgentClient";
 import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
@@ -187,7 +186,6 @@ export function DashboardClientPageContent({ // This component is now used for t
         <Skeleton className="h-24 w-full md:w-1/2 lg:w-1/3" />
         <Skeleton className="h-12 w-1/4" />
         <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-48 w-full" />
       </div>
     );
   }
@@ -204,36 +202,29 @@ export function DashboardClientPageContent({ // This component is now used for t
         newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-2xl text-primary">Trader Management</CardTitle> {/* Updated title */}
-              <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
-                 <Skeleton className="h-64 w-full" />
-              ) : (
-                <TraderTableClient 
-                  key={keyForTable} 
-                  initialTraders={traders} 
-                  branchId={currentBaseBranchId!} 
-                  allBranchTraders={traders} 
-                  onAdd={handleAdd}
-                  onUpdate={handleUpdate}
-                  onDelete={handleDelete}
-                  onBulkAdd={handleBulkAdd}
-                  onBulkDelete={handleBulkDelete}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        <div className="xl:col-span-1 space-y-6">
-          <ProfitPartnerAgentClient traders={traders} />
-        </div>
-      </div>
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-primary">Trader Management</CardTitle>
+          <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
+              <Skeleton className="h-64 w-full" />
+          ) : (
+            <TraderTableClient 
+              key={keyForTable} 
+              initialTraders={traders} 
+              branchId={currentBaseBranchId!} 
+              allBranchTraders={traders} 
+              onAdd={handleAdd}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+              onBulkAdd={handleBulkAdd}
+              onBulkDelete={handleBulkDelete}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

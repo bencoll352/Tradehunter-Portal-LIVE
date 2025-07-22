@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll, ClipboardCheck, MapPin } from "lucide-react"; 
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll, ClipboardCheck, MapPin, Key } from "lucide-react"; 
 
 const faqs = [
   {
@@ -38,15 +38,14 @@ const faqs = [
   },
   {
     value: "item-4",
-    question: "What is the Branch Booster?",
-    answer: "The Branch Booster helps analyse trader and customer data. It's on the 'TradeHunter' Hub page and the 'BuildWise Intel' page. Use Quick Actions, type questions, or upload customer files for insights. It uses your branch's current trader data and any uploaded file.\n" +
-            "On the BuildWise Intel page, ask questions bridging Intel portal insights with your trader data.",
-    icon: <Rocket className="h-5 w-5 text-primary mr-2" />
+    question: "How can my external AI access the portal data?",
+    answer: "The portal exposes a secure API for external use. Your AI agent can make a GET request to `/api/traders/{branchId}` (e.g., `/api/traders/PURLEY`). The request MUST include a header `x-api-key` with the secret API key defined in the server's `TRADERS_API_KEY` environment variable. This provides a JSON array of all traders for that branch.",
+    icon: <Key className="h-5 w-5 text-primary mr-2" />
   },
-  { // Item 7 was previously for Competitor Insights, now removed
-    value: "item-8", // Keep original value for existing item, or re-number if desired
+  {
+    value: "item-8",
     question: "What is the BuildWise Intel page?",
-    answer: "The 'BuildWise Intel' page (tab in header) embeds an external application for specialised industry data. The Branch Booster is also on this page for combined analysis.",
+    answer: "The 'BuildWise Intel' page (tab in header) embeds an external application for specialised industry data.",
     icon: <Briefcase className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -137,7 +136,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">2. Accessing Main Sections</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li><strong>Dashboard (Overview):</strong> The first page after login. Provides quick links and portal summary. Access via "Dashboard" tab in header/sidebar.</li>
-              <li><strong>TradeHunter Hub:</strong> Click the "TradeHunter" tab in header/sidebar to view and manage traders, and use analytical tools.</li>
+              <li><strong>TradeHunter Hub:</strong> Click the "TradeHunter" tab in header/sidebar to view and manage traders.</li>
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in header to access the external insights portal.</li>
               <li><strong>Estimator:</strong> Click the "Estimator" tab in header to access the external Building Materials Estimator tool.</li>
               <li><strong>Dover Sales Navigator (Dover Manager Only):</strong> If logged in as "DOVERMANAGER", a "Dover Sales Nav" tab appears in the header/sidebar. This leads to a specialized tool for Dover branch.</li>
@@ -158,12 +157,12 @@ export default function HowToUsePage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using the Branch Booster</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">4. External AI Access via API</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>Located on the <strong>TradeHunter Hub</strong> or at the bottom of the <strong>BuildWise Intel page</strong>.</li>
-              <li>Use "Quick Actions", type questions, or upload customer data files.</li>
-              <li><strong>On TradeHunter Hub:</strong> Example queries: "List all active traders.", "What is the average sales per trader?".</li>
-              <li><strong>On BuildWise Intel Page:</strong> Example queries: "Using BuildWise Intel, suggest cross-selling opportunities for active traders."</li>
+                <li>Provide your AI agent with your portal's URL and your secret API key (`TRADERS_API_KEY`).</li>
+                <li>Instruct it to make a `GET` request to `/api/traders/{branchId}`.</li>
+                <li>Ensure it sends the `x-api-key` header with your secret key for authentication.</li>
+                <li>The API will return all trader data for the specified branch as a JSON object.</li>
             </ul>
           </div>
            <div>
@@ -171,7 +170,6 @@ export default function HowToUsePage() {
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "BuildWise Intel" tab in the main header.</li>
               <li>Interact with the embedded external portal.</li>
-              <li>Use the Branch Booster below it for combined analysis.</li>
             </ul>
           </div>
           <div>
