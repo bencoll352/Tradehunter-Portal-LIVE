@@ -1,7 +1,11 @@
-
 // src/lib/firebase.ts
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { config } from 'dotenv';
+
+// Force-load environment variables from .env file at the earliest possible point.
+// This is the definitive fix to ensure Firebase has the credentials it needs when this module is imported.
+config({ path: '.env' });
 
 let firebaseConfig: FirebaseOptions | null = null;
 let configSource = ""; // To track where the config came from
