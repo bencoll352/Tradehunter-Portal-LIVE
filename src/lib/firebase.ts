@@ -22,6 +22,7 @@ if (process.env.FIREBASE_WEBAPP_CONFIG) {
     firebaseConfig = null; // Ensure fallback if parsing fails
   }
 }
+.env
 
 // If FIREBASE_WEBAPP_CONFIG wasn't available or failed to parse, use individual NEXT_PUBLIC_ variables
 if (!firebaseConfig) {
