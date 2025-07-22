@@ -1,3 +1,4 @@
+
 // src/lib/firebase.ts
 // FORCE-LOAD .env variables at the top of this file. This is the most reliable way
 // to ensure they are available before any Firebase initialization logic runs.
@@ -111,3 +112,4 @@ Ensure this is correctly set. If using .env, YOU MUST RESTART YOUR DEV SERVER af
 }
 
 export { db };
+

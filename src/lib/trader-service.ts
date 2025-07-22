@@ -387,3 +387,4 @@ export async function bulkAddTradersToDb(
   console.log(`[TraderService:bulkAddTradersToDb] Successfully bulk added a total of ${createdTraders.length} traders to branch ${baseBranchId}.`);
   return createdTraders;
 }
+
