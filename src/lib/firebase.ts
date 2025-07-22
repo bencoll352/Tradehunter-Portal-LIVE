@@ -1,10 +1,11 @@
 // src/lib/firebase.ts
+// FORCE-LOAD .env variables at the top of this file. This is the most reliable way
+// to ensure they are available before any Firebase initialization logic runs.
+import { config } from 'dotenv';
+config({ path: '.env' });
+
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-
-// The dotenv config() call has been moved to src/lib/trader-service.ts to ensure it runs
-// at the absolute earliest point it's needed for Firestore operations, which is the root
-// of the "Firestore not initialized" errors.
 
 let firebaseConfig: FirebaseOptions | null = null;
 let configSource = ""; // To track where the config came from

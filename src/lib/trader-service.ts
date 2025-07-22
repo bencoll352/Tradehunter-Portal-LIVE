@@ -1,11 +1,8 @@
 
 'use server';
 
-// Force-load environment variables from .env at the absolute earliest point needed.
-// This is the definitive fix for "Firestore not initialized" race conditions on server-side rendering.
-import { config } from 'dotenv';
-config({ path: '.env' });
-
+// The dotenv config call has been moved to src/lib/firebase.ts to ensure it's loaded
+// at the absolute earliest point possible, right before initialization.
 import { db } from './firebase';
 import {
   collection,
