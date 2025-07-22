@@ -1,7 +1,7 @@
 
 "use client"; // Ensure client component directive
 
-import { useState, useRef } from "react"; // React hooks
+import { useState, useRef, useEffect } from "react"; // React hooks
 import { z } from "zod"; // Zod for schema validation
 import { useForm } from "react-hook-form"; // React Hook Form
 import { zodResolver } from "@hookform/resolvers/zod"; // Zod resolver for RHF
@@ -10,9 +10,10 @@ import { Textarea } from "@/components/ui/textarea"; // ShadCN Textarea
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // ShadCN Card components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // ShadCN Form components
 import { Input } from "@/components/ui/input"; // ShadCN Input
-import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon, ShieldCheck } from "lucide-react"; // Lucide icons
+import { Loader2, Rocket, Sparkles, Paperclip, XCircle, Lightbulb, PackageSearch, Users, BarChart, TrendingUp, type LucideIcon, ShieldCheck, FileJson, Server } from "lucide-react"; // Lucide icons
 import { profitPartnerQuery, type ProfitPartnerQueryInput } from "@/ai/flows/profit-partner-query"; // Genkit flow
-import type { Trader } from "@/types"; // Trader type
+import type { Trader, BranchInfo, BranchLoginId } from "@/types"; // Trader type
+import { getBranchInfo } from "@/types";
 import { formatTraderDataForAnalysis } from "@/lib/utils"; // Utility function
 import { ScrollArea } from "@/components/ui/scroll-area"; // ShadCN ScrollArea
 import { useToast } from "@/hooks/use-toast"; // Toast hook
@@ -31,16 +32,20 @@ interface QuickAction {
 
 // Array of predefined quick actions
 const quickActions: QuickAction[] = [
-  { label: "New Customers", query: "Identify new customers and provide a brief summary.", icon: Users },
-  { label: "High Potential New Customers", query: "Which new customers show the highest potential? Provide reasons.", icon: TrendingUp },
-  { label: "Boost Existing Customer Spend", query: "Suggest strategies to boost spending from existing customers.", icon: BarChart },
-  { label: "High Value Existing Customers", query: "List high-value existing customers and any recent changes in their activity.", icon: Sparkles },
-  { label: "Lapsed Accounts (3+ Months)", query: "Identify accounts that have been inactive for 3 or more months and suggest re-engagement actions.", icon: Lightbulb },
-  { label: "Declined Accounts (6+ Months)", query: "List accounts that have declined in activity or stopped purchasing for 6+ months and potential reasons.", icon: XCircle },
+  { label: "New Customers", query: "Using the getTraderDataByBranch tool, identify new customers and provide a brief summary.", icon: Users },
+  { label: "High Potential New Customers", query: "Using the getTraderDataByBranch tool, which new customers show the highest potential? Provide reasons.", icon: TrendingUp },
+  { label: "Boost Existing Customer Spend", query: "Using the getTraderDataByBranch tool, suggest strategies to boost spending from existing customers.", icon: BarChart },
+  { label: "High Value Existing Customers", query: "Using the getTraderDataByBranch tool, list high-value existing customers and any recent changes in their activity.", icon: Sparkles },
+  { label: "Lapsed Accounts (3+ Months)", query: "Using the getTraderDataByBranch tool, identify accounts that have been inactive for 3 or more months and suggest re-engagement actions.", icon: Lightbulb },
   {
-    label: "API Access Instructions",
-    query: `To access trader data programmatically, use the secure API endpoint. Make a GET request to /api/traders/{branchId} (e.g., /api/traders/PURLEY). You MUST include a header 'x-api-key' with the secret API key defined in the server's TRADERS_API_KEY environment variable. This will return a JSON array of all traders for that branch. Please analyze the data for the PURLEY branch.`,
-    icon: ShieldCheck
+    label: "Live Data vs. Summary",
+    query: `What is the difference between the summary 'traderData' and the data from the 'getTraderDataByBranch' tool?`,
+    icon: FileJson
+  },
+  {
+    label: "List All Traders (Live)",
+    query: `Please use the getTraderDataByBranch tool for my branch to get the full, live list of all traders and then display their names.`,
+    icon: Server
   },
   {
     label: "Estimate Project Materials",
@@ -61,8 +66,16 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
+  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
+      setBranchInfo(getBranchInfo(storedLoggedInId));
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof agentFormSchema>>({
     resolver: zodResolver(agentFormSchema),
@@ -105,6 +118,11 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
   };
 
   const onSubmit = async (values: z.infer<typeof agentFormSchema>) => {
+    if (!branchInfo?.baseBranchId) {
+      toast({ variant: "destructive", title: "Branch Not Identified", description: "Could not identify the current branch. Please try logging in again." });
+      return;
+    }
+
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);
@@ -114,6 +132,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
     const input: ProfitPartnerQueryInput = {
       query: values.query,
       traderData: traderDataString,
+      branchId: branchInfo.baseBranchId,
       ...(fileContent && { uploadedFileContent: fileContent }),
     };
 
@@ -143,7 +162,7 @@ export function ProfitPartnerAgentClient({ traders }: ProfitPartnerAgentClientPr
           <Rocket className="h-8 w-8 text-primary" />
           <div>
             <CardTitle className="text-2xl text-primary">Branch Booster</CardTitle>
-            <CardDescription>Get insights and recommendations for your branch's traders. Current trader data for your branch is automatically included in analyses.</CardDescription>
+            <CardDescription>Get insights and recommendations for your branch's traders. The agent can now securely fetch live trader data for analysis.</CardDescription>
           </div>
         </div>
       </CardHeader>

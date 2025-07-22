@@ -10,8 +10,9 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 import { fetchWebsiteContent } from '@/ai/tools/fetch-website-content-tool';
+import { getTraderDataByBranch } from '@/ai/tools/get-trader-data-tool';
 
 const BUILDWISE_INTEL_URL = "https://studio--buildwise-intel.us-central1.hosted.app/";
 const DOVER_NAVIGATOR_URL = "https://sales-and-strategy-navigator-dover-302177537641.us-west1.run.app/";
@@ -19,8 +20,9 @@ const LEATHERHEAD_NAVIGATOR_URL = "https://sales-and-strategy-navigator-leatherh
 
 const ProfitPartnerQueryInputSchema = z.object({
   query: z.string().describe('The question about trader performance or a predefined quick action.'),
-  traderData: z.string().describe('The current trader data CSV string to use when answering the question. This data pertains to a specific UK branch.'),
+  traderData: z.string().describe('A summary of current trader data CSV string to use when answering the question. This data pertains to a specific UK branch.'),
   uploadedFileContent: z.string().optional().describe('Optional: Content of an uploaded file (e.g., CSV of customers) for analysis. Expected format: raw text content of the file.'),
+  branchId: z.string().describe('The base branch ID (e.g., "PURLEY", "DOVER") for which the analysis is being performed. This is crucial for context and for using tools that might require a branch identifier.'),
 });
 export type ProfitPartnerQueryInput = z.infer<typeof ProfitPartnerQueryInputSchema>;
 
@@ -30,7 +32,6 @@ const ProfitPartnerQueryOutputSchema = z.object({
 export type ProfitPartnerQueryOutput = z.infer<typeof ProfitPartnerQueryOutputSchema>;
 
 export async function profitPartnerQuery(input: ProfitPartnerQueryInput): Promise<ProfitPartnerQueryOutput> {
-  // The Genkit flow will handle API key issues if GOOGLE_API_KEY is missing or invalid.
   return profitPartnerQueryFlow(input);
 }
 
@@ -38,30 +39,32 @@ const profitPartnerAnalysisPrompt = ai.definePrompt({
   name: 'profitPartnerAnalysisPrompt',
   input: { schema: ProfitPartnerQueryInputSchema },
   output: { schema: ProfitPartnerQueryOutputSchema },
-  tools: [fetchWebsiteContent],
+  tools: [fetchWebsiteContent, getTraderDataByBranch],
   prompt: `You are a helpful assistant for a UK-based building supplies company's branch manager.
 Your primary goal is to analyse trader data and provide actionable insights relevant to the United Kingdom market and the specific operational area of the branch.
 You will be given a query, a string of current trader data for the branch (assume this data is from a UK branch), and optionally, content from an uploaded customer file.
 
-New Capability: You can now access external websites using the 'fetchWebsiteContent' tool. This is particularly useful for analyzing three specialized portals:
-- The BuildWise Intel portal: ${BUILDWISE_INTEL_URL}
-- The Dover Sales & Strategy Navigator (for Dover branch): ${DOVER_NAVIGATOR_URL}
-- The Leatherhead Sales & Strategy Navigator (for Leatherhead branch): ${LEATHERHEAD_NAVIGATOR_URL}
+New Capabilities:
+- You can access external websites using the 'fetchWebsiteContent' tool. This is for general web pages or the specialized portals listed below.
+- You can fetch a complete, live list of all traders for a specific branch using the 'getTraderDataByBranch' tool. This is the PREFERRED method for getting trader data for analysis, as the 'traderData' input is only a summary.
 
 Key Instructions:
-1.  **UK Context**: All analysis, recommendations, and information provided must be tailored to the UK market, business practices, and typical customer behaviours in the UK building trade.
-2.  **Local Branch Focus & Geographic Relevance**: The provided trader data pertains to a specific local UK branch. Your insights must be highly relevant to this local context. Pay close attention to any geographic indicators within the user's query or the trader data (such as addresses, city names, or postcodes). If such information is available, ensure your analysis is tailored to that specific town, city, region, or postcode area.
-3.  **Tool Use for External Data**:
+1.  **Use the Right Tool**:
+    - For any query that requires a detailed or fresh list of traders (e.g., "List all active traders", "Who is the newest trader?"), you MUST use the \`getTraderDataByBranch\` tool with the provided 'branchId' (e.g., 'PURLEY'). Do NOT rely on the potentially stale 'traderData' summary for these queries.
     - If the user's query requires information from the **BuildWise Intel portal** (e.g., "Analyze project LE/001/2025/PL from the portal..."), you MUST use the \`fetchWebsiteContent\` tool with the URL '${BUILDWISE_INTEL_URL}' to get the portal's content.
-    - If the user's query mentions the **Dover Sales & Strategy Navigator** or refers to advanced sales intelligence for the Dover branch, you MUST use the \`fetchWebsiteContent\` tool with the URL '${DOVER_NAVIGATOR_URL}'.
-    - If the user's query mentions the **Leatherhead Sales & Strategy Navigator** or refers to advanced sales intelligence for the Leatherhead branch, you MUST use the \`fetchWebsiteContent\` tool with the URL '${LEATHERHEAD_NAVIGATOR_URL}'.
-    - Integrate the fetched content from the relevant portal with the local trader data to provide comprehensive insights.
-4.  **Actionable Insights**: Focus on providing actionable insights, identifying trends, or suggesting specific actions the branch manager can take within their UK operational context.
+    - If the user's query mentions the **Dover Sales & Strategy Navigator**, you MUST use the \`fetchWebsiteContent\` tool with the URL '${DOVER_NAVIGATOR_URL}'.
+    - If the user's query mentions the **Leatherhead Sales & Strategy Navigator**, you MUST use the \`fetchWebsiteContent\` tool with the URL '${LEATHERHEAD_NAVIGATOR_URL}'.
+2.  **UK Context & Geographic Relevance**: All analysis and recommendations must be tailored to the UK market. The provided branchId ('{{{branchId}}}') is your key piece of geographic information. Tailor your insights to that specific branch's likely location.
+3.  **Actionable Insights**: Focus on providing actionable insights, identifying trends, or suggesting specific actions the branch manager can take.
+4.  **Material Estimation**: If asked to 'estimate project materials', your goal is to list typical materials and quantities for the specified project, using UK common building practices. Ask for project details if not provided.
 
 User's Query:
 {{{query}}}
 
-Trader Data (summary format, specific to a UK branch):
+Branch ID for this query:
+{{{branchId}}}
+
+Trader Data (summary format, potentially outdated):
 {{{traderData}}}
 
 {{#if uploadedFileContent}}
@@ -70,26 +73,7 @@ Additional Uploaded Data (e.g., customer list, sales records):
 {{/if}}
 
 Based on all the provided information, please generate a concise and helpful answer to the user's query.
-If the query asks for a list (e.g., "list all active traders"), provide the list.
-If the query is about totals or averages, calculate and provide them.
-If the query is open-ended (e.g., "suggest strategies"), provide thoughtful suggestions applicable to a UK building supplies branch.
-If the query is explicitly asking to 'estimate project materials' or similar, focus on that estimation task. You should ask for project details (like type of project, dimensions, specific material preferences if any) if they are not provided in the query. Your primary goal for such queries is to list typical materials and quantities for the specified project, using UK common building practices and material names. Do not primarily use the trader data sheet to come up with project ideas for estimation unless the user's query explicitly suggests linking it to a trader or a trend from the trader data.
-Be specific and refer to the data where possible.
-If the uploaded file content is relevant to the query, incorporate it into your analysis.
-If the data seems insufficient to answer the query fully, politely state that and explain what additional information might be needed.
 `,
-  // The default model is 'googleai/gemini-2.0-flash' as per src/ai/genkit.ts
-  // You can add model configuration or safety settings here if needed, for example:
-  // model: 'googleai/gemini-1.5-flash-latest', // Or another compatible model
-  // config: {
-  //   temperature: 0.7,
-  //   safetySettings: [
-  //     {
-  //       category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-  //       threshold: 'BLOCK_NONE', // Example: Adjust safety settings
-  //     },
-  //   ],
-  // },
 });
 
 const profitPartnerQueryFlow = ai.defineFlow(
@@ -99,8 +83,8 @@ const profitPartnerQueryFlow = ai.defineFlow(
     outputSchema: ProfitPartnerQueryOutputSchema,
   },
   async (input: ProfitPartnerQueryInput): Promise<ProfitPartnerQueryOutput> => {
-    console.log(`[profitPartnerQueryFlow] Received query: "${input.query}" for Genkit/Gemini analysis.`);
-    console.log(`[profitPartnerQueryFlow] Trader data length: ${input.traderData.length} chars`);
+    console.log(`[profitPartnerQueryFlow] Received query: "${input.query}" for Genkit/Gemini analysis for branch ${input.branchId}.`);
+    console.log(`[profitPartnerQueryFlow] Trader data summary length: ${input.traderData.length} chars`);
     console.log(`[profitPartnerQueryFlow] Uploaded file content present: ${!!input.uploadedFileContent}, length: ${input.uploadedFileContent?.length || 0} chars`);
 
     if (!process.env.GOOGLE_API_KEY) {
@@ -117,7 +101,7 @@ const profitPartnerQueryFlow = ai.defineFlow(
       }
 
       console.log('[profitPartnerQueryFlow] Successfully received answer from Genkit/Gemini analysis.');
-      return output; // output directly matches ProfitPartnerQueryOutputSchema
+      return output;
     } catch (error) {
       console.error('[profitPartnerQueryFlow] Error during Genkit/Gemini analysis:', error);
       let detailedErrorMessage = 'An unexpected error occurred during the analysis.';
