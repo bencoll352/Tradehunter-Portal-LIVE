@@ -43,24 +43,24 @@ export default function DashboardOverviewPage() {
             setTraders(result.data);
           } else {
             setTraders([]);
-            setError(result.error);
+            setError(result.error ?? "An unknown error occurred while fetching trader data.");
             toast({ variant: "destructive", title: "Error Loading Stats Data", description: result.error || "Could not load trader data for dashboard stats." });
           }
-        } catch (error) {
-          console.error("Error fetching traders for dashboard stats:", error);
-          const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+        } catch (err) {
+          console.error("Error fetching traders for dashboard stats:", err);
+          const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
           setError(errorMessage);
           setTraders([]);
           toast({ variant: "destructive", title: "Error Loading Stats Data", description: "Failed to load trader data for dashboard stats due to an unexpected error." });
         } finally {
           setIsLoadingStats(false);
         }
-      } else if (branchInfo && branchInfo.role === 'unknown') {
-        setIsLoadingStats(false); // No valid branch to fetch for
+      } else if (branchInfo) { // This condition handles cases where branchInfo is resolved but role is unknown or baseBranchId is null
+        setIsLoadingStats(false);
       }
     };
 
-    if (branchInfo) { // Only fetch if branchInfo is resolved
+    if (branchInfo) { 
       fetchTraderData();
     }
   }, [branchInfo, toast]);
@@ -117,7 +117,7 @@ export default function DashboardOverviewPage() {
             hotLeadsCount={hotLeadsCount}
             activeTradersGoalInitial={activeTradersCount} /* Pass current active count as potential initial value for goal */
           />
-      ) : !branchInfo || branchInfo.role === 'unknown' ? (
+      ) : !branchInfo || branchInfo.role === 'unknown' && !isLoadingStats ? (
         <Card className="shadow-md">
             <CardHeader>
                 <CardTitle className="text-lg text-muted-foreground">Branch Statistics & Goals</CardTitle>
