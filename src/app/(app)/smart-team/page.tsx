@@ -12,25 +12,17 @@ import type { SVGProps } from 'react';
 
 // Custom Chess Piece Icon Component - UPDATED to match user image
 const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        {...props}
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 24 24" 
+      fill="currentColor" 
+      stroke="currentColor" 
+      strokeWidth="0.5" // Adjusted for a filled look with a slight border
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      {...props}
     >
-        <path d="M8 20H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4" />
-        <path d="M16 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" />
-        <path d="M12 4v16" />
-        <path d="M12 4h-2" />
-        <path d="M12 4h2" />
-        <path d="M12 20h-2" />
-        <path d="M12 20h2" />
+        <path d="M8 20H4a1 1 0 0 1-1-1v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H8zM16 20h4a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1h2zM7 14h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1zM9 7V5a3 3 0 0 1 3-3 3 3 0 0 1 3 3v2H9z" />
     </svg>
 );
 
