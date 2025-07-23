@@ -56,9 +56,9 @@ const faqs = [
   },
   {
     value: "item-10",
-    question: "What is the Dover Sales Navigator (Dover Manager)?",
-    answer: "If logged in as 'DOVERMANAGER', an additional 'Dover Sales Nav' tab appears. This page leads to an advanced, specialized Sales & Strategy Navigator tool for the Dover branch, embedding an external application for in-depth analysis, intelligence, and strategic planning.",
-    icon: <Compass className="h-5 w-5 text-primary mr-2" />
+    question: "What is the Smart Team page (Managers)?",
+    answer: "If you are logged in with a Manager account, a 'Smart Team' tab will appear. This page is a hub for interacting with specialized AI agents for sales, strategy, and analysis.",
+    icon: <UsersRound className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-11",
@@ -139,7 +139,7 @@ export default function HowToUsePage() {
               <li><strong>TradeHunter Hub:</strong> Click the "TradeHunter" tab in header/sidebar to view and manage traders.</li>
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in header to access the external insights portal.</li>
               <li><strong>Estimator:</strong> Click the "Estimator" tab in header to access the external Building Materials Estimator tool.</li>
-              <li><strong>Dover Sales Navigator (Dover Manager Only):</strong> If logged in as "DOVERMANAGER", a "Dover Sales Nav" tab appears in the header/sidebar. This leads to a specialized tool for Dover branch.</li>
+              <li><strong>Smart Team (Managers Only):</strong> If logged in with a Manager account, a "Smart Team" tab appears. This leads to a hub for specialized AI agents.</li>
               <li><strong>Leatherhead Sales Navigator (Leatherhead Manager Only):</strong> If logged in as "LEATHERHEADMANAGER", a "Leatherhead Sales Nav" tab appears in the header/sidebar.</li>
               <li><strong>How to Use (this page):</strong> Click "How to Use" in the left sidebar for help and FAQs.</li>
             </ul>
@@ -180,10 +180,10 @@ export default function HowToUsePage() {
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Dover Sales Navigator (Dover Manager Only)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Smart Team Hub (Managers Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>If you are the Dover Manager, click on the "Dover Sales Nav" tab in the header or sidebar.</li>
-              <li>Interact with the embedded Dover-specific advanced Sales & Strategy Navigator tool for comprehensive insights.</li>
+              <li>If you are a Manager, click on the "Smart Team" tab in the header or sidebar.</li>
+              <li>Interact with the specialized AI agents for comprehensive insights and assistance.</li>
             </ul>
           </div>
           <div>

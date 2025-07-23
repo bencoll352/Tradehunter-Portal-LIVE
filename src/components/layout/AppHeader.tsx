@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Calculator, Users, Columns, Compass, MapPin } from "lucide-react"; 
+import { Home, LayoutDashboard, Calculator, Users, Columns, Compass, MapPin, UsersRound } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from 'react';
 import { getBranchInfo, type BranchInfo } from '@/types';
@@ -15,7 +15,7 @@ const getPathTitle = (path: string) => {
   if (path.startsWith("/tradehunter")) return "TradeHunter Hub";
   if (path.startsWith("/buildwise-intel")) return "BuildWise Intel";
   if (path.startsWith("/estimator")) return "Materials Estimator";
-  if (path.startsWith("/dover-sales-navigator")) return "Dover Sales Navigator";
+  if (path.startsWith("/smart-team")) return "Smart Team Hub";
   if (path.startsWith("/leatherhead-sales-navigator")) return "Leatherhead Sales Navigator";
   if (path.startsWith("/how-to-use")) return "How to Use Guide";
   return "TradeHunter Pro Portal";
@@ -105,21 +105,21 @@ export function AppHeader() {
             Estimator
           </Link>
         </Button>
-        {branchInfo?.displayLoginId === 'DOVERMANAGER' && (
+        {branchInfo?.role === 'manager' && (
           <Button
             asChild
             size="lg"
-            variant={pathname === "/dover-sales-navigator" ? "default" : "ghost"}
+            variant={pathname === "/smart-team" ? "default" : "ghost"}
             className={cn(
               "font-medium",
-              pathname === "/dover-sales-navigator"
+              pathname === "/smart-team"
                 ? "bg-purple-600 text-white hover:bg-purple-700"
                 : "text-purple-600/90 hover:bg-purple-600/10 hover:text-purple-700"
             )}
           >
-            <Link href="/dover-sales-navigator" className="flex items-center gap-2">
-              <Compass className="h-5 w-5" />
-              Dover Sales Nav
+            <Link href="/smart-team" className="flex items-center gap-2">
+              <UsersRound className="h-5 w-5" />
+              Smart Team
             </Link>
           </Button>
         )}

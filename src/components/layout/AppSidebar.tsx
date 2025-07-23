@@ -62,6 +62,7 @@ import {
   MapPin,
   Globe,
   ReplaceAll,
+  UsersRound,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
@@ -86,16 +87,14 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'do1c1', icon: Info, text: "Welcome to TradeHunter Pro! This is your main overview." },
     { id: 'do1c2', icon: LinkIcon, text: "Quickly navigate to key sections like TradeHunter Hub, BuildWise Intel, and the Materials Estimator using the cards on this page or the header/sidebar navigation." },
     { id: 'do1c3', icon: Columns, text: "Get a bird's-eye view of the tools available to help manage your branch effectively." },
-    { id: 'do1c4', icon: Compass, text: "If you are the Dover Manager, a 'Dover Sales Navigator' tab will also be available in the header and sidebar." },
+    { id: 'do1c4', icon: UsersRound, text: "If you are a Manager, a 'Smart Team' tab will also be available in the header and sidebar to access specialized AI agents." },
   ],
   'do2_content': [
     { id: 'do2c1', icon: Users, text: "Dive into detailed trader management: view, add, edit, and delete traders." },
-    { id: 'do2c2', icon: Rocket, text: "Utilise the Branch Booster for system-driven insights on your trader data." },
-    { id: 'do2c3', icon: UploadCloud, text: "Perform bulk operations like CSV uploads and deletions." },
+    { id: 'do2c2', icon: UploadCloud, text: "Perform bulk operations like CSV uploads and deletions." },
   ],
   'do3_content': [
     { id: 'do3c1', icon: Briefcase, text: "Access an external portal for specialised industry data and insights." },
-    { id: 'do3c2', icon: Lightbulb, text: "Use the integrated Branch Booster on that page to cross-reference Intel data with your local trader information." }, 
   ],
   'do4_content': [
     { id: 'do4c1', icon: Calculator, text: "Access an external tool to help estimate materials needed for various construction projects." },
@@ -113,12 +112,7 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'th2c4', icon: Trash2, text: "Click trash icon to delete a trader individually." },
     { id: 'th2c5', icon: CheckSquare, text: "Select multiple traders for bulk deletion using checkboxes and the 'Delete (X)' button." },
   ],
-  'th3_content': [
-    { id: 'th3c1', icon: MessageSquareQuote, text: "Ask questions about trader performance or market insights." },
-    { id: 'th3c2', icon: Zap, text: "Utilise 'Quick Actions' for common, pre-defined analyses." },
-    { id: 'th3c3', icon: Paperclip, text: "Upload customer data files (.csv, .txt) for deeper, contextual analysis." },
-  ],
-   'th4_content': [
+  'th4_content': [
     { id: 'th4c1', icon: Users, text: "See counts for Active, Call-Back, and New Lead traders." },
     { id: 'th4c2', icon: Activity, text: "View number of recently active traders (activity in last 30 days)." },
   ],
@@ -128,7 +122,6 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   'bwi_content_main': [
     { id: 'bwic1', icon: Briefcase, text: "Access the external BuildWise Intel application." },
     { id: 'bwic2', icon: Lightbulb, text: "Gain specialised industry data and insights from their portal." }, 
-    { id: 'bwic3', icon: Rocket, text: "Use the Branch Booster (also on this page) to analyse Intel portal info alongside your trader data." }, 
   ],
   'est_content_main': [
     { id: 'estc1', icon: Wrench, text: "Access the external Building Materials Estimator tool." },
@@ -139,12 +132,12 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'htuc1', icon: HelpCircle, text: "Find answers to Frequently Asked Questions." },
     { id: 'htuc2', icon: ListChecks, text: "Follow detailed step-by-step instructions for portal features." },
     { id: 'htuc3', icon: BookOpenText, text: "Learn about all core functionalities and how to use them effectively." },
-    { id: 'htuc4', icon: Compass, text: "Dover Managers: Find a dedicated 'Dover Sales Navigator' tab providing access to a specialized tool." },
+    { id: 'htuc4', icon: UsersRound, text: "Managers: Find a dedicated 'Smart Team' tab providing access to a hub of specialized AI agents." },
   ],
-  'dsn_content_main': [
-    { id: 'dsnc1', icon: Compass, text: "Access the advanced Dover Sales & Strategy Navigator." },
-    { id: 'dsnc2', icon: TrendingUp, text: "Explore comprehensive sales intelligence and strategic opportunities for the Dover branch." },
-    { id: 'dsnc3', icon: ShieldCheck, text: "This tool is exclusively available to the Dover Manager account." },
+  'st_content_main': [
+      { id: 'stc1', icon: UsersRound, text: "Access the Smart Team hub for multiple AI agents." },
+      { id: 'stc2', icon: TrendingUp, text: "Leverage specialized agents for sales, strategy, and data analysis." },
+      { id: 'stc3', icon: ShieldCheck, text: "This hub is exclusively available to Manager accounts." },
   ],
   'lsn_content_main': [
     { id: 'lsnc1', icon: MapPin, text: "Access the advanced Leatherhead Sales & Strategy Navigator." },
@@ -163,13 +156,12 @@ const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
 const tradeHunterPurposeItems: PurposeBoxItem[] = [
   { id: 'th1', icon: Eye, text: "View & Manage Trader Data", contentKey: 'th1_content' },
   { id: 'th2', icon: Users, text: "Add, Edit, & Delete Traders", contentKey: 'th2_content' },
-  { id: 'th3', icon: Rocket, text: "Analyse Data with Branch Booster", contentKey: 'th3_content' }, 
   { id: 'th4', icon: BarChart2, text: "View Hub Statistics", contentKey: 'th4_content'},
   { id: 'th5', icon: BookOpenText, text: "Comprehensive 'How to Use' Guide", contentKey: 'th5_content' }
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
-  { id: 'bwi_main', icon: Home, text: "BuildWise Intel Portal & Analysis", contentKey: 'bwi_content_main' }, 
+  { id: 'bwi_main', icon: Home, text: "BuildWise Intel Portal", contentKey: 'bwi_content_main' }, 
 ];
 
 const estimatorPurposeItems: PurposeBoxItem[] = [
@@ -180,8 +172,8 @@ const howToUsePurposeItems: PurposeBoxItem[] = [
   { id: 'htu_main', icon: HelpCircle, text: "Portal Usage Guide & FAQs", contentKey: 'htu_content_main' },
 ];
 
-const doverSalesNavigatorPurposeItems: PurposeBoxItem[] = [
-  { id: 'dsn_main', icon: Compass, text: "Dover Sales Navigator Tool", contentKey: 'dsn_content_main' },
+const smartTeamPurposeItems: PurposeBoxItem[] = [
+  { id: 'st_main', icon: UsersRound, text: "Smart Team Agent Hub", contentKey: 'st_content_main' },
 ];
 
 const leatherheadSalesNavigatorPurposeItems: PurposeBoxItem[] = [
@@ -217,18 +209,18 @@ export function AppSidebar() {
   let currentPageTitle = "Page Info";
   let navItems = [...baseNavItems]; 
 
-  if (branchInfo?.displayLoginId === 'DOVERMANAGER') {
+  if (branchInfo?.role === 'manager') {
     const howToUseIndex = navItems.findIndex(item => item.href === "/how-to-use");
-    const doverNavItem = {
-      href: "/dover-sales-navigator",
-      icon: Compass,
-      label: "Dover Sales Nav",
-      tooltip: "Dover: Advanced Sales & Strategy Hub",
+    const smartTeamNavItem = {
+      href: "/smart-team",
+      icon: UsersRound,
+      label: "Smart Team",
+      tooltip: "Smart Team Agent Hub",
     };
     if (howToUseIndex !== -1) {
-      navItems.splice(howToUseIndex, 0, doverNavItem);
+      navItems.splice(howToUseIndex, 0, smartTeamNavItem);
     } else { 
-      navItems.push(doverNavItem);
+      navItems.push(smartTeamNavItem);
     }
   }
 
@@ -259,9 +251,9 @@ export function AppSidebar() {
   } else if (pathname.startsWith("/estimator")) {
     currentPurposeItems = estimatorPurposeItems;
     currentPageTitle = "Estimator: Purpose";
-  } else if (pathname.startsWith("/dover-sales-navigator") && branchInfo?.displayLoginId === 'DOVERMANAGER') {
-    currentPurposeItems = doverSalesNavigatorPurposeItems;
-    currentPageTitle = "Dover Sales Nav: Purpose";
+  } else if (pathname.startsWith("/smart-team") && branchInfo?.role === 'manager') {
+    currentPurposeItems = smartTeamPurposeItems;
+    currentPageTitle = "Smart Team: Purpose";
   } else if (pathname.startsWith("/leatherhead-sales-navigator") && branchInfo?.displayLoginId === 'LEATHERHEADMANAGER') {
     currentPurposeItems = leatherheadSalesNavigatorPurposeItems;
     currentPageTitle = "Leatherhead Nav: Purpose";
@@ -290,7 +282,7 @@ export function AppSidebar() {
         <ScrollArea className="flex-1 px-3 py-2">
           <SidebarMenu className="mb-4">
             {navItems.map((item) => {
-              if (item.href === "/dover-sales-navigator" && branchInfo?.displayLoginId !== 'DOVERMANAGER') {
+              if (item.href === "/smart-team" && branchInfo?.role !== 'manager') {
                 return null;
               }
               if (item.href === "/leatherhead-sales-navigator" && branchInfo?.displayLoginId !== 'LEATHERHEADMANAGER') {
