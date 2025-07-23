@@ -10,16 +10,17 @@ import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';
 
-// Custom Chess Piece Icon Component - UPDATED to Chess Rook
+// Custom Chess Piece Icon Component - UPDATED to match user image
 const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      stroke="none"
-      {...props}
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        stroke="none"
+        {...props}
     >
-      <path d="M5 22h14v-2H5v2zm0-3h14v-2H5v2zm1.5-12h11l-1.1 2.2a1 1 0 0 1-.85.5H8.45a1 1 0 0 1-.85-.5L6.5 7h11zM6 5V3h3v2H6zm5 0V3h2v2h-2zm5 0V3h3v2h-3z" />
+        <path d="M9 11h6v2H9zM8 8h8v2H8z" />
+        <path fillRule="evenodd" clipRule="evenodd" d="M8 9h1V8h6v1h1v1h-1v1h-1v-1H9v1H8V9zm1-2h6V6H9v1z" />
     </svg>
   );
 
@@ -141,9 +142,9 @@ export default function SmartTeamPage() {
           <div className="flex items-center gap-3 mb-2">
             <UsersRound className="h-10 w-10 text-primary" />
             <div>
-              <CardTitle className="text-3xl font-bold text-primary">Smart Team Roster</CardTitle>
+              <CardTitle className="text-3xl font-bold text-primary">Smart Team Hub</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Meet your AI-powered team members, here to help you succeed.
+                Meet your Smart Team members, here to help you succeed.
               </CardDescription>
             </div>
           </div>
