@@ -3,17 +3,39 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UsersRound, AlertTriangle, Loader2 } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, BrainCircuit, Bot, Compass } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 
-// TODO: Define Agent components and structure
-// Example:
-// const AgentCard = ({ name, description }) => (
-//   <Card>
-//     <CardHeader><CardTitle>{name}</CardTitle></CardHeader>
-//     <CardContent>{description}</CardContent>
-//   </Card>
-// );
+interface AgentCardProps {
+  title: string;
+  description: string;
+  url: string;
+  icon: LucideIcon;
+}
+
+const AgentCard = ({ title, description, url, icon: Icon }: AgentCardProps) => (
+  <Card className="shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden border-border hover:border-primary/30">
+    <CardHeader className="pb-4">
+      <div className="flex items-center gap-3 mb-2">
+        <Icon className="h-7 w-7 text-primary" />
+        <CardTitle className="text-xl text-primary">{title}</CardTitle>
+      </div>
+       <CardDescription className="text-sm text-muted-foreground">{description}</CardDescription>
+    </CardHeader>
+    <CardContent className="flex-grow p-0">
+        <div className="w-full h-[60vh] rounded-b-md overflow-hidden bg-muted/20">
+            <iframe
+              src={url}
+              title={title}
+              className="w-full h-full border-0"
+              allowFullScreen
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            />
+          </div>
+    </CardContent>
+  </Card>
+);
+
 
 export default function SmartTeamPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -74,29 +96,28 @@ export default function SmartTeamPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="mb-4 text-foreground">
-            This is your central hub for leveraging specialized AI agents. Each agent has a specific role to help you with sales, strategy, and analysis. Select an agent below to get started.
+          <p className="mb-6 text-foreground">
+            This is your central hub for leveraging specialized AI agents. Each agent has a specific role to help you with sales, strategy, and analysis. Interact with an agent below to get started.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Placeholder for future agent cards */}
-            <Card>
-                <CardHeader><CardTitle>Strategy Agent</CardTitle></CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Analyzes market trends and competitor data to suggest strategic opportunities. (Coming Soon)</p>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader><CardTitle>Sales Agent</CardTitle></CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Identifies high-potential leads and suggests engagement tactics. (Coming Soon)</p>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader><CardTitle>Data Agent</CardTitle></CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Provides deep-dive analysis and answers questions about your branch data. (Coming Soon)</p>
-                </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+            <AgentCard 
+              title="Summit Coach"
+              description="An AI-powered coaching agent designed to enhance skills and strategies."
+              url="https://summitcoach-302177537641.us-west1.run.app"
+              icon={BrainCircuit}
+            />
+            <AgentCard 
+              title="Sales Navigator"
+              description="A specialized agent to help navigate sales data, identify leads, and provide tactical recommendations."
+              url="https://sales-navigator-302177537641.us-west1.run.app"
+              icon={Bot}
+            />
+             <AgentCard 
+              title="Sales & Strategy Navigator"
+              description="A comprehensive tool for in-depth analysis, intelligence, and strategic planning."
+              url="https://sales-and-strategy-navigator-leatherhead-302177537641.us-west1.run.app"
+              icon={Compass}
+            />
           </div>
         </CardContent>
       </Card>
