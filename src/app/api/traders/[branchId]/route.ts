@@ -11,9 +11,9 @@ function extractErrorMessage(error: unknown): string {
 // This function handles GET requests to /api/traders/[branchId]
 export async function GET(
   request: NextRequest,
-  context: { params: { branchId: string } }
+  { params }: { params: { branchId: string } }
 ) {
-  const { branchId } = context.params;
+  const { branchId } = params;
   const apiKey = request.headers.get('x-api-key');
 
   // 1. API Key Validation
