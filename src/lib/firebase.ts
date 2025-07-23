@@ -3,7 +3,7 @@
 // FORCE-LOAD .env variables at the top of this file. This is the most reliable way
 // to ensure they are available before any Firebase initialization logic runs.
 import { config } from 'dotenv';
-config({ path: '.env' });
+config({ path: '.env.local' });
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
