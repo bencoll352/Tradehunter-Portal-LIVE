@@ -1,2 +1,2 @@
-// This file has been removed as part of deleting the Competitor Insights feature.
-// The Firestore service for storing competitor URLs is no longer available.
+// This file has been removed as it is obsolete.
+// The Competitor Insights feature now uses Genkit directly and does not require this service.
