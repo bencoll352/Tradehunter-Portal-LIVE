@@ -12,15 +12,15 @@ import type { SVGProps } from 'react';
 
 // Custom Chess Piece Icon Component - UPDATED to Chess King
 const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 512 512" 
-    fill="currentColor"
-    {...props}>
-    <path d="M384,96h-48l-48-32v32h-96V64L144,96H96c-17.7,0-32,14.3-32,32v32h32v160H80v32h352v-32h-16V160h32v-32 C416,110.3,401.7,96,384,96z M160,224c-17.7,0-32,14.3-32,32s14.3,32,32,32s32-14.3,32-32S177.7,224,160,224z M256,128h-32v32h32 V128z M288,128v32h32v-32H288z M224,208c0-8.8,7.2-16,16-16h32c8.8,0,16,7.2,16,16v32h-64V208z M352,224 c-17.7,0-32,14.3-32,32s14.3,32,32,32s32-14.3,32-32S369.7,224,352,224z M32,416h448v32H32V416z M288,192h-64v-32h64V192z"/>
-    <path d="M256,32L240,64h32L256,32z"/>
-  </svg>
-);
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      fill="currentColor"
+      {...props}
+    >
+      <path d="M256 32L224 96h-32v32h-32v32h32V128h32l32 64h32v-32h32V96h-32v32h-32L288 96h-32V32z M128 224v160h256V224H128zM96 416h320v32H96v-32z"/>
+    </svg>
+  );
 
 
 interface AgentRosterCardProps {
