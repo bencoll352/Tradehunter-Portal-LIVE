@@ -10,7 +10,7 @@ import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';
 
-// Custom Chess Piece Icon Component - UPDATED to Chess Queen
+// Custom Chess Piece Icon Component - UPDATED to Chess Knight
 const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -18,7 +18,7 @@ const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
     fill="currentColor"
     {...props}
   >
-    <path d="M256 48c-17.625 0-32 14.375-32 32s14.375 32 32 32 32-14.375 32-32-14.375-32-32-32zM128 208c0-26.5 21.5-48 48-48h160c26.5 0 48 21.5 48 48v80h-48v-32h-16v32h-32v-32h-16v32h-32v-32h-16v32H128v-80zM96 320h320v32c0 8.844-7.156 16-16 16H112c-8.844 0-16-7.156-16-16v-32zM48 400h416v32c0 17.672-14.328 32-32 32H80c-17.672 0-32-14.328-32-32v-32z" />
+    <path d="M363.6,183.3c-2.4-3.1-6.1-5-10-5H248c-1.6,0-3.1,0.5-4.4,1.4c-1.3,0.9-2.3,2.3-2.7,3.8L225.1,240h-42.3 c-2-2.8-5.1-4.5-8.5-4.5H128c-4.1,0-7.8,2.1-9.8,5.5c-2,3.4-1.8,7.7,0.5,10.9L161.4,320H96c-8.8,0-16,7.2-16,16v32 c0,8.8,7.2,16,16,16h320c8.8,0,16-7.2,16-16v-32c0-8.8-7.2-16-16-16h-65.4l42.7-68.3c2.3-3.2,2.5-7.5,0.5-10.9 C404,185.1,400.4,183,396,183h-32.4V183.3z M272,240l16-56h56.5l-30.8,49.3C311.9,235.9,309.5,240,306,240H272z M448,432 c0,8.8-7.2,16-16,16H80c-8.8,0-16-7.2-16-16v-32c0-8.8,7.2-16,16,16h352c8.8,0,16,7.2,16,16V432z" />
   </svg>
 );
 
