@@ -43,12 +43,6 @@ const faqs = [
     icon: <Lightbulb className="h-5 w-5 text-primary mr-2" />
   },
   {
-    value: "item-4",
-    question: "How can my external AI access the portal data?",
-    answer: "The portal exposes a secure API for external use. Your AI agent can make a GET request to `/api/traders/{branchId}` (e.g., `/api/traders/PURLEY`). The request MUST include a header `x-api-key` with the secret API key defined in the server's `TRADERS_API_KEY` environment variable. This provides a JSON array of all traders for that branch.",
-    icon: <Key className="h-5 w-5 text-primary mr-2" />
-  },
-  {
     value: "item-8",
     question: "What is the BuildWise Intel page?",
     answer: "The 'BuildWise Intel' page (tab in header) embeds an external application for specialised industry data.",
@@ -171,45 +165,36 @@ export default function HowToUsePage() {
               <li>Click "Get Insights" to receive an analysis.</li>
             </ul>
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">5. External AI Access via API</h3>
-            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-                <li>Provide your AI agent with your portal's URL and your secret API key (`TRADERS_API_KEY`).</li>
-                <li>Instruct it to make a `GET` request to `/api/traders/{branchId}`.</li>
-                <li>Ensure it sends the `x-api-key` header with your secret key for authentication.</li>
-                <li>The API will return all trader data for the specified branch as a JSON object.</li>
-            </ul>
-          </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">6. Accessing & Utilising BuildWise Intel Portal</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">5. Accessing & Utilising BuildWise Intel Portal</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "BuildWise Intel" tab in the main header.</li>
               <li>Interact with the embedded external portal.</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Materials Estimator</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">6. Using the Materials Estimator</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "Estimator" tab in the main header.</li>
               <li>Interact with the embedded external tool.</li>
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">8. Using the Smart Team Hub (Managers Only)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Smart Team Hub (Managers Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If you are a Manager, click on the "Smart Team" tab in the header or sidebar.</li>
               <li>From the roster page, click "Launch Agent" to open a specialized AI agent (like Summit Coach, Sales Navigator, Outreach Pro, etc.) in its own dedicated page.</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">9. Using the Leatherhead Sales Navigator (Leatherhead Manager Only)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">8. Using the Leatherhead Sales Navigator (Leatherhead Manager Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If you are the Leatherhead Manager, click on the "Leatherhead Sales Nav" tab in the header or sidebar.</li>
               <li>Interact with the embedded Leatherhead-specific advanced Sales & Strategy Navigator tool for comprehensive insights.</li>
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">10. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">9. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All trader data is stored securely in Firebase Firestore, specific to your branch.</li>
               <li>Changes are persistent across sessions.</li>
