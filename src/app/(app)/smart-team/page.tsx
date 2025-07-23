@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, Briefcase } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, Briefcase, Send } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -63,6 +63,14 @@ const agents: AgentRosterCardProps[] = [
         href: "/smart-team/sales-strategy-navigator",
         icon: Compass,
         iconStyle: "border-emerald-500/50 text-emerald-500 bg-emerald-500/10",
+    },
+    {
+        title: "Outreach Pro",
+        role: "Sales Assistant",
+        description: "I craft compelling outreach messages and help you manage targeted sales campaigns.",
+        href: "/smart-team/outreach-pro",
+        icon: Send,
+        iconStyle: "border-sky-500/50 text-sky-500 bg-sky-500/10",
     },
 ]
 
@@ -126,7 +134,7 @@ export default function SmartTeamPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {agents.map((agent) => (
                 <AgentRosterCard key={agent.title} {...agent} />
             ))}

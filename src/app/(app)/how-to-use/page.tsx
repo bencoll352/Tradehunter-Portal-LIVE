@@ -57,7 +57,7 @@ const faqs = [
   {
     value: "item-10",
     question: "What is the Smart Team page (Managers)?",
-    answer: "If you are logged in with a Manager account, a 'Smart Team' tab will appear. This page is a hub for launching specialized AI agents. From the roster, you can launch agents like the Summit Coach, Sales Navigator, and Sales & Strategy Navigator into their own dedicated pages.",
+    answer: "If you are logged in with a Manager account, a 'Smart Team' tab will appear. This page is a hub for launching specialized AI agents. From the roster, you can launch agents like the Summit Coach, Sales Navigator, Sales & Strategy Navigator, and Outreach Pro into their own dedicated pages.",
     icon: <UsersRound className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -183,7 +183,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Smart Team Hub (Managers Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If you are a Manager, click on the "Smart Team" tab in the header or sidebar.</li>
-              <li>From the roster page, click "Launch Agent" to open a specialized AI agent (like Summit Coach or Sales Navigator) in its own dedicated page.</li>
+              <li>From the roster page, click "Launch Agent" to open a specialized AI agent (like Summit Coach, Sales Navigator, Outreach Pro, etc.) in its own dedicated page.</li>
             </ul>
           </div>
           <div>
