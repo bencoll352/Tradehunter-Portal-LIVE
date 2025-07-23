@@ -15,23 +15,11 @@ const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      fill="currentColor"
+      stroke="none"
       {...props}
     >
-      <path d="M5 22h14" />
-      <path d="M5 18h14" />
-      <path d="M7 18v-8" />
-      <path d="M17 18v-8" />
-      <path d="M9 10h6" />
-      <path d="M7 10h1.5a1.5 1.5 0 0 1 0 3H7" />
-      <path d="M17 10h-1.5a1.5 1.5 0 0 0 0 3H17" />
-      <path d="M9 2v4" />
-      <path d="M15 2v4" />
-      <path d="M5 6h14" />
+      <path d="M5 22h14v-2H5v2zm0-3h14v-2H5v2zm1.5-12h11l-1.1 2.2a1 1 0 0 1-.85.5H8.45a1 1 0 0 1-.85-.5L6.5 7h11zM6 5V3h3v2H6zm5 0V3h2v2h-2zm5 0V3h3v2h-3z" />
     </svg>
   );
 

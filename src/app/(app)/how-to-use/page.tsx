@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll, ClipboardCheck, MapPin, Key } from "lucide-react"; 
+import { HelpCircle, ListChecks, BarChart2, Users, Rocket, UploadCloud, Database, Briefcase, Home, Calculator, Compass, UsersRound, Globe, ReplaceAll, ClipboardCheck, MapPin, Key, Lightbulb } from "lucide-react"; 
 
 const faqs = [
   {
@@ -21,20 +21,26 @@ const faqs = [
   {
     value: "item-2",
     question: "How can I view trader data?",
-    answer: "Once logged in, navigate to the 'TradeHunter' Hub (accessible via the 'TradeHunter' tab in the header or sidebar). This section will display a table of traders specific to your branch. You can sort columns, search, filter by category, and paginate (50 traders per page). The TradeHunter Hub also shows mini-stats like Live and Recently Active traders.",
+    answer: "Once logged in, navigate to the 'Traders' Hub (accessible via the 'Traders' tab in the header or sidebar). This section will display a table of traders specific to your branch. You can sort columns, search, filter by category, and paginate (50 traders per page). The Traders Hub also shows mini-stats like Live and Recently Active traders.",
     icon: <BarChart2 className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-3",
     question: "How do I add, edit, or delete a trader?",
-    answer: "On the 'TradeHunter' Hub, use the 'Add New Trader' button. The form includes comprehensive fields. To edit or delete, use the respective icons in the 'Actions' column of the trader table. The system warns about duplicate phone numbers on manual addition.",
+    answer: "On the 'Traders' Hub, use the 'Add New Trader' button. The form includes comprehensive fields. To edit or delete, use the respective icons in the 'Actions' column of the trader table. The system warns about duplicate phone numbers on manual addition.",
     icon: <Users className="h-5 w-5 text-primary mr-2" />
   },
    {
     value: "item-6",
     question: "How do I bulk upload traders using a CSV file?",
-    answer: "Use the 'Bulk Add Traders' button on the 'TradeHunter' Hub. Upload a CSV file with a mandatory 'Name' header. The system uses flexible header matching. Fields with commas must be double-quoted. Duplicates (by phone number) are skipped.",
+    answer: "Use the 'Bulk Add Traders' button on the 'Traders' Hub. Upload a CSV file with a mandatory 'Name' header. The system uses flexible header matching. Fields with commas must be double-quoted. Duplicates (by phone number) are skipped.",
     icon: <UploadCloud className="h-5 w-5 text-primary mr-2" />
+  },
+    {
+    value: "item-7",
+    question: "What is the Competitor Insights page?",
+    answer: "The 'Insights' page (tab in header, with a lightbulb icon) allows you to analyze competitor websites. Enter a competitor's URL to receive an AI-powered breakdown of their business, target audience, and marketing strategy.",
+    icon: <Lightbulb className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-4",
@@ -136,7 +142,8 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">2. Accessing Main Sections</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li><strong>Dashboard (Overview):</strong> The first page after login. Provides quick links and portal summary. Access via "Dashboard" tab in header/sidebar.</li>
-              <li><strong>TradeHunter Hub:</strong> Click the "TradeHunter" tab in header/sidebar to view and manage traders.</li>
+              <li><strong>Traders Hub:</strong> Click the "Traders" tab in header/sidebar to view and manage traders.</li>
+              <li><strong>Competitor Insights:</strong> Click the "Insights" tab in header/sidebar to analyze competitor websites.</li>
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in header to access the external insights portal.</li>
               <li><strong>Estimator:</strong> Click the "Estimator" tab in header to access the external Building Materials Estimator tool.</li>
               <li><strong>Smart Team (Managers Only):</strong> If logged in with a Manager account, a "Smart Team" tab appears. This leads to a hub for launching specialized AI agents.</li>
@@ -145,9 +152,9 @@ export default function HowToUsePage() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">3. Managing Traders (on TradeHunter Hub)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">3. Managing Traders (on Traders Hub)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li><strong>View Traders:</strong> Traders for your branch are listed on the TradeHunter Hub (50 per page). View mini-stats at the top.</li>
+              <li><strong>View Traders:</strong> Traders for your branch are listed on the Traders Hub (50 per page). View mini-stats at the top.</li>
               <li><strong>Search & Filter:</strong> Use the search bar and category dropdown.</li>
               <li><strong>Sort:</strong> Click on table headers.</li>
               <li><strong>Add Trader:</strong> Click "Add New Trader", fill the form.</li>
@@ -156,8 +163,16 @@ export default function HowToUsePage() {
               <li><strong>Delete Single/Multiple Traders:</strong> Use trash icon or select checkboxes and "Delete (X)" button.</li>
             </ul>
           </div>
+           <div>
+            <h3 className="text-xl font-semibold text-foreground mb-1">4. Using Competitor Insights</h3>
+            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
+              <li>Click on the "Insights" tab in the main header or sidebar.</li>
+              <li>Enter a competitor's full website URL (e.g., `https://www.competitor.com`).</li>
+              <li>Click "Get Insights" to receive an analysis.</li>
+            </ul>
+          </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">4. External AI Access via API</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">5. External AI Access via API</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
                 <li>Provide your AI agent with your portal's URL and your secret API key (`TRADERS_API_KEY`).</li>
                 <li>Instruct it to make a `GET` request to `/api/traders/{branchId}`.</li>
@@ -166,35 +181,35 @@ export default function HowToUsePage() {
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">5. Accessing & Utilising BuildWise Intel Portal</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">6. Accessing & Utilising BuildWise Intel Portal</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "BuildWise Intel" tab in the main header.</li>
               <li>Interact with the embedded external portal.</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">6. Using the Materials Estimator</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Materials Estimator</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>Click on the "Estimator" tab in the main header.</li>
               <li>Interact with the embedded external tool.</li>
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Smart Team Hub (Managers Only)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">8. Using the Smart Team Hub (Managers Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If you are a Manager, click on the "Smart Team" tab in the header or sidebar.</li>
               <li>From the roster page, click "Launch Agent" to open a specialized AI agent (like Summit Coach, Sales Navigator, Outreach Pro, etc.) in its own dedicated page.</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">8. Using the Leatherhead Sales Navigator (Leatherhead Manager Only)</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">9. Using the Leatherhead Sales Navigator (Leatherhead Manager Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If you are the Leatherhead Manager, click on the "Leatherhead Sales Nav" tab in the header or sidebar.</li>
               <li>Interact with the embedded Leatherhead-specific advanced Sales & Strategy Navigator tool for comprehensive insights.</li>
             </ul>
           </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">9. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">10. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All trader data is stored securely in Firebase Firestore, specific to your branch.</li>
               <li>Changes are persistent across sessions.</li>

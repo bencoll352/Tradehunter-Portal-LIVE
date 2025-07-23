@@ -11,7 +11,7 @@ import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { MiniDashboardStats } from './MiniDashboardStats';
 import { parseISO } from 'date-fns';
-import { getTradersAction } from '@/app/(app)/tradehunter/actions';  // Updated import path
+import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -23,7 +23,7 @@ interface DashboardClientPageContentProps {
   bulkDeleteTradersAction: (branchId: BaseBranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>;
 }
 
-export function DashboardClientPageContent({ // This component is now used for the TradeHunter Hub
+export function DashboardClientPageContent({
   addTraderAction,
   updateTraderAction,
   deleteTraderAction,
@@ -204,7 +204,7 @@ export function DashboardClientPageContent({ // This component is now used for t
       />
       <Card className="shadow-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-primary">Trader Management</CardTitle>
+          <CardTitle className="text-2xl text-primary">Trader Database</CardTitle>
           <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
         </CardHeader>
         <CardContent>

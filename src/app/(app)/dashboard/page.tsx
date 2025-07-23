@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Eye, Briefcase, Calculator, Users, ArrowRight, Columns, Loader2 } from "lucide-react";
+import { Eye, Briefcase, Calculator, Users, ArrowRight, Columns, Loader2, Lightbulb } from "lucide-react";
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
 import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -128,16 +128,22 @@ export default function DashboardOverviewPage() {
         </Card>
       ) : null}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <FeatureCard
-          title="TradeHunter Hub"
-          description="Manage your trader database, track performance, and get advanced insights with the Branch Booster. Access detailed trader information, add new traders, and perform bulk actions."
+          title="Trader Database"
+          description="Manage your trader database, track performance, and view detailed trader information. Add new traders individually or via bulk CSV upload."
           icon={<Users className="h-8 w-8 text-accent" />}
           link="/tradehunter"
         />
         <FeatureCard
+          title="Competitor Insights"
+          description="Get AI-powered analysis of competitor websites. Understand their strategy, strengths, and weaknesses to gain a competitive edge."
+          icon={<Lightbulb className="h-8 w-8 text-accent" />}
+          link="/competitor-insights"
+        />
+        <FeatureCard
           title="BuildWise Intel"
-          description="Access specialised external data and insights from the BuildWise Intel portal. Use the integrated Branch Booster to analyse this information alongside your trader data."
+          description="Access specialised external data and insights from the BuildWise Intel portal for market intelligence."
           icon={<Briefcase className="h-8 w-8 text-accent" />}
           link="/buildwise-intel"
         />
@@ -181,4 +187,3 @@ function FeatureCard({ title, description, icon, link }: FeatureCardProps) {
     </Card>
   );
 }
-

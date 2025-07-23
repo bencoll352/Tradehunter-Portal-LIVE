@@ -71,7 +71,8 @@ import { cn } from "@/lib/utils";
 
 const baseNavItems = [
   { href: "/dashboard", icon: Columns, label: "Dashboard", tooltip: "Portal Overview" },
-  { href: "/tradehunter", icon: Users, label: "TradeHunter", tooltip: "TradeHunter Hub" },
+  { href: "/tradehunter", icon: Users, label: "Traders", tooltip: "Trader Database" },
+  { href: "/competitor-insights", icon: Lightbulb, label: "Insights", tooltip: "Competitor Insights" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
 
@@ -85,7 +86,7 @@ interface PurposeBoxItem {
 const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   'do1_content': [
     { id: 'do1c1', icon: Info, text: "Welcome to TradeHunter Pro! This is your main overview." },
-    { id: 'do1c2', icon: LinkIcon, text: "Quickly navigate to key sections like TradeHunter Hub, BuildWise Intel, and the Materials Estimator using the cards on this page or the header/sidebar navigation." },
+    { id: 'do1c2', icon: LinkIcon, text: "Quickly navigate to key sections like Trader Database, Competitor Insights, BuildWise Intel, and the Materials Estimator using the cards on this page or the header/sidebar navigation." },
     { id: 'do1c3', icon: Columns, text: "Get a bird's-eye view of the tools available to help manage your branch effectively." },
     { id: 'do1c4', icon: UsersRound, text: "If you are a Manager, a 'Smart Team' tab will also be available in the header and sidebar to access specialized AI agents." },
   ],
@@ -93,12 +94,15 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
     { id: 'do2c1', icon: Users, text: "Dive into detailed trader management: view, add, edit, and delete traders." },
     { id: 'do2c2', icon: UploadCloud, text: "Perform bulk operations like CSV uploads and deletions." },
   ],
-  'do3_content': [
-    { id: 'do3c1', icon: Briefcase, text: "Access an external portal for specialised industry data and insights." },
+   'do3_content': [
+    { id: 'do3c1', icon: Lightbulb, text: "Enter a competitor's website URL to get AI-powered analysis on their business, target audience, and marketing strategies." },
   ],
   'do4_content': [
-    { id: 'do4c1', icon: Calculator, text: "Access an external tool to help estimate materials needed for various construction projects." },
-    { id: 'do4c2', icon: PackageSearch, text: "Streamline project planning by quickly getting material quantity estimates." },
+    { id: 'do4c1', icon: Briefcase, text: "Access an external portal for specialised industry data and insights." },
+  ],
+  'do5_content': [
+    { id: 'do5c1', icon: Calculator, text: "Access an external tool to help estimate materials needed for various construction projects." },
+    { id: 'do5c2', icon: PackageSearch, text: "Streamline project planning by quickly getting material quantity estimates." },
   ],
   'th1_content': [
     { id: 'th1c1', icon: Table, text: "Trader data is displayed in a sortable, searchable table." },
@@ -118,6 +122,10 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
   ],
   'th5_content': [
     { id: 'th5c1', icon: LinkIcon, text: "Navigate to the main 'How to Use' page (sidebar link) for complete portal documentation and FAQs." }
+  ],
+  'ci_content_main': [
+      { id: 'cic1', icon: Globe, text: "Provide a competitor's website URL." },
+      { id: 'cic2', icon: Sparkles, text: "Receive an AI-generated analysis of their business." },
   ],
   'bwi_content_main': [
     { id: 'bwic1', icon: Briefcase, text: "Access the external BuildWise Intel application." },
@@ -148,9 +156,10 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
 
 const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
   { id: 'do1', icon: Eye, text: "Portal Overview & Navigation", contentKey: 'do1_content' },
-  { id: 'do2', icon: Users, text: "Go to: TradeHunter Hub", contentKey: 'do2_content' },
-  { id: 'do3', icon: Briefcase, text: "Go to: BuildWise Intel", contentKey: 'bwi_content_main' }, 
-  { id: 'do4', icon: Calculator, text: "Go to: Materials Estimator", contentKey: 'est_content_main' }, 
+  { id: 'do2', icon: Users, text: "Go to: Trader Database", contentKey: 'do2_content' },
+  { id: 'do3', icon: Lightbulb, text: "Go to: Competitor Insights", contentKey: 'do3_content' },
+  { id: 'do4', icon: Briefcase, text: "Go to: BuildWise Intel", contentKey: 'bwi_content_main' }, 
+  { id: 'do5', icon: Calculator, text: "Go to: Materials Estimator", contentKey: 'est_content_main' }, 
 ];
 
 const tradeHunterPurposeItems: PurposeBoxItem[] = [
@@ -158,6 +167,10 @@ const tradeHunterPurposeItems: PurposeBoxItem[] = [
   { id: 'th2', icon: Users, text: "Add, Edit, & Delete Traders", contentKey: 'th2_content' },
   { id: 'th4', icon: BarChart2, text: "View Hub Statistics", contentKey: 'th4_content'},
   { id: 'th5', icon: BookOpenText, text: "Comprehensive 'How to Use' Guide", contentKey: 'th5_content' }
+];
+
+const competitorInsightsPurposeItems: PurposeBoxItem[] = [
+    { id: 'ci_main', icon: Lightbulb, text: "Analyze Competitors", contentKey: 'ci_content_main' },
 ];
 
 const buildwiseIntelPurposeItems: PurposeBoxItem[] = [
@@ -244,7 +257,10 @@ export function AppSidebar() {
     currentPageTitle = "Dashboard: Overview & Purpose";
   } else if (pathname.startsWith("/tradehunter")) {
     currentPurposeItems = tradeHunterPurposeItems;
-    currentPageTitle = "TradeHunter Hub: Purpose & How-To's";
+    currentPageTitle = "Trader Database: Purpose & How-To's";
+  } else if (pathname.startsWith("/competitor-insights")) {
+    currentPurposeItems = competitorInsightsPurposeItems;
+    currentPageTitle = "Competitor Insights: Purpose";
   } else if (pathname.startsWith("/buildwise-intel")) {
     currentPurposeItems = buildwiseIntelPurposeItems;
     currentPageTitle = "BuildWise Intel: Purpose";
