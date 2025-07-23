@@ -22,16 +22,16 @@ const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
       strokeLinejoin="round"
       {...props}
     >
-        <path d="M5 22h14" />
-        <path d="M5 18h14" />
-        <path d="M7 18v-8" />
-        <path d="M17 18v-8" />
-        <path d="M9 10h6" />
-        <path d="M7 10h1.5a1.5 1.5 0 0 1 0 3H7" />
-        <path d="M17 10h-1.5a1.5 1.5 0 0 0 0 3H17" />
-        <path d="M9 2v4" />
-        <path d="M15 2v4" />
-        <path d="M5 6h14" />
+      <path d="M5 22h14" />
+      <path d="M5 18h14" />
+      <path d="M7 18v-8" />
+      <path d="M17 18v-8" />
+      <path d="M9 10h6" />
+      <path d="M7 10h1.5a1.5 1.5 0 0 1 0 3H7" />
+      <path d="M17 10h-1.5a1.5 1.5 0 0 0 0 3H17" />
+      <path d="M9 2v4" />
+      <path d="M15 2v4" />
+      <path d="M5 6h14" />
     </svg>
   );
 
