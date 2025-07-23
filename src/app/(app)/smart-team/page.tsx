@@ -5,16 +5,30 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, Briefcase, Send } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, Briefcase, Send, MessageSquareQuote } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
+import type { SVGProps } from 'react';
+
+// Custom Chess Piece Icon Component
+const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 512 512" 
+    fill="currentColor"
+    {...props}
+  >
+    <path d="M448 352h-32V304c35.344 0 64-28.656 64-64s-28.656-64-64-64h-16.812C402.156 101.812 333.812 48 256 48S109.844 101.812 112.812 176H96c-35.344 0-64 28.656-64 64s28.656 64 64 64v48H64c-17.672 0-32 14.328-32 32v32c0 17.672 14.328 32 32 32h384c17.672 0 32-14.328 32-32v-32c0-17.672-14.328-32-32-32zM384 192c17.625 0 32 14.375 32 32s-14.375 32-32 32H128c-17.625 0-32-14.375-32-32s14.375-32 32-32h256zM144 352h224V304H144v48z" />
+  </svg>
+);
+
 
 interface AgentRosterCardProps {
   title: string;
   role: string;
   description: string;
   href: string;
-  icon: LucideIcon;
+  icon: React.ElementType; // Changed from LucideIcon to allow SVGs
   iconStyle: string;
 }
 
@@ -61,7 +75,7 @@ const agents: AgentRosterCardProps[] = [
         role: "Strategic Analyst",
         description: "I provide comprehensive analysis, market intelligence, and strategic planning.",
         href: "/smart-team/sales-strategy-navigator",
-        icon: Bot,
+        icon: ChessPieceIcon,
         iconStyle: "border-blue-500/50 text-blue-500 bg-blue-500/10",
     },
     {
@@ -69,7 +83,7 @@ const agents: AgentRosterCardProps[] = [
         role: "Sales Assistant",
         description: "I craft compelling outreach messages and help you manage targeted sales campaigns.",
         href: "/smart-team/outreach-pro",
-        icon: Send,
+        icon: MessageSquareQuote,
         iconStyle: "border-sky-500/50 text-sky-500 bg-sky-500/10",
     },
 ]
