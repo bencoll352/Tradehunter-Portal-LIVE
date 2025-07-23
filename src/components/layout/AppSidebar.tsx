@@ -243,7 +243,7 @@ export function AppSidebar() {
     const leatherheadNavItem = {
       href: "/leatherhead-sales-navigator",
       icon: MapPin,
-      label: "Leatherhead Nav",
+      label: "Leatherhead",
       tooltip: "Leatherhead: Advanced Sales & Strategy Hub",
     };
     if (howToUseIndex !== -1) {
