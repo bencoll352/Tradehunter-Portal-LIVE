@@ -2,7 +2,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Compass, AlertTriangle } from "lucide-react"; 
+import { Bot, AlertTriangle } from "lucide-react"; 
 
 export default function SalesStrategyNavigatorAgentPage() {
   const agentUrl = "https://sales-and-strategy-navigator-leatherhead-302177537641.us-west1.run.app";
@@ -12,7 +12,7 @@ export default function SalesStrategyNavigatorAgentPage() {
       <Card className="shadow-lg w-full">
         <CardHeader>
           <div className="flex items-center gap-3">
-              <Compass className="h-8 w-8 text-primary" />
+              <Bot className="h-8 w-8 text-primary" />
               <div>
                   <CardTitle className="text-2xl text-primary">Sales & Strategy Navigator</CardTitle>
                   <CardDescription>
