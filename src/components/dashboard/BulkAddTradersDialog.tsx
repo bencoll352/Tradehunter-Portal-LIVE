@@ -402,7 +402,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         if (result.error) {
           console.error("Server action failed during bulk add with error message from server:", result.error);
           let toastDescription: React.ReactNode;
-          if (result.error.toLowerCase().includes("firestore not initialized")) {
+          if (result.error.toLowerCase().includes("firestore not initialised")) {
             toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server error: Firestore Not Initialised</p>
