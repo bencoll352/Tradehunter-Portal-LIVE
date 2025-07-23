@@ -57,7 +57,7 @@ const faqs = [
   {
     value: "item-10",
     question: "What is the Smart Team page (Managers)?",
-    answer: "If you are logged in with a Manager account, a 'Smart Team' tab will appear. This page is a hub for interacting with specialized AI agents, including the Summit Coach, Sales Navigator, and Sales & Strategy Navigator. Each agent is embedded in its own interactive card.",
+    answer: "If you are logged in with a Manager account, a 'Smart Team' tab will appear. This page is a hub for launching specialized AI agents. From the roster, you can launch agents like the Summit Coach, Sales Navigator, and Sales & Strategy Navigator into their own dedicated pages.",
     icon: <UsersRound className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -139,7 +139,7 @@ export default function HowToUsePage() {
               <li><strong>TradeHunter Hub:</strong> Click the "TradeHunter" tab in header/sidebar to view and manage traders.</li>
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in header to access the external insights portal.</li>
               <li><strong>Estimator:</strong> Click the "Estimator" tab in header to access the external Building Materials Estimator tool.</li>
-              <li><strong>Smart Team (Managers Only):</strong> If logged in with a Manager account, a "Smart Team" tab appears. This leads to a hub for specialized AI agents.</li>
+              <li><strong>Smart Team (Managers Only):</strong> If logged in with a Manager account, a "Smart Team" tab appears. This leads to a hub for launching specialized AI agents.</li>
               <li><strong>Leatherhead Sales Navigator (Leatherhead Manager Only):</strong> If logged in as "LEATHERHEADMANAGER", a "Leatherhead Sales Nav" tab appears in the header/sidebar.</li>
               <li><strong>How to Use (this page):</strong> Click "How to Use" in the left sidebar for help and FAQs.</li>
             </ul>
@@ -183,7 +183,7 @@ export default function HowToUsePage() {
             <h3 className="text-xl font-semibold text-foreground mb-1">7. Using the Smart Team Hub (Managers Only)</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>If you are a Manager, click on the "Smart Team" tab in the header or sidebar.</li>
-              <li>Interact with the specialized AI agents (Summit Coach, Sales Navigator, etc.) for comprehensive insights and assistance. Each is embedded in its own card.</li>
+              <li>From the roster page, click "Launch Agent" to open a specialized AI agent (like Summit Coach or Sales Navigator) in its own dedicated page.</li>
             </ul>
           </div>
           <div>
