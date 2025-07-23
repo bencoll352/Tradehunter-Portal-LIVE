@@ -17,7 +17,6 @@ const getPathTitle = (path: string) => {
   if (path.startsWith("/buildwise-intel")) return "BuildWise Intel";
   if (path.startsWith("/estimator")) return "Materials Estimator";
   if (path.startsWith("/smart-team")) return "Smart Team Hub";
-  if (path.startsWith("/leatherhead-sales-navigator")) return "Leatherhead Sales Navigator";
   if (path.startsWith("/how-to-use")) return "How to Use Guide";
   return "TradeHunter Pro Portal";
 };
@@ -137,24 +136,6 @@ export function AppHeader() {
             <Link href="/smart-team" className="flex items-center gap-2">
               <UsersRound className="h-5 w-5" />
               Smart Team
-            </Link>
-          </Button>
-        )}
-        {branchInfo?.displayLoginId === 'LEATHERHEADMANAGER' && (
-          <Button
-            asChild
-            size="lg"
-            variant={pathname === "/leatherhead-sales-navigator" ? "default" : "ghost"}
-            className={cn(
-              "font-medium",
-              pathname === "/leatherhead-sales-navigator"
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                : "text-emerald-600/90 hover:bg-emerald-600/10 hover:text-emerald-700"
-            )}
-          >
-            <Link href="/leatherhead-sales-navigator" className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Leatherhead Sales Nav
             </Link>
           </Button>
         )}

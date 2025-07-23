@@ -61,12 +61,6 @@ const faqs = [
     icon: <UsersRound className="h-5 w-5 text-primary mr-2" />
   },
   {
-    value: "item-11",
-    question: "What is the Leatherhead Sales Navigator (Leatherhead Manager)?",
-    answer: "If logged in as 'LEATHERHEADMANAGER', an additional 'Leatherhead Sales Nav' tab appears. This page leads to an advanced, specialized Sales & Strategy Navigator tool for the Leatherhead branch, embedding an external application for in-depth analysis, intelligence, and strategic planning.",
-    icon: <MapPin className="h-5 w-5 text-primary mr-2" />
-  },
-  {
     value: "item-5",
     question: "Is my branch data secure and persistent?",
     answer: "Yes, data is isolated by branch via your Login ID. Manager logins see their team's branch data. Trader data is stored in Firebase Firestore, ensuring persistence.",
@@ -141,7 +135,6 @@ export default function HowToUsePage() {
               <li><strong>BuildWise Intel:</strong> Click the "BuildWise Intel" tab in header to access the external insights portal.</li>
               <li><strong>Estimator:</strong> Click the "Estimator" tab in header to access the external Building Materials Estimator tool.</li>
               <li><strong>Smart Team (Managers Only):</strong> If logged in with a Manager account, a "Smart Team" tab appears. This leads to a hub for launching specialized AI agents.</li>
-              <li><strong>Leatherhead Sales Navigator (Leatherhead Manager Only):</strong> If logged in as "LEATHERHEADMANAGER", a "Leatherhead Sales Nav" tab appears in the header/sidebar.</li>
               <li><strong>How to Use (this page):</strong> Click "How to Use" in the left sidebar for help and FAQs.</li>
             </ul>
           </div>
@@ -186,15 +179,8 @@ export default function HowToUsePage() {
               <li>From the roster page, click "Launch Agent" to open a specialized AI agent (like Summit Coach, Sales Navigator, Outreach Pro, etc.) in its own dedicated page.</li>
             </ul>
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">8. Using the Leatherhead Sales Navigator (Leatherhead Manager Only)</h3>
-            <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
-              <li>If you are the Leatherhead Manager, click on the "Leatherhead Sales Nav" tab in the header or sidebar.</li>
-              <li>Interact with the embedded Leatherhead-specific advanced Sales & Strategy Navigator tool for comprehensive insights.</li>
-            </ul>
-          </div>
            <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">9. Data Persistence</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-1">8. Data Persistence</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-1 pl-2">
               <li>All trader data is stored securely in Firebase Firestore, specific to your branch.</li>
               <li>Changes are persistent across sessions.</li>

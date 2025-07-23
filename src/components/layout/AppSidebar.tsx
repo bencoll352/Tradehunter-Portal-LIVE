@@ -148,11 +148,6 @@ const pageSpecificAccordionContent: Record<string, PurposeBoxItem[]> = {
       { id: 'stc2', icon: TrendingUp, text: "Leverage specialized agents for sales, strategy, and data analysis." },
       { id: 'stc3', icon: ShieldCheck, text: "This hub is exclusively available to Manager accounts." },
   ],
-  'lsn_content_main': [
-    { id: 'lsnc1', icon: MapPin, text: "Access the advanced Leatherhead Sales & Strategy Navigator." },
-    { id: 'lsnc2', icon: TrendingUp, text: "Explore comprehensive sales intelligence and strategic opportunities for the Leatherhead branch." },
-    { id: 'lsnc3', icon: ShieldCheck, text: "This tool is exclusively available to the Leatherhead Manager account." },
-  ],
 };
 
 const dashboardOverviewPurposeItems: PurposeBoxItem[] = [
@@ -189,11 +184,6 @@ const howToUsePurposeItems: PurposeBoxItem[] = [
 const smartTeamPurposeItems: PurposeBoxItem[] = [
   { id: 'st_main', icon: UsersRound, text: "Smart Team Agent Hub", contentKey: 'st_content_main' },
 ];
-
-const leatherheadSalesNavigatorPurposeItems: PurposeBoxItem[] = [
-  { id: 'lsn_main', icon: MapPin, text: "Leatherhead Sales Navigator Tool", contentKey: 'lsn_content_main' },
-];
-
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -237,21 +227,6 @@ export function AppSidebar() {
       navItems.push(smartTeamNavItem);
     }
   }
-
-  if (branchInfo?.displayLoginId === 'LEATHERHEADMANAGER') {
-    const howToUseIndex = navItems.findIndex(item => item.href === "/how-to-use");
-    const leatherheadNavItem = {
-      href: "/leatherhead-sales-navigator",
-      icon: MapPin,
-      label: "Leatherhead",
-      tooltip: "Leatherhead: Advanced Sales & Strategy Hub",
-    };
-    if (howToUseIndex !== -1) {
-      navItems.splice(howToUseIndex, 0, leatherheadNavItem);
-    } else { 
-      navItems.push(leatherheadNavItem);
-    }
-  }
   
   if (pathname === "/dashboard") {
     currentPurposeItems = dashboardOverviewPurposeItems;
@@ -271,9 +246,6 @@ export function AppSidebar() {
   } else if (pathname.startsWith("/smart-team") && branchInfo?.role === 'manager') {
     currentPurposeItems = smartTeamPurposeItems;
     currentPageTitle = "Smart Team: Purpose";
-  } else if (pathname.startsWith("/leatherhead-sales-navigator") && branchInfo?.displayLoginId === 'LEATHERHEADMANAGER') {
-    currentPurposeItems = leatherheadSalesNavigatorPurposeItems;
-    currentPageTitle = "Leatherhead Nav: Purpose";
   } else if (pathname.startsWith("/how-to-use")) {
     currentPurposeItems = howToUsePurposeItems;
     currentPageTitle = "How to Use: Guide Sections";
@@ -300,9 +272,6 @@ export function AppSidebar() {
           <SidebarMenu className="mb-4">
             {navItems.map((item) => {
               if (item.href === "/smart-team" && branchInfo?.role !== 'manager') {
-                return null;
-              }
-              if (item.href === "/leatherhead-sales-navigator" && branchInfo?.displayLoginId !== 'LEATHERHEADMANAGER') {
                 return null;
               }
 
