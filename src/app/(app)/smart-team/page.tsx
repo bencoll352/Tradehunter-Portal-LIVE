@@ -24,12 +24,13 @@ const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
         strokeLinejoin="round"
         {...props}
     >
-        <path d="M5 21h14v-2H5v2z" />
-        <path d="M6 19v-8h12v8H6z" />
-        <path d="M8 11h8" />
-        <path d="M5 7V5h3v2H5z" />
-        <path d="M16 7V5h3v2h-3z" />
-        <path d="M10.5 7V5h3v2h-3z" />
+        <path d="M8 20H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4" />
+        <path d="M16 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" />
+        <path d="M12 4v16" />
+        <path d="M12 4h-2" />
+        <path d="M12 4h2" />
+        <path d="M12 20h-2" />
+        <path d="M12 20h2" />
     </svg>
 );
 
@@ -44,7 +45,7 @@ interface AgentRosterCardProps {
 }
 
 const AgentRosterCard = ({ title, role, description, href, icon: Icon, iconStyle }: AgentRosterCardProps) => (
-  <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30">
+  <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full">
     <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", iconStyle)}>
       <Icon className="h-12 w-12" />
     </div>
@@ -158,7 +159,7 @@ export default function SmartTeamPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {agents.map((agent) => (
                 <AgentRosterCard key={agent.title} {...agent} />
             ))}
