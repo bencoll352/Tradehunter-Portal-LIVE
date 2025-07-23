@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, BrainCircuit, Bot, Compass, ArrowRight, Briefcase } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, Briefcase } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -45,7 +45,7 @@ const agents: AgentRosterCardProps[] = [
         role: "Performance Coach",
         description: "I analyze performance data and provide actionable coaching insights to elevate your team.",
         href: "/smart-team/summit-coach",
-        icon: BrainCircuit,
+        icon: Mountain,
         iconStyle: "border-purple-500/50 text-purple-500 bg-purple-500/10",
     },
     {
