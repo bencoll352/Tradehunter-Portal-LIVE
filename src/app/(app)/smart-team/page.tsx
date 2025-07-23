@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, Briefcase, Send, MessageSquareQuote } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, MessageSquareQuote } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';
@@ -30,7 +30,6 @@ const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
         <path d="M5 7V5h3v2H5z" />
         <path d="M16 7V5h3v2h-3z" />
         <path d="M10.5 7V5h3v2h-3z" />
-
     </svg>
 );
 
