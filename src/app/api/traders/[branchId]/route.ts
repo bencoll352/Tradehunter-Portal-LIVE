@@ -1,4 +1,3 @@
-
 // src/app/api/traders/[branchId]/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { getTradersByBranch } from '@/lib/trader-service';
@@ -12,9 +11,9 @@ function extractErrorMessage(error: unknown): string {
 // This function handles GET requests to /api/traders/[branchId]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { branchId: string } }
+  context: { params: { branchId: string } }
 ) {
-  const { branchId } = params;
+  const { branchId } = context.params;
   const apiKey = request.headers.get('x-api-key');
 
   // 1. API Key Validation
