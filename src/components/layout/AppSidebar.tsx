@@ -63,6 +63,7 @@ import {
   Globe,
   ReplaceAll,
   UsersRound,
+  Sparkles,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { useEffect, useState } from "react";
