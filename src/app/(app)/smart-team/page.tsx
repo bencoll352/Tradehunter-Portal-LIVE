@@ -14,15 +14,26 @@ import type { SVGProps } from 'react';
 const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
-        fill="currentColor"
-        stroke="none"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         {...props}
     >
-        <path d="M9 11h6v2H9zM8 8h8v2H8z" />
-        <path fillRule="evenodd" clipRule="evenodd" d="M8 9h1V8h6v1h1v1h-1v1h-1v-1H9v1H8V9zm1-2h6V6H9v1z" />
+        <path d="M5 21h14" />
+        <path d="M5 21v-2h14v2" />
+        <path d="M7 19v-5" />
+        <path d="M17 19v-5" />
+        <path d="M7 14h10v-3s-1-1.5-5-1.5-5 1.5-5 1.5v3z" />
+        <path d="M9 11V6" />
+        <path d="M15 11V6" />
+        <path d="M7 6h2v3h6V6h2v3" />
     </svg>
-  );
+);
 
 
 interface AgentRosterCardProps {
@@ -41,7 +52,6 @@ const AgentRosterCard = ({ title, role, description, href, icon: Icon, iconStyle
     </div>
     <CardTitle className="text-xl text-primary mb-1">{title}</CardTitle>
     <div className="flex items-center gap-1.5 mb-2">
-      <Briefcase className="h-4 w-4 text-muted-foreground" />
       <p className="text-sm font-semibold text-accent">{role}</p>
     </div>
     <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
