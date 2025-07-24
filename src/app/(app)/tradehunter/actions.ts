@@ -2,7 +2,7 @@
 'use server';
 
 // The dotenv/config import must be the very first line of the file
-// to ensure that all environment variables are loaded from .env.local
+// to ensure that all environment variables are loaded from .env
 // before any other code is executed, especially the Firestore client.
 import 'dotenv/config';
 
