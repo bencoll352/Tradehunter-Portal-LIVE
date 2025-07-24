@@ -1,12 +1,12 @@
 
-// The 'dotenv/config' import is now handled by the server action files that need it,
+// NOTE: dotenv/config is now handled by the server action files that need it (e.g. tradehunter/actions.ts),
 // ensuring environment variables are loaded before this file is executed in those contexts.
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 
-function getFirebaseConfig(): FirebaseOptions {
+function getFirebaseConfig(): FirebaseOptions | null {
     console.log("[Firebase Setup] SERVER-SIDE: Constructing Firebase config from process.env variables.");
 
     const firebaseConfig: FirebaseOptions = {
@@ -18,6 +18,7 @@ function getFirebaseConfig(): FirebaseOptions {
         appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     };
     
+    // This check is critical. It ensures that we don't proceed with a partial or empty config.
     if (!firebaseConfig.projectId) {
         console.error("[Firebase Setup Error] SERVER-SIDE: Firebase configuration is missing critical 'projectId'. CHECK YOUR .env.local FILE and ensure it is correctly formatted and all NEXT_PUBLIC_FIREBASE_... variables are present.");
         // Throwing an error here is better than returning null and getting a less clear error downstream.
@@ -29,7 +30,7 @@ function getFirebaseConfig(): FirebaseOptions {
 }
 
 // This is the robust "singleton" pattern for Firebase initialization
-const app = !getApps().length ? initializeApp(getFirebaseConfig()) : getApp();
+const app = !getApps().length ? initializeApp(getFirebaseConfig()!) : getApp();
 const db = getFirestore(app);
 
 export { db };

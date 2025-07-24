@@ -1,7 +1,10 @@
 
 'use server';
 
-import 'dotenv/config'; // Ensure this is the very first import to load environment variables
+// The dotenv/config import must be the very first line of the file
+// to ensure that all environment variables are loaded from .env.local
+// before any other code is executed, especially the Firestore client.
+import 'dotenv/config';
 
 import {
   getTradersByBranch,
