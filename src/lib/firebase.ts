@@ -1,7 +1,7 @@
 
 
-// Note: The 'dotenv/config' import has been moved to the top of the server actions file
-// to ensure it runs at the very beginning of any server-side action that needs it.
+// The 'dotenv/config' import is now handled by the server action files that need it,
+// ensuring environment variables are loaded before this file is executed in those contexts.
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
