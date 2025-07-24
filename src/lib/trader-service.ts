@@ -15,7 +15,8 @@ import {
   Timestamp,
   getDoc
 } from 'firebase/firestore';
-import { db } from './firebase'; // Import the initialized db object
+import type { FirebaseApp } from 'firebase/app';
+import type { Firestore } from 'firebase/firestore';
 import type { Trader, BaseBranchId, ParsedTraderData } from '@/types'; // Use BaseBranchId
 
 const TRADERS_COLLECTION = 'traders';
@@ -172,6 +173,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
 
 // Renamed branchId to baseBranchId to reflect its purpose
 export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Trader[]> {
+  const { db } = await import('./firebase');
   console.log(`[TraderService:getTradersByBranch] Called for branch: ${baseBranchId}`);
   if (!db) {
     console.error("[TraderService:getTradersByBranch] Firestore not initialised. Aborting operation. Check Firebase configuration.");
@@ -220,8 +222,9 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
 
 // Renamed branchId to baseBranchId
 export async function getTraderById(id: string, baseBranchId: BaseBranchId): Promise<Trader | null> {
-    console.log(`[TraderService:getTraderById] Called for ID: ${id} in branch ${baseBranchId}`);
-    if (!db) {
+  const { db } = await import('./firebase');
+  console.log(`[TraderService:getTraderById] Called for ID: ${id} in branch ${baseBranchId}`);
+  if (!db) {
     console.error("[TraderService:getTraderById] Firestore not initialised. Aborting operation. Check Firebase configuration.");
     throw new Error("Firestore not initialised. Cannot fetch trader.");
   }
@@ -249,6 +252,7 @@ export async function addTraderToDb(
   traderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'>, // branchId will be added here
   baseBranchId: BaseBranchId // Use BaseBranchId
 ): Promise<Trader> {
+  const { db } = await import('./firebase');
   console.log(`[TraderService:addTraderToDb] Called for branch: ${baseBranchId}`);
   if (!db) {
     console.error("[TraderService:addTraderToDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
@@ -276,6 +280,7 @@ export async function addTraderToDb(
 
 // updatedTraderData.branchId should already be the BaseBranchId
 export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trader | null> {
+  const { db } = await import('./firebase');
   console.log(`[TraderService:updateTraderInDb] Called for trader ID: ${updatedTraderData.id}`);
   if (!db) {
     console.error("[TraderService:updateTraderInDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
@@ -303,6 +308,7 @@ export async function updateTraderInDb(updatedTraderData: Trader): Promise<Trade
 
 // Renamed branchId to baseBranchId
 export async function deleteTraderFromDb(traderId: string, baseBranchId: BaseBranchId): Promise<boolean> {
+   const { db } = await import('./firebase');
    console.log(`[TraderService:deleteTraderFromDb] Called for trader ID: ${traderId}`);
    if (!db) {
     console.error("[TraderService:deleteTraderFromDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
@@ -324,6 +330,7 @@ export async function bulkAddTradersToDb(
   tradersToCreate: ParsedTraderData[],
   baseBranchId: BaseBranchId // Use BaseBranchId
 ): Promise<Trader[]> {
+  const { db } = await import('./firebase');
   console.log(`[TraderService:bulkAddTradersToDb] Called for branch: ${baseBranchId}`);
   if (!db) {
     console.error("[TraderService:bulkAddTradersToDb] Firestore not initialised. Aborting operation. Check Firebase configuration.");
