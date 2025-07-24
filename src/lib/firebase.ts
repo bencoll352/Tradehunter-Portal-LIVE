@@ -1,12 +1,12 @@
 
-// src/lib/firebase.ts
+// Note: The 'dotenv/config' import has been moved here.
+// This is because this file can be imported in various server-side contexts,
+// and we need to ensure environment variables are loaded before anything else happens.
+import 'dotenv/config';
+
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
-// Note: The 'dotenv/config' import has been moved to the top of `trader-service.ts`.
-// This is because `trader-service.ts` is the entry point for server-side actions
-// that require the database, guaranteeing the environment variables are loaded
-// before any other module resolution, including this one.
 
 function getFirebaseConfig(): FirebaseOptions {
     console.log("[Firebase Setup] SERVER-SIDE: Constructing Firebase config from process.env variables.");
