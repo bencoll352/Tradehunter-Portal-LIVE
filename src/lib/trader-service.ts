@@ -1,11 +1,6 @@
 
 'use server';
 
-// Force-load .env variables at the very top of this server-side-only file.
-// This is the most reliable way to ensure they are available before any other
-// modules (like './firebase') are imported and executed.
-import 'dotenv/config';
-
 import {
   collection,
   query,
@@ -20,7 +15,7 @@ import {
   Timestamp,
   getDoc
 } from 'firebase/firestore';
-import { db } from './firebase'; // db is now reliably initialized thanks to the dotenv import above.
+import { db } from './firebase'; 
 import type { Trader, BaseBranchId, ParsedTraderData } from '@/types';
 
 const TRADERS_COLLECTION = 'traders';
