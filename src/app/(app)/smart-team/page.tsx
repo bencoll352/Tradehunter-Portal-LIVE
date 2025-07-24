@@ -5,44 +5,17 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, MessageSquareQuote } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, MessageSquareQuote, Target } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';
-
-// Custom Chess Piece Icon Component - UPDATED to match user image
-const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        {...props}
-    >
-        <path d="M18 8a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v2H9a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3" />
-        <path d="M12 22V10" />
-        <path d="M12 6V5" />
-        <path d="M10 4h4" />
-        <path d="M18 10a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4" />
-        <path d="M22 13a4.5 4.5 0 0 0-4.5-4.5" />
-        <circle cx="16.5" cy="8.5" r=".5" fill="currentColor" />
-        <circle cx="22" cy="13" r=".5" fill="currentColor" />
-        <path d="m16.5 8.5 2.5 2.5" />
-        <path d="m19 11 1-1" />
-        <path d="M18 14l-1-1" />
-    </svg>
-);
-
 
 interface AgentRosterCardProps {
   title: string;
   role: string;
   description: string;
   href: string;
-  icon: React.ElementType; // Changed from LucideIcon to allow SVGs
+  icon: React.ElementType; 
   iconStyle: string;
 }
 
@@ -88,7 +61,7 @@ const agents: AgentRosterCardProps[] = [
         role: "Strategic Analyst",
         description: "I provide comprehensive analysis, market intelligence, and strategic planning.",
         href: "/smart-team/sales-strategy-navigator",
-        icon: ChessPieceIcon,
+        icon: Target,
         iconStyle: "border-blue-500/50 text-blue-500 bg-blue-500/10",
     },
     {
