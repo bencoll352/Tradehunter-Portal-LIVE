@@ -1,14 +1,16 @@
 
 
-// NOTE: dotenv/config should be handled by the server action files that need it (e.g. tradehunter/actions.ts),
-// ensuring environment variables are loaded before this file is executed in those contexts.
-// Do not add dotenv/config to this file directly.
+// NOTE: The 'dotenv/config' call, crucial for loading environment variables
+// from .env.local on the server, is now handled in the server action files
+// that require it (e.g., src/app/(app)/tradehunter/actions.ts).
+// This ensures environment variables are loaded before this file is executed
+// in those server-side contexts.
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 
-function getFirebaseConfig(): FirebaseOptions | null {
+function getFirebaseConfig(): FirebaseOptions {
     console.log("[Firebase Setup] SERVER-SIDE: Constructing Firebase config from process.env variables.");
 
     const firebaseConfig: FirebaseOptions = {
@@ -32,7 +34,7 @@ function getFirebaseConfig(): FirebaseOptions | null {
 }
 
 // This is the robust "singleton" pattern for Firebase initialization
-const app = !getApps().length ? initializeApp(getFirebaseConfig()!) : getApp();
+const app = !getApps().length ? initializeApp(getFirebaseConfig()) : getApp();
 const db = getFirestore(app);
 
 export { db };
