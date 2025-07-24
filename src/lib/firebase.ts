@@ -13,9 +13,16 @@ let configSource = ""; // To track where the config came from
 // Try to use App Hosting's FIREBASE_WEBAPP_CONFIG first
 if (process.env.FIREBASE_WEBAPP_CONFIG) {
   try {
-    firebaseConfig = JSON.parse(process.env.FIREBASE_WEBAPP_CONFIG);
-    configSource = "FIREBASE_WEBAPP_CONFIG (from Firebase Hosting)";
-    console.log("[Firebase Setup] SERVER-SIDE: Attempting to use FIREBASE_WEBAPP_CONFIG environment variable.");
+    const parsedConfig = JSON.parse(process.env.FIREBASE_WEBAPP_CONFIG);
+    // Add a check to ensure the parsed object has at least the projectId
+    if (parsedConfig && parsedConfig.projectId) {
+        firebaseConfig = parsedConfig;
+        configSource = "FIREBASE_WEBAPP_CONFIG (from Firebase Hosting)";
+        console.log("[Firebase Setup] SERVER-SIDE: Attempting to use FIREBASE_WEBAPP_CONFIG environment variable.");
+    } else {
+        console.warn("[Firebase Setup] SERVER-SIDE: FIREBASE_WEBAPP_CONFIG was present but invalid (e.g., empty or missing projectId). Falling back to NEXT_PUBLIC_ variables.");
+        firebaseConfig = null; // Force fallback
+    }
   } catch (e) {
     console.error("[Firebase Setup Error] SERVER-SIDE: Failed to parse FIREBASE_WEBAPP_CONFIG. Falling back to NEXT_PUBLIC_ variables if available. Error:", e);
     firebaseConfig = null; // Ensure fallback if parsing fails
@@ -24,12 +31,11 @@ if (process.env.FIREBASE_WEBAPP_CONFIG) {
 
 // If FIREBASE_WEBAPP_CONFIG wasn't available or failed to parse, use individual NEXT_PUBLIC_ variables
 if (!firebaseConfig) {
-  configSource = "NEXT_PUBLIC_FIREBASE_... variables (from .env or hosting env)";
-  if (process.env.FIREBASE_WEBAPP_CONFIG) {
-     console.log("[Firebase Setup] SERVER-SIDE: Continuing to use individual NEXT_PUBLIC_FIREBASE_... variables as FIREBASE_WEBAPP_CONFIG parsing failed.");
-  } else {
+  if (configSource === "") { // Only log this if we haven't tried the other source yet
     console.log("[Firebase Setup] SERVER-SIDE: FIREBASE_WEBAPP_CONFIG not found. Attempting to use individual NEXT_PUBLIC_FIREBASE_... variables.");
   }
+  configSource = "NEXT_PUBLIC_FIREBASE_... variables (from .env or hosting env)";
+  
   firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -52,7 +58,7 @@ let db: any; // Allow db to be uninitialised if config is bad
 
 if (!getApps().length) {
   let missingKeys = false;
-  if (firebaseConfig) {
+  if (firebaseConfig && firebaseConfig.projectId) { // Also check projectId explicitly here
     for (const key of requiredConfigKeysForInit) {
       if (!firebaseConfig[key]) {
         const envVarSourceDetail = configSource.startsWith("FIREBASE_WEBAPP_CONFIG")
@@ -69,17 +75,8 @@ Trader data will NOT be saved or loaded correctly. CHECK SERVER-SIDE LOGS.`
         missingKeys = true;
       }
     }
-    if (!firebaseConfig.projectId) {
-        console.error(
-`[Firebase Setup Error] SERVER-SIDE: Critical: Missing Firebase configuration for 'projectId'. This is essential for Firestore.
-Sourced from: ${configSource}.
-Ensure this is correctly set. If using .env, YOU MUST RESTART YOUR DEV SERVER after changes. CHECK SERVER-SIDE LOGS.`
-        );
-        missingKeys = true;
-    }
-
   } else {
-    console.error("[Firebase Setup Error] SERVER-SIDE: Firebase configuration object could not be constructed from any source (FIREBASE_WEBAPP_CONFIG or NEXT_PUBLIC_ variables). Cannot initialise. CHECK SERVER-SIDE LOGS.");
+    console.error(`[Firebase Setup Error] SERVER-SIDE: Firebase configuration object could not be constructed or is missing 'projectId'. Sourced from: ${configSource}. Cannot initialise. CHECK SERVER-SIDE LOGS.`);
     missingKeys = true;
   }
 
