@@ -1,14 +1,41 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, MessageSquareQuote, Target } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, MessageSquareQuote } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';
+
+// Custom SVG icon component for the Sales & Strategy Navigator
+const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        {...props}
+    >
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2" />
+        <path d="M12 2v4" />
+        <path d="M12 18v4" />
+        <path d="M22 12h-4" />
+        <path d="M6 12H2" />
+        <path d="M16 8v8" />
+        <path d="m16 12-4-4" />
+        <path d="m16 12-4 4" />
+    </svg>
+);
+
 
 interface AgentRosterCardProps {
   title: string;
@@ -61,7 +88,7 @@ const agents: AgentRosterCardProps[] = [
         role: "Strategic Analyst",
         description: "I provide comprehensive analysis, market intelligence, and strategic planning.",
         href: "/smart-team/sales-strategy-navigator",
-        icon: Target,
+        icon: StrategyNavigatorIcon,
         iconStyle: "border-blue-500/50 text-blue-500 bg-blue-500/10",
     },
     {
