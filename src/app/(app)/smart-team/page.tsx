@@ -13,16 +13,26 @@ import type { SVGProps } from 'react';
 // Custom Chess Piece Icon Component - UPDATED to match user image
 const ChessPieceIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="currentColor" 
-      stroke="currentColor" 
-      strokeWidth="0.5" // Adjusted for a filled look with a slight border
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      {...props}
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="1.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        {...props}
     >
-        <path d="M8 20H4a1 1 0 0 1-1-1v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H8zM16 20h4a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1h2zM7 14h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1zM9 7V5a3 3 0 0 1 3-3 3 3 0 0 1 3 3v2H9z" />
+        <path d="M18 8a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v2H9a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h2v1a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3" />
+        <path d="M12 22V10" />
+        <path d="M12 6V5" />
+        <path d="M10 4h4" />
+        <path d="M18 10a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4" />
+        <path d="M22 13a4.5 4.5 0 0 0-4.5-4.5" />
+        <circle cx="16.5" cy="8.5" r=".5" fill="currentColor" />
+        <circle cx="22" cy="13" r=".5" fill="currentColor" />
+        <path d="m16.5 8.5 2.5 2.5" />
+        <path d="m19 11 1-1" />
+        <path d="M18 14l-1-1" />
     </svg>
 );
 
