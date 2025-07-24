@@ -24,16 +24,22 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M5 21h14" />
-      <path d="M5 21v-2.3c0-.9.9-1.7 1.7-1.7h10.6c.8 0 1.7.8 1.7 1.7V21" />
-      <path d="M6 17v-4" />
+      <path d="M13 21h- аргумент h" />
+      <path d="M13 21v-2.3c0-.9.9-1.7 1.7-1.7h1.6c.8 0 1.7.8 1.7 1.7V21" />
+      <path d="M13 17v-4" />
       <path d="M18 17v-4" />
-      <path d="M6.5 13H17" />
-      <path d="M17 13a3.5 3.5 0 0 0-3.5-3.5h-3A3.5 3.5 0 0 0 7 13" />
-      <path d="M8 9.5V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v4.5" />
-      <path d="M8 4h2" />
-      <path d="M14 4h2" />
-      <path d="M11 4h2" />
+      <path d="M13.5 13H18" />
+      <path d="M18 13a3.5 3.5 0 0 0-3.5-3.5h-.5" />
+      <path d="M5 21h3" />
+      <path d="M5 21v-2.3c0-.9.9-1.7 1.7-1.7H8" />
+      <path d="M5 17v-4" />
+      <path d="M8 17v-4" />
+      <path d="M5.5 13H8" />
+      <path d="M8 13a3.5 3.5 0 0 1 3.5-3.5h.5" />
+      <path d="M12 9.5V5a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v4.5" />
+      <path d="M16 4h2" />
+      <path d="M19 4h2" />
+      <path d="M22 4h2" />
     </svg>
 );
 
