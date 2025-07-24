@@ -24,12 +24,18 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
         strokeLinejoin="round" 
         {...props}
     >
-        <path d="M13.2 7.09a2 2 0 0 0-2.4 0l-3 3.6A2 2 0 0 0 9 12.5v1.5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-1.5a2 2 0 0 0-1.2-1.81z" />
-        <path d="M12 20v-4" />
-        <path d="M9.5 20h5" />
-        <path d="M9 4h6" />
-        <path d="M9 8V4" />
-        <path d="M15 8V4" />
+      {/* Rook */}
+      <path d="M8 3H7V2H6v1H5v2h1v1h1V5h1V3z" strokeWidth="1" fill="currentColor" />
+      <path d="M8 6V5M7 6V5" />
+      <path d="M12 4h-1v1h-1v1h-1v1H8v1H7v2h1v1h1v1h1v2h1v1h1v-1h1v-2h1v-1h1v-1h1v-2h-1V8h-1V7h-1V6h-1V5h-1z" />
+      <path d="M15 4h-1v1h-1v1h-1v1H8v1H7v2h1v1h1v1h1v2h1v1h1v-1h1v-2h1v-1h1v-1h1v-2h-1V8h-1V7h-1V6h-1V5h-1z" stroke="none" fill="currentColor" />
+      <path d="M9 19v-3h6v3z" />
+      
+      {/* Pawn */}
+      <path d="M15 9a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2z" />
+      <path d="M12 11v3" />
+      <path d="M10.5 14h3" />
+      <path d="M9 18v-2h6v2z" />
     </svg>
 );
 
