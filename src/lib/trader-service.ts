@@ -1,6 +1,10 @@
 
 'use server';
 
+// This must be the very first import to ensure environment variables are loaded
+// before any other server-side code that depends on them, especially firebase.ts.
+import 'dotenv/config'; 
+
 import {
   collection,
   query,

@@ -1,8 +1,6 @@
 
-// Note: The 'dotenv/config' import has been moved here.
-// This is because this file can be imported in various server-side contexts,
-// and we need to ensure environment variables are loaded before anything else happens.
-import 'dotenv/config';
+// Note: The 'dotenv/config' import has been moved to src/lib/trader-service.ts
+// to ensure it runs at the very beginning of any server-side action that needs it.
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
