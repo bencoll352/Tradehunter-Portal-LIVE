@@ -26,10 +26,8 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
     >
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-        <path d="m9 18 3-3-3-3"></path>
-        <path d="m12 15 3 3-3 3"></path>
-        <path d="M12 15h3"></path>
-        <path d="M9 12v3"></path>
+        <path d="m9 14 3-3 3 3"></path>
+        <path d="m9 10 3 3 3-3"></path>
     </svg>
 );
 
