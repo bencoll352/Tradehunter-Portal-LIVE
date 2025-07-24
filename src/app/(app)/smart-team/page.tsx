@@ -12,30 +12,34 @@ import type { SVGProps } from 'react';
 
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        {...props}
-    >
-        <path d="M8 18L10 22L14 22L16 18"/>
-        <path d="M12 20V12"/>
-        <path d="M11 12H13"/>
-        <path d="M8 12H16"/>
-        <path d="M8 8H16"/>
-        <path d="M10 4L14 4"/>
-        <path d="M10 2L14 2"/>
-        <path d="M15 16C15 14.3431 16.3431 13 18 13C19.6569 13 21 14.3431 21 16"/>
-        <path d="M15 16L21 16"/>
-        <path d="M16 16L16 18L20 18L20 16"/>
-        <path d="M18 13V11"/>
-    </svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    {/* Rook */}
+    <path d="M8 3H7V6H9V3" />
+    <path d="M11 3H10V6H12V3" />
+    <path d="M14 3H13V6H15V3" />
+    <path d="M17 3H16V6H18V3" />
+    <path d="M19 6L18 9H7L6 6" />
+    <path d="M19 9V21H6V9" />
+    <path d="M8 12H17" />
+    <path d="M8 16H17" />
+
+    {/* Pawn */}
+    <path d="M15 21V19" />
+    <path d="M15 15C16.6569 15 18 13.6569 18 12C18 10.3431 16.6569 9 15 9C13.3431 9 12 10.3431 12 12C12 13.6569 13.3431 15 15 15Z" />
+    <path d="M12 15H18" />
+
+  </svg>
 );
 
 
