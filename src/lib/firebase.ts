@@ -1,7 +1,7 @@
 
-
-// NOTE: dotenv/config is now handled by the server action files that need it (e.g. tradehunter/actions.ts),
+// NOTE: dotenv/config should be handled by the server action files that need it (e.g. tradehunter/actions.ts),
 // ensuring environment variables are loaded before this file is executed in those contexts.
+// Do not add dotenv/config to this file directly.
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
