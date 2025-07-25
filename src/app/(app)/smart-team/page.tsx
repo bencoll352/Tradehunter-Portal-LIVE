@@ -12,36 +12,49 @@ import type { SVGProps } from 'react';
 
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
+    <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 88 88" 
+        fill="none" 
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor" // Use current color from parent
+        {...props}
     >
-        <path d="M15.5 9.5h.01" />
-        <path d="M8.5 16.5h.01" />
-        <path d="M12.5 12.5h.01" />
-        <path d="M17.5 15.5h.01" />
-        <path d="M15.5 19.5v.01" />
-        <path d="M19.5 15.5v.01" />
-        <path d="M19.5 8.5v.01" />
-        <path d="M8.5 19.5v.01" />
-        <path d="M4.5 15.5v.01" />
-        <path d="M4.5 8.5v.01" />
-        <path d="M8.5 4.5v.01" />
-        <path d="M12.5 4.5v.01" />
-        <path d="M15.5 4.5v.01" />
-        <path d="M4.5 12.5h.01" />
-        <path d="M8.5 8.5h.01" />
-        <path d="M8.5 12.5h.01" />
-        <path d="M19.5 12.5h.01" />
-        <path d="M17.5 8.5h.01" />
+        <circle cx="44" cy="44" r="42" fill="#E0E8FF" strokeWidth="3" />
+        <circle cx="38.5" cy="47.5" r="1.5" fill="currentColor" />
+        <circle cx="43.5" cy="47.5" r="1.5" fill="currentColor" />
+        <circle cx="48.5" cy="47.5" r="1.5" fill="currentColor" />
+        <circle cx="53.5" cy="47.5" r="1.5" fill="currentColor" />
+        <circle cx="58.5" cy="47.5" r="1.5" fill="currentColor" />
+        <circle cx="35.5" cy="42.5" r="1.5" fill="currentColor" />
+        <circle cx="40.5" cy="42.5" r="1.5" fill="currentColor" />
+        <circle cx="45.5" cy="42.5" r="1.5" fill="currentColor" />
+        <circle cx="50.5" cy="42.5" r="1.5" fill="currentColor" />
+        <circle cx="55.5" cy="42.5" r="1.5" fill="currentColor" />
+        <circle cx="32.5" cy="37.5" r="1.5" fill="currentColor" />
+        <circle cx="37.5" cy="37.5" r="1.5" fill="currentColor" />
+        <circle cx="42.5" cy="37.5" r="1.5" fill="currentColor" />
+        <circle cx="47.5" cy="37.5" r="1.5" fill="currentColor" />
+        <circle cx="52.5" cy="37.5" r="1.5" fill="currentColor" />
+        <circle cx="29.5" cy="32.5" r="1.5" fill="currentColor" />
+        <circle cx="34.5" cy="32.5" r="1.5" fill="currentColor" />
+        <circle cx="39.5" cy="32.5" r="1.5" fill="currentColor" />
+        <circle cx="44.5" cy="32.5" r="1.5" fill="currentColor" />
+        <circle cx="49.5" cy="32.5" r="1.5" fill="currentColor" />
+        <circle cx="26.5" cy="27.5" r="1.5" fill="currentColor" />
+        <circle cx="31.5" cy="27.5" r="1.5" fill="currentColor" />
+        <circle cx="36.5" cy="27.5" r="1.5" fill="currentColor" />
+        <circle cx="41.5" cy="27.5" r="1.5" fill="currentColor" />
+        <circle cx="33.5" cy="52.5" r="1.5" fill="currentColor" />
+        <circle cx="38.5" cy="52.5" r="1.5" fill="currentColor" />
+        <circle cx="43.5" cy="52.5" r="1.5" fill="currentColor" />
+        <circle cx="48.5" cy="52.5" r="1.5" fill="currentColor" />
+        <circle cx="53.5" cy="52.5" r="1.5" fill="currentColor" />
+        <circle cx="30.5" cy="57.5" r="1.5" fill="currentColor" />
+        <circle cx="35.5" cy="57.5" r="1.5" fill="currentColor" />
+        <circle cx="40.5" cy="57.5" r="1.5" fill="currentColor" />
+        <circle cx="45.5" cy="57.5" r="1.5" fill="currentColor" />
     </svg>
 );
 
