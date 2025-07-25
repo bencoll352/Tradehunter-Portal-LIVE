@@ -13,15 +13,14 @@ import type { SVGProps } from 'react';
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg 
-        width="24" 
-        height="24" 
+        width="88" 
+        height="88" 
         viewBox="0 0 88 88" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
-        stroke="currentColor" // Use current color from parent
         {...props}
     >
-        <circle cx="44" cy="44" r="42" fill="#E0E8FF" strokeWidth="3" />
+        <circle cx="44" cy="44" r="42" fill="#E0E8FF" stroke="currentColor" strokeWidth="3" />
         <circle cx="38.5" cy="47.5" r="1.5" fill="currentColor" />
         <circle cx="43.5" cy="47.5" r="1.5" fill="currentColor" />
         <circle cx="48.5" cy="47.5" r="1.5" fill="currentColor" />
@@ -57,7 +56,6 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
         <circle cx="45.5" cy="57.5" r="1.5" fill="currentColor" />
     </svg>
 );
-
 
 interface AgentRosterCardProps {
   title: string;
