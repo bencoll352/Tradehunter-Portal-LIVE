@@ -12,29 +12,22 @@ import type { SVGProps } from 'react';
 
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
+    <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         xmlns="http://www.w3.org/2000/svg"
         {...props}>
-      <path d="M12 2a9 9 0 0 0-6.8 15.6c.4.5.8 1 1.3 1.4h11c.5-.4.9-.9 1.3-1.4A9 9 0 0 0 12 2Z" />
-      <path d="M12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" />
-      <path d="m14 14-1.2 2" />
-      <path d="m10 14-1.2 2" />
-      <path d="m14 18-1.2-2" />
-      <path d="m10 18-1.2-2" />
-      <path d="m12 8-1-2" />
-      <path d="m12 20 1-2" />
-      <path d="M7 21h10" />
-      <path d="M7 19h10" />
-      <path d="M2 12h2" />
-      <path d="M20 12h2" />
-      <path d="m4.9 4.9 1.4 1.4" />
-      <path d="m17.7 4.9-1.4 1.4" />
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+        <polyline points="14 2 14 8 20 8" />
+        <path d="M8.5 17l2-2" />
+        <path d="M8.5 15l2 2" />
+        <path d="M11 14.5s1.5-2 4-2c2.5 0 4 2.5 4 5" />
+        <circle cx="15" cy="9.5" r=".5" fill="currentColor" />
+        <path d="M15 19l-2-2 2-2" />
     </svg>
 );
 
