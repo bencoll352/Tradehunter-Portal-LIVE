@@ -14,6 +14,8 @@ import type { SVGProps } from 'react';
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
+        width="24"
+        height="24"
         viewBox="0 0 24 24" 
         fill="none" 
         stroke="currentColor" 
@@ -22,12 +24,11 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
         strokeLinejoin="round" 
         {...props}
     >
-        <path d="M12 22a2 2 0 1 1-4 0h8a2 2 0 1 1-4 0z" strokeWidth="2" />
-        <path d="M4 18h16v-2H4v2z" strokeWidth="2" />
-        <path d="M14.5 16h-5v-1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5V16z" />
-        <path d="M15.35 14H8.65A1.65 1.65 0 0 1 7 12.35V9.65A1.65 1.65 0 0 1 8.65 8H9a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3h.35A1.65 1.65 0 0 1 17 9.65v2.7A1.65 1.65 0 0 1 15.35 14z" />
-        <path d="M12 5a4 4 0 0 0-4-4h.5a4.5 4.5 0 0 1 4.5 4.5V8" />
-        <circle cx="13" cy="9.5" r="0.5" fill="currentColor" stroke="none" />
+        <path d="M15.23 2.42a4.5 4.5 0 0 1 4.34 7.37l-1.33 1.48a1.5 1.5 0 0 1-2.26.08L13 8.41V4.5a2 2 0 0 0-2-2h-.5A4.5 4.5 0 0 1 15.23 2.42z" />
+        <path d="M5 10.5A4.5 4.5 0 0 0 9.5 6H13v2.41l-3.14 3.9a1.5 1.5 0 0 1-2.26.08L5.94 10.9A4.5 4.5 0 0 0 5 10.5z" />
+        <path d="M4 18.5h16" />
+        <path d="M6 21h12" />
+        <path d="M8 18.5v-2h8v2" />
     </svg>
 );
 
