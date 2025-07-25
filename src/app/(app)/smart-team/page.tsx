@@ -17,23 +17,17 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
         viewBox="0 0 24 24" 
         fill="none" 
         stroke="currentColor" 
-        strokeWidth="2" 
+        strokeWidth="2.5" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
         {...props}
     >
-        <path d="M12 15a3 3 0 1 0-6 0 3 3 0 0 0 6 0z"/>
-        <path d="M12 15a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/>
-        <path d="M9 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-        <path d="M15 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-        <path d="M12 9a3 3 0 1 0-6 0 3 3 0 0 0 6 0z"/>
-        <path d="M12 9a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/>
-        <path d="M9 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-        <path d="M15 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-        <path d="M12 21.5c-4.69 0-8.5-3.81-8.5-8.5s3.81-8.5 8.5-8.5 8.5 3.81 8.5 8.5"/>
-        <path d="M20.5 13H16l2.5-2.5"/>
-        <path d="M3.5 11H8l-2.5 2.5"/>
-        <path d="M12 4.5c4.69 0 8.5 3.81 8.5 8.5s-3.81 8.5-8.5 8.5-8.5-3.81-8.5-8.5"/>
+        <path d="M12 22a2 2 0 1 1-4 0h8a2 2 0 1 1-4 0z" strokeWidth="2" />
+        <path d="M4 18h16v-2H4v2z" strokeWidth="2" />
+        <path d="M14.5 16h-5v-1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5V16z" />
+        <path d="M15.35 14H8.65A1.65 1.65 0 0 1 7 12.35V9.65A1.65 1.65 0 0 1 8.65 8H9a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3h.35A1.65 1.65 0 0 1 17 9.65v2.7A1.65 1.65 0 0 1 15.35 14z" />
+        <path d="M12 5a4 4 0 0 0-4-4h.5a4.5 4.5 0 0 1 4.5 4.5V8" />
+        <circle cx="13" cy="9.5" r="0.5" fill="currentColor" stroke="none" />
     </svg>
 );
 
