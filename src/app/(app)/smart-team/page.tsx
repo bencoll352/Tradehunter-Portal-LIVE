@@ -83,7 +83,7 @@ const agents: AgentRosterCardProps[] = [
         role: "Strategic Analyst",
         description: "I provide comprehensive analysis, market intelligence, and strategic planning.",
         href: "/smart-team/sales-strategy-navigator",
-        icon: StrategyNavigatorIcon,
+        icon: Target,
         iconStyle: "border-blue-500/50 text-blue-500 bg-blue-500/10",
     },
     {
