@@ -23,11 +23,11 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
         {...props}>
         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
         <polyline points="14 2 14 8 20 8" />
-        <path d="M8.5 17l2-2" />
-        <path d="M8.5 15l2 2" />
-        <path d="M11 14.5s1.5-2 4-2c2.5 0 4 2.5 4 5" />
-        <circle cx="15" cy="9.5" r=".5" fill="currentColor" />
-        <path d="M15 19l-2-2 2-2" />
+        <path d="m9.5 17.5 3-3" />
+        <path d="m12.5 17.5-3-3" />
+        <circle cx="15" cy="11.5" r=".5" fill="currentColor" />
+        <path d="M12.5 7.5v1a2 2 0 0 0 2 2h1" />
+        <path d="M9.5 14.5h1a2 2 0 0 1 2 2v1" />
     </svg>
 );
 
