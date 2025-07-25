@@ -13,21 +13,23 @@ import type { SVGProps } from 'react';
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      stroke="currentColor"
-      strokeWidth="0"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
     >
-      <path d="M15.22,2.22,5.2,12.25a.5.5,0,0,0,.35.85H7.72V15a.5.5,0,0,0,.5.5h1.25a.5.5,0,0,0,.5-.5V14.12h.17a2.8,2.8,0,0,1,2.8,2.8,2.77,2.77,0,0,1-2.77,2.82,2.52,2.52,0,0,1-2.5-2.5.5.5,0,0,0-.5-.5H5.82a.5.5,0,0,0-.5.5,3.78,3.78,0,0,0,3.78,3.78,3.83,3.83,0,0,0,3.83-3.83,3.76,3.76,0,0,0-2.83-3.66.5.5,0,0,0-.47.5v1.22a.5.5,0,0,0,.5.5h.33A1.5,1.5,0,0,0,12,14.33a1.5,1.5,0,0,0-1.5-1.5.5.5,0,0,0-.5.5v.75H7.72v1.25a.5.5,0,0,0,.5.5h1.25a.5.5,0,0,0,.5-.5V15a.5.5,0,0,0-.5-.5H8.57a.5.5,0,0,1-.5-.5V13.1H5.92L16.27,2.75a1,1,0,0,0-.22-1.4,1,1,0,0,0-1.4-.2Z" transform="scale(0.8) translate(2, 0)" />
-      <path d="M4 18H20" strokeWidth="1.5"/>
-      <path d="M5 20H19" strokeWidth="1.5" />
-      <path d="M6 22H18" strokeWidth="1.5" />
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2" />
+        <path d="M12 12l6-6" />
+        <path d="M14 6h4v4" />
+        <path d="M12 12l-1.5 1.5" />
     </svg>
 );
 
