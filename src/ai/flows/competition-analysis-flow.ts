@@ -30,21 +30,25 @@ const prompt = ai.definePrompt({
   output: {schema: CompetitionAnalysisOutputSchema},
   prompt: `You are an expert business strategist for a large UK builders merchant called Jewson. Your task is to analyze a competitor's website and provide a detailed strategic report.
 
-Based on the content of the website at the URL {{{competitorUrl}}}, provide a detailed analysis covering the following points:
+Based on the content of the website at the URL {{{competitorUrl}}}, you MUST provide a detailed analysis covering the following points in order. Use the exact headings provided.
 
-1.  **Offerings:** What specific products, services, and solutions does this company offer? Are they targeting trade professionals, DIY customers, or both?
+### Offerings:
+What specific products, services, and solutions does this company offer? Are they targeting trade professionals, DIY customers, or both?
 
-2.  **Strengths:** What are their key strengths based on their website? Consider their branding, messaging, product range, apparent online features (e.g., account management, delivery options), and any unique selling propositions they highlight.
+### Strengths:
+What are their key strengths based on their website? Consider their branding, messaging, product range, apparent online features (e.g., account management, delivery options), and any unique selling propositions they highlight.
 
-3.  **Weaknesses:** What are their potential weaknesses? Look for what's missing. Do they lack a clear focus? Is their product range limited? Is the site difficult to navigate? Do they fail to mention key services that trade professionals expect (like credit accounts, bulk delivery, etc.)?
+### Weaknesses:
+What are their potential weaknesses? Look for what's missing. Do they lack a clear focus? Is their product range limited? Is the site difficult to navigate? Do they fail to mention key services that trade professionals expect (like credit accounts, bulk delivery, etc.)?
 
-4.  **Actionable Counter-Strategy for Jewson:** This is the most important section. Provide specific, actionable advice on how Jewson can leverage the competitor's weaknesses and counter their strengths. For example:
-    *   If the competitor has a weak online presence, suggest Jewson could run targeted digital ads in their area.
-    *   If the competitor focuses only on retail (DIY), advise on how Jewson can emphasize its superior trade services.
-    *   If the competitor has a limited product range, suggest Jewson promote its wider stock availability.
-    *   If the competitor's website is not user-friendly, suggest Jewson highlight its own easy-to-use online ordering system.
+### Actionable Counter-Strategy for Jewson:
+This is the most important section. Provide specific, actionable advice on how Jewson can leverage the competitor's weaknesses and counter their strengths. For example:
+*   If the competitor has a weak online presence, suggest Jewson could run targeted digital ads in their area.
+*   If the competitor focuses only on retail (DIY), advise on how Jewson can emphasize its superior trade services.
+*   If the competitor has a limited product range, suggest Jewson promote its wider stock availability.
+*   If the competitor's website is not user-friendly, suggest Jewson highlight its own easy-to-use online ordering system.
 
-Provide the full analysis as a single, well-structured string in the 'analysis' field. Use clear headings for each section.`,
+Provide the full analysis as a single, well-structured string in the 'analysis' field.`,
 });
 
 const competitionAnalysisFlow = ai.defineFlow(
