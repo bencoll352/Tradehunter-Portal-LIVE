@@ -15,47 +15,24 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg 
         width="88" 
         height="88" 
-        viewBox="0 0 88 88" 
+        viewBox="0 0 24 24"
         fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
         xmlns="http://www.w3.org/2000/svg"
         {...props}
     >
-        <circle cx="44" cy="44" r="42" fill="#E0E8FF" stroke="currentColor" strokeWidth="3" />
-        <circle cx="38.5" cy="47.5" r="1.5" fill="currentColor" />
-        <circle cx="43.5" cy="47.5" r="1.5" fill="currentColor" />
-        <circle cx="48.5" cy="47.5" r="1.5" fill="currentColor" />
-        <circle cx="53.5" cy="47.5" r="1.5" fill="currentColor" />
-        <circle cx="58.5" cy="47.5" r="1.5" fill="currentColor" />
-        <circle cx="35.5" cy="42.5" r="1.5" fill="currentColor" />
-        <circle cx="40.5" cy="42.5" r="1.5" fill="currentColor" />
-        <circle cx="45.5" cy="42.5" r="1.5" fill="currentColor" />
-        <circle cx="50.5" cy="42.5" r="1.5" fill="currentColor" />
-        <circle cx="55.5" cy="42.5" r="1.5" fill="currentColor" />
-        <circle cx="32.5" cy="37.5" r="1.5" fill="currentColor" />
-        <circle cx="37.5" cy="37.5" r="1.5" fill="currentColor" />
-        <circle cx="42.5" cy="37.5" r="1.5" fill="currentColor" />
-        <circle cx="47.5" cy="37.5" r="1.5" fill="currentColor" />
-        <circle cx="52.5" cy="37.5" r="1.5" fill="currentColor" />
-        <circle cx="29.5" cy="32.5" r="1.5" fill="currentColor" />
-        <circle cx="34.5" cy="32.5" r="1.5" fill="currentColor" />
-        <circle cx="39.5" cy="32.5" r="1.5" fill="currentColor" />
-        <circle cx="44.5" cy="32.5" r="1.5" fill="currentColor" />
-        <circle cx="49.5" cy="32.5" r="1.5" fill="currentColor" />
-        <circle cx="26.5" cy="27.5" r="1.5" fill="currentColor" />
-        <circle cx="31.5" cy="27.5" r="1.5" fill="currentColor" />
-        <circle cx="36.5" cy="27.5" r="1.5" fill="currentColor" />
-        <circle cx="41.5" cy="27.5" r="1.5" fill="currentColor" />
-        <circle cx="33.5" cy="52.5" r="1.5" fill="currentColor" />
-        <circle cx="38.5" cy="52.5" r="1.5" fill="currentColor" />
-        <circle cx="43.5" cy="52.5" r="1.5" fill="currentColor" />
-        <circle cx="48.5" cy="52.5" r="1.5" fill="currentColor" />
-        <circle cx="53.5" cy="52.5" r="1.5" fill="currentColor" />
-        <circle cx="30.5" cy="57.5" r="1.5" fill="currentColor" />
-        <circle cx="35.5" cy="57.5" r="1.5" fill="currentColor" />
-        <circle cx="40.5" cy="57.5" r="1.5" fill="currentColor" />
-        <circle cx="45.5" cy="57.5" r="1.5" fill="currentColor" />
+        <path d="M15.26 2.61a2 2 0 0 1 2.53.28l.41.41a2 2 0 0 1 .28 2.53l-2.07 4.14a6 6 0 0 1-8.49 0L6 8.83a2 2 0 0 1 .28-2.53l.41-.41a2 2 0 0 1 2.53.28z"></path>
+        <path d="M9 12a3 3 0 0 0-3 3v2"></path>
+        <path d="M11 12h2"></path>
+        <path d="M15 15v-2a3 3 0 0 0-3-3"></path>
+        <path d="M5 22h14"></path>
+        <path d="M6 18h12"></path>
     </svg>
 );
+
 
 interface AgentRosterCardProps {
   title: string;
