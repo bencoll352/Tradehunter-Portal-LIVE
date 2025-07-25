@@ -12,23 +12,36 @@ import type { SVGProps } from 'react';
 
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24"
-        height="24"
-        viewBox="0 0 24 24" 
-        fill="none"
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        {...props}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
     >
-      <path d="M15.5 9.50002C15.5 8.12002 14.38 7.00002 13 7.00002C12.14 7.00002 11.39 7.43002 10.92 8.10002C10.58 7.42002 9.86 7.00002 9 7.00002C7.62 7.00002 6.5 8.12002 6.5 9.50002V10.5C6.5 11.88 7.62 13 9 13H9.42002C10.28 13 11 12.28 11 11.42V11C11 10.14 11.72 9.42002 12.58 9.42002H13C14.38 9.42002 15.5 10.54 15.5 11.92V12.42C15.5 13.28 14.78 14 13.92 14H13C11.62 14 10.5 15.12 10.5 16.5C10.5 17.88 11.62 19 13 19H16.5V16.5C16.5 15.12 15.38 14 14 14H13.58C12.72 14 12 13.28 12 12.42V12C12 11.14 12.72 10.42 13.58 10.42H14C14.86 10.42 15.58 9.70002 15.92 8.88002" transform="translate(2.5 1.5)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-      <path d="M8.5 3H15.5C16.6046 3 17.5 3.89543 17.5 5V8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-      <path d="M8.5 21H5.5C4.39543 21 3.5 20.1046 3.5 19V5C3.5 3.89543 4.39543 3 5.5 3H8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-      <path d="M20.5 8.5V5C20.5 3.89543 19.6046 3 18.5 3H15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-      <path d="M3.5 15.5V19C3.5 20.1046 4.39543 21 5.5 21H8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M15.5 9.5h.01" />
+        <path d="M8.5 16.5h.01" />
+        <path d="M12.5 12.5h.01" />
+        <path d="M17.5 15.5h.01" />
+        <path d="M15.5 19.5v.01" />
+        <path d="M19.5 15.5v.01" />
+        <path d="M19.5 8.5v.01" />
+        <path d="M8.5 19.5v.01" />
+        <path d="M4.5 15.5v.01" />
+        <path d="M4.5 8.5v.01" />
+        <path d="M8.5 4.5v.01" />
+        <path d="M12.5 4.5v.01" />
+        <path d="M15.5 4.5v.01" />
+        <path d="M4.5 12.5h.01" />
+        <path d="M8.5 8.5h.01" />
+        <path d="M8.5 12.5h.01" />
+        <path d="M19.5 12.5h.01" />
+        <path d="M17.5 8.5h.01" />
     </svg>
 );
 
