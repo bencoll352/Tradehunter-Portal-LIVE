@@ -12,20 +12,21 @@ import type { SVGProps } from 'react';
 
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
       {...props}
     >
-        <path d="M17.5 9.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0z" />
-        <path d="M13 13.5v5m-4-2h4v2H9v-2z" />
+      <path d="M12.22 12.22a3 3 0 0 0-4.24 4.24l1.06-1.06a3 3 0 0 1 0-4.24l-4.24 4.24a3 3 0 0 0 4.24 4.24l1.06-1.06a3 3 0 0 1 0-4.24z"></path>
+      <path d="M12.22 12.22a3 3 0 0 1 4.24-4.24l-1.06 1.06a3 3 0 0 0 0 4.24l4.24-4.24a3 3 0 0 1-4.24-4.24l-1.06 1.06a3 3 0 0 0 0 4.24z"></path>
+      <circle cx="12" cy="12" r="10"></circle>
     </svg>
 );
 
