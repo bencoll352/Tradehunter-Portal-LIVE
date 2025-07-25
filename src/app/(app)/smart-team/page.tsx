@@ -17,18 +17,14 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
         width="24"
         height="24"
         viewBox="0 0 24 24" 
-        fill="none" 
+        fill="currentColor"
         stroke="currentColor" 
-        strokeWidth="2.5" 
+        strokeWidth="2" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
         {...props}
     >
-        <path d="M15.23 2.42a4.5 4.5 0 0 1 4.34 7.37l-1.33 1.48a1.5 1.5 0 0 1-2.26.08L13 8.41V4.5a2 2 0 0 0-2-2h-.5A4.5 4.5 0 0 1 15.23 2.42z" />
-        <path d="M5 10.5A4.5 4.5 0 0 0 9.5 6H13v2.41l-3.14 3.9a1.5 1.5 0 0 1-2.26.08L5.94 10.9A4.5 4.5 0 0 0 5 10.5z" />
-        <path d="M4 18.5h16" />
-        <path d="M6 21h12" />
-        <path d="M8 18.5v-2h8v2" />
+      <rect width="24" height="24" />
     </svg>
 );
 
