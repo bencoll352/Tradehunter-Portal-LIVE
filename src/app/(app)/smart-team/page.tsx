@@ -27,9 +27,8 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
         <circle cx="12" cy="12" r="10" />
         <circle cx="12" cy="12" r="6" />
         <circle cx="12" cy="12" r="2" />
-        <path d="m14 10 5.5 5.5" />
-        <path d="M18.5 10.5 14 10" />
-        <path d="M19.5 15.5 14 10" />
+        <line x1="15.5" y1="8.5" x2="10.5" y2="13.5" />
+        <path d="M12.5 15.5 10.5 13.5 8.5 14.5" />
     </svg>
 );
 
