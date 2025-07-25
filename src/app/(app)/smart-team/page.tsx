@@ -12,20 +12,28 @@ import type { SVGProps } from 'react';
 
 // Custom SVG icon component for the Sales & Strategy Navigator
 const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        xmlns="http://www.w3.org/2000/svg"
-        {...props}>
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-        <polyline points="14 2 14 8 20 8" />
-        <path d="m10.4 8.6-3 3M7.4 8.6l3 3" />
-        <path d="M14 15.5c-1.5 0-2.8-1-3-2.5s.4-3.5 2-4.5c1.1-.7 2.5-.7 3.6 0" />
-        <path d="M14.5 11.2V6.4l2.5 2.6-2.5 2.2Z" />
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        {...props}
+    >
+        <path d="M12 15a3 3 0 1 0-6 0 3 3 0 0 0 6 0z"/>
+        <path d="M12 15a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/>
+        <path d="M9 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        <path d="M15 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        <path d="M12 9a3 3 0 1 0-6 0 3 3 0 0 0 6 0z"/>
+        <path d="M12 9a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/>
+        <path d="M9 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        <path d="M15 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        <path d="M12 21.5c-4.69 0-8.5-3.81-8.5-8.5s3.81-8.5 8.5-8.5 8.5 3.81 8.5 8.5"/>
+        <path d="M20.5 13H16l2.5-2.5"/>
+        <path d="M3.5 11H8l-2.5 2.5"/>
+        <path d="M12 4.5c4.69 0 8.5 3.81 8.5 8.5s-3.81 8.5-8.5 8.5-8.5-3.81-8.5-8.5"/>
     </svg>
 );
 
