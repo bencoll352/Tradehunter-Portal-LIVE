@@ -16,14 +16,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { VALID_LOGIN_IDS, type BranchLoginId } from "@/types";
 import { LogIn } from "lucide-react";
 
 const formSchema = z.object({
-  branchId: z.string().min(1, { message: "Branch ID is required." })
-    .refine(val => VALID_LOGIN_IDS.includes(val.toUpperCase() as BranchLoginId), {
-      message: "Invalid Login ID. Example: PURLEY (team) or PURLEYMANAGER (manager).",
-    }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
 });
 
 export function LoginForm() {
@@ -33,26 +29,18 @@ export function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      branchId: "",
+      email: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const enteredId = values.branchId.toUpperCase() as BranchLoginId;
-    if (VALID_LOGIN_IDS.includes(enteredId)) {
-      localStorage.setItem("loggedInId", enteredId); 
-      toast({
-        title: "Login Successful",
-        description: `Welcome! Redirecting to dashboard...`,
-      });
-      router.push("/dashboard"); // Remains /dashboard for the new overview page
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid Login ID. Example: PURLEY (team) or PURLEYMANAGER (manager).",
-      });
-    }
+    // Mock login logic. For a real app, you'd validate credentials here.
+    localStorage.setItem("loggedInUser", values.email); 
+    toast({
+      title: "Login Successful",
+      description: `Welcome! Redirecting to dashboard...`,
+    });
+    router.push("/dashboard");
   }
 
   return (
@@ -60,12 +48,12 @@ export function LoginForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="branchId"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-foreground">Login ID</FormLabel>
+              <FormLabel className="text-foreground">Email</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., PURLEY or PURLEYMANAGER" {...field} className="text-base" />
+                <Input placeholder="e.g., sales.hero@example.com" {...field} className="text-base" />
               </FormControl>
               <FormMessage />
             </FormItem>

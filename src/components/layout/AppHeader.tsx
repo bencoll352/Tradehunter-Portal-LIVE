@@ -5,33 +5,21 @@ import Link from 'next/link';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Calculator, Users, Columns, Compass, MapPin, UsersRound, Lightbulb } from "lucide-react"; 
+import { LayoutDashboard, Bot, BarChart3, Settings } from "lucide-react"; 
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from 'react';
-import { getBranchInfo, type BranchInfo } from '@/types';
 
 const getPathTitle = (path: string) => {
-  if (path === "/dashboard") return "Portal Overview"; 
-  if (path.startsWith("/tradehunter")) return "Trader Database";
-  if (path.startsWith("/competitor-insights")) return "Competitor Insights";
-  if (path.startsWith("/buildwise-intel")) return "BuildWise Intel";
-  if (path.startsWith("/estimator")) return "Materials Estimator";
-  if (path.startsWith("/smart-team")) return "Smart Team Hub";
-  if (path.startsWith("/how-to-use")) return "How to Use Guide";
-  return "TradeHunter Pro Portal";
+  if (path === "/dashboard") return "Dashboard"; 
+  if (path.startsWith("/scenario-generator")) return "Scenario Generator";
+  if (path.startsWith("/analytics")) return "Analytics";
+  if (path.startsWith("/settings")) return "Settings";
+  if (path.startsWith("/how-to-use")) return "How to Use";
+  return "ScenarioForge";
 };
 
 export function AppHeader() {
   const pathname = usePathname();
   const title = getPathTitle(pathname);
-  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const loggedInId = localStorage.getItem("loggedInId");
-      setBranchInfo(getBranchInfo(loggedInId));
-    }
-  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
@@ -40,7 +28,7 @@ export function AppHeader() {
       </div>
       <h1 className="flex-1 text-xl font-semibold text-foreground">{title}</h1>
       
-      <nav className="flex items-center gap-2">
+      <nav className="hidden md:flex items-center gap-2">
         <Button
           asChild
           size="lg" 
@@ -60,85 +48,51 @@ export function AppHeader() {
         <Button
           asChild
           size="lg" 
-          variant={pathname.startsWith("/tradehunter") ? "default" : "ghost"}
+          variant={pathname.startsWith("/scenario-generator") ? "default" : "ghost"}
           className={cn(
             "font-medium", 
-            pathname.startsWith("/tradehunter") 
+            pathname.startsWith("/scenario-generator") 
               ? "bg-primary text-primary-foreground hover:bg-primary/90" 
               : "text-primary/90 hover:bg-primary/10 hover:text-primary"
           )}
         >
-          <Link href="/tradehunter" className="flex items-center gap-2">
-            <Users className="h-5 w-5" /> 
-            Traders
+          <Link href="/scenario-generator" className="flex items-center gap-2">
+            <Bot className="h-5 w-5" /> 
+            Generator
           </Link>
         </Button>
          <Button
           asChild
           size="lg" 
-          variant={pathname.startsWith("/competitor-insights") ? "default" : "ghost"}
+          variant={pathname.startsWith("/analytics") ? "default" : "ghost"}
           className={cn(
             "font-medium", 
-            pathname.startsWith("/competitor-insights") 
+            pathname.startsWith("/analytics") 
               ? "bg-primary text-primary-foreground hover:bg-primary/90" 
               : "text-primary/90 hover:bg-primary/10 hover:text-primary"
           )}
         >
-          <Link href="/competitor-insights" className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" /> 
-            Insights
-          </Link>
-        </Button>
-        <Button
-          asChild
-          size="lg" 
-          variant={pathname === "/buildwise-intel" ? "default" : "ghost"}
-          className={cn(
-            "font-medium", 
-            pathname === "/buildwise-intel" 
-              ? "bg-accent text-accent-foreground hover:bg-accent/90" 
-              : "text-accent/90 hover:bg-accent/10 hover:text-accent"
-          )}
-        >
-          <Link href="/buildwise-intel" className="flex items-center gap-2">
-            <Home className="h-5 w-5" /> 
-            BuildWise Intel
+          <Link href="/analytics" className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" /> 
+            Analytics
           </Link>
         </Button>
         <Button
           asChild
           size="lg"
-          variant={pathname === "/estimator" ? "default" : "ghost"}
+          variant={pathname === "/settings" ? "default" : "ghost"}
           className={cn(
             "font-medium",
-            pathname === "/estimator"
+            pathname === "/settings"
               ? "bg-primary text-primary-foreground hover:bg-primary/90" 
               : "text-primary/90 hover:bg-primary/10 hover:text-primary"
           )}
         >
-          <Link href="/estimator" className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            Estimator
+          <Link href="/settings" className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Settings
           </Link>
         </Button>
-        {branchInfo?.role === 'manager' && (
-          <Button
-            asChild
-            size="lg"
-            variant={pathname === "/smart-team" ? "default" : "ghost"}
-            className={cn(
-              "font-medium",
-              pathname === "/smart-team"
-                ? "bg-purple-600 text-white hover:bg-purple-700"
-                : "text-purple-600/90 hover:bg-purple-600/10 hover:text-purple-700"
-            )}
-          >
-            <Link href="/smart-team" className="flex items-center gap-2">
-              <UsersRound className="h-5 w-5" />
-              Smart Team
-            </Link>
-          </Button>
-        )}
       </nav>
     </header>
   );

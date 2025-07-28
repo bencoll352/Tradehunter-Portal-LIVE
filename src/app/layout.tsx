@@ -5,8 +5,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'TradeHunter Pro',
-  description: 'Manage your branch trader data efficiently.',
+  title: 'ScenarioForge',
+  description: 'AI-powered sales role-play scenarios.',
 };
 
 export default function RootLayout({

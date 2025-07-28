@@ -1,25 +1,21 @@
 
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { getBranchInfo } from '@/types'; 
 
 export default function HomePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const loggedInId = localStorage.getItem('loggedInId');
-      const branchInfo = getBranchInfo(loggedInId); 
+      const loggedInUser = localStorage.getItem('loggedInUser');
 
-      if (branchInfo.baseBranchId && branchInfo.role !== 'unknown') {
-        router.replace('/dashboard'); // Remains /dashboard for the new overview page
+      if (loggedInUser) {
+        router.replace('/dashboard');
       } else {
         router.replace('/login');
       }
-      // setLoading(false); 
     }
   }, [router]);
 
