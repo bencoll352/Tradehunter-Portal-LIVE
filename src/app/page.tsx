@@ -8,15 +8,8 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const loggedInUser = localStorage.getItem('loggedInUser');
-
-      if (loggedInUser) {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/login');
-      }
-    }
+    // Directly redirect to the main dashboard as there is no login.
+    router.replace('/dashboard');
   }, [router]);
 
   return (

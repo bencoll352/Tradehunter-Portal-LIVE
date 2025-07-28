@@ -14,19 +14,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  LogOut,
   LayoutDashboard,
   Bot,
   BarChart3,
   Settings,
   HelpCircle,
-  type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -39,25 +34,7 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { setOpenMobile } = useSidebar();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setUserEmail(localStorage.getItem("loggedInUser"));
-    }
-  }, []);
-
-  const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem("loggedInUser");
-    }
-    router.push("/login");
-    setOpenMobile(false);
-  };
-
-  const avatarChar = userEmail ? userEmail.charAt(0).toUpperCase() : "U";
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="border-r-0">
@@ -97,28 +74,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <Separator className="my-2 bg-sidebar-border group-data-[collapsible=icon]:hidden"/>
-        <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center p-2 rounded-md hover:bg-sidebar-accent transition-colors">
-            <Avatar className="h-9 w-9 border-2 border-sidebar-primary">
-              <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
-                {avatarChar}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="text-sm font-medium text-sidebar-primary-foreground truncate max-w-28">
-                {userEmail || "User"}
-              </span>
-            </div>
-        </div>
-
-        <SidebarMenuButton
-          onClick={handleLogout}
-          tooltip="Logout"
-          className="mt-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        >
-          <LogOut />
-          <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-        </SidebarMenuButton>
+        {/* User info and logout button have been removed as login is disabled */}
       </SidebarFooter>
     </Sidebar>
   );
