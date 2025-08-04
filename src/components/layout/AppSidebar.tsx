@@ -17,18 +17,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   LayoutDashboard,
   Bot,
-  BarChart3,
+  Lightbulb,
   Settings,
   HelpCircle,
+  Database,
+  Users,
+  Calculator,
+  Home,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard" },
-  { href: "/scenario-generator", icon: Bot, label: "Generator", tooltip: "Scenario Generator" },
-  { href: "/analytics", icon: BarChart3, label: "Analytics", tooltip: "Performance Analytics" },
-  { href: "/settings", icon: Settings, label: "Settings", tooltip: "Account Settings" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard Overview" },
+  { href: "/tradehunter", icon: Database, label: "Trader Database", tooltip: "Manage Traders" },
+  { href: "/competitor-insights", icon: Lightbulb, label: "Competitor Insights", tooltip: "Analyze Competitors" },
+  { href: "/estimator", icon: Calculator, label: "Estimator", tooltip: "Materials Estimator" },
+  { href: "/smart-team", icon: Users, label: "Smart Team", tooltip: "Smart Team Hub" },
+  { href: "/buildwise-intel", icon: Home, label: "BuildWise Intel", tooltip: "External Intel Portal" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
 

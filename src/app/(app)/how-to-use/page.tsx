@@ -6,32 +6,38 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, Bot, BarChart3, Settings } from "lucide-react"; 
+import { HelpCircle, Bot, Database, Calculator, Users } from "lucide-react"; 
 
 const faqs = [
   {
     value: "item-1",
-    question: "What is ScenarioForge?",
-    answer: "ScenarioForge is a platform that uses AI to generate customized role-play scenarios for sales training. It helps you practice real-world sales situations to improve your skills and confidence.",
+    question: "What is TradeHunter Pro?",
+    answer: "TradeHunter Pro is a sales intelligence platform for builders merchants. It helps you find, track, and manage relationships with trade professionals to grow your business.",
     icon: <HelpCircle className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-2",
-    question: "How do I generate a scenario?",
-    answer: "Navigate to the 'Generator' page. Input the product you're selling, the customer's industry, and the key challenge or situation you want to practice. The AI will then create a detailed scenario for you.",
-    icon: <Bot className="h-5 w-5 text-primary mr-2" />
+    question: "How do I use the Trader Database?",
+    answer: "Navigate to the 'TraderHunter' page. Here you can view all traders for your branch, search for specific ones, add new traders manually, or perform bulk uploads and deletions using a CSV file. Click on a trader's name to mark them as a 'Hot Lead' for follow-up.",
+    icon: <Database className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-3",
-    question: "What does the Analytics Dashboard show?",
-    answer: "The Analytics Dashboard (coming soon) will track your performance and progress across different scenarios. It will provide insights into your strengths and areas for improvement.",
-    icon: <BarChart3 className="h-5 w-5 text-primary mr-2" />
+    question: "What does Competitor Insights do?",
+    answer: "Go to the 'Competitor Insights' page and enter the website URL of a local competitor. The system will analyze their site and provide a strategic report on their offerings, strengths, weaknesses, and actionable counter-strategies for Jewson.",
+    icon: <Bot className="h-5 w-5 text-primary mr-2" />
   },
    {
     value: "item-4",
-    question: "How do I manage my account and subscription?",
-    answer: "Go to the 'Settings' page. Here you can manage your subscription details, access any custom scenario packs you've purchased, and update your profile information.",
-    icon: <Settings className="h-5 w-5 text-primary mr-2" />
+    question: "What is the Materials Estimator?",
+    answer: "The 'Estimator' page contains a tool to help you quickly generate quotes for customer projects. This streamlines your quoting process and improves accuracy.",
+    icon: <Calculator className="h-5 w-5 text-primary mr-2" />
+  },
+   {
+    value: "item-5",
+    question: "What is the Smart Team Hub?",
+    answer: "Available to managers, the 'Smart Team' hub provides access to specialized AI agents that can assist with lead generation, strategic analysis, sales coaching, and crafting outreach messages, further enhancing your branch's capabilities.",
+    icon: <Users className="h-5 w-5 text-primary mr-2" />
   },
 ];
 
@@ -43,7 +49,7 @@ export default function HowToUsePage() {
           <div className="flex items-center gap-3 mb-2">
             <HelpCircle className="h-10 w-10 text-primary" />
             <div>
-              <CardTitle className="text-3xl font-bold text-primary">How to Use ScenarioForge</CardTitle>
+              <CardTitle className="text-3xl font-bold text-primary">How to Use TradeHunter Pro</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
                 Your guide to mastering the platform.
               </CardDescription>
@@ -52,8 +58,8 @@ export default function HowToUsePage() {
         </CardHeader>
         <CardContent>
           <p className="mb-6 text-foreground">
-            Welcome to ScenarioForge! This guide will help you understand the core functionalities
-            and make the most out of your sales training.
+            Welcome to TradeHunter Pro! This guide will help you understand the core functionalities
+            and make the most out of your sales intelligence.
           </p>
 
           <Accordion type="single" collapsible className="w-full">

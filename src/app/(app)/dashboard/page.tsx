@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Bot, BarChart3, Settings } from "lucide-react"; 
+import { ArrowRight, Bot, Database, Settings } from "lucide-react"; 
 
 export default function DashboardOverviewPage() {
   
@@ -17,41 +17,41 @@ export default function DashboardOverviewPage() {
               <Bot className="h-12 w-12 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Welcome to ScenarioForge</CardTitle>
+              <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Welcome to TradeHunter Pro</CardTitle>
               <CardDescription className="text-lg md:text-xl text-muted-foreground mt-1">
-                Generate customized AI role-play scenarios to master your sales skills.
+                Your command center for trade intelligence and sales growth.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-foreground mb-4 text-center md:text-left">
-            Navigate to the Scenario Generator to begin, or explore the dashboard to track your progress and manage your account.
+            Navigate to the Trader Database to manage your customer list, or explore the dashboard to access powerful insights and tools.
           </p>
            <p className="text-lg font-semibold text-accent text-center md:text-left italic px-4 py-2 bg-accent/10 rounded-md border border-accent/30">
-            A platform that leverages AI to generate customized role-play scenarios for sales professionals.
+            A platform designed to help builders merchants identify, track, and engage with trade professionals.
           </p>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <FeatureCard
-          title="Scenario Generator"
-          description="Create dynamic, realistic scenarios complete with customer profiles, objections, and outcomes for comprehensive training."
+          title="Trader Database"
+          description="View, add, and manage your complete list of trade customers. Track their status, activity, and value to your branch."
+          icon={<Database className="h-8 w-8 text-accent" />}
+          link="/tradehunter"
+        />
+        <FeatureCard
+          title="Competitor Insights"
+          description="Analyze competitor websites to understand their strategy and identify opportunities for Jewson to win."
           icon={<Bot className="h-8 w-8 text-accent" />}
-          link="/scenario-generator"
+          link="/competitor-insights"
         />
         <FeatureCard
-          title="Analytics Dashboard"
-          description="Track your performance and progress. Get insights and recommendations for further training."
-          icon={<BarChart3 className="h-8 w-8 text-accent" />}
-          link="/analytics"
-        />
-        <FeatureCard
-          title="Account Settings"
-          description="Manage your subscription, view scenario packs, and configure your profile."
+          title="Materials Estimator"
+          description="Quickly generate accurate material estimates for customer projects to streamline your quoting process."
           icon={<Settings className="h-8 w-8 text-accent" />}
-          link="/settings"
+          link="/estimator"
         />
       </div>
     </div>
