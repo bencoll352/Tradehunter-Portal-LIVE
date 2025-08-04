@@ -167,6 +167,7 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
   try {
     let querySnapshot = await getDocs(q);
     if (querySnapshot.empty) {
+      console.log(`[TraderService] No traders found for branch '${baseBranchId}'. Seeding data...`);
       const seedDataForBranch = INITIAL_SEED_TRADERS_DATA.filter(t => t.branchId === baseBranchId);
       if (seedDataForBranch.length > 0) {
         const batch = writeBatch(db);
@@ -175,8 +176,10 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
           batch.set(traderDocRef, traderSeedData);
         });
         await batch.commit();
+        console.log(`[TraderService] Successfully seeded ${seedDataForBranch.length} traders for branch '${baseBranchId}'. Refetching...`);
         querySnapshot = await getDocs(q);
       } else {
+        console.log(`[TraderService] No seed data available for branch '${baseBranchId}'. Returning empty array.`);
         return [];
       }
     }
