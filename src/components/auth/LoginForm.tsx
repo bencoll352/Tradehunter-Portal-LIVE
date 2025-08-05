@@ -23,7 +23,6 @@ const formSchema = z.object({
   loginId: z.string().min(1, { message: "Login ID is required." }),
 });
 
-// This is a simplified client-side check.
 const isValidCredential = (loginId: BranchLoginId, email: string): boolean => {
     const info = getBranchInfo(loginId, email);
     return info.role !== 'unknown';
@@ -41,47 +40,52 @@ export function LoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const formattedLoginId = values.loginId.toUpperCase() as BranchLoginId;
+    const rawInput = values.loginId.toUpperCase().trim();
+    const isManagerLogin = rawInput.includes("MANAGER");
     
+    // Extract the core branch ID by removing "MANAGER" and trimming whitespace
+    const formattedLoginId = (isManagerLogin ? rawInput.replace("MANAGER", "") : rawInput).trim() as BranchLoginId;
+
     if (!VALID_LOGIN_IDS.includes(formattedLoginId)) {
        toast({
         variant: "destructive",
-        title: "Invalid Login ID",
-        description: `The ID "${values.loginId}" is not recognized. Please use a valid ID (e.g., PURLEY, LEATHERHEAD).`,
+        title: "Invalid Branch ID",
+        description: `The Branch ID part "${formattedLoginId}" is not recognized. Please use a valid ID (e.g., PURLEY, LEATHERHEAD).`,
       });
       return;
     }
     
-    // To maintain compatibility with the role system, we'll derive an email.
-    // We check if the login ID maps to a manager role first.
-    let derivedEmail = `user@${formattedLoginId.toLowerCase()}.example.com`; // default staff email
-    if (formattedLoginId === 'LEATHERHEAD' || formattedLoginId === 'BRANCH_D') {
-      derivedEmail = 'manager.leatherhead@example.com';
-    } else if (formattedLoginId === 'PURLEY' || formattedLoginId === 'BRANCH_A') {
-      // For Purley, we can check for a specific manager string if needed
-      if (values.loginId.toUpperCase().includes('MANAGER')) {
-        derivedEmail = 'manager.purley@example.com';
-      } else {
-        derivedEmail = 'staff.purley@example.com';
-      }
+    const branchInfoForEmail = getBranchInfo(formattedLoginId, 'any@example.com'); // Get baseBranchId
+    if (!branchInfoForEmail.baseBranchId) {
+        toast({
+            variant: "destructive",
+            title: "Internal Error",
+            description: "Could not resolve branch information. Please contact support.",
+        });
+        return;
     }
 
+    // Derive the email based on whether "MANAGER" was included in the input
+    const derivedEmail = isManagerLogin 
+        ? `manager.${branchInfoForEmail.baseBranchId.toLowerCase()}@example.com` 
+        : `staff.${branchInfoForEmail.baseBranchId.toLowerCase()}@example.com`;
 
     if (isValidCredential(formattedLoginId, derivedEmail)) {
-        // Store user info in localStorage for the session
         localStorage.setItem("loggedInUser", derivedEmail);
         localStorage.setItem("loggedInId", formattedLoginId);
 
+        const info = getBranchInfo(formattedLoginId, derivedEmail);
+
         toast({
             title: "Login Successful",
-            description: `Welcome. Redirecting to your dashboard...`,
+            description: `Welcome ${info.role === 'manager' ? 'Manager' : 'Staff'}. Redirecting...`,
         });
         router.push("/dashboard");
     } else {
          toast({
             variant: "destructive",
             title: "Login Failed",
-            description: "Invalid credentials provided. Please check and try again.",
+            description: "Invalid credentials. Ensure the Branch ID is correct and 'MANAGER' is used appropriately.",
         });
     }
   }
@@ -97,7 +101,7 @@ export function LoginForm() {
               <FormLabel className="text-foreground">Login ID</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="e.g., PURLEY or LEATHERHEAD" 
+                  placeholder="e.g., PURLEY or LEATHERHEAD MANAGER" 
                   {...field} 
                   className="text-base" 
                 />

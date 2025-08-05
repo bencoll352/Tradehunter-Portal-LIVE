@@ -28,10 +28,14 @@ export interface BranchInfo {
   branchName: string;
 }
 
-// Defines who is a manager for which branch.
+// Defines who is a manager for which branch based on a predictable email pattern.
 const managerMap: Partial<Record<BaseBranchId, string[]>> = {
     'PURLEY': ['manager.purley@example.com'],
     'LEATHERHEAD': ['manager.leatherhead@example.com'],
+    // We can add more manager emails here if other branches get managers
+    'BRANCH_B': ['manager.branch_b@example.com'],
+    'BRANCH_C': ['manager.branch_c@example.com'],
+    'DOVER': ['manager.dover@example.com'],
 };
 
 // Main function to get branch and user info
@@ -42,9 +46,10 @@ export const getBranchInfo = (loginId: BranchLoginId | null, email: string | nul
 
     const baseBranchId = branchIdMapping[loginId];
     
-    // Determine user role
+    // Determine user role based on the email pattern
     const managersForBranch = managerMap[baseBranchId];
     const isManager = managersForBranch ? managersForBranch.includes(email.toLowerCase()) : false;
+    // A user is staff if they are not a manager for that branch (and not unknown)
     const role: UserRole = isManager ? 'manager' : 'staff';
     
     // A simple mapping for display names.
@@ -55,6 +60,8 @@ export const getBranchInfo = (loginId: BranchLoginId | null, email: string | nul
         'DOVER': 'Dover Branch',
         'LEATHERHEAD': 'Leatherhead Branch',
     };
+
+    const displayId = loginId.includes("MANAGER") ? `${baseBranchId} MANAGER` : baseBranchId;
 
     return {
         baseBranchId,
