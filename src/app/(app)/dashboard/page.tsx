@@ -10,6 +10,7 @@ import { getBranchInfo } from '@/types';
 import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BranchPerformanceChart } from '@/components/dashboard/BranchPerformanceChart';
 
 export default function DashboardOverviewPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -49,6 +50,15 @@ export default function DashboardOverviewPage() {
 
   const newLeadsCount = traders.filter(t => t.status === 'New Lead').length;
   const hotLeadsCount = traders.filter(t => t.status === 'Call-Back').length;
+  const activeTradersCount = traders.filter(t => t.status === 'Active').length;
+  const inactiveTradersCount = traders.filter(t => t.status === 'Inactive').length;
+
+  const chartData = [
+    { name: 'Active', count: activeTradersCount, fill: "hsl(var(--chart-2))" },
+    { name: 'Hot Leads', count: hotLeadsCount, fill: "hsl(var(--chart-1))" },
+    { name: 'New Leads', count: newLeadsCount, fill: "hsl(var(--chart-4))" },
+    { name: 'Inactive', count: inactiveTradersCount, fill: "hsl(var(--muted))" },
+  ];
 
   return (
     <div className="space-y-8">
@@ -92,13 +102,19 @@ export default function DashboardOverviewPage() {
                          <Skeleton className="h-16" />
                      </div>
                 </div>
+                <div className="pt-4 mt-4 border-t">
+                    <Skeleton className="h-80 w-full" />
+                </div>
             </CardContent>
         </Card>
       ) : (
+        <>
          <DashboardStatsAndGoals 
             newLeadsCount={newLeadsCount}
             hotLeadsCount={hotLeadsCount}
         />
+         <BranchPerformanceChart data={chartData} />
+        </>
       )}
     </div>
   );
