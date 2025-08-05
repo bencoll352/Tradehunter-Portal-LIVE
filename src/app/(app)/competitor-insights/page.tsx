@@ -25,11 +25,6 @@ export default function CompetitorInsightsPage() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof insightsFormSchema>>({
-    resolver: zodResolver(insightsFormSchema),
-    defaultValues: { competitorUrl: "" },
-  });
-
   const onSubmit = async (values: z.infer<typeof insightsFormSchema>) => {
     setIsLoading(true);
     setAnalysisResponse(null);
