@@ -46,6 +46,7 @@ import type { traderFormSchema } from "@/components/dashboard/TraderForm";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import Papa from "papaparse"; // For CSV export
+import { Label } from "../ui/label";
 
 const ITEMS_PER_PAGE = 50; 
 
@@ -82,6 +83,7 @@ export function TraderTableClient({
   const [selectedTraderIds, setSelectedTraderIds] = useState<Set<string>>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
   const { toast } = useToast();
   const branchId = propBranchId; 
 
@@ -340,6 +342,7 @@ export function TraderTableClient({
     setSelectedTraderIds(new Set());
     setIsBulkDeleting(false);
     setIsBulkDeleteAlertOpen(false);
+    setDeleteConfirmationInput("");
   };
 
   const downloadCsv = () => {
@@ -498,15 +501,33 @@ export function TraderTableClient({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete {selectedTraderIds.size} selected trader(s). This action cannot be undone.
+                    This action is permanent and cannot be undone. You are about to delete{" "}
+                    <strong>{selectedTraderIds.size}</strong> trader(s) from the database.
+                    <br/><br/>
+                    To confirm, please type <strong>DELETE</strong> into the box below.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
+                <div className="py-2">
+                    <Label htmlFor="delete-confirm" className="sr-only">Confirm Deletion</Label>
+                    <Input 
+                        id="delete-confirm"
+                        value={deleteConfirmationInput}
+                        onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+                        placeholder='Type "DELETE" to confirm'
+                        className="border-destructive focus-visible:ring-destructive"
+                        autoFocus
+                    />
+                </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleConfirmBulkDelete} disabled={isBulkDeleting} className="bg-destructive hover:bg-destructive/90">
-                    {isBulkDeleting ? "Deleting..." : "Confirm Delete"}
+                  <AlertDialogCancel disabled={isBulkDeleting} onClick={() => setDeleteConfirmationInput("")}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleConfirmBulkDelete} 
+                    disabled={isBulkDeleting || deleteConfirmationInput !== "DELETE"} 
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    {isBulkDeleting ? "Deleting..." : "Confirm & Delete"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -687,3 +708,5 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
+
+    
