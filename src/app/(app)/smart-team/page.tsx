@@ -105,7 +105,8 @@ export default function SmartTeamPage() {
     const initializeData = async () => {
       if (typeof window !== 'undefined') {
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-        const info = getBranchInfo(storedLoggedInId);
+        const storedUser = localStorage.getItem('loggedInUser'); // Fetch the stored user email
+        const info = getBranchInfo(storedLoggedInId, storedUser); // Pass both to getBranchInfo
         setBranchInfo(info);
         setIsLoading(false); 
       }
@@ -166,5 +167,3 @@ export default function SmartTeamPage() {
     </div>
   );
 }
-
-    
