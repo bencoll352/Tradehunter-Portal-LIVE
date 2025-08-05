@@ -4,8 +4,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Send, AlertTriangle } from "lucide-react"; 
 
-export default function OutreachProAgentPage() {
-  const agentUrl = "https://outreach-pro-ai-sales-assistant-302177537641.us-west1.run.app";
+export default function OutreachProPage() {
+  const appUrl = "https://outreach-pro-ai-sales-assistant-302177537641.us-west1.run.app";
 
   return (
     <div className="space-y-6">
@@ -19,7 +19,7 @@ export default function OutreachProAgentPage() {
                       A sales assistant to help craft compelling outreach messages and manage targeted campaigns.
                       <span className="block mt-1 text-xs text-muted-foreground italic">
                         <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
-                        Note: Data accuracy within this agent is managed by the external provider. Verify critical information.
+                        Note: Data accuracy within this system is managed by the external provider. Verify critical information.
                       </span>
                   </CardDescription>
               </div>
@@ -28,7 +28,7 @@ export default function OutreachProAgentPage() {
         <CardContent>
           <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
             <iframe
-              src={agentUrl}
+              src={appUrl}
               title="Outreach Pro"
               className="w-full h-full border-0"
               allowFullScreen

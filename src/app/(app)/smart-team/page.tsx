@@ -32,7 +32,7 @@ const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
 );
 
 
-interface AgentRosterCardProps {
+interface RosterCardProps {
   title: string;
   role: string;
   description: string;
@@ -41,7 +41,7 @@ interface AgentRosterCardProps {
   iconStyle: string;
 }
 
-const AgentRosterCard = ({ title, role, description, href, icon: Icon, iconStyle }: AgentRosterCardProps) => (
+const RosterCard = ({ title, role, description, href, icon: Icon, iconStyle }: RosterCardProps) => (
   <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full">
     <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", iconStyle)}>
       <Icon className="h-12 w-12" />
@@ -55,24 +55,24 @@ const AgentRosterCard = ({ title, role, description, href, icon: Icon, iconStyle
     </CardDescription>
     <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
       <Link href={href}>
-        Launch Agent <ArrowRight className="ml-2 h-4 w-4" />
+        Launch Tool <ArrowRight className="ml-2 h-4 w-4" />
       </Link>
     </Button>
   </Card>
 );
 
-const agents: AgentRosterCardProps[] = [
+const assistants: RosterCardProps[] = [
     {
         title: "Summit Coach",
         role: "Performance Coach",
-        description: "I analyze performance data and provide actionable coaching insights to elevate your team.",
+        description: "I analyse performance data and provide actionable coaching insights to elevate your team.",
         href: "/smart-team/summit-coach",
         icon: Mountain,
         iconStyle: "border-purple-500/50 text-purple-500 bg-purple-500/10",
     },
     {
         title: "Sales Navigator",
-        role: "Lead Generation Agent",
+        role: "Lead Generation Tool",
         description: "I help you find and qualify high-quality leads, so you can focus on closing deals.",
         href: "/smart-team/sales-navigator",
         icon: Compass,
@@ -151,15 +151,15 @@ export default function SmartTeamPage() {
             <div>
               <CardTitle className="text-3xl font-bold text-primary">Smart Team Hub</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Meet your Smart Team members, here to help you succeed.
+                Meet your Smart assistants, here to help you succeed.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {agents.map((agent) => (
-                <AgentRosterCard key={agent.title} {...agent} />
+            {assistants.map((assistant) => (
+                <RosterCard key={assistant.title} {...assistant} />
             ))}
           </div>
         </CardContent>

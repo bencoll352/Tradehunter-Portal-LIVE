@@ -590,7 +590,7 @@ export function TraderTableClient({
                 <SortableHeader sortKey="description" label="Description" />
                 <TableHead>Notes</TableHead>
                 <SortableHeader sortKey="rating" label="Rating" />
-                <TableHead className="whitespace-nowrap">🌐Website</TableHead>
+                <TableHead className="whitespace-nowrap">🌐 Website</TableHead>
                 <TableHead className="whitespace-nowrap">📞 Phone</TableHead>
                 <SortableHeader sortKey="ownerName" label="Owner Name" />
                 <SortableHeader sortKey="mainCategory" label="Main Category" />
@@ -708,5 +708,3 @@ const TooltipContent = React.forwardRef<
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
-
-    

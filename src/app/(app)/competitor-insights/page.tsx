@@ -6,7 +6,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -19,13 +18,20 @@ const insightsFormSchema = z.object({
   competitorUrl: z.string().url({ message: "Please enter a valid URL." }),
 });
 
+type InsightsFormValues = z.infer<typeof insightsFormSchema>;
+
 export default function CompetitorInsightsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResponse, setAnalysisResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const onSubmit = async (values: z.infer<typeof insightsFormSchema>) => {
+  const form = useForm<InsightsFormValues>({
+    resolver: zodResolver(insightsFormSchema),
+    defaultValues: { competitorUrl: "" },
+  });
+
+  const onSubmit = async (values: InsightsFormValues) => {
     setIsLoading(true);
     setAnalysisResponse(null);
     setError(null);

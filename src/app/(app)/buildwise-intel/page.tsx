@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Rocket, Home, AlertTriangle } from "lucide-react"; 
+import { Loader2, Home, AlertTriangle } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 

@@ -22,7 +22,8 @@ export default function DashboardOverviewPage() {
     const initializeData = async () => {
       if (typeof window !== 'undefined') {
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-        const info = getBranchInfo(storedLoggedInId);
+        const storedUser = localStorage.getItem('loggedInUser');
+        const info = getBranchInfo(storedLoggedInId, storedUser);
         setBranchInfo(info);
 
         if (info.baseBranchId && info.role !== 'unknown') {
@@ -71,14 +72,14 @@ export default function DashboardOverviewPage() {
             <div>
               <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Welcome to your Portal</CardTitle>
               <CardDescription className="text-lg md:text-xl text-muted-foreground mt-1">
-                Your command center for trade intelligence and sales growth.
+                Your command centre for trade intelligence and sales growth.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-foreground max-w-3xl">
-            This is your central hub for managing customer relationships and analyzing market data. 
+            This is your central hub for managing customer relationships and analysing market data. 
             Navigate to the Trader Database to view and manage your customers, or use the Insight & Assistance features to get a competitive edge.
           </p>
         </CardContent>

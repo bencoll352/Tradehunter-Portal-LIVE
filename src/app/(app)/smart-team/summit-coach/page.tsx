@@ -2,24 +2,24 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BrainCircuit, AlertTriangle } from "lucide-react"; 
+import { Mountain, AlertTriangle } from "lucide-react"; 
 
-export default function SummitCoachAgentPage() {
-  const agentUrl = "https://summitcoach-302177537641.us-west1.run.app";
+export default function SummitCoachPage() {
+  const appUrl = "https://summitcoach-302177537641.us-west1.run.app";
 
   return (
     <div className="space-y-6">
       <Card className="shadow-lg w-full">
         <CardHeader>
           <div className="flex items-center gap-3">
-              <BrainCircuit className="h-8 w-8 text-primary" />
+              <Mountain className="h-8 w-8 text-primary" />
               <div>
                   <CardTitle className="text-2xl text-primary">Summit Coach</CardTitle>
                   <CardDescription>
-                      An AI-powered coaching agent designed to enhance skills and strategies.
+                      An performance coaching tool designed to enhance skills and strategies.
                       <span className="block mt-1 text-xs text-muted-foreground italic">
                         <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
-                        Note: Data accuracy within this agent is managed by the external provider. Verify critical information.
+                        Note: Data accuracy within this system is managed by the external provider. Verify critical information.
                       </span>
                   </CardDescription>
               </div>
@@ -28,7 +28,7 @@ export default function SummitCoachAgentPage() {
         <CardContent>
           <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
             <iframe
-              src={agentUrl}
+              src={appUrl}
               title="Summit Coach"
               className="w-full h-full border-0"
               allowFullScreen

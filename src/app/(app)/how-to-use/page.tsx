@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, Bot, Database, Calculator, Users } from "lucide-react"; 
+import { HelpCircle, Bot, Database, Calculator, Users, Lightbulb } from "lucide-react"; 
 
 const faqs = [
   {
@@ -18,14 +18,14 @@ const faqs = [
   {
     value: "item-2",
     question: "How do I use the Trader Database?",
-    answer: "Navigate to the 'TraderHunter' page. Here you can view all traders for your branch, search for specific ones, add new traders manually, or perform bulk uploads and deletions using a CSV file. Click on a trader's name to mark them as a 'Hot Lead' for follow-up.",
+    answer: "Navigate to the 'Trader Database' page. Here you can view all traders for your branch, search for specific ones, add new traders manually, or perform bulk uploads and deletions using a CSV file. Click on a trader's name to mark them as a 'Hot Lead' for follow-up.",
     icon: <Database className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-3",
     question: "What does Competitor Insights do?",
-    answer: "Go to the 'Competitor Insights' page and enter the website URL of a local competitor. The system will analyze their site and provide a strategic report on their offerings, strengths, weaknesses, and actionable counter-strategies for Jewson.",
-    icon: <Bot className="h-5 w-5 text-primary mr-2" />
+    answer: "Go to the 'Competitor Insights' page and enter the website URL of a local competitor. The system will analyse their site and provide a strategic report on their offerings, strengths, weaknesses, and actionable counter-strategies for Jewson.",
+    icon: <Lightbulb className="h-5 w-5 text-primary mr-2" />
   },
    {
     value: "item-4",
@@ -36,7 +36,7 @@ const faqs = [
    {
     value: "item-5",
     question: "What is the Smart Team Hub?",
-    answer: "Available to managers, the 'Smart Team' hub provides access to specialized AI agents that can assist with lead generation, strategic analysis, sales coaching, and crafting outreach messages, further enhancing your branch's capabilities.",
+    answer: "Available to managers, the 'Smart Team' hub provides access to specialised systems that can assist with lead generation, strategic analysis, sales coaching, and crafting outreach messages, further enhancing your branch's capabilities.",
     icon: <Users className="h-5 w-5 text-primary mr-2" />
   },
 ];

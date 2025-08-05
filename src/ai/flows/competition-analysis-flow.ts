@@ -1,11 +1,11 @@
 
 'use server';
 /**
- * @fileOverview A competitor analysis AI agent.
+ * @fileOverview A competitor analysis system.
  *
- * - analyzeCompetitor - A function that handles the competitor analysis process.
- * - CompetitionAnalysisInput - The input type for the analyzeCompetitor function.
- * - CompetitionAnalysisOutput - The return type for the analyzeCompetitor function.
+ * - analyseCompetitor - A function that handles the competitor analysis process.
+ * - CompetitionAnalysisInput - The input type for the analyseCompetitor function.
+ * - CompetitionAnalysisOutput - The return type for the analyseCompetitor function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -21,7 +21,7 @@ const CompetitionAnalysisOutputSchema = z.object({
 });
 export type CompetitionAnalysisOutput = z.infer<typeof CompetitionAnalysisOutputSchema>;
 
-export async function analyzeCompetitor(input: CompetitionAnalysisInput): Promise<CompetitionAnalysisOutput> {
+export async function analyseCompetitor(input: CompetitionAnalysisInput): Promise<CompetitionAnalysisOutput> {
   return competitionAnalysisFlow(input);
 }
 
@@ -29,7 +29,7 @@ const prompt = ai.definePrompt({
   name: 'competitionAnalysisPrompt',
   input: {schema: CompetitionAnalysisInputSchema},
   output: {schema: CompetitionAnalysisOutputSchema},
-  prompt: `You are an expert business strategist for a large UK builders merchant called Jewson. Your task is to analyze a competitor's website and provide a detailed strategic report.
+  prompt: `You are an expert business strategist for a large UK builders merchant called Jewson. Your task is to analyse a competitor's website and provide a detailed strategic report.
 
 Based on the content of the website at the URL {{{competitorUrl}}}, you MUST provide a detailed analysis covering the following points in order. Use the exact headings provided.
 
@@ -45,7 +45,7 @@ What are their potential weaknesses? Look for what's missing. Do they lack a cle
 ### Actionable Counter-Strategy for Jewson:
 This is the most important section. Provide specific, actionable advice on how Jewson can leverage the competitor's weaknesses and counter their strengths. For example:
 *   If the competitor has a weak online presence, suggest Jewson could run targeted digital ads in their area.
-*   If the competitor focuses only on retail (DIY), advise on how Jewson can emphasize its superior trade services.
+*   If the competitor focuses only on retail (DIY), advise on how Jewson can emphasise its superior trade services.
 *   If the competitor has a limited product range, suggest Jewson promote its wider stock availability.
 *   If the competitor's website is not user-friendly, suggest Jewson highlight its own easy-to-use online ordering system.
 

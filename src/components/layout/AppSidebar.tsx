@@ -12,16 +12,11 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   LayoutDashboard,
-  Bot,
   Lightbulb,
-  Settings,
   HelpCircle,
   Database,
   Users,
@@ -29,8 +24,6 @@ import {
   Home,
   LogOut,
   UserCircle,
-  AlertTriangle,
-  Rocket
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
@@ -39,12 +32,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { type BranchInfo, type BranchLoginId, getBranchInfo } from "@/types";
 import { InfoAccordion } from "../common/InfoAccordion";
-import { formatTraderDataForAnalysis } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", tooltip: "Dashboard Overview" },
   { href: "/tradehunter", icon: Database, label: "Trader Database", tooltip: "Manage Traders" },
-  { href: "/competitor-insights", icon: Lightbulb, label: "Competitor Insights", tooltip: "Analyze Competitors" },
+  { href: "/competitor-insights", icon: Lightbulb, label: "Competitor Insights", tooltip: "Analyse Competitors" },
   { href: "/estimator", icon: Calculator, label: "Estimator", tooltip: "Materials Estimator" },
   { href: "/smart-team", icon: Users, label: "Smart Team", tooltip: "Smart Team Hub (Managers)" },
   { href: "/buildwise-intel", icon: Home, label: "BuildWise Intel", tooltip: "External Intel Portal" },
@@ -84,10 +76,10 @@ export function AppSidebar() {
         icon: Lightbulb, 
         defaultOpen: true,
         content: [
-            "Quickly analyze competitor strategies.",
+            "Quickly analyse competitor strategies.",
             "Generate material estimates for projects.",
-            "Access specialized data via BuildWise Intel.",
-            "For managers: utilize the Smart Team Hub for advanced analytics and lead generation."
+            "Access specialised data via BuildWise Intel.",
+            "For managers: utilise the Smart Team Hub for advanced analytics and lead generation."
         ]
     },
     { 

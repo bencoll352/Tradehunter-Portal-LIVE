@@ -4,8 +4,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Compass, AlertTriangle } from "lucide-react"; 
 
-export default function SalesNavigatorAgentPage() {
-  const agentUrl = "https://sales-navigator-302177537641.us-west1.run.app";
+export default function SalesNavigatorPage() {
+  const appUrl = "https://sales-navigator-302177537641.us-west1.run.app";
 
   return (
     <div className="space-y-6">
@@ -16,10 +16,10 @@ export default function SalesNavigatorAgentPage() {
               <div>
                   <CardTitle className="text-2xl text-primary">Sales Navigator</CardTitle>
                   <CardDescription>
-                      A specialized agent to help navigate sales data, identify leads, and provide tactical recommendations.
+                      A specialised tool to help navigate sales data, identify leads, and provide tactical recommendations.
                       <span className="block mt-1 text-xs text-muted-foreground italic">
                         <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
-                        Note: Data accuracy within this agent is managed by the external provider. Verify critical information.
+                        Note: Data accuracy within this tool is managed by the external provider. Verify critical information.
                       </span>
                   </CardDescription>
               </div>
@@ -28,7 +28,7 @@ export default function SalesNavigatorAgentPage() {
         <CardContent>
           <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
             <iframe
-              src={agentUrl}
+              src={appUrl}
               title="Sales Navigator"
               className="w-full h-full border-0"
               allowFullScreen
