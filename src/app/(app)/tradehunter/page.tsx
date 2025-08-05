@@ -10,7 +10,7 @@ import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 type AddTraderActionType = (branchId: BaseBranchId, values: z.infer<typeof traderFormSchema>) => Promise<{ data: Trader | null; error: string | null }>;
 type UpdateTraderActionType = (branchId: BaseBranchId, traderId: string, values: z.infer<typeof traderFormSchema>) => Promise<{ data: Trader | null; error: string | null }>;
 type DeleteTraderActionType = (branchId: BaseBranchId, traderId: string) => Promise<{ success: boolean; error: string | null }>;
-type BulkAddTradersActionType = (branchId: BaseBranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
+type BulkAddTradersActionType = (branchId: BaseBranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error:string | null; }>;
 type BulkDeleteTradersActionType = (branchId: BaseBranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>;
 
 

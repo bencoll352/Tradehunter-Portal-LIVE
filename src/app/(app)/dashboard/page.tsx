@@ -1,13 +1,55 @@
 
 "use client";
 
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Bot, Database, Settings } from "lucide-react"; 
+import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
+import { Bot } from "lucide-react"; 
+import type { Trader, BranchInfo, BranchLoginId } from '@/types';
+import { getBranchInfo } from '@/types';
+import { getTradersAction } from '@/app/(app)/tradehunter/actions';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardOverviewPage() {
-  
+  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
+  const [traders, setTraders] = useState<Trader[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const initializeData = async () => {
+      if (typeof window !== 'undefined') {
+        const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
+        const info = getBranchInfo(storedLoggedInId);
+        setBranchInfo(info);
+
+        if (info.baseBranchId && info.role !== 'unknown') {
+          try {
+            const result = await getTradersAction(info.baseBranchId);
+            if (result.data) {
+              setTraders(result.data);
+            } else {
+              setTraders([]);
+              toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data." });
+            }
+          } catch (error) {
+             setTraders([]);
+             toast({ variant: "destructive", title: "Error Loading Data", description: "Failed to load trader data." });
+          } finally {
+            setIsLoading(false);
+          }
+        } else {
+            setIsLoading(false);
+        }
+      }
+    };
+    initializeData();
+  }, [toast]);
+
+  const newLeadsCount = traders.filter(t => t.status === 'New Lead').length;
+  const hotLeadsCount = traders.filter(t => t.status === 'Call-Back').length;
+
   return (
     <div className="space-y-8">
       <Card className="shadow-lg w-full bg-gradient-to-br from-primary/5 via-background to-background border-primary/20">
@@ -17,7 +59,7 @@ export default function DashboardOverviewPage() {
               <Bot className="h-12 w-12 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Welcome to TradeHunter Pro</CardTitle>
+              <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Welcome to your Portal</CardTitle>
               <CardDescription className="text-lg md:text-xl text-muted-foreground mt-1">
                 Your command center for trade intelligence and sales growth.
               </CardDescription>
@@ -25,65 +67,39 @@ export default function DashboardOverviewPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-foreground mb-4 text-center md:text-left">
-            Navigate to the Trader Database to manage your customer list, or explore the dashboard to access powerful insights and tools.
-          </p>
-           <p className="text-lg font-semibold text-accent text-center md:text-left italic px-4 py-2 bg-accent/10 rounded-md border border-accent/30">
-            A platform designed to help builders merchants identify, track, and engage with trade professionals.
+          <p className="text-foreground max-w-3xl">
+            This is your central hub for managing customer relationships and analyzing market data. 
+            Navigate to the Trader Database to view and manage your customers, or use the Insight & Assistance features to get a competitive edge.
           </p>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <FeatureCard
-          title="Trader Database"
-          description="View, add, and manage your complete list of trade customers. Track their status, activity, and value to your branch."
-          icon={<Database className="h-8 w-8 text-accent" />}
-          link="/tradehunter"
+      {isLoading ? (
+        <Card className="shadow-lg w-full border-accent/30">
+            <CardHeader>
+                 <Skeleton className="h-8 w-1/2" />
+                 <Skeleton className="h-4 w-3/4" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Skeleton className="h-24" />
+                    <Skeleton className="h-24" />
+                </div>
+                <div className="space-y-4 pt-4 border-t">
+                     <Skeleton className="h-6 w-1/3" />
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <Skeleton className="h-16" />
+                         <Skeleton className="h-16" />
+                     </div>
+                </div>
+            </CardContent>
+        </Card>
+      ) : (
+         <DashboardStatsAndGoals 
+            newLeadsCount={newLeadsCount}
+            hotLeadsCount={hotLeadsCount}
         />
-        <FeatureCard
-          title="Competitor Insights"
-          description="Analyze competitor websites to understand their strategy and identify opportunities for Jewson to win."
-          icon={<Bot className="h-8 w-8 text-accent" />}
-          link="/competitor-insights"
-        />
-        <FeatureCard
-          title="Materials Estimator"
-          description="Quickly generate accurate material estimates for customer projects to streamline your quoting process."
-          icon={<Settings className="h-8 w-8 text-accent" />}
-          link="/estimator"
-        />
-      </div>
+      )}
     </div>
-  );
-}
-
-interface FeatureCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  link: string;
-}
-
-function FeatureCard({ title, description, icon, link }: FeatureCardProps) {
-  return (
-    <Card className="shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden border-border hover:border-primary/30">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-3 mb-3">
-          {icon}
-          <CardTitle className="text-xl text-primary">{title}</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-muted-foreground text-sm mb-4">{description}</p>
-      </CardContent>
-      <CardContent className="pt-0">
-         <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-          <Link href={link}>
-            Go to {title} <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
   );
 }

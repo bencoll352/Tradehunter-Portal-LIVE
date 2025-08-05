@@ -40,7 +40,8 @@ export function DashboardClientPageContent({
     const initializeDashboard = async () => {
       if (typeof window !== 'undefined') {
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-        const info = getBranchInfo(storedLoggedInId);
+        const storedUser = localStorage.getItem('loggedInUser');
+        const info = getBranchInfo(storedLoggedInId, storedUser);
         setBranchInfo(info);
 
         if (info.baseBranchId && info.role !== 'unknown') {
@@ -103,7 +104,8 @@ export function DashboardClientPageContent({
       try {
         return parseISO(t.lastActivity) >= thirtyDaysAgo;
       } catch (e) {
-        console.warn(`Invalid date format for trader ID ${t.id}: ${t.lastActivity}`);
+        // Using a more specific warning for easier debugging
+        console.warn(`[DashboardClientPageContent] Invalid date format for trader ID ${t.id}: "${t.lastActivity}". This trader will not be counted in 'Recently Active'.`);
         return false; 
       }
     }).length;

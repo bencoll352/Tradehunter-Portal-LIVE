@@ -23,6 +23,7 @@ export type UserRole = 'manager' | 'staff' | 'unknown';
 export interface BranchInfo {
   baseBranchId: BaseBranchId | null;
   displayLoginId: BranchLoginId | null;
+  userEmail: string | null;
   role: UserRole;
   branchName: string;
 }
@@ -33,17 +34,17 @@ const managerMap: Partial<Record<BaseBranchId, string[]>> = {
     'LEATHERHEAD': ['manager.leatherhead@example.com'],
 };
 
-// Simplified getBranchInfo that doesn't rely on email, just the login ID.
-export const getBranchInfo = (loginId: BranchLoginId | null): BranchInfo => {
-    if (!loginId || !VALID_LOGIN_IDS.includes(loginId)) {
-        return { baseBranchId: null, displayLoginId: null, role: 'unknown', branchName: 'Unknown Branch' };
+// Main function to get branch and user info
+export const getBranchInfo = (loginId: BranchLoginId | null, email: string | null): BranchInfo => {
+    if (!loginId || !VALID_LOGIN_IDS.includes(loginId) || !email) {
+        return { baseBranchId: null, displayLoginId: null, userEmail: null, role: 'unknown', branchName: 'Unknown Branch' };
     }
 
     const baseBranchId = branchIdMapping[loginId];
     
-    // Determine role based on the base branch ID. For simplicity, we'll make some managers.
-    // This logic can be adapted. Here, managers are hardcoded for certain base branches.
-    const isManager = baseBranchId === 'PURLEY' || baseBranchId === 'LEATHERHEAD';
+    // Determine user role
+    const managersForBranch = managerMap[baseBranchId];
+    const isManager = managersForBranch ? managersForBranch.includes(email.toLowerCase()) : false;
     const role: UserRole = isManager ? 'manager' : 'staff';
     
     // A simple mapping for display names.
@@ -58,6 +59,7 @@ export const getBranchInfo = (loginId: BranchLoginId | null): BranchInfo => {
     return {
         baseBranchId,
         displayLoginId: loginId,
+        userEmail: email,
         role,
         branchName: branchNameMap[baseBranchId] || 'Unknown Branch',
     };
