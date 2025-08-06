@@ -16,6 +16,7 @@ const getPathTitle = (path: string): string => {
     "/estimator": "Materials Estimator",
     "/smart-team": "Smart Team Hub",
     "/buildwise-intel": "BuildWise Intel",
+    "/automation-scraping": "Automation & Scraping",
     "/how-to-use": "How to Use"
   };
 
