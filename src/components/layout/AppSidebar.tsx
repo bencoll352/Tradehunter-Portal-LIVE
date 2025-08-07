@@ -41,7 +41,6 @@ const navItems = [
   { href: "/estimator", icon: Calculator, label: "Estimator", tooltip: "Materials Estimator" },
   { href: "/smart-team", icon: Users, label: "Smart Team", tooltip: "Smart Team Hub (Managers)" },
   { href: "/buildwise-intel", icon: Home, label: "BuildWise Intel", tooltip: "External Intel Portal" },
-  { href: "/automation-scraping", icon: Bot, label: "Automation", tooltip: "Automation & Scraping Tools" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use", tooltip: "How to Use Guide" },
 ];
 
