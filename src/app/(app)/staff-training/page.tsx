@@ -26,6 +26,11 @@ export default function StaffTrainingPage() {
           </div>
         </CardHeader>
         <CardContent>
+            <p className="mb-6 text-foreground">
+                Describe a sales situation you want to practice, and the interactive system will create a role-play scenario for you to tackle. For example, you could practice handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high"</code> or navigating situations like <code className="font-semibold text-primary">"handling a technical question I don't know the answer to."</code>
+                <br/><br/>
+                Use the tool below to get started.
+            </p>
           <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
             <iframe
               src={appUrl}
