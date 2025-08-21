@@ -40,7 +40,6 @@ export default function StaffTrainingPage() {
                   title="Apex Sales Trainer - Interactive Scenarios"
                   className="w-full h-full border-0"
                   allowFullScreen
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                 />
               </div>
             </div>
