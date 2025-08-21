@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, Bot, Database, Calculator, Users, Lightbulb } from "lucide-react"; 
+import { HelpCircle, Sparkles, Database, Calculator, Users, Lightbulb } from "lucide-react"; 
 
 const faqs = [
   {

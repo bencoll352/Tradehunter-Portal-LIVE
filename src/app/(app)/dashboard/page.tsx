@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
-import { Bot } from "lucide-react"; 
+import { Sparkles } from "lucide-react"; 
 import type { Trader, BranchInfo, BranchLoginId } from '@/types';
 import { getBranchInfo } from '@/types';
 import { getTradersAction } from '@/app/(app)/tradehunter/actions';
@@ -67,7 +67,7 @@ export default function DashboardOverviewPage() {
         <CardHeader>
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
             <div className="p-3 bg-primary/10 rounded-full border border-primary/20">
-              <Bot className="h-12 w-12 text-primary" />
+              <Sparkles className="h-12 w-12 text-primary" />
             </div>
             <div>
               <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Welcome to your Portal</CardTitle>

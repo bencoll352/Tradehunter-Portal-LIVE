@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Bot, Compass, ArrowRight, MessageSquareQuote, Target } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Compass, ArrowRight, MessageSquareQuote, Target } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';

@@ -37,7 +37,7 @@ const StandardCategories = {
   PROPERTY_MAINTENANCE: "Property Maintenance",
   PLASTERERS: "Plasterers",
   LANDSCAPERS: "Landscapers",
-  HANDYMAN_HOME_IMPROVEMENTS: "Handy Man - Home Improvements",
+  HANDYMAN_HOME_IMPROVEMENTS: "Handyman - Home Improvements",
   PROPERTY_DEVELOPERS: "Property developers",
   PAINTERS_DECORATORS: "Painters & Decorators",
   KITCHEN_BATHROOM_INSTALLERS: "Kitchen and Bathroom installers",
@@ -65,8 +65,8 @@ const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
   { name: 'George Jetson', branchId: 'DOVER', status: 'New Lead', description: 'Digital Indexer at Spacely Space Sprockets. Future-proof solutions.', rating: 4.0, phone: '01234 567805', 
     mainCategory: StandardCategories.HANDYMAN_HOME_IMPROVEMENTS, categories: StandardCategories.HANDYMAN_HOME_IMPROVEMENTS, address: "Orbit City Apartments", ownerName: "George Jetson", workdayTiming: "Mon-Fri 9am-5pm (21st Century Time)", website: null, ownerProfileLink: null, closedOn: null, notes: "Interested in our latest robotic tools.", callBackDate: null, estimatedAnnualRevenue: 1200000, estimatedCompanyValue: 500000, employeeCount: 200 },
   
-  { name: 'Laura Croft', branchId: 'LEATHERHEAD', status: 'Active', description: 'Supplier of rare archaeological equipment and expedition gear. Expert in ancient artifacts.', website: 'https://croftarch.example.com', phone: '01372 100201', address: 'Croft Manor, Leatherhead, SUR 123', 
-    mainCategory: StandardCategories.INTERIOR_DESIGNER, ownerName: "Lara Croft", ownerProfileLink: "https://example.com/laracroft", categories: StandardCategories.INTERIOR_DESIGNER, workdayTiming: "Mon-Fri 9am-6pm", closedOn: "Weekends", reviewKeywords: "rare, artifacts, adventure, quality", rating: 4.9, notes: "Key supplier for university expeditions.", callBackDate: null, estimatedAnnualRevenue: 400000, estimatedCompanyValue: 1200000, employeeCount: 12 },
+  { name: 'Laura Croft', branchId: 'LEATHERHEAD', status: 'Active', description: 'Supplier of rare archaeological equipment and expedition gear. Expert in ancient artefacts.', website: 'https://croftarch.example.com', phone: '01372 100201', address: 'Croft Manor, Leatherhead, SUR 123', 
+    mainCategory: StandardCategories.INTERIOR_DESIGNER, ownerName: "Lara Croft", ownerProfileLink: "https://example.com/laracroft", categories: StandardCategories.INTERIOR_DESIGNER, workdayTiming: "Mon-Fri 9am-6pm", closedOn: "Weekends", reviewKeywords: "rare, artefacts, adventure, quality", rating: 4.9, notes: "Key supplier for university expeditions.", callBackDate: null, estimatedAnnualRevenue: 400000, estimatedCompanyValue: 1200000, employeeCount: 12 },
   
   { name: 'Henry "Indiana" Jones Jr.', branchId: 'LEATHERHEAD', status: 'Call-Back', description: 'Procurement of ancient relics and historical items. Often on field assignments.', rating: 4.7, phone: '01372 100202', 
     mainCategory: StandardCategories.INTERIOR_DESIGNER, categories: StandardCategories.INTERIOR_DESIGNER, address: "Barnett College Dept. of Archaeology", ownerName: "Dr. Henry Jones Jr.", ownerProfileLink: "https://example.com/indy", workdayTiming: "Varies (often unavailable)", closedOn: null, reviewKeywords: "knowledgeable, adventurous, rare finds", website: null, notes: "Follow up regarding the Crystal Skull shipment. Prefers to be called Indy.", callBackDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), estimatedAnnualRevenue: 200000, estimatedCompanyValue: 600000, employeeCount: 3 },
@@ -90,7 +90,7 @@ const INITIAL_SEED_TRADERS_DATA_RAW: Omit<Trader, 'id' | 'lastActivity'>[] = [
     mainCategory: StandardCategories.PAINTERS_DECORATORS, categories: StandardCategories.PAINTERS_DECORATORS, address: "3 Brush Stroke Boulevard, Dover", ownerName: "Paula Hue", workdayTiming: "Mon-Fri 9am-5pm", website: null, ownerProfileLink: null, closedOn: "Weekends", reviewKeywords: "painting, decorating, meticulous, interior, exterior", notes: "New lead, enquired about eco-friendly paints.", callBackDate: null, estimatedAnnualRevenue: 70000, estimatedCompanyValue: 25000, employeeCount: 2 },
   
   { name: 'Carl The Carpenter', branchId: 'LEATHERHEAD', status: 'Active', description: 'Custom carpentry, joinery, and bespoke furniture.', rating: 4.8, phone: '01372 100205',
-    mainCategory: StandardCategories.CARPENTERS_JOINERS, categories: StandardCategories.CARPENTERS_JOINERS, address: "Unit 5, Woodwork Way, Leatherhead", ownerName: "Carl Wood", workdayTiming: "Mon-Fri 8am-6pm", website: 'https://carlscarpentry.example.com', ownerProfileLink: 'https://example.com/carlwood', closedOn: "Sundays", reviewKeywords: "carpentry, joinery, bespoke, quality wood", notes: "Specializes in oak furniture.", callBackDate: null, estimatedAnnualRevenue: 150000, estimatedCompanyValue: 75000, employeeCount: 7 }
+    mainCategory: StandardCategories.CARPENTERS_JOINERS, categories: StandardCategories.CARPENTERS_JOINERS, address: "Unit 5, Woodwork Way, Leatherhead", ownerName: "Carl Wood", workdayTiming: "Mon-Fri 8am-6pm", website: 'https://carlscarpentry.example.com', ownerProfileLink: 'https://example.com/carlwood', closedOn: "Sundays", reviewKeywords: "carpentry, joinery, bespoke, quality wood", notes: "Specialises in oak furniture.", callBackDate: null, estimatedAnnualRevenue: 150000, estimatedCompanyValue: 75000, employeeCount: 7 }
 ];
 
 const INITIAL_SEED_TRADERS_DATA: Omit<Trader, 'id'>[] = INITIAL_SEED_TRADERS_DATA_RAW.map((trader, index) => {
@@ -161,7 +161,7 @@ const mapDocToTrader = (docData: any, id: string): Trader => {
 };
 
 export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Trader[]> {
-  if (!db) throw new Error("Firestore (db) is not initialized.");
+  if (!db) throw new Error("Firestore (db) is not initialised.");
   const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
   const q = query(tradersCollectionRef, where("branchId", "==", baseBranchId));
   try {
@@ -191,7 +191,7 @@ export async function getTradersByBranch(baseBranchId: BaseBranchId): Promise<Tr
 }
 
 export async function getTraderById(id: string, baseBranchId: BaseBranchId): Promise<Trader | null> {
-  if (!db) throw new Error("Firestore (db) is not initialized.");
+  if (!db) throw new Error("Firestore (db) is not initialised.");
   try {
     const traderDocRef = doc(db, TRADERS_COLLECTION, id);
     const docSnap = await getDoc(traderDocRef);
@@ -214,7 +214,7 @@ export async function addTrader(
   traderData: Omit<Trader, 'id' | 'lastActivity' | 'branchId'>,
   baseBranchId: BaseBranchId
 ): Promise<Trader> {
-  if (!db) throw new Error("Firestore (db) is not initialized.");
+  if (!db) throw new Error("Firestore (db) is not initialised.");
   try {
     const dataWithSystemFields = {
       ...traderData,
@@ -233,7 +233,7 @@ export async function addTrader(
 
 
 export async function updateTrader(updatedTraderData: Trader): Promise<Trader | null> {
-  if (!db) throw new Error("Firestore (db) is not initialized.");
+  if (!db) throw new Error("Firestore (db) is not initialised.");
   try {
     const traderDocRef = doc(db, TRADERS_COLLECTION, updatedTraderData.id);
     const dataToPrepareForUpdate = {
@@ -251,7 +251,7 @@ export async function updateTrader(updatedTraderData: Trader): Promise<Trader | 
 }
 
 export async function deleteTrader(traderId: string, baseBranchId: BaseBranchId): Promise<boolean> {
-  if (!db) throw new Error("Firestore (db) is not initialized.");
+  if (!db) throw new Error("Firestore (db) is not initialised.");
   try {
     const traderDocRef = doc(db, TRADERS_COLLECTION, traderId);
     await deleteDoc(traderDocRef);
@@ -266,7 +266,7 @@ export async function bulkAddTraders(
   tradersToCreate: ParsedTraderData[],
   baseBranchId: BaseBranchId
 ): Promise<Trader[]> {
-  if (!db) throw new Error("Firestore (db) is not initialized.");
+  if (!db) throw new Error("Firestore (db) is not initialised.");
   const tradersCollectionRef = collection(db, TRADERS_COLLECTION);
   const createdTraders: Trader[] = [];
   const chunkSize = 499;
@@ -314,7 +314,7 @@ export async function bulkAddTraders(
 
 export async function bulkDeleteTraders(traderIds: string[], baseBranchId: BaseBranchId): Promise<BulkDeleteTradersResult> {
   if (!db) {
-    const errorMsg = "Firestore not initialized. Cannot bulk delete.";
+    const errorMsg = "Firestore not initialised. Cannot bulk delete.";
     console.error(`[TraderService:bulkDeleteTraders] ${errorMsg}`);
     return { successCount: 0, failureCount: traderIds.length, error: errorMsg };
   }

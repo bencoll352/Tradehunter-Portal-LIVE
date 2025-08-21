@@ -16,7 +16,7 @@ export default function StaffTrainingPage() {
               <div>
                   <CardTitle className="text-2xl text-primary">Interactive Sales Trainer</CardTitle>
                   <CardDescription>
-                      Practice and improve your sales skills in realistic scenarios.
+                      Practise and improve your sales skills in realistic scenarios.
                        <span className="block mt-1 text-xs text-muted-foreground italic">
                         <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
                         Note: This is an external training tool. Performance and data are managed by the provider.
@@ -28,9 +28,9 @@ export default function StaffTrainingPage() {
         <CardContent>
             <div className="p-6 border rounded-lg">
               <p className="mb-6 text-foreground">
-                  This interactive sales trainer helps you practice and improve your skills. You can describe a sales situation you want to practice, and the system will create a role-play scenario for you.
+                  This interactive sales trainer helps you practise and improve your skills. You can describe a sales situation you want to practise, and the system will create a role-play scenario for you.
                   <br/><br/>
-                  For example, you could practice handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high,"</code> navigating situations like <code className="font-semibold text-primary">"handling a technical question I don't know the answer to,"</code> or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
+                  For example, you could practise handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high,"</code> navigating situations like <code className="font-semibold text-primary">"handling a technical question I don't know the answer to,"</code> or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
                   <br/><br/>
                   Use the tool below to get started.
               </p>
