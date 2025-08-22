@@ -2,7 +2,8 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, AlertTriangle } from "lucide-react"; 
+import { Button } from "@/components/ui/button";
+import { GraduationCap, Download, AlertTriangle } from "lucide-react"; 
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://apex-sales-trainer-426945894753.us-west1.run.app/";
@@ -11,18 +12,22 @@ export default function StaffTrainingPage() {
     <div className="space-y-6">
       <Card className="shadow-lg w-full">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <GraduationCap className="h-10 w-10 text-primary" />
-            <div>
-              <CardTitle className="text-3xl font-bold text-primary">Interactive Sales Trainer</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">
-                Practise and improve your sales skills in realistic scenarios.
-                  <span className="block mt-1 text-xs text-muted-foreground italic">
-                    <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
-                    Note: This is an external training tool. Performance and data are managed by the provider.
-                  </span>
-              </CardDescription>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <GraduationCap className="h-10 w-10 text-primary" />
+              <div>
+                <CardTitle className="text-3xl font-bold text-primary">Interactive Sales Trainer</CardTitle>
+                <CardDescription className="text-lg text-muted-foreground">
+                  Practise and improve your sales skills in realistic scenarios.
+                </CardDescription>
+              </div>
             </div>
+            <Button asChild>
+                <a href="/resources/The_Growth_Mindset_Training_Program.pdf" download>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Resources
+                </a>
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -46,4 +51,3 @@ export default function StaffTrainingPage() {
     </div>
   );
 }
-
