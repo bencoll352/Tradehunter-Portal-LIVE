@@ -11,22 +11,21 @@ export default function StaffTrainingPage() {
     <div className="space-y-6">
       <Card className="shadow-lg w-full">
         <CardHeader>
-          <div className="flex items-center gap-3">
-              <GraduationCap className="h-8 w-8 text-primary" />
-              <div>
-                  <CardTitle className="text-2xl text-primary">Interactive Sales Trainer</CardTitle>
-                  <CardDescription>
-                      Practise and improve your sales skills in realistic scenarios.
-                       <span className="block mt-1 text-xs text-muted-foreground italic">
-                        <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
-                        Note: This is an external training tool. Performance and data are managed by the provider.
-                      </span>
-                  </CardDescription>
-              </div>
+          <div className="flex items-center gap-3 mb-2">
+            <GraduationCap className="h-10 w-10 text-primary" />
+            <div>
+              <CardTitle className="text-3xl font-bold text-primary">Interactive Sales Trainer</CardTitle>
+              <CardDescription className="text-lg text-muted-foreground">
+                Practise and improve your sales skills in realistic scenarios.
+                  <span className="block mt-1 text-xs text-muted-foreground italic">
+                    <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
+                    Note: This is an external training tool. Performance and data are managed by the provider.
+                  </span>
+              </CardDescription>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-            <div className="p-6 border rounded-lg">
               <p className="mb-6 text-foreground">
                   This interactive sales trainer helps you practise and improve your skills. You can describe a sales situation you want to practise, and the system will create a role-play scenario for you.
                   <br/><br/>
@@ -42,9 +41,9 @@ export default function StaffTrainingPage() {
                   allowFullScreen
                 />
               </div>
-            </div>
         </CardContent>
       </Card>
     </div>
   );
 }
+
