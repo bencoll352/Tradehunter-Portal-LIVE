@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://apex-sales-trainer-426945894753.us-west1.run.app/";
   const trainingPdfUrl = "/resources/The_Growth_Mindset_Training_Program.pdf";
+  const presentationUrl = "https://chat.z.ai/space/a0m48718gd21-ppt";
 
   return (
     <div className="space-y-6">
@@ -25,9 +26,10 @@ export default function StaffTrainingPage() {
         </CardHeader>
         <CardContent>
             <Tabs defaultValue="interactive-trainer" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="interactive-trainer">Interactive Trainer</TabsTrigger>
                     <TabsTrigger value="growth-mindset">The Growth Mindset PDF</TabsTrigger>
+                    <TabsTrigger value="presentation-trainer">Presentation Trainer</TabsTrigger>
                 </TabsList>
                 <TabsContent value="interactive-trainer" className="mt-4">
                     <Card>
@@ -65,6 +67,26 @@ export default function StaffTrainingPage() {
                                 <iframe
                                     src={trainingPdfUrl}
                                     title="The Growth Mindset Training Program PDF"
+                                    className="w-full h-full border-0"
+                                    allow="fullscreen"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="presentation-trainer" className="mt-4">
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Presentation Trainer</CardTitle>
+                            <CardDescription>
+                                Review this presentation material to enhance your sales skills.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                                <iframe
+                                    src={presentationUrl}
+                                    title="Presentation Trainer"
                                     className="w-full h-full border-0"
                                     allow="fullscreen"
                                 />
