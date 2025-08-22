@@ -2,50 +2,77 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { GraduationCap, Download, AlertTriangle } from "lucide-react"; 
+import { GraduationCap } from "lucide-react"; 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://apex-sales-trainer-426945894753.us-west1.run.app/";
+  const trainingPdfUrl = "/resources/The_Growth_Mindset_Training_Program.pdf";
 
   return (
     <div className="space-y-6">
       <Card className="shadow-lg w-full">
         <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-3">
               <GraduationCap className="h-10 w-10 text-primary" />
               <div>
-                <CardTitle className="text-3xl font-bold text-primary">Interactive Sales Trainer</CardTitle>
+                <CardTitle className="text-3xl font-bold text-primary">Staff Training Centre</CardTitle>
                 <CardDescription className="text-lg text-muted-foreground">
-                  Practise and improve your sales skills in realistic scenarios.
+                  Hone your skills with our interactive tools and resources.
                 </CardDescription>
               </div>
             </div>
-            <Button asChild>
-                <a href="/resources/The_Growth_Mindset_Training_Program.pdf" download>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Resources
-                </a>
-            </Button>
-          </div>
         </CardHeader>
         <CardContent>
-              <p className="mb-6 text-foreground">
-                  This interactive sales trainer helps you practise and improve your skills. You can describe a sales situation you want to practise, and the system will create a role-play scenario for you.
-                  <br/><br/>
-                  For example, you could practise handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high,"</code> navigating situations like <code className="font-semibold text-primary">"handling a technical question I don't know the answer to,"</code> or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
-                  <br/><br/>
-                  Use the tool below to get started.
-              </p>
-              <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
-                <iframe
-                  src={apexSalesTrainerUrl}
-                  title="Apex Sales Trainer - Interactive Scenarios"
-                  className="w-full h-full border-0"
-                  allowFullScreen
-                />
-              </div>
+            <Tabs defaultValue="interactive-trainer" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="interactive-trainer">Interactive Trainer</TabsTrigger>
+                    <TabsTrigger value="growth-mindset">The Growth Mindset PDF</TabsTrigger>
+                </TabsList>
+                <TabsContent value="interactive-trainer" className="mt-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Interactive Scenario Trainer</CardTitle>
+                            <CardDescription>
+                                Describe a sales situation you want to practise. The system will create a role-play scenario for you to navigate.
+                                <br/>
+                                For example, you could practise handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high,"</code> or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                                <iframe
+                                src={apexSalesTrainerUrl}
+                                title="Apex Sales Trainer - Interactive Scenarios"
+                                className="w-full h-full border-0"
+                                allowFullScreen
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="growth-mindset" className="mt-4">
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>The Growth Mindset: A Pioneering Recruitment Training Program</CardTitle>
+                            <CardDescription>
+                                Please use this document as a key resource for your professional development. 
+                                <strong className="block mt-1">Note:</strong> If the PDF does not load, please ensure the file `The_Growth_Mindset_Training_Program.pdf` has been added to the `public/resources` folder in the project directory.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                                <iframe
+                                    src={trainingPdfUrl}
+                                    title="The Growth Mindset Training Program PDF"
+                                    className="w-full h-full border-0"
+                                    allow="fullscreen"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </CardContent>
       </Card>
     </div>
