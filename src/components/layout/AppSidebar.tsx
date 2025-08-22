@@ -25,6 +25,7 @@ import {
   LogOut,
   UserCircle,
   GraduationCap,
+  Sparkles,
 } from "lucide-react";
 import { Logo } from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
@@ -75,7 +76,7 @@ export function AppSidebar() {
     { 
         id: "insights", 
         title: "Insight & Assistance Features",
-        icon: Lightbulb, 
+        icon: Sparkles, 
         defaultOpen: true,
         content: [
             "Quickly analyse competitor strategies.",

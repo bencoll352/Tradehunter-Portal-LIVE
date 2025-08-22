@@ -1,10 +1,9 @@
 
 import type { HTMLAttributes } from 'react';
-import Image from 'next/image';
 import { cn } from "@/lib/utils";
 import { Target } from 'lucide-react'; 
 
-export function Logo(props: HTMLAttributes<HTMLDivElement> & { width?: number, height?: number }) {
+export function Logo(props: HTMLAttributes<HTMLDivElement>) {
   const { className, ...rest } = props;
 
   return (
