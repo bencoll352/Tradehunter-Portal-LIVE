@@ -17,7 +17,7 @@ body {
     --popover: 0 0% 100%; /* White */
     --popover-foreground: 220 15% 25%;
 
-    --primary: 215 35% 30%; /* Strong, slightly desaturated blue */
+    --primary: 217 91% 60%; /* Bright Blue from Logo */
     --primary-foreground: 0 0% 100%; /* White text for primary bg */
 
     --secondary: 210 40% 92%; /* Lighter gray for secondary elements */
@@ -26,7 +26,7 @@ body {
     --muted: 210 40% 90%; /* Slightly darker gray for muted elements */
     --muted-foreground: 215.4 16.3% 46.9%; /* Muted text */
 
-    --accent: 170 65% 40%; /* Vibrant teal */
+    --accent: 25 95% 53%; /* Orange from Logo */
     --accent-foreground: 0 0% 100%; /* White text for accent bg */
 
     --destructive: 0 84.2% 60.2%;
@@ -34,7 +34,7 @@ body {
 
     --border: 0 0% 90%; /* Border color */
     --input: 0 0% 90%; /* Input background/border */
-    --ring: 170 65% 40%; /* Ring color (focus) - teal */
+    --ring: 25 95% 53%; /* Ring color (focus) - orange */
 
     --radius: 0.5rem;
 
@@ -46,17 +46,17 @@ body {
     --chart-5: 27 87% 67%;
 
     /* Sidebar specific theme */
-    --sidebar-background: 215 35% 22%; /* Darker shade of primary blue */
+    --sidebar-background: 217 91% 30%; /* Darker shade of primary blue */
     --sidebar-foreground: 210 20% 85%; /* Light gray for text */
     
-    --sidebar-primary: 170 65% 45%; /* Brighter teal for active/highlighted items */
+    --sidebar-primary: 25 95% 53%; /* Orange for active/highlighted items */
     --sidebar-primary-foreground: 0 0% 100%; /* White/very light text */
     
-    --sidebar-accent: 215 35% 28%; /* Hover state - slightly lighter than sidebar bg */
+    --sidebar-accent: 217 91% 35%; /* Hover state - slightly lighter than sidebar bg */
     --sidebar-accent-foreground: 0 0% 100%; /* White/very light text */
     
-    --sidebar-border: 215 35% 18%; /* Border color within sidebar */
-    --sidebar-ring: 170 65% 45%; /* Teal for focus rings in sidebar */
+    --sidebar-border: 217 91% 25%; /* Border color within sidebar */
+    --sidebar-ring: 25 95% 53%; /* Orange for focus rings in sidebar */
   }
 
   .dark {
@@ -70,7 +70,7 @@ body {
     --popover: 220 15% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 215 40% 55%; /* Lighter blue for dark mode */
+    --primary: 217 91% 60%; /* Same bright blue for dark mode */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 15% 20%;
@@ -79,7 +79,7 @@ body {
     --muted: 220 15% 20%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 170 70% 50%; /* Brighter teal for dark mode */
+    --accent: 25 95% 53%; /* Same orange for dark mode */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 50%;
@@ -87,20 +87,20 @@ body {
 
     --border: 220 15% 25%;
     --input: 220 15% 25%;
-    --ring: 170 70% 50%;
+    --ring: 25 95% 53%;
 
     /* Dark Sidebar specific theme */
-    --sidebar-background: 215 30% 18%; 
+    --sidebar-background: 217 91% 22%; 
     --sidebar-foreground: 210 20% 88%;
     
-    --sidebar-primary: 170 70% 50%; 
+    --sidebar-primary: 25 95% 53%; 
     --sidebar-primary-foreground: 0 0% 100%;
     
-    --sidebar-accent: 215 30% 24%;
+    --sidebar-accent: 217 91% 28%;
     --sidebar-accent-foreground: 0 0% 100%;
     
-    --sidebar-border: 215 30% 15%;
-    --sidebar-ring: 170 70% 50%;
+    --sidebar-border: 217 91% 18%;
+    --sidebar-ring: 25 95% 53%;
   }
 }
 

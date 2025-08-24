@@ -1,7 +1,7 @@
 
 import type { HTMLAttributes } from 'react';
 import { cn } from "@/lib/utils";
-import { Target } from 'lucide-react'; 
+import { Crosshair } from 'lucide-react'; 
 
 export function Logo(props: HTMLAttributes<HTMLDivElement>) {
   const { className, ...rest } = props;
@@ -9,10 +9,17 @@ export function Logo(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("flex flex-col items-center justify-center gap-1", className)} {...rest}>
        <div className="flex items-center gap-2">
-         <Target className="h-7 w-7 text-sidebar-primary-foreground" />
-         <span className="text-xl font-bold text-sidebar-primary-foreground group-data-[collapsible=icon]:hidden">
-           TradeHunter Pro
-         </span>
+         <div className="p-1.5 rounded-md bg-sidebar-primary">
+            <Crosshair className="h-6 w-6 text-sidebar-primary-foreground" />
+         </div>
+         <div className="flex flex-col text-left group-data-[collapsible=icon]:hidden">
+            <span className="text-lg font-bold text-sidebar-primary-foreground leading-tight">
+              TradeHunter
+            </span>
+            <span className="text-lg font-bold text-sidebar-primary leading-tight -mt-1">
+              Pro
+            </span>
+         </div>
        </div>
     </div>
   );
