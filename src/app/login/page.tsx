@@ -1,18 +1,16 @@
 
 import { DynamicLoginFormWrapper } from '@/components/auth/DynamicLoginFormWrapper';
-import { Crosshair } from 'lucide-react';
+import { Logo } from '@/components/icons/Logo';
 
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center justify-center gap-4">
-            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 border border-primary/20">
-                <Crosshair className="h-8 w-8 text-primary" />
-            </div>
+            <Logo className="h-20" />
             <div className="text-center">
                 <h1 className="text-3xl font-bold text-primary">
-                    TradeHunter <span className="text-accent">Pro</span>
+                    Welcome to TradeHunter <span className="text-accent">Pro</span>
                 </h1>
                 <p className="mt-1 text-muted-foreground">Sign in to your branch account</p>
             </div>

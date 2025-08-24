@@ -101,7 +101,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="border-r-0">
-      <SidebarHeader className="p-3">
+      <SidebarHeader className="p-3 h-20 flex items-center justify-center">
          <Logo />
       </SidebarHeader>
 

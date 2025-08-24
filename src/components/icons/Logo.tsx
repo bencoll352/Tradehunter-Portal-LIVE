@@ -1,26 +1,32 @@
 
 import type { HTMLAttributes } from 'react';
 import { cn } from "@/lib/utils";
-import { Crosshair } from 'lucide-react'; 
+import Image from 'next/image';
 
 export function Logo(props: HTMLAttributes<HTMLDivElement>) {
   const { className, ...rest } = props;
 
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-1", className)} {...rest}>
-       <div className="flex items-center gap-2">
-         <div className="p-1.5 rounded-md bg-sidebar-primary">
-            <Crosshair className="h-6 w-6 text-sidebar-primary-foreground" />
-         </div>
-         <div className="flex flex-col text-left group-data-[collapsible=icon]:hidden">
-            <span className="text-lg font-bold text-sidebar-primary-foreground leading-tight">
-              TradeHunter
-            </span>
-            <span className="text-lg font-bold text-sidebar-primary leading-tight -mt-1">
-              Pro
-            </span>
-         </div>
-       </div>
+    <div className={cn("flex items-center justify-center gap-2", className)} {...rest}>
+      {/* This is a placeholder for your logo image. 
+          You can replace the `src` with the path to your actual logo file (e.g., "/logo.png") 
+          once you add it to the `public` folder. */}
+      <Image 
+        src="https://placehold.co/200x50.png" 
+        alt="TradeHunter Pro Logo" 
+        width={160} 
+        height={40}
+        data-ai-hint="logo construction"
+        className="group-data-[collapsible=icon]:hidden"
+      />
+       <Image 
+        src="https://placehold.co/50x50.png" 
+        alt="TradeHunter Pro Icon" 
+        width={32} 
+        height={32}
+        data-ai-hint="logo construction"
+        className="hidden group-data-[collapsible=icon]:block"
+      />
     </div>
   );
 }
