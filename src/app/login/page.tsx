@@ -1,6 +1,9 @@
 
 import { DynamicLoginFormWrapper } from '@/components/auth/DynamicLoginFormWrapper';
 import { Logo } from '@/components/icons/Logo';
+import Image from 'next/image';
+import { ShieldCheck, Lock, DatabaseZap } from 'lucide-react';
+
 
 export default function LoginPage() {
   return (
@@ -18,6 +21,21 @@ export default function LoginPage() {
         
         <div className="rounded-lg border bg-card p-8 shadow-lg">
            <DynamicLoginFormWrapper />
+        </div>
+
+        <div className="flex justify-center items-center gap-4 py-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+                <ShieldCheck className="h-5 w-5 text-green-500" />
+                <span className="text-xs font-semibold">Cyber Security</span>
+            </div>
+             <div className="flex items-center gap-2 text-muted-foreground">
+                <Lock className="h-5 w-5 text-green-500" />
+                <span className="text-xs font-semibold">SSL Certified</span>
+            </div>
+             <div className="flex items-center gap-2 text-muted-foreground">
+                <DatabaseZap className="h-5 w-5 text-green-500" />
+                <span className="text-xs font-semibold">Data Protection</span>
+            </div>
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
