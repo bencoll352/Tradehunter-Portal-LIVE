@@ -54,7 +54,7 @@ export function DashboardStatsAndGoals({
         <div className="flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-accent" />
             <div>
-                <CardTitle className="text-2xl text-accent">Branch Pulse & Targets</CardTitle>
+                <CardTitle className="text-2xl text-accent">Branch Pulse &amp; Targets</CardTitle>
                 <CardDescription>Key performance indicators and goal setting for your branch.</CardDescription>
             </div>
         </div>

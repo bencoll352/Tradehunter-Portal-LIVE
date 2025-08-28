@@ -80,7 +80,7 @@ export default function DashboardOverviewPage() {
         <CardContent>
           <p className="text-foreground max-w-3xl">
             This is your central hub for managing customer relationships and analysing market data. 
-            Navigate to the Trader Database to view and manage your customers, or use the Insight & Assistance features to get a competitive edge.
+            Navigate to the Trader Database to view and manage your customers, or use the Insight &amp; Assistance features to get a competitive edge.
           </p>
         </CardContent>
       </Card>
