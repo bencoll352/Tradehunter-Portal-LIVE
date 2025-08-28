@@ -8,13 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserCheck, Flame, Target, CalendarDays, CheckCircle, TrendingUp, Goal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface DashboardStatsAndGoalsProps {
   newLeadsCount: number;
