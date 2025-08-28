@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
-import { Sparkles } from "lucide-react"; 
 import type { Trader, BranchInfo, BranchLoginId } from '@/types';
 import { getBranchInfo } from '@/types';
 import { getTradersAction } from '@/app/(app)/tradehunter/actions';
@@ -63,51 +62,27 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-lg w-full bg-gradient-to-br from-primary/5 via-background to-background border-primary/20">
-        <CardHeader>
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-            <div className="p-3 bg-primary/10 rounded-full border border-primary/20">
-              <Sparkles className="h-12 w-12 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-3xl md:text-4xl font-bold text-primary">Welcome to your Portal</CardTitle>
-              <CardDescription className="text-lg md:text-xl text-muted-foreground mt-1">
-                Your command centre for trade intelligence and sales growth.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-foreground max-w-3xl">
-            This is your central hub for managing customer relationships and analysing market data. 
-            Navigate to the Trader Database to view and manage your customers, or use the Insight &amp; Assistance features to get a competitive edge.
-          </p>
-        </CardContent>
-      </Card>
-
       {isLoading ? (
-        <Card className="shadow-lg w-full border-accent/30">
-            <CardHeader>
-                 <Skeleton className="h-8 w-1/2" />
-                 <Skeleton className="h-4 w-3/4" />
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Skeleton className="h-24" />
-                    <Skeleton className="h-24" />
-                </div>
-                <div className="space-y-4 pt-4 border-t">
-                     <Skeleton className="h-6 w-1/3" />
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <Skeleton className="h-16" />
-                         <Skeleton className="h-16" />
-                     </div>
-                </div>
-                <div className="pt-4 mt-4 border-t">
+        <div className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-8 w-1/2" />
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Skeleton className="h-10" />
+                    <Skeleton className="h-10" />
+                </CardContent>
+            </Card>
+            <Card>
+                 <CardHeader>
+                    <Skeleton className="h-8 w-1/3" />
+                    <Skeleton className="h-4 w-3/4" />
+                </CardHeader>
+                <CardContent>
                     <Skeleton className="h-80 w-full" />
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </div>
       ) : (
         <>
          <DashboardStatsAndGoals 
