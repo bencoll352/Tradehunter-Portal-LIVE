@@ -12,7 +12,7 @@ export function Logo(props: HTMLAttributes<HTMLDivElement>) {
           You can replace the `src` with the path to your actual logo file (e.g., "/logo.png") 
           once you add it to the `public` folder. */}
       <Image 
-        src="https://placehold.co/400x100/2563eb/ffffff?text=TradeHunter+Pro" 
+        src="https://placehold.co/400x100/2563eb/f97316?text=TradeHunter+Pro" 
         alt="TradeHunter Pro Logo" 
         width={160} 
         height={40}
@@ -21,7 +21,7 @@ export function Logo(props: HTMLAttributes<HTMLDivElement>) {
         className="group-data-[collapsible=icon]:hidden"
       />
        <Image 
-        src="https://placehold.co/100x100/f97316/ffffff?text=TH" 
+        src="https://placehold.co/100x100/2563eb/ffffff?text=TH" 
         alt="TradeHunter Pro Icon" 
         width={32} 
         height={32}
