@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://apex-sales-trainer-426945894753.us-west1.run.app/";
   const trainingPdfUrl = "/resources/The_Growth_Mindset_Training_Program.pdf";
-  const presentationUrl = "https://chat.z.ai/space/a0m48718gd21-ppt";
+  const presentationUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
 
   return (
     <div className="space-y-6">
@@ -77,17 +77,18 @@ export default function StaffTrainingPage() {
                 <TabsContent value="presentation-trainer" className="mt-4">
                      <Card>
                         <CardHeader>
-                            <CardTitle>Presentation Trainer</CardTitle>
+                            <CardTitle>Presentation Trainer: The Power of Atomic Habits</CardTitle>
                             <CardDescription>
-                                Review this presentation material to enhance your sales skills.
+                                Review this presentation material to enhance your skills.
+                                <strong className="block mt-1">Note:</strong> If the PDF does not load, please ensure the file `The_Power_of_Atomic_Habits.pdf` has been added to the `public/resources` folder in the project directory.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                            <div className="w-full h-full min-h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
                                 <iframe
                                     src={presentationUrl}
-                                    title="Presentation Trainer"
-                                    className="w-full h-full border-0"
+                                    title="Presentation Trainer: The Power of Atomic Habits"
+                                    className="w-full h-full min-h-[75vh] border-0"
                                     allow="fullscreen"
                                 />
                             </div>
