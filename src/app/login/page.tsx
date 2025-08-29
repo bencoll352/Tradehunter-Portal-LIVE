@@ -1,4 +1,3 @@
-
 import { DynamicLoginFormWrapper } from '@/components/auth/DynamicLoginFormWrapper';
 import { Logo } from '@/components/icons/Logo';
 import Image from 'next/image';
