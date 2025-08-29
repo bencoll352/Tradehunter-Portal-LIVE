@@ -2,7 +2,7 @@
 import { DynamicLoginFormWrapper } from '@/components/auth/DynamicLoginFormWrapper';
 import { Logo } from '@/components/icons/Logo';
 import Image from 'next/image';
-import { ShieldCheck, Lock, DatabaseZap } from 'lucide-react';
+import { ShieldCheck, Lock, DatabaseZap, Award } from 'lucide-react';
 
 
 export default function LoginPage() {
@@ -23,7 +23,7 @@ export default function LoginPage() {
            <DynamicLoginFormWrapper />
         </div>
 
-        <div className="flex justify-center items-center gap-4 py-4">
+        <div className="flex flex-wrap justify-center items-center gap-4 py-4">
             <div className="flex items-center gap-2 text-muted-foreground">
                 <ShieldCheck className="h-5 w-5 text-green-500" />
                 <span className="text-xs font-semibold">Cyber Security</span>
@@ -35,6 +35,10 @@ export default function LoginPage() {
              <div className="flex items-center gap-2 text-muted-foreground">
                 <DatabaseZap className="h-5 w-5 text-green-500" />
                 <span className="text-xs font-semibold">Data Protection</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+                <Award className="h-5 w-5 text-blue-500" />
+                <span className="text-xs font-semibold">Google Cloud Certified</span>
             </div>
         </div>
 
