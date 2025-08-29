@@ -53,6 +53,7 @@ export function DashboardStatsAndGoals({
             <Target className="h-8 w-8 text-primary" />
             <div>
                 <CardTitle className="text-2xl text-primary">Set Your Branch Goals</CardTitle>
+                <CardDescription>Define your weekly and monthly targets to track progress.</CardDescription>
             </div>
         </div>
       </CardHeader>
