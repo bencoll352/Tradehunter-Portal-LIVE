@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
-  const trainingPdfUrl = "https://chat.z.ai/space/x0be07aeb190-ppt?embed=true";
+  const trainingPdfUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
   const presentationUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
 
   return (
@@ -59,10 +59,10 @@ export default function StaffTrainingPage() {
                 <TabsContent value="growth-mindset" className="mt-4">
                      <Card>
                         <CardHeader>
-                            <CardTitle>The Growth Mindset: A Pioneering Recruitment Training Program</CardTitle>
+                            <CardTitle>The Growth Mindset: The Power of Atomic Habits</CardTitle>
                             <CardDescription>
-                                Please use this document as a key resource for your professional development. 
-                                <strong className="block mt-1">Note:</strong> This is an external document. If it does not load, please check the URL or your network connection.
+                                Review this presentation material to enhance your skills.
+                                <strong className="block mt-1">Note:</strong> This document is a key resource for your professional development. 
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
