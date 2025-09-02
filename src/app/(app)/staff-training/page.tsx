@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
-  const growthMindsetPdfUrl = "https://chat.z.ai/space/x0be07aeb190-ppt?embed=true";
+  const growthMindsetPdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
   const presentationTrainerUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 
 
@@ -104,4 +104,5 @@ export default function StaffTrainingPage() {
     </div>
   );
 }
+
 
