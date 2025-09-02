@@ -6,7 +6,7 @@ import { GraduationCap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function StaffTrainingPage() {
-  const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
+  const apexSalesTrainerUrl = "https://aistudio.google.com/app/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_";
   const trainingPdfUrl = "/resources/The_Growth_Mindset_Training_Program.pdf";
   const presentationUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
 
