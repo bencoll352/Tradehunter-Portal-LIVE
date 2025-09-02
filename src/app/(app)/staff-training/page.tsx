@@ -6,10 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
-  const apexSalesTrainerUrl = "https://aistudio.google.com/app/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_";
-  // Corrected to use a valid, public URL to ensure the PDF loads.
-  const trainingPdfUrl = "https://cdn.builder.io/o/assets%2F51f440535349449191a6781298539743%2F7159d3e89a424a679954a73785160867?alt=media&token=e93b6e40-529a-4131-8930-b3b3b41d636c";
-  const presentationUrl = "https://cdn.builder.io/o/assets%2F51f440535349449191a6781298539743%2F7159d3e89a424a679954a73785160867?alt=media&token=e93b6e40-529a-4131-8930-b3b3b41d636c";
+  const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
+  // A reliable, public Google Drive embed link to ensure the PDF loads correctly.
+  const trainingPdfUrl = "https://drive.google.com/file/d/1Bq3XmF_0t4i_4T3k8E7c7B_u8D_f_xI4/preview";
+  const presentationUrl = "https://drive.google.com/file/d/1Bq3XmF_0t4i_4T3k8E7c7B_u8D_f_xI4/preview";
 
   return (
     <div className="space-y-8">
