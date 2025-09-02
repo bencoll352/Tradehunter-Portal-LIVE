@@ -1,11 +1,11 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, BookOpen, Presentation } from "lucide-react"; 
+import { GraduationCap, BookOpen, Presentation, Group } from "lucide-react"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function StaffTrainingPage() {
-  const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
+  const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?authuser=0&showPreview=true&showCode=true&showAssistant=true";
   const trainingPdfUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
   const presentationUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
 
@@ -59,10 +59,11 @@ export default function StaffTrainingPage() {
                 <TabsContent value="growth-mindset" className="mt-4">
                      <Card>
                         <CardHeader>
-                            <CardTitle>The Growth Mindset: The Power of Atomic Habits</CardTitle>
+                            <CardTitle>The Growth Mindset</CardTitle>
                             <CardDescription>
-                                Review this presentation material to enhance your skills.
-                                <strong className="block mt-1">Note:</strong> This document is a key resource for your professional development. 
+                                A Pioneering Recruitment Training Program
+                                <strong className="block mt-2 font-semibold text-primary">Our Talent Is Your Future</strong>
+                                <p className="mt-2">Review this presentation material on Atomic Habits to enhance your skills. This document is a key resource for your professional development.</p>
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
