@@ -7,9 +7,6 @@ import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
-  const growthMindsetPdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-  const presentationTrainerUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-
 
   return (
     <div className="space-y-8">
@@ -66,14 +63,7 @@ export default function StaffTrainingPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
-                                <iframe
-                                    src={growthMindsetPdfUrl}
-                                    title="The Growth Mindset Training Program PDF"
-                                    className="w-full h-full border-0"
-                                    allow="fullscreen"
-                                />
-                            </div>
+                            <p className="text-sm text-muted-foreground">Training material will be displayed here.</p>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -86,14 +76,7 @@ export default function StaffTrainingPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="w-full h-full min-h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
-                                <iframe
-                                    src={presentationTrainerUrl}
-                                    title="Presentation Trainer: The Power of Atomic Habits"
-                                    className="w-full h-full min-h-[75vh] border-0"
-                                    allow="fullscreen"
-                                />
-                            </div>
+                           <p className="text-sm text-muted-foreground">Training material will be displayed here.</p>
                         </CardContent>
                     </Card>
                 </TabsContent>
