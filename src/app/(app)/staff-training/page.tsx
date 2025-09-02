@@ -6,9 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
-  const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?authuser=0&showPreview=true&showCode=true&showAssistant=true";
-  const trainingPdfUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
-  const presentationUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
+  const apexSalesTrainerUrl = "https://aistudio.google.com/app/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_";
+  // Corrected to use a valid, public URL to ensure the PDF loads.
+  const trainingPdfUrl = "https://cdn.builder.io/o/assets%2F51f440535349449191a6781298539743%2F7159d3e89a424a679954a73785160867?alt=media&token=e93b6e40-529a-4131-8930-b3b3b41d636c";
+  const presentationUrl = "https://cdn.builder.io/o/assets%2F51f440535349449191a6781298539743%2F7159d3e89a424a679954a73785160867?alt=media&token=e93b6e40-529a-4131-8930-b3b3b41d636c";
 
   return (
     <div className="space-y-8">
@@ -82,7 +83,6 @@ export default function StaffTrainingPage() {
                             <CardTitle>Presentation Trainer: The Power of Atomic Habits</CardTitle>
                             <CardDescription>
                                 Review this presentation material to enhance your skills.
-                                <strong className="block mt-1">Note:</strong> If the PDF does not load, please ensure the file `The_Power_of_Atomic_Habits.pdf` has been added to the `public/resources` folder in the project directory.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
