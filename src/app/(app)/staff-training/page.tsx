@@ -1,8 +1,9 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, BookOpen, Presentation, Group } from "lucide-react"; 
+import { GraduationCap, BookOpen, Presentation, ExternalLink } from "lucide-react"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?authuser=0&showPreview=true&showCode=true&showAssistant=true";
@@ -34,14 +35,11 @@ export default function StaffTrainingPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
-                        <iframe
-                        src={apexSalesTrainerUrl}
-                        title="Apex Sales Trainer - Interactive Scenarios"
-                        className="w-full h-full border-0"
-                        allowFullScreen
-                        />
-                    </div>
+                    <Button asChild>
+                        <a href={apexSalesTrainerUrl} target="_blank" rel="noopener noreferrer">
+                            Launch Interactive Trainer <ExternalLink className="ml-2 h-4 w-4" />
+                        </a>
+                    </Button>
                 </CardContent>
             </Card>
 
