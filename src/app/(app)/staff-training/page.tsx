@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
-  const trainingPdfUrl = "https://chat.z.ai/space/x0be07aeb190-ppt";
+  const trainingPdfUrl = "https://chat.z.ai/space/x0be07aeb190-ppt?embed=true";
   const presentationUrl = "/resources/The_Power_of_Atomic_Habits.pdf";
 
   return (
