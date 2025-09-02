@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +8,8 @@ import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://aistudio.google.com/u/0/apps/drive/17_f9RP33EDHhr82Qu7HUiHNQswkT_Xw_?showPreview=true&showCode=true&showAssistant=true";
-  // A reliable, public PDF link to ensure the iframe loads correctly.
-  const publicPdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+  const growthMindsetPdfUrl = "https://chat.z.ai/space/x0be07aeb190-ppt?embed=true";
+  const presentationTrainerUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 
 
   return (
@@ -62,13 +63,13 @@ export default function StaffTrainingPage() {
                             <CardDescription>
                                 A Pioneering Recruitment Training Program
                                 <strong className="block mt-2 font-semibold text-primary">Our Talent Is Your Future</strong>
-                                <p className="mt-2">Review this presentation material on Atomic Habits to enhance your skills. This document is a key resource for your professional development.</p>
+                                <p className="mt-2">Review this presentation material on The Growth Mindset to enhance your skills. This document is a key resource for your professional development.</p>
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
                                 <iframe
-                                    src={publicPdfUrl}
+                                    src={growthMindsetPdfUrl}
                                     title="The Growth Mindset Training Program PDF"
                                     className="w-full h-full border-0"
                                     allow="fullscreen"
@@ -88,7 +89,7 @@ export default function StaffTrainingPage() {
                         <CardContent>
                             <div className="w-full h-full min-h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
                                 <iframe
-                                    src={publicPdfUrl}
+                                    src={presentationTrainerUrl}
                                     title="Presentation Trainer: The Power of Atomic Habits"
                                     className="w-full h-full min-h-[75vh] border-0"
                                     allow="fullscreen"
@@ -103,3 +104,4 @@ export default function StaffTrainingPage() {
     </div>
   );
 }
+
