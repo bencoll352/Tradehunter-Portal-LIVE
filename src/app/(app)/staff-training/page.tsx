@@ -61,7 +61,7 @@ export default function StaffTrainingPage() {
                                 <strong className="block mt-2 font-semibold text-primary">Our Talent Is Your Future</strong>
                                 <p className="mt-2">Review this presentation material on The Growth Mindset to enhance your skills. This document is a key resource for your professional development.</p>
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                             <p className="text-sm text-muted-foreground">Training material will be displayed here.</p>
                         </CardContent>
