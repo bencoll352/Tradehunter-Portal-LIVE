@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
-  const apexSalesTrainerUrl = "https://apex-sales-trainer-302177537641.us-west1.run.app/"
+  const apexSalesTrainerUrl = "https://apex-sales-trainer-302177537641.us-west1.run.app/";
 
   return (
     <div className="space-y-8">
@@ -63,7 +63,9 @@ export default function StaffTrainingPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm text-muted-foreground">Training material will be displayed here.</p>
+                            <div className="w-full h-[60vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                                <iframe src="https://storage.googleapis.com/project-spark-335215.appspot.com/b0f16428-1bf3-4919-8664-de68f694e02a/q17rfl3mxxb.pdf" className="w-full h-full" title="The Growth Mindset PDF"></iframe>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -76,7 +78,9 @@ export default function StaffTrainingPage() {
                             </CardDescription>
                         </Header>
                         <CardContent>
-                           <p className="text-sm text-muted-foreground">Training material will be displayed here.</p>
+                           <div className="w-full h-[60vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                               <iframe src="https://storage.googleapis.com/project-spark-335215.appspot.com/b0f16428-1bf3-4919-8664-de68f694e02a/q17rfl3n2fb.pdf" className="w-full h-full" title="Atomic Habits Presentation"></iframe>
+                           </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
