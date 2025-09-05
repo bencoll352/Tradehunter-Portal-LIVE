@@ -79,7 +79,7 @@ export default function StaffTrainingPage() {
                         </Header>
                         <CardContent>
                            <div className="w-full h-[60vh] rounded-md overflow-hidden border border-border bg-muted/20">
-                               <iframe src="https://storage.googleapis.com/project-spark-335215.appspot.com/b0f16428-1bf3-4919-8664-de68f694e02a/q17rfl3n2fb.pdf" className="w-full h-full" title="Atomic Habits Presentation"></iframe>
+                               <iframe src="https://storage.googleapis.com/project-spark-3B35215.appspot.com/b0f16428-1bf3-4919-8664-de68f694e02a/q17rfl3n2fb.pdf" className="w-full h-full" title="Atomic Habits Presentation"></iframe>
                            </div>
                         </CardContent>
                     </Card>
