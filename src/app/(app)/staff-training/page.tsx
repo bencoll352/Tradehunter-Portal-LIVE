@@ -84,5 +84,5 @@ export default function StaffTrainingPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
