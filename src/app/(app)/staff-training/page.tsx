@@ -29,7 +29,7 @@ export default function StaffTrainingPage() {
                     <CardDescription>
                         Describe a sales situation you want to practise. The system will create a role-play scenario for you to navigate.
                         <br/>
-                        For example, you could practise handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high,"</code> or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
+                        For example, you could practise handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high"</code>, or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

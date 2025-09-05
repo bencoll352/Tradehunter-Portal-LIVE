@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Compass, ArrowRight, MessageSquareQuote, Target } from "lucide-react"; 
+import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Compass, ArrowRight, MessageSquareQuote, Target, BarChart } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';
@@ -94,6 +94,14 @@ const assistants: RosterCardProps[] = [
         icon: MessageSquareQuote,
         iconStyle: "border-sky-500/50 text-sky-500 bg-sky-500/10",
     },
+    {
+        title: "Performance Insights",
+        role: "Data Insights Platform",
+        description: "I am a sales performance and data insights platform to help you make better decisions.",
+        href: "/smart-team/performance-insights",
+        icon: BarChart,
+        iconStyle: "border-orange-500/50 text-orange-500 bg-orange-500/10",
+    },
 ]
 
 
@@ -157,7 +165,7 @@ export default function SmartTeamPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {assistants.map((assistant) => (
                 <RosterCard key={assistant.title} {...assistant} />
             ))}
