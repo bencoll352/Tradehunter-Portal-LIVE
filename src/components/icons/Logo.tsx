@@ -12,7 +12,6 @@ export function Logo(props: HTMLAttributes<HTMLDivElement>) {
         width={200} 
         height={50}
         priority
-        data-ai-hint="logo construction"
       />
     </div>
   );
