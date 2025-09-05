@@ -34,6 +34,8 @@ export function AppHeader() {
     { href: "/competitor-insights", label: "Competitors", icon: Lightbulb },
     { href: "/estimator", label: "Estimator", icon: Calculator },
     { href: "/smart-team", label: "Smart Team", icon: Users },
+    { href: "/buildwise-intel", label: "BuildWise Intel", icon: Home },
+    { href: "/staff-training", label: "Staff Training", icon: GraduationCap },
   ];
 
   return (
