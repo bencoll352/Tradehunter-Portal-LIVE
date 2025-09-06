@@ -10,6 +10,7 @@ import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BranchPerformanceChart } from '@/components/dashboard/BranchPerformanceChart';
+import { Logo } from '@/components/icons/Logo';
 
 export default function DashboardOverviewPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -62,6 +63,17 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="space-y-8">
+       <div className="flex justify-start items-center gap-4">
+        <Logo className="h-20" />
+        <div>
+          <h1 className="text-3xl font-bold text-primary">
+            {branchInfo?.branchName ?? 'Dashboard'} Overview
+          </h1>
+          <p className="text-muted-foreground">
+            Welcome back, {branchInfo?.role === 'manager' ? 'Manager' : 'Staff'}. DOMINATE YOUR TERRITORY.
+          </p>
+        </div>
+      </div>
       {isLoading ? (
         <div className="space-y-8">
             <Card>
