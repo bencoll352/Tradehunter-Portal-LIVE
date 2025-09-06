@@ -29,15 +29,19 @@ export default function StaffTrainingPage() {
                     <CardDescription>
                         Describe a sales situation you want to practise. The system will create a role-play scenario for you to navigate.
                         <br/>
-                        For example, you could practise handling common objections like <code className="font-semibold text-primary">"a customer says our price is too high"</code>, or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
+                        For example, you could practise handling common objections like <code>"a customer says our price is too high"</code>, or learning effective responses to specific customer objections. It's a great way to build confidence for real-world conversations.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Button asChild>
-                        <a href={apexSalesTrainerUrl} target="_blank" rel="noopener noreferrer">
-                            Launch Interactive Trainer <ExternalLink className="ml-2 h-4 w-4" />
-                        </a>
-                    </Button>
+                    <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                        <iframe
+                        src={apexSalesTrainerUrl}
+                        title="Apex Sales Trainer"
+                        className="w-full h-full border-0"
+                        allowFullScreen
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                        />
+                    </div>
                 </CardContent>
             </Card>
 
