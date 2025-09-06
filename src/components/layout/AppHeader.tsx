@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Calculator, Lightbulb, Database, Home, GraduationCap } from "lucide-react"; 
+import { LayoutDashboard, Users, Calculator, Lightbulb, Database, Home } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 
 const getPathTitle = (path: string): string => {
@@ -16,7 +16,6 @@ const getPathTitle = (path: string): string => {
     "/estimator": "Materials Estimator",
     "/smart-team": "Smart Team Hub",
     "/buildwise-intel": "BuildWise Intel",
-    "/staff-training": "Staff Training",
     "/how-to-use": "How to Use"
   };
 
@@ -35,7 +34,6 @@ export function AppHeader() {
     { href: "/estimator", label: "Estimator", icon: Calculator },
     { href: "/smart-team", label: "Smart Team", icon: Users },
     { href: "/buildwise-intel", label: "BuildWise Intel", icon: Home },
-    { href: "/staff-training", label: "Staff Training", icon: GraduationCap },
   ];
 
   return (
