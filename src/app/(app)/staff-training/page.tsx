@@ -2,24 +2,28 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, ExternalLink } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Message {
     role: 'user' | 'model';
     content: string;
 }
 
-export default function StaffTrainingPage() {
+const apexSalesTrainerUrl = "https://apex-sales-trainer-302177537641.us-west1.run.app/";
+
+function InternalTrainer() {
     const [scenario, setScenario] = useState("");
     const [isScenarioSet, setIsScenarioSet] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -90,21 +94,10 @@ export default function StaffTrainingPage() {
             setIsLoading(false);
         }
     };
-
+    
     return (
-        <Card className="shadow-lg w-full max-w-4xl mx-auto flex flex-col h-[85vh]">
-            <CardHeader>
-                <div className="flex items-center gap-3">
-                    <GraduationCap className="h-10 w-10 text-primary" />
-                    <div>
-                        <CardTitle className="text-3xl font-bold text-primary">Apex Sales Trainer</CardTitle>
-                        <CardDescription className="text-lg text-muted-foreground">
-                            Practice your sales skills in a real-time role-playing scenario.
-                        </CardDescription>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
+        <Card className="shadow-none border-none flex flex-col h-full">
+            <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-0">
                 {!isScenarioSet ? (
                     <div className="space-y-4 p-4 rounded-lg border bg-background animate-in fade-in-50">
                         <h3 className="text-lg font-semibold text-foreground">1. Define the Scenario</h3>
@@ -198,6 +191,63 @@ export default function StaffTrainingPage() {
                         </div>
                     </div>
                 )}
+            </CardContent>
+        </Card>
+    );
+}
+
+function ExternalTrainerLink() {
+    return (
+        <div className="p-4">
+             <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
+                <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", "border-teal-500/50 text-teal-500 bg-teal-500/10")}>
+                    <ExternalLink className="h-12 w-12" />
+                </div>
+                <CardTitle className="text-xl text-primary mb-1">Apex Sales Trainer</CardTitle>
+                <div className="flex items-center gap-1.5 mb-2">
+                    <p className="text-sm font-semibold text-accent">External Application</p>
+                </div>
+                <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
+                    "Launch the full-featured Apex Sales Trainer application in a new window for advanced simulations and scenarios."
+                </CardDescription>
+                <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
+                    <Link href={apexSalesTrainerUrl} target="_blank" rel="noopener noreferrer">
+                        Launch Trainer <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </Card>
+        </div>
+    );
+}
+
+
+export default function StaffTrainingPage() {
+    return (
+        <Card className="shadow-lg w-full max-w-4xl mx-auto flex flex-col h-[85vh]">
+            <CardHeader>
+                <div className="flex items-center gap-3">
+                    <GraduationCap className="h-10 w-10 text-primary" />
+                    <div>
+                        <CardTitle className="text-3xl font-bold text-primary">Sales Training Centre</CardTitle>
+                        <CardDescription className="text-lg text-muted-foreground">
+                            Hone your skills with our training tools. Choose your preferred method below.
+                        </CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
+                 <Tabs defaultValue="internal-trainer" className="w-full flex-grow flex flex-col">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="internal-trainer">Text-Based Trainer</TabsTrigger>
+                        <TabsTrigger value="external-app">External App Link</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="internal-trainer" className="flex-grow">
+                        <InternalTrainer />
+                    </TabsContent>
+                    <TabsContent value="external-app" className="flex-grow">
+                        <ExternalTrainerLink />
+                    </TabsContent>
+                </Tabs>
             </CardContent>
         </Card>
     );
