@@ -5,7 +5,7 @@ import { GraduationCap, BookOpen, Presentation } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function StaffTrainingPage() {
-  const apexSalesTrainerUrl = "https://apex-sales-trainer-302177537641.us-west1.run.app/";
+  const apexSalesTrainerUrl = "https://apex-sales-trainer-302177537641.us-west1.run.app/"
 
   return (
     <div className="space-y-8">
