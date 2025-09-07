@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A sales training AI agent for role-playing scenarios.
@@ -15,14 +16,14 @@ const ChatMessageSchema = z.object({
   content: z.string(),
 });
 
-export const SalesTrainingInputSchema = z.object({
+const SalesTrainingInputSchema = z.object({
   scenario: z.string().describe('A description of the sales scenario to role-play. This sets the context for the agent.'),
   history: z.array(ChatMessageSchema).describe('The history of the conversation so far.'),
   userMessage: z.string().describe("The user's latest message in the conversation."),
 });
 export type SalesTrainingInput = z.infer<typeof SalesTrainingInputSchema>;
 
-export const SalesTrainingOutputSchema = z.object({
+const SalesTrainingOutputSchema = z.object({
   response: z.string().describe("The agent's response in the role-play scenario."),
 });
 export type SalesTrainingOutput = z.infer<typeof SalesTrainingOutputSchema>;
