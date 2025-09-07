@@ -1,9 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, BookOpen, Presentation, ExternalLink } from "lucide-react"; 
+import { GraduationCap, BookOpen, Presentation } from "lucide-react"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 
 export default function StaffTrainingPage() {
   const apexSalesTrainerUrl = "https://apex-sales-trainer-302177537641.us-west1.run.app/";
