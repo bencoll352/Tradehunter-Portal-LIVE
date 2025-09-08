@@ -245,34 +245,115 @@ function SpeechTrainerLink() {
 }
 
 interface TrainingMaterial {
+    id: string;
     title: string;
     description?: string;
     type: string;
     category: string;
     tags?: string;
     dateAdded: string;
-    link: string;
+    link?: string;
     file?: File;
+    content?: React.ReactNode;
 }
 
 const initialTrainingMaterials: TrainingMaterial[] = [
     {
+      id: "growth-mindset",
       title: "The Growth Mindset",
       description: "A PDF document on the importance of a growth mindset in sales.",
       type: "PDF",
       category: "Mindset",
       tags: "growth, mindset, psychology",
       dateAdded: "September 8, 2025",
-      link: "#"
+      content: (
+        <div className="prose prose-sm lg:prose-base max-w-none text-foreground">
+            <h2 className="text-xl font-bold text-primary">The Growth Mindset: Enhanced Visual Training Summary</h2>
+            <div className="text-sm space-y-1 mb-6">
+                <p><strong>Authors:</strong> Dan Strutzel & Traci Shoblom</p>
+                <p><strong>Focus:</strong> Personal development and mindset transformation</p>
+                <p><strong>Intended Audience:</strong> Professionals, students, and individuals seeking personal growth</p>
+            </div>
+
+            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg">
+                <h3 className="text-lg font-semibold mt-0">Executive Overview</h3>
+                <p className="mt-2">
+                    "The Growth Mindset" is a comprehensive guide that combines psychological principles with practical
+                    strategies to help individuals transform their lives through mindset change. The book presents a structured
+                    approach using the GROW! system and includes a complete 30-day implementation challenge.
+                </p>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-6 mb-4">Core Concepts & Key Principles</h3>
+
+            <div className="border rounded-lg p-4">
+                <h4 className="font-semibold text-center mb-4">1. Growth vs. Fixed Mindset Foundation</h4>
+                <div className="flex flex-col md:flex-row justify-around items-start gap-8">
+                    {/* Growth Mindset */}
+                    <div className="flex-1 text-center">
+                        <p className="text-lg font-bold text-green-600 mb-2">Growth Mindset</p>
+                        <div className="relative flex justify-center items-center h-24">
+                           <div className="absolute h-16 w-16 bg-green-200/50 rounded-full flex items-center justify-center font-bold text-green-800">
+                                GROWTH
+                           </div>
+                           <svg className="absolute top-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <path d="M20,90 Q25,50 30,10" stroke="hsl(var(--primary))" fill="none" strokeWidth="2" markerEnd="url(#arrow-up)" />
+                                <path d="M50,90 Q50,50 50,10" stroke="hsl(var(--primary))" fill="none" strokeWidth="2" markerEnd="url(#arrow-up)" />
+                                <path d="M80,90 Q75,50 70,10" stroke="hsl(var(--primary))" fill="none" strokeWidth="2" markerEnd="url(#arrow-up)" />
+                           </svg>
+                        </div>
+                        <ul className="mt-4 text-left list-disc list-inside space-y-1">
+                            <li>Embraces challenges</li>
+                            <li>Persists through obstacles</li>
+                            <li>Sees effort as path to mastery</li>
+                            <li>Learns from criticism</li>
+                            <li>Finds inspiration in others</li>
+                        </ul>
+                    </div>
+
+                    {/* Fixed Mindset */}
+                     <div className="flex-1 text-center">
+                        <p className="text-lg font-bold text-red-600 mb-2">Fixed Mindset</p>
+                        <div className="relative flex flex-col justify-center items-center h-24">
+                           <div className="h-16 w-16 bg-red-200/50 rounded-full flex items-center justify-center font-bold text-red-800 mb-1">
+                                FIXED
+                           </div>
+                           <div className="w-24 h-2 bg-red-500 rounded"></div>
+                        </div>
+                        <ul className="mt-4 text-left list-disc list-inside space-y-1">
+                            <li>Avoids challenges</li>
+                            <li>Gives up easily</li>
+                            <li>Sees effort as sign of weakness</li>
+                            <li>Ignores useful criticism</li>
+                            <li>Feels threatened by others</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+             <svg width="0" height="0">
+              <defs>
+                <marker id="arrow-up" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(var(--primary))"></path>
+                </marker>
+              </defs>
+            </svg>
+        </div>
+      )
     },
     {
+      id: "persuasion-mastery",
       title: "Persuasion Mastery",
       description: "A sales playbook covering advanced persuasion techniques.",
       type: "PDF",
       category: "Sales Playbook",
       tags: "persuasion, sales, techniques",
       dateAdded: "September 8, 2025",
-      link: "#"
+      content: (
+        <div className="prose prose-sm lg:prose-base max-w-none text-foreground">
+           <h2 className="text-xl font-bold text-primary">Persuasion Mastery</h2>
+           <p>Content for Persuasion Mastery goes here...</p>
+        </div>
+      )
     }
 ];
 
@@ -281,7 +362,7 @@ const contentFormSchema = z.object({
   description: z.string().optional(),
   category: z.string().min(3, { message: "Category is required." }),
   tags: z.string().optional(),
-  file: z.any().refine((files) => files?.length == 1, "File is required."),
+  file: z.any().optional(), // File is optional for now
 });
 type ContentFormValues = z.infer<typeof contentFormSchema>;
 
@@ -295,18 +376,22 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
     const fileRef = form.register("file");
 
     const onSubmit = (values: ContentFormValues) => {
-        const file = values.file[0];
+        const file = values.file?.[0];
         const newMaterial: TrainingMaterial = {
+            id: `material_${Date.now()}`,
             title: values.title,
             description: values.description,
             category: values.category,
             tags: values.tags,
             file: file,
-            type: file.type.split('/')[1]?.toUpperCase() || 'File',
+            type: file ? file.type.split('/')[1]?.toUpperCase() || 'File' : 'Document',
             dateAdded: format(new Date(), "MMMM d, yyyy"),
-            link: "#" 
         };
         onAddContent(newMaterial);
+        toast({
+            title: "Content Added",
+            description: `"${newMaterial.title}" has been added to the portal.`,
+        });
         setOpen(false);
         form.reset();
     };
@@ -395,7 +480,7 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                             name="file"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>File</FormLabel>
+                                    <FormLabel>File (Optional)</FormLabel>
                                     <FormControl>
                                         <Input type="file" {...fileRef} />
                                     </FormControl>
@@ -414,73 +499,96 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
     );
 }
 
+function ViewMaterialDialog({ material, open, onOpenChange }: { material: TrainingMaterial | null, open: boolean, onOpenChange: (open: boolean) => void }) {
+    if (!material) return null;
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                <DialogHeader>
+                    <DialogTitle>{material.title}</DialogTitle>
+                    <DialogDescription>{material.description}</DialogDescription>
+                </DialogHeader>
+                <div className="flex-grow overflow-y-auto pr-6 -mr-6">
+                   {material.content}
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 function TrainingMaterialPortal() {
     const [materials, setMaterials] = useState<TrainingMaterial[]>(initialTrainingMaterials);
+    const [selectedMaterial, setSelectedMaterial] = useState<TrainingMaterial | null>(null);
+    const [isViewOpen, setIsViewOpen] = useState(false);
     const { toast } = useToast();
 
     const handleAddContent = (newMaterial: TrainingMaterial) => {
         setMaterials(prev => [...prev, newMaterial]);
-        toast({
-            title: "Content Added",
-            description: `"${newMaterial.title}" has been added to the portal.`,
-        });
+    };
+
+    const handleViewMaterial = (material: TrainingMaterial) => {
+        setSelectedMaterial(material);
+        setIsViewOpen(true);
     };
 
     return (
-      <Card className="shadow-lg mt-8">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-primary flex items-center gap-3">
-            <BookOpen className="h-8 w-8" />
-            Training Material Portal
-          </CardTitle>
-          <CardDescription className="text-lg text-muted-foreground">
-            Access training documents, playbooks, and other resources.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-            <Table>
-                <TableHeader>
-                <TableRow>
-                    <TableHead className="w-[40%]">Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Date Added</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-                </TableHeader>
-                <TableBody>
-                {materials.map((material) => (
-                    <TableRow key={material.title}>
-                        <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-muted-foreground" />
-                                {material.title}
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <Badge variant="outline">{material.type}</Badge>
-                        </TableCell>
-                        <TableCell>{material.category}</TableCell>
-                        <TableCell>{material.dateAdded}</TableCell>
-                        <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link href={material.link}>
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        View
-                                    </Link>
-                                </Button>
-                            </div>
-                        </TableCell>
+      <>
+        <Card className="shadow-lg mt-8">
+            <CardHeader>
+            <CardTitle className="text-2xl font-bold text-primary flex items-center gap-3">
+                <BookOpen className="h-8 w-8" />
+                Training Material Portal
+            </CardTitle>
+            <CardDescription className="text-lg text-muted-foreground">
+                Access training documents, playbooks, and other resources.
+            </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[40%]">Name</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Date Added</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                ))}
-                </TableBody>
-            </Table>
-        </CardContent>
-         <CardFooter className="flex justify-end border-t pt-6">
-            <AddContentDialog onAddContent={handleAddContent} />
-        </CardFooter>
-      </Card>
+                    </TableHeader>
+                    <TableBody>
+                    {materials.map((material) => (
+                        <TableRow key={material.id}>
+                            <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                    {material.title}
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <Badge variant="outline">{material.type}</Badge>
+                            </TableCell>
+                            <TableCell>{material.category}</TableCell>
+                            <TableCell>{material.dateAdded}</TableCell>
+                            <TableCell className="text-right">
+                                <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+            <CardFooter className="flex justify-end border-t pt-6">
+                <AddContentDialog onAddContent={handleAddContent} />
+            </CardFooter>
+        </Card>
+        <ViewMaterialDialog material={selectedMaterial} open={isViewOpen} onOpenChange={setIsViewOpen} />
+      </>
     )
 }
 
@@ -520,5 +628,3 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
-
-    
