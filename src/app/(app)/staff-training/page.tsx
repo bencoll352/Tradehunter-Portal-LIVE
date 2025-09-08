@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, ExternalLink, TrendingUp, Zap, Mic } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -196,7 +196,7 @@ function InternalTrainer() {
     );
 }
 
-function ExternalTrainerLink() {
+function SpeechTrainerLink() {
     return (
         <div className="p-4">
              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
@@ -222,93 +222,88 @@ function ExternalTrainerLink() {
 
 function AtomicHabitsSection() {
     return (
-        <ScrollArea className="h-full">
-            <div className="p-4 md:p-6 space-y-6">
-                 <Card className="bg-gradient-to-br from-card to-muted/30 border-primary/20 shadow-lg">
-                    <CardHeader>
-                        <CardTitle className="text-3xl font-bold text-primary flex items-center gap-3">
-                            <Zap className="h-8 w-8" />
-                            Atomic Habits: Empowering Talent
-                        </CardTitle>
-                        <CardDescription className="text-lg text-accent">
-                            Transform your potential through the compound effect of tiny changes.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <Card className="border-accent/50 shadow-md">
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-xl flex items-center gap-2 font-semibold">
-                                    <TrendingUp className="h-6 w-6 text-accent" />
-                                    The Power of 1%
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex items-start gap-4">
-                                <div className="text-7xl font-bold text-accent">1%</div>
-                                <p className="text-muted-foreground mt-2">
-                                    Small improvements compound over time to create remarkable results. Habits are the <strong className="text-foreground">compound interest of self-improvement.</strong> By getting just 1% better each day, you'll see a massive difference over a year.
-                                </p>
-                            </CardContent>
-                        </Card>
+        <Card className="bg-gradient-to-br from-card to-muted/30 border-primary/20 shadow-lg mt-8">
+           <CardHeader>
+               <CardTitle className="text-3xl font-bold text-primary flex items-center gap-3">
+                   <Zap className="h-8 w-8" />
+                   Sales Technique: Atomic Habits
+               </CardTitle>
+               <CardDescription className="text-lg text-accent">
+                   Transform your potential through the compound effect of tiny changes.
+               </CardDescription>
+           </CardHeader>
+           <CardContent className="space-y-6">
+               <Card className="border-accent/50 shadow-md">
+                   <CardHeader className="pb-4">
+                       <CardTitle className="text-xl flex items-center gap-2 font-semibold">
+                           <TrendingUp className="h-6 w-6 text-accent" />
+                           The Power of 1%
+                       </CardTitle>
+                   </CardHeader>
+                   <CardContent className="flex items-start gap-4">
+                       <div className="text-7xl font-bold text-accent">1%</div>
+                       <p className="text-muted-foreground mt-2">
+                           Small improvements compound over time to create remarkable results. Habits are the <strong className="text-foreground">compound interest of self-improvement.</strong> By getting just 1% better each day, you'll see a massive difference over a year.
+                       </p>
+                   </CardContent>
+               </Card>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Card className="bg-green-500/10 border-green-500/30">
-                                <CardHeader>
-                                    <CardTitle className="text-4xl font-bold text-green-700">37x</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="font-semibold text-green-800">Better after one year with 1% daily improvement.</p>
-                                </CardContent>
-                            </Card>
-                             <Card className="bg-red-500/10 border-red-500/30">
-                                <CardHeader>
-                                    <CardTitle className="text-4xl font-bold text-red-700">0.03x</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="font-semibold text-red-800">Result after one year with 1% daily decline.</p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </CardContent>
-                 </Card>
-            </div>
-        </ScrollArea>
-    )
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <Card className="bg-green-500/10 border-green-500/30">
+                       <CardHeader>
+                           <CardTitle className="text-4xl font-bold text-green-700">37x</CardTitle>
+                       </CardHeader>
+                       <CardContent>
+                           <p className="font-semibold text-green-800">Better after one year with 1% daily improvement.</p>
+                       </CardContent>
+                   </Card>
+                    <Card className="bg-red-500/10 border-red-500/30">
+                       <CardHeader>
+                           <CardTitle className="text-4xl font-bold text-red-700">0.03x</CardTitle>
+                       </CardHeader>
+                       <CardContent>
+                           <p className="font-semibold text-red-800">Result after one year with 1% daily decline.</p>
+                       </CardContent>
+                   </Card>
+               </div>
+           </CardContent>
+        </Card>
+   )
 }
 
 
 export default function StaffTrainingPage() {
     return (
-        <Card className="shadow-lg w-full max-w-4xl mx-auto flex flex-col h-[85vh]">
-            <CardHeader>
-                <div className="flex items-center gap-3">
-                    <GraduationCap className="h-10 w-10 text-primary" />
-                    <div>
-                        <CardTitle className="text-3xl font-bold text-primary">Sales Training Centre</CardTitle>
-                        <CardDescription className="text-lg text-muted-foreground">
-                            Hone your skills with our training tools. Choose your preferred method below.
-                        </CardDescription>
+        <div className="space-y-8">
+            <Card className="shadow-lg w-full flex flex-col h-full">
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <GraduationCap className="h-10 w-10 text-primary" />
+                        <div>
+                            <CardTitle className="text-3xl font-bold text-primary">Sales Training Centre</CardTitle>
+                            <CardDescription className="text-lg text-muted-foreground">
+                                Hone your skills with our training tools. Choose your preferred method below.
+                            </CardDescription>
+                        </div>
                     </div>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
-                 <Tabs defaultValue="internal-trainer" className="w-full flex-grow flex flex-col">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="internal-trainer">Text-Based Trainer</TabsTrigger>
-                        <TabsTrigger value="sales-techniques">Sales Techniques</TabsTrigger>
-                        <TabsTrigger value="speech-trainer">Speech Sales Trainer</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="internal-trainer" className="flex-grow">
-                        <InternalTrainer />
-                    </TabsContent>
-                     <TabsContent value="sales-techniques" className="flex-grow bg-muted/30 rounded-b-lg">
-                        <AtomicHabitsSection />
-                    </TabsContent>
-                    <TabsContent value="speech-trainer" className="flex-grow">
-                        <ExternalTrainerLink />
-                    </TabsContent>
-                </Tabs>
-            </CardContent>
-        </Card>
+                </CardHeader>
+                <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
+                    <Tabs defaultValue="internal-trainer" className="w-full flex-grow flex flex-col">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="internal-trainer">Text-Based Trainer</TabsTrigger>
+                            <TabsTrigger value="speech-trainer">Speech Sales Trainer</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="internal-trainer" className="flex-grow">
+                            <InternalTrainer />
+                        </TabsContent>
+                        <TabsContent value="speech-trainer" className="flex-grow">
+                            <SpeechTrainerLink />
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
+            </Card>
+
+            <AtomicHabitsSection />
+        </div>
     );
 }
-
