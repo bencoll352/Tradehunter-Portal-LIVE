@@ -125,7 +125,7 @@ export function LoginForm() {
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select your branch ID" />
-                      </SelectTrigger>
+                      </Trigger>
                     </FormControl>
                     <SelectContent>
                        {VALID_LOGIN_IDS.map(id => (
