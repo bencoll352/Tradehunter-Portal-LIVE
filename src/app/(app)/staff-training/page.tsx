@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic, BookOpen, FileText, Eye, MoreHorizontal, PlusCircle } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic, BookOpen, FileText, Eye, MoreHorizontal, PlusCircle, Download, Share, Trash2 } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -480,9 +480,9 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                             name="file"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>File (Optional)</FormLabel>
+                                    <FormLabel>File (PDF)</FormLabel>
                                     <FormControl>
-                                        <Input type="file" {...fileRef} />
+                                        <Input type="file" accept="application/pdf" {...fileRef} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -500,6 +500,24 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
 }
 
 function ViewMaterialDialog({ material, open, onOpenChange }: { material: TrainingMaterial | null, open: boolean, onOpenChange: (open: boolean) => void }) {
+    const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        let objectUrl: string | null = null;
+        if (open && material?.file) {
+            objectUrl = URL.createObjectURL(material.file);
+            setFileUrl(objectUrl);
+        } else {
+            setFileUrl(null);
+        }
+
+        return () => {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+        };
+    }, [open, material]);
+
     if (!material) return null;
 
     return (
@@ -510,7 +528,15 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                     <DialogDescription>{material.description}</DialogDescription>
                 </DialogHeader>
                 <div className="flex-grow overflow-y-auto pr-6 -mr-6">
-                   {material.content}
+                   {fileUrl ? (
+                        <iframe src={fileUrl} className="w-full h-full" title={material.title}></iframe>
+                   ) : material.content ? (
+                       material.content
+                   ) : (
+                       <div className="flex items-center justify-center h-full text-muted-foreground">
+                           <p>No viewable content available for this item.</p>
+                       </div>
+                   )}
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
@@ -533,6 +559,14 @@ function TrainingMaterialPortal() {
     const handleViewMaterial = (material: TrainingMaterial) => {
         setSelectedMaterial(material);
         setIsViewOpen(true);
+    };
+    
+    const handleDeleteMaterial = (materialId: string) => {
+        setMaterials(prev => prev.filter(m => m.id !== materialId));
+        toast({
+            title: "Material Deleted",
+            description: "The training material has been removed from the list."
+        });
     };
 
     return (
@@ -573,10 +607,24 @@ function TrainingMaterialPortal() {
                             <TableCell>{material.category}</TableCell>
                             <TableCell>{material.dateAdded}</TableCell>
                             <TableCell className="text-right">
-                                <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View
-                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                            <span className="sr-only">Actions</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => handleViewMaterial(material)}>
+                                            <Eye className="mr-2 h-4 w-4" />
+                                            View
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleDeleteMaterial(material.id)} className="text-destructive focus:text-destructive">
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </TableCell>
                         </TableRow>
                     ))}
