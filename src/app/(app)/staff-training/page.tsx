@@ -533,9 +533,9 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-                <DialogHeader className="p-6 pb-2 border-b">
+                <DialogHeader className="p-6 pb-2 border-b shrink-0">
                     <DialogTitle>{material.title}</DialogTitle>
-                    <DialogDescription>{material.description}</DialogDescription>
+                    {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
                 <div className="flex-grow overflow-auto">
                    {fileUrl ? (
@@ -550,7 +550,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                        </div>
                    )}
                 </div>
-                <DialogFooter className="p-4 border-t bg-background">
+                <DialogFooter className="p-4 border-t bg-background shrink-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
                 </DialogFooter>
             </DialogContent>
@@ -674,3 +674,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
