@@ -336,16 +336,31 @@ const initialTrainingMaterials: TrainingMaterial[] = [
     },
     {
       id: "persuasion-mastery",
-      title: "Persuasion Mastery",
-      description: "A sales playbook covering advanced persuasion techniques.",
+      title: "Persuasion Mastery Programme",
+      description: "10-Week Programme Comprehensive training in psychological influence for UK sales contexts Cialdini's Six Principles Reciprocation, Commitment, Social Proof, Liking, Authority, Scarcity UK-Specific Application Tailored strategies for British business culture and regulations",
       type: "PDF",
       category: "Sales Playbook",
-      tags: "persuasion, sales, techniques",
+      tags: "persuasion, sales, techniques, Cialdini",
       dateAdded: "September 8, 2025",
       content: (
-        <div className="prose prose-sm lg:prose-base max-w-none text-foreground">
-           <h2 className="text-xl font-bold text-primary">Persuasion Mastery</h2>
-           <p>Content for Persuasion Mastery goes here...</p>
+        <div className="prose prose-sm lg:prose-base max-w-none text-foreground p-4">
+           <h2 className="text-xl font-bold text-primary">Persuasion Mastery Programme</h2>
+            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg mb-6">
+                <p className="mt-0">
+                    A 10-week comprehensive training program in psychological influence tailored for UK sales contexts.
+                </p>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Core Principles Covered:</h3>
+            <ul className="list-disc list-inside space-y-2">
+                <li><strong>Reciprocation:</strong> The obligation to give back what you have received from others.</li>
+                <li><strong>Commitment & Consistency:</strong> The desire to be consistent with what we have already done.</li>
+                <li><strong>Social Proof:</strong> The tendency to see an action as more appropriate when others are doing it.</li>
+                <li><strong>Liking:</strong> The tendency to agree with people we like.</li>
+                <li><strong>Authority:</strong> The tendency to obey authority figures.</li>
+                <li><strong>Scarcity:</strong> The desire for things that are less available.</li>
+            </ul>
+             <h3 className="text-lg font-semibold mt-6 mb-2">UK-Specific Application:</h3>
+             <p>This programme tailors these universal principles to the nuances of British business culture and regulations, providing actionable strategies for immediate implementation.</p>
         </div>
       )
     }
@@ -526,8 +541,8 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                    {fileUrl ? (
                         <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
                    ) : material.content ? (
-                       <ScrollArea className="h-full p-6">
-                           {material.content}
+                       <ScrollArea className="h-full">
+                           <div className="p-6">{material.content}</div>
                        </ScrollArea>
                    ) : (
                        <div className="flex items-center justify-center h-full text-muted-foreground">
