@@ -1,10 +1,13 @@
 
 import type { Metadata } from 'next';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import './globals.css';
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Botasaurus Scraper',
-  description: 'A web scraping dashboard',
+  title: 'TradeHunter Pro',
+  description: 'Sales Intelligence for Builders Merchants',
 };
 
 export default function RootLayout({
@@ -13,9 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="bg-gray-50 text-gray-900">
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body>
         {children}
+        <Toaster />
       </body>
     </html>
   );

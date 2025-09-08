@@ -1,10 +1,6 @@
 
-import ScraperDashboard from "@/components/ScraperDashboard";
+import { redirect } from 'next/navigation';
 
-export default function HomePage() {
-  return (
-    <main>
-      <ScraperDashboard />
-    </main>
-  );
+export default function RootPage() {
+  redirect('/login');
 }
