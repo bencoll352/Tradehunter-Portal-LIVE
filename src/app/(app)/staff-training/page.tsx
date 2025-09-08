@@ -3,18 +3,27 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic, BookOpen, FileText, Eye, MoreHorizontal } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 
 interface Message {
     role: 'user' | 'model';
@@ -220,55 +229,92 @@ function SpeechTrainerLink() {
     );
 }
 
-function AtomicHabitsSection() {
-    return (
-        <Card className="bg-gradient-to-br from-card to-muted/30 border-primary/20 shadow-lg mt-8">
-           <CardHeader>
-               <CardTitle className="text-3xl font-bold text-primary flex items-center gap-3">
-                   <Zap className="h-8 w-8" />
-                   Sales Technique: Atomic Habits
-               </CardTitle>
-               <CardDescription className="text-lg text-accent">
-                   Transform your potential through the compound effect of tiny changes.
-               </CardDescription>
-           </CardHeader>
-           <CardContent className="space-y-6">
-               <Card className="border-accent/50 shadow-md">
-                   <CardHeader className="pb-4">
-                       <CardTitle className="text-xl flex items-center gap-2 font-semibold">
-                           <TrendingUp className="h-6 w-6 text-accent" />
-                           The Power of 1%
-                       </CardTitle>
-                   </CardHeader>
-                   <CardContent className="flex items-start gap-4">
-                       <div className="text-7xl font-bold text-accent">1%</div>
-                       <p className="text-muted-foreground mt-2">
-                           Small improvements compound over time to create remarkable results. Habits are the <strong className="text-foreground">compound interest of self-improvement.</strong> By getting just 1% better each day, you'll see a massive difference over a year.
-                       </p>
-                   </CardContent>
-               </Card>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <Card className="bg-green-500/10 border-green-500/30">
-                       <CardHeader>
-                           <CardTitle className="text-4xl font-bold text-green-700">37x</CardTitle>
-                       </CardHeader>
-                       <CardContent>
-                           <p className="font-semibold text-green-800">Better after one year with 1% daily improvement.</p>
-                       </CardContent>
-                   </Card>
-                    <Card className="bg-red-500/10 border-red-500/30">
-                       <CardHeader>
-                           <CardTitle className="text-4xl font-bold text-red-700">0.03x</CardTitle>
-                       </CardHeader>
-                       <CardContent>
-                           <p className="font-semibold text-red-800">Result after one year with 1% daily decline.</p>
-                       </CardContent>
-                   </Card>
-               </div>
-           </CardContent>
-        </Card>
-   )
+const trainingMaterials = [
+    {
+      name: "The Growth Mindset",
+      type: "PDF",
+      category: "Training Material",
+      dateAdded: "September 8, 2025",
+      link: "#"
+    },
+    {
+      name: "Persuasion Mastery",
+      type: "PDF",
+      category: "Sales Playbook",
+      dateAdded: "September 8, 2025",
+      link: "#"
+    }
+];
+
+function TrainingMaterialPortal() {
+    return (
+      <Card className="shadow-lg mt-8">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-primary flex items-center gap-3">
+            <BookOpen className="h-8 w-8" />
+            Training Material Portal
+          </CardTitle>
+          <CardDescription className="text-lg text-muted-foreground">
+            Access training documents, playbooks, and other resources.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead className="w-[40%]">Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Date Added</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+                </TableHeader>
+                <TableBody>
+                {trainingMaterials.map((material) => (
+                    <TableRow key={material.name}>
+                        <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-muted-foreground" />
+                                {material.name}
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                            <Badge variant="outline">{material.type}</Badge>
+                        </TableCell>
+                        <TableCell>{material.category}</TableCell>
+                        <TableCell>{material.dateAdded}</TableCell>
+                        <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                                <Button variant="outline" size="sm" asChild>
+                                    <Link href={material.link}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View
+                                    </Link>
+                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>Download</DropdownMenuItem>
+                                        <DropdownMenuItem>Share</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+        </CardContent>
+         <CardFooter className="flex justify-end">
+          <Button variant="outline">View All Materials</Button>
+        </CardFooter>
+      </Card>
+    )
 }
 
 
@@ -303,7 +349,7 @@ export default function StaffTrainingPage() {
                 </CardContent>
             </Card>
 
-            <AtomicHabitsSection />
+            <TrainingMaterialPortal />
         </div>
     );
 }
