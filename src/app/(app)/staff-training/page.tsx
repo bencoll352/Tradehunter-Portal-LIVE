@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic, BookOpen, FileText, Eye, MoreHorizontal } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic, BookOpen, FileText, Eye, MoreHorizontal, PlusCircle } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -310,8 +310,11 @@ function TrainingMaterialPortal() {
                 </TableBody>
             </Table>
         </CardContent>
-         <CardFooter className="flex justify-end">
-          <Button variant="outline">View All Materials</Button>
+         <CardFooter className="flex justify-end border-t pt-6">
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add New Content
+            </Button>
         </CardFooter>
       </Card>
     )
@@ -353,3 +356,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
