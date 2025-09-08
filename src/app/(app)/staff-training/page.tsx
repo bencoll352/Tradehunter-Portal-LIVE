@@ -23,6 +23,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useForm, zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { format } from 'date-fns';
 
 
 interface Message {
@@ -229,8 +241,15 @@ function SpeechTrainerLink() {
     );
 }
 
+interface TrainingMaterial {
+    name: string;
+    type: string;
+    category: string;
+    dateAdded: string;
+    link: string;
+}
 
-const trainingMaterials = [
+const initialTrainingMaterials: TrainingMaterial[] = [
     {
       name: "The Growth Mindset",
       type: "PDF",
@@ -247,7 +266,110 @@ const trainingMaterials = [
     }
 ];
 
+const contentFormSchema = z.object({
+  name: z.string().min(3, { message: "Name must be at least 3 characters." }),
+  type: z.string().min(2, { message: "Type must be at least 2 characters (e.g., PDF, Video)." }),
+  category: z.string().min(3, { message: "Category is required." }),
+});
+type ContentFormValues = z.infer<typeof contentFormSchema>;
+
+
+function AddContentDialog({ onAddContent }: { onAddContent: (values: ContentFormValues) => void }) {
+    const [open, setOpen] = useState(false);
+    const form = useForm<ContentFormValues>({
+        resolver: zodResolver(contentFormSchema),
+        defaultValues: { name: "", type: "PDF", category: "Training Material" },
+    });
+
+    const onSubmit = (values: ContentFormValues) => {
+        onAddContent(values);
+        setOpen(false);
+        form.reset();
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add New Content
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New Training Material</DialogTitle>
+                    <DialogDescription>
+                        Fill in the details for the new training content. The link will be disabled for now.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Content Name</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g., Advanced Negotiation Tactics" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="type"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Content Type</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g., PDF, Video, Link" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Category</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g., Sales Playbook" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <DialogFooter>
+                            <Button type="submit">Add Content</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 function TrainingMaterialPortal() {
+    const [materials, setMaterials] = useState<TrainingMaterial[]>(initialTrainingMaterials);
+    const { toast } = useToast();
+
+    const handleAddContent = (values: ContentFormValues) => {
+        const newMaterial: TrainingMaterial = {
+            ...values,
+            dateAdded: format(new Date(), "MMMM d, yyyy"),
+            link: "#" // Placeholder link
+        };
+        setMaterials(prev => [...prev, newMaterial]);
+        toast({
+            title: "Content Added",
+            description: `"${values.name}" has been added to the portal.`,
+        });
+    };
+
     return (
       <Card className="shadow-lg mt-8">
         <CardHeader>
@@ -271,7 +393,7 @@ function TrainingMaterialPortal() {
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {trainingMaterials.map((material) => (
+                {materials.map((material) => (
                     <TableRow key={material.name}>
                         <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
@@ -311,10 +433,7 @@ function TrainingMaterialPortal() {
             </Table>
         </CardContent>
          <CardFooter className="flex justify-end border-t pt-6">
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add New Content
-            </Button>
+            <AddContentDialog onAddContent={handleAddContent} />
         </CardFooter>
       </Card>
     )
@@ -356,5 +475,3 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
-
-    
