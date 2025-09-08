@@ -1,3 +1,4 @@
+
 // lib/task-manager.ts
 import { Scraper } from './scraper';
 import { ScrapingOptions, ScrapingResult } from '@/types';
@@ -45,18 +46,17 @@ export class TaskManager {
       return;
     }
 
-    for (const [taskId, task] of this.tasks) {
-      if (task.status === 'pending') {
-        this.runningTasks++;
-        this.executeTask(taskId);
-      }
+    const pendingTask = Array.from(this.tasks.values()).find(t => t.status === 'pending');
+    if (pendingTask) {
+        this.executeTask(pendingTask.id);
     }
   }
 
   private async executeTask(taskId: string): Promise<void> {
     const task = this.tasks.get(taskId);
-    if (!task) return;
+    if (!task || task.status !== 'pending') return;
 
+    this.runningTasks++;
     task.status = 'running';
     task.startedAt = new Date();
 

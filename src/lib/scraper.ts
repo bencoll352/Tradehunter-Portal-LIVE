@@ -1,3 +1,4 @@
+
 // lib/scraper.ts
 import { Page } from 'puppeteer';
 import { BrowserManager } from './browser-manager';

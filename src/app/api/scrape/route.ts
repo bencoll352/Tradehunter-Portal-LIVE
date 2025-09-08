@@ -1,3 +1,4 @@
+
 // app/api/scrape/route.ts
 import { NextResponse } from 'next/server';
 import { Scraper } from '@/lib/scraper';

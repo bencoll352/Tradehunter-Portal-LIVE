@@ -1,3 +1,4 @@
+
 // lib/browser-manager.ts
 import puppeteer, { Browser, Page } from 'puppeteer';
 import { BrowserConfig, ScrapingOptions } from '@/types';
