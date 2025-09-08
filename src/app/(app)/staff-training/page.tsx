@@ -363,6 +363,7 @@ type ContentFormValues = z.infer<typeof contentFormSchema>;
 
 function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMaterial) => void }) {
     const [open, setOpen] = useState(false);
+    const { toast } = useToast();
     const form = useForm<ContentFormValues>({
         resolver: zodResolver(contentFormSchema),
         defaultValues: { title: "", description: "", category: "Sales Playbook", tags: "" },
@@ -658,5 +659,3 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
-
-    
