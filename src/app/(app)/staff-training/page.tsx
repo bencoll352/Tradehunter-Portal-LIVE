@@ -10,19 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, TrendingUp, Zap, Mic, BookOpen, FileText, Eye, MoreHorizontal, PlusCircle, Download, Share, Trash2 } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Trash2, Eye, MoreHorizontal, FileText, PlusCircle, BookOpen, Mic } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +30,14 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 
 interface Message {
@@ -362,7 +362,7 @@ const contentFormSchema = z.object({
   description: z.string().optional(),
   category: z.string().min(3, { message: "Category is required." }),
   tags: z.string().optional(),
-  file: z.any().optional(), // File is optional for now
+  file: z.any().optional(),
 });
 type ContentFormValues = z.infer<typeof contentFormSchema>;
 
@@ -522,23 +522,25 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
-                <DialogHeader>
+            <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+                <DialogHeader className="p-6 pb-2">
                     <DialogTitle>{material.title}</DialogTitle>
                     <DialogDescription>{material.description}</DialogDescription>
                 </DialogHeader>
-                <div className="flex-grow overflow-y-auto pr-6 -mr-6">
+                <div className="flex-grow overflow-y-auto px-6">
                    {fileUrl ? (
-                        <iframe src={fileUrl} className="w-full h-full" title={material.title}></iframe>
+                        <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
                    ) : material.content ? (
-                       material.content
+                       <ScrollArea className="h-full pr-2">
+                           {material.content}
+                       </ScrollArea>
                    ) : (
                        <div className="flex items-center justify-center h-full text-muted-foreground">
                            <p>No viewable content available for this item.</p>
                        </div>
                    )}
                 </div>
-                <DialogFooter>
+                <DialogFooter className="p-6 pt-2 border-t">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
                 </DialogFooter>
             </DialogContent>
@@ -571,7 +573,7 @@ function TrainingMaterialPortal() {
 
     return (
       <>
-        <Card className="shadow-lg mt-8">
+        <Card className="shadow-lg">
             <CardHeader>
             <CardTitle className="text-2xl font-bold text-primary flex items-center gap-3">
                 <BookOpen className="h-8 w-8" />
@@ -676,3 +678,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
