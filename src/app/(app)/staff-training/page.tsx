@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, ExternalLink, TrendingUp, Zap } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, ExternalLink, TrendingUp, Zap, Mic } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -201,14 +201,14 @@ function ExternalTrainerLink() {
         <div className="p-4">
              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
                 <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", "border-teal-500/50 text-teal-500 bg-teal-500/10")}>
-                    <ExternalLink className="h-12 w-12" />
+                    <Mic className="h-12 w-12" />
                 </div>
-                <CardTitle className="text-xl text-primary mb-1">Apex Sales Trainer</CardTitle>
+                <CardTitle className="text-xl text-primary mb-1">Speech Sales Trainer</CardTitle>
                 <div className="flex items-center gap-1.5 mb-2">
                     <p className="text-sm font-semibold text-accent">External Application</p>
                 </div>
                 <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
-                    "Launch the full-featured Apex Sales Trainer application in a new window for advanced simulations and scenarios."
+                    "Launch the full-featured Speech Sales Trainer application in a new window for advanced, voice-based simulations and scenarios."
                 </CardDescription>
                 <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
                     <Link href={apexSalesTrainerUrl} target="_blank" rel="noopener noreferrer">
@@ -295,7 +295,7 @@ export default function StaffTrainingPage() {
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="internal-trainer">Text-Based Trainer</TabsTrigger>
                         <TabsTrigger value="sales-techniques">Sales Techniques</TabsTrigger>
-                        <TabsTrigger value="external-app">External App Link</TabsTrigger>
+                        <TabsTrigger value="speech-trainer">Speech Sales Trainer</TabsTrigger>
                     </TabsList>
                     <TabsContent value="internal-trainer" className="flex-grow">
                         <InternalTrainer />
@@ -303,7 +303,7 @@ export default function StaffTrainingPage() {
                      <TabsContent value="sales-techniques" className="flex-grow bg-muted/30 rounded-b-lg">
                         <AtomicHabitsSection />
                     </TabsContent>
-                    <TabsContent value="external-app" className="flex-grow">
+                    <TabsContent value="speech-trainer" className="flex-grow">
                         <ExternalTrainerLink />
                     </TabsContent>
                 </Tabs>
@@ -311,3 +311,4 @@ export default function StaffTrainingPage() {
         </Card>
     );
 }
+
