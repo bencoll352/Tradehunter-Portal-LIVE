@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Trash2, Eye, FileText, PlusCircle, BookOpen, Mic } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -387,6 +387,14 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
 
     const onSubmit = (values: ContentFormValues) => {
         const file = values.file?.[0];
+        if (!file) {
+            toast({
+                variant: 'destructive',
+                title: "File Required",
+                description: "Please select a PDF file to upload.",
+            });
+            return;
+        }
         const newMaterial: TrainingMaterial = {
             id: `material_${Date.now()}`,
             title: values.title,
@@ -573,14 +581,6 @@ function TrainingMaterialPortal() {
         setIsViewOpen(true);
     };
     
-    const handleDeleteMaterial = (materialId: string) => {
-        setMaterials(prev => prev.filter(m => m.id !== materialId));
-        toast({
-            title: "Material Deleted",
-            description: "The training material has been removed from the list."
-        });
-    };
-
     return (
       <>
         <Card className="shadow-lg">
@@ -674,5 +674,7 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
 
     
