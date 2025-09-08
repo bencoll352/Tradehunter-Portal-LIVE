@@ -337,13 +337,13 @@ const initialTrainingMaterials: TrainingMaterial[] = [
     {
       id: "persuasion-mastery",
       title: "Persuasion Mastery Programme",
-      description: "10-Week Programme Comprehensive training in psychological influence for UK sales contexts Cialdini's Six Principles Reciprocation, Commitment, Social Proof, Liking, Authority, Scarcity UK-Specific Application Tailored strategies for British business culture and regulations",
+      description: "A 10-week comprehensive training program in psychological influence tailored for UK sales contexts.",
       type: "PDF",
       category: "Sales Playbook",
       tags: "persuasion, sales, techniques, Cialdini",
       dateAdded: "September 8, 2025",
       content: (
-        <div className="prose prose-sm lg:prose-base max-w-none text-foreground p-4">
+        <div className="prose prose-sm lg:prose-base max-w-none text-foreground">
            <h2 className="text-xl font-bold text-primary">Persuasion Mastery Programme</h2>
             <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg mb-6">
                 <p className="mt-0">
@@ -351,7 +351,7 @@ const initialTrainingMaterials: TrainingMaterial[] = [
                 </p>
             </div>
             <h3 className="text-lg font-semibold mb-2">Core Principles Covered:</h3>
-            <ul className="list-disc list-inside space-y-2">
+            <ul className="list-disc list-outside ml-5 space-y-2">
                 <li><strong>Reciprocation:</strong> The obligation to give back what you have received from others.</li>
                 <li><strong>Commitment & Consistency:</strong> The desire to be consistent with what we have already done.</li>
                 <li><strong>Social Proof:</strong> The tendency to see an action as more appropriate when others are doing it.</li>
