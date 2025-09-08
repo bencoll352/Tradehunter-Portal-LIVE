@@ -33,10 +33,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 interface Message {
@@ -244,47 +245,68 @@ function SpeechTrainerLink() {
 }
 
 interface TrainingMaterial {
-    name: string;
+    title: string;
+    description?: string;
     type: string;
     category: string;
+    tags?: string;
     dateAdded: string;
     link: string;
+    file?: File;
 }
 
 const initialTrainingMaterials: TrainingMaterial[] = [
     {
-      name: "The Growth Mindset",
+      title: "The Growth Mindset",
+      description: "A PDF document on the importance of a growth mindset in sales.",
       type: "PDF",
-      category: "Training Material",
+      category: "Mindset",
+      tags: "growth, mindset, psychology",
       dateAdded: "September 8, 2025",
       link: "#"
     },
     {
-      name: "Persuasion Mastery",
+      title: "Persuasion Mastery",
+      description: "A sales playbook covering advanced persuasion techniques.",
       type: "PDF",
       category: "Sales Playbook",
+      tags: "persuasion, sales, techniques",
       dateAdded: "September 8, 2025",
       link: "#"
     }
 ];
 
 const contentFormSchema = z.object({
-  name: z.string().min(3, { message: "Name must be at least 3 characters." }),
-  type: z.string().min(2, { message: "Type must be at least 2 characters (e.g., PDF, Video)." }),
+  title: z.string().min(3, { message: "Title must be at least 3 characters." }),
+  description: z.string().optional(),
   category: z.string().min(3, { message: "Category is required." }),
+  tags: z.string().optional(),
+  file: z.any().refine((files) => files?.length == 1, "File is required."),
 });
 type ContentFormValues = z.infer<typeof contentFormSchema>;
 
 
-function AddContentDialog({ onAddContent }: { onAddContent: (values: ContentFormValues) => void }) {
+function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMaterial) => void }) {
     const [open, setOpen] = useState(false);
     const form = useForm<ContentFormValues>({
         resolver: zodResolver(contentFormSchema),
-        defaultValues: { name: "", type: "PDF", category: "Training Material" },
+        defaultValues: { title: "", description: "", category: "Sales Playbook", tags: "" },
     });
+    const fileRef = form.register("file");
 
     const onSubmit = (values: ContentFormValues) => {
-        onAddContent(values);
+        const file = values.file[0];
+        const newMaterial: TrainingMaterial = {
+            title: values.title,
+            description: values.description,
+            category: values.category,
+            tags: values.tags,
+            file: file,
+            type: file.type.split('/')[1]?.toUpperCase() || 'File',
+            dateAdded: format(new Date(), "MMMM d, yyyy"),
+            link: "#" 
+        };
+        onAddContent(newMaterial);
         setOpen(false);
         form.reset();
     };
@@ -299,21 +321,21 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: ContentForm
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add New Training Material</DialogTitle>
+                    <DialogTitle>Add New Content</DialogTitle>
                     <DialogDescription>
-                        Fill in the details for the new training content. The link will be disabled for now.
+                        Add a new file to your content library. Fill in the details below.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="title"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Content Name</FormLabel>
+                                    <FormLabel>Title</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g., Advanced Negotiation Tactics" {...field} />
+                                        <Input placeholder="e.g., Q3 Sales Playbook" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -321,32 +343,69 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: ContentForm
                         />
                         <FormField
                             control={form.control}
-                            name="type"
+                            name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Content Type</FormLabel>
+                                    <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g., PDF, Video, Link" {...field} />
+                                        <Textarea placeholder="A short description of the content." {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <FormField
+                         <FormField
                             control={form.control}
                             name="category"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Category</FormLabel>
+                               <FormItem>
+                                <FormLabel>Category</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                        <Input placeholder="e.g., Sales Playbook" {...field} />
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a category" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Sales Playbook">Sales Playbook</SelectItem>
+                                        <SelectItem value="Training Material">Training Material</SelectItem>
+                                        <SelectItem value="Mindset">Mindset</SelectItem>
+                                        <SelectItem value="Product Guide">Product Guide</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="tags"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Tags</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Add tags, comma separated" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="file"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>File</FormLabel>
+                                    <FormControl>
+                                        <Input type="file" {...fileRef} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <DialogFooter>
-                            <Button type="submit">Add Content</Button>
+                            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                            <Button type="submit">Publish</Button>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -359,16 +418,11 @@ function TrainingMaterialPortal() {
     const [materials, setMaterials] = useState<TrainingMaterial[]>(initialTrainingMaterials);
     const { toast } = useToast();
 
-    const handleAddContent = (values: ContentFormValues) => {
-        const newMaterial: TrainingMaterial = {
-            ...values,
-            dateAdded: format(new Date(), "MMMM d, yyyy"),
-            link: "#" // Placeholder link
-        };
+    const handleAddContent = (newMaterial: TrainingMaterial) => {
         setMaterials(prev => [...prev, newMaterial]);
         toast({
             title: "Content Added",
-            description: `"${values.name}" has been added to the portal.`,
+            description: `"${newMaterial.title}" has been added to the portal.`,
         });
     };
 
@@ -396,11 +450,11 @@ function TrainingMaterialPortal() {
                 </TableHeader>
                 <TableBody>
                 {materials.map((material) => (
-                    <TableRow key={material.name}>
+                    <TableRow key={material.title}>
                         <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-muted-foreground" />
-                                {material.name}
+                                {material.title}
                             </div>
                         </TableCell>
                         <TableCell>
@@ -416,17 +470,6 @@ function TrainingMaterialPortal() {
                                         View
                                     </Link>
                                 </Button>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>Download</DropdownMenuItem>
-                                        <DropdownMenuItem>Share</DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
                             </div>
                         </TableCell>
                     </TableRow>
@@ -477,3 +520,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
