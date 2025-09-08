@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Trash2, Eye, MoreHorizontal, FileText, PlusCircle, BookOpen, Mic } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Trash2, Eye, FileText, PlusCircle, BookOpen, Mic } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -32,12 +32,6 @@ import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 
 interface Message {
@@ -523,15 +517,15 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-                <DialogHeader className="p-6 pb-2">
+                <DialogHeader className="p-6 pb-2 border-b">
                     <DialogTitle>{material.title}</DialogTitle>
                     <DialogDescription>{material.description}</DialogDescription>
                 </DialogHeader>
-                <div className="flex-grow overflow-y-auto px-6">
+                <div className="flex-grow overflow-auto">
                    {fileUrl ? (
                         <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
                    ) : material.content ? (
-                       <ScrollArea className="h-full pr-2">
+                       <ScrollArea className="h-full p-6">
                            {material.content}
                        </ScrollArea>
                    ) : (
@@ -540,7 +534,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                        </div>
                    )}
                 </div>
-                <DialogFooter className="p-6 pt-2 border-t">
+                <DialogFooter className="p-4 border-t bg-background">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
                 </DialogFooter>
             </DialogContent>
@@ -609,24 +603,10 @@ function TrainingMaterialPortal() {
                             <TableCell>{material.category}</TableCell>
                             <TableCell>{material.dateAdded}</TableCell>
                             <TableCell className="text-right">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                            <span className="sr-only">Actions</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => handleViewMaterial(material)}>
-                                            <Eye className="mr-2 h-4 w-4" />
-                                            View
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleDeleteMaterial(material.id)} className="text-destructive focus:text-destructive">
-                                            <Trash2 className="mr-2 h-4 w-4" />
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View
+                                </Button>
                             </TableCell>
                         </TableRow>
                     ))}
