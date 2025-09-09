@@ -181,18 +181,35 @@ export function DashboardClientPageContent({
     return result;
   };
 
-  if (isLoading && !traders.length && (!currentBaseBranchId || currentUserRole !== 'unknown')) { 
+  if (isLoading && !branchInfo) { 
     return (
       <div className="space-y-6">
-        <Skeleton className="h-24 w-full md:w-1/2 lg:w-1/3" />
-        <Skeleton className="h-12 w-1/4" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-12 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
     );
   }
+  
+  if (!currentBaseBranchId && currentUserRole === 'user' && !isLoading) { 
+      return <p>Error: Branch information not found. Please ensure you are logged in correctly.</p>;
+  }
 
-  if (!currentBaseBranchId && !isLoading) { 
-    return <p>Error: Branch information not found. Please ensure you are logged in correctly.</p>;
+  // Handle Manager View - show dashboard but not trader table if no branch selected
+  if (currentUserRole === 'manager' && !currentBaseBranchId) {
+      return (
+          <div className="space-y-6">
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Manager View</CardTitle>
+                      <CardDescription>Select a branch from the login screen to view and manage its traders.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <p>As a manager, you can log in with any specific branch ID to see its data.</p>
+                  </CardContent>
+              </Card>
+          </div>
+      )
   }
   
   return (
@@ -209,7 +226,7 @@ export function DashboardClientPageContent({
           <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading && traders.length === 0 && (currentBaseBranchId && currentUserRole !== 'unknown') ? (
+          {isLoading ? (
               <Skeleton className="h-64 w-full" />
           ) : (
             <TraderTableClient 
