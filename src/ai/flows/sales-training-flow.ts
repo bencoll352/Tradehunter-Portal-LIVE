@@ -9,7 +9,7 @@
  */
 
 import { ai, geminiPro } from '@/ai/genkit';
-import { z } from 'genkit/zod';
+import { z } from 'zod';
 
 const MessageSchema = z.object({
     role: z.enum(['user', 'model']),

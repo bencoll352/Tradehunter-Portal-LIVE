@@ -33,7 +33,8 @@ const sharedModelConfig: GenerationCommonConfig = {
 export const ai = genkit({
   plugins: [
     googleAI({
-      // The API key is usually automatically sourced from the GOOGLE_API_KEY environment variable
+      // The API key is usually automatically sourced from the GOOGLE_API_KEY environment variable,
+      // or Application Default Credentials are used in a managed environment.
     }),
   ],
   logLevel: 'debug',
@@ -41,11 +42,13 @@ export const ai = genkit({
 });
 
 export const geminiPro = 'gemini-1.0-pro-latest';
-export const geminiProVision = 'gemini-1.0-pro-vision-latest';
+export const geminiProVision = 'gemini-pro-vision';
 
 
 // Helper function to apply default configuration to a model
 export function getModel(modelName: string, overrides: GenerationCommonConfig = {}) {
+  // This helper is no longer strictly necessary with the simplified model strings,
+  // but it's kept for consistency and if more complex configurations are needed later.
   return {
     model: modelName,
     config: {

@@ -9,7 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit/zod';
+import { z } from 'zod';
 import { geminiPro } from '@/ai/genkit';
 
 export const CompetitionAnalysisInputSchema = z.object({
