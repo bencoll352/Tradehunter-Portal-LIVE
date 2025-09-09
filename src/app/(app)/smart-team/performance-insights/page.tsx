@@ -14,8 +14,7 @@ export default function PerformanceInsightsPage() {
           <div className="flex items-center gap-3">
               <BarChart className="h-8 w-8 text-primary" />
               <div>
-                  <CardTitle className="text-2xl text-primary">Performance Insights</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-2xl text-primary">Performance Insights</CardTitle>                  <CardDescription>
                       A Sales Performance & Data Insights Platform.
                       <span className="block mt-1 text-xs text-muted-foreground italic">
                         <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
