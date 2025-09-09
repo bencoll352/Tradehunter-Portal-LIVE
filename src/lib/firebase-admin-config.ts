@@ -1,31 +1,29 @@
-
 // src/lib/firebase-admin-config.ts
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 
-const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-let db: admin.firestore.Firestore | null = null;
+let db: admin.firestore.Firestore;
 
-if (serviceAccountKey) {
-    try {
-        const serviceAccount = JSON.parse(Buffer.from(serviceAccountKey, 'base64').toString('utf8'));
-        if (admin.apps.length === 0) {
-            admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount)
-            });
-             console.log("[Firebase Admin] Initialized successfully.");
-        } else {
-             console.log("[Firebase Admin] Already initialized.");
-        }
-        db = getFirestore();
-    } catch (error) {
-        console.error("[Firebase Admin] Error parsing service account key or initializing app:", error);
-        if (serviceAccountKey && !serviceAccountKey.trim().startsWith("{")) {
-            console.error("[Firebase Admin] The FIREBASE_SERVICE_ACCOUNT_KEY environment variable does not appear to be a valid JSON object. It might be encoded incorrectly. Please ensure it's a direct JSON string or correctly Base64 encoded.");
-        }
+try {
+    if (admin.apps.length === 0) {
+        // In many managed environments (like Google Cloud Run, which App Hosting uses),
+        // the Admin SDK can automatically detect the project's service account credentials
+        // without needing a service account key file or environment variable.
+        admin.initializeApp();
+        console.log("[Firebase Admin] Initialized successfully using default credentials.");
+    } else {
+        console.log("[Firebase Admin] Already initialized.");
     }
-} else {
-    console.warn("[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_KEY environment variable not found. Server-side Firebase features will be disabled.");
+    db = getFirestore();
+} catch (error) {
+    console.error("[Firebase Admin] Error initializing app:", error);
+    // If running locally without default credentials, this will fail.
+    // The previous implementation with FIREBASE_SERVICE_ACCOUNT_KEY can be used as a fallback for local dev if needed,
+    // but the default credential method is preferred for deployed environments.
+    console.error("[Firebase Admin] This might happen if you are running locally without the gcloud CLI authenticated or a service account key. For deployed environments, ensure the runtime service account has 'Firebase Admin SDK Administrator Service Agent' role.");
+    // To allow the app to run without crashing, we'll set db to null, but operations will fail.
+    db = null as any; 
 }
+
 
 export { db };
