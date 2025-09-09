@@ -11,7 +11,6 @@ import { InfoAccordion } from '../common/InfoAccordion';
 
 export function AppSidebar() {
   const insightFeatures = [
-    "Quickly analyse competitor strategies.",
     "Generate material estimates for projects.",
     "Access specialised data via BuildWise Intel.",
     "For managers: utilise the Smart Team Hub for advanced analytics and lead generation."

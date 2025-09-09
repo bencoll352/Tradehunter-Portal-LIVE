@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/tradehunter", icon: Database, label: "Trader Database" },
-  { href: "/competitor-insights", icon: Lightbulb, label: "Competitor Insights" },
   { href: "/estimator", icon: Calculator, label: "Estimator" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
   { href: "/buildwise-intel", icon: Home, label: "BuildWise Intel" },

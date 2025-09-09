@@ -27,12 +27,6 @@ const faqs = [
     answer: "Navigate to the 'Trader Database' page. Here you can view all traders for your branch, search for specific ones, add new traders manually, or perform bulk uploads and deletions using a CSV file. Click on a trader's name to mark them as a 'Hot Lead' for follow-up.",
     icon: <Database className="h-5 w-5 text-primary mr-2" />
   },
-  {
-    value: "item-3",
-    question: "What does Competitor Insights do?",
-    answer: "Go to the 'Competitor Insights' page and enter the website URL of a local competitor. The system will analyse their site and provide a strategic report on their offerings, strengths, weaknesses, and actionable counter-strategies for Jewson.",
-    icon: <Lightbulb className="h-5 w-5 text-primary mr-2" />
-  },
    {
     value: "item-4",
     question: "What is the Materials Estimator?",

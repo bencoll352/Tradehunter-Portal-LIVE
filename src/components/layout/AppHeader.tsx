@@ -11,7 +11,6 @@ import { usePathname } from 'next/navigation';
 const headerNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tradehunter", label: "Trader DB", icon: Database },
-  { href: "/competitor-insights", label: "Competitors", icon: Lightbulb },
   { href: "/estimator", label: "Estimator", icon: Calculator },
   { href: "/smart-team", label: "Smart Team", icon: UsersRound },
 ];
