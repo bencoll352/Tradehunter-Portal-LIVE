@@ -371,44 +371,47 @@ const contentFormSchema = z.object({
   description: z.string().optional(),
   category: z.string().min(3, { message: "Category is required." }),
   tags: z.string().optional(),
-  file: z.any().optional(),
+  files: z.any().optional(),
 });
 type ContentFormValues = z.infer<typeof contentFormSchema>;
 
 
-function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMaterial) => void }) {
+function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMaterial[]) => void }) {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     const form = useForm<ContentFormValues>({
         resolver: zodResolver(contentFormSchema),
         defaultValues: { title: "", description: "", category: "Sales Playbook", tags: "" },
     });
-    const fileRef = form.register("file");
+    const fileRef = form.register("files");
 
     const onSubmit = (values: ContentFormValues) => {
-        const file = values.file?.[0];
-        if (!file) {
+        const files = values.files;
+        if (!files || files.length === 0) {
             toast({
                 variant: 'destructive',
-                title: "File Required",
-                description: "Please select a PDF file to upload.",
+                title: "File(s) Required",
+                description: "Please select one or more image files to upload.",
             });
             return;
         }
-        const newMaterial: TrainingMaterial = {
-            id: `material_${Date.now()}`,
-            title: values.title,
+
+        const newMaterials: TrainingMaterial[] = Array.from(files).map((file: any) => ({
+            id: `material_${Date.now()}_${file.name}`,
+            title: values.title || file.name,
             description: values.description,
             category: values.category,
             tags: values.tags,
             file: file,
-            type: file ? file.type.split('/')[1]?.toUpperCase() || 'File' : 'Document',
+            type: file.type.split('/')[1]?.toUpperCase() || 'File',
             dateAdded: format(new Date(), "MMMM d, yyyy"),
-        };
-        onAddContent(newMaterial);
+        }));
+        
+        onAddContent(newMaterials);
+
         toast({
             title: "Content Added",
-            description: `"${newMaterial.title}" has been added to the portal.`,
+            description: `${newMaterials.length} file(s) have been added to the portal.`,
         });
         setOpen(false);
         form.reset();
@@ -426,7 +429,7 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                 <DialogHeader>
                     <DialogTitle>Add New Content</DialogTitle>
                     <DialogDescription>
-                        Add a new file to your content library. Fill in the details below.
+                        Add new files to your content library. You can select multiple images.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -474,6 +477,7 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                                         <SelectItem value="Training Material">Training Material</SelectItem>
                                         <SelectItem value="Mindset">Mindset</SelectItem>
                                         <SelectItem value="Product Guide">Product Guide</SelectItem>
+                                        <SelectItem value="Image">Image</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -495,12 +499,12 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                         />
                         <FormField
                             control={form.control}
-                            name="file"
+                            name="files"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>File (PDF)</FormLabel>
+                                    <FormLabel>Files (Images)</FormLabel>
                                     <FormControl>
-                                        <Input type="file" accept="application/pdf" {...fileRef} />
+                                        <Input type="file" accept="image/png, image/jpeg, image/gif" {...fileRef} multiple />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -572,8 +576,8 @@ function TrainingMaterialPortal() {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const { toast } = useToast();
 
-    const handleAddContent = (newMaterial: TrainingMaterial) => {
-        setMaterials(prev => [...prev, newMaterial]);
+    const handleAddContent = (newMaterials: TrainingMaterial[]) => {
+        setMaterials(prev => [...prev, ...newMaterials]);
     };
 
     const handleViewMaterial = (material: TrainingMaterial) => {
