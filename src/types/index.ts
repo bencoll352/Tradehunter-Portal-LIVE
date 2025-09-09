@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 // --- Branch & User Management ---
 
-export const VALID_BRANCH_IDS = ["PURLEY", "LEATHERHEAD", "DORKING", "REDHILL", "BRANCH_D"] as const;
+export const VALID_BRANCH_IDS = ["PURLEY", "LEATHERHEAD", "DORKING", "REDHILL", "BRANCH_D", "MARGATE"] as const;
 export const VALID_LOGIN_IDS = [...VALID_BRANCH_IDS, "MANAGER"] as const;
 
 export type BranchId = typeof VALID_BRANCH_IDS[number];
@@ -27,6 +27,7 @@ const branchDetails: Record<BaseBranchId, { name: string; address: string; }> = 
     DORKING: { name: "Jewson Dorking", address: "Vincent Lane, Dorking" },
     REDHILL: { name: "Jewson Redhill", address: "Brighton Road, Redhill" },
     BRANCH_D: { name: "Jewson Branch D", address: "Somewhere, UK" },
+    MARGATE: { name: "Jewson Margate", address: "Margate, UK" },
 };
 
 
