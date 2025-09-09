@@ -94,14 +94,6 @@ const assistants: RosterCardProps[] = [
         icon: MessageSquareQuote,
         iconStyle: "border-sky-500/50 text-sky-500 bg-sky-500/10",
     },
-    {
-        title: "Performance Insights",
-        role: "Data Insights Platform",
-        description: "I am a sales performance and data insights platform to help you make better decisions.",
-        href: "/smart-team/performance-insights",
-        icon: BarChart,
-        iconStyle: "border-orange-500/50 text-orange-500 bg-orange-500/10",
-    },
 ]
 
 
