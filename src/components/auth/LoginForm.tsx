@@ -115,7 +115,7 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <FormField_
+            <FormField
               control={form.control}
               name="loginId"
               render={({ field }) => (
@@ -125,7 +125,7 @@ export function LoginForm() {
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select your branch ID" />
-                      </Trigger>
+                      </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                        {VALID_LOGIN_IDS.map(id => (
