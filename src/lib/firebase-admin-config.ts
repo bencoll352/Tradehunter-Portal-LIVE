@@ -10,7 +10,10 @@ let db: admin.firestore.Firestore;
 try {
     if (admin.apps.length === 0) {
         console.log("[Firebase Admin] No active apps, initializing...");
-        admin.initializeApp();
+        // Explicitly providing the projectId is crucial for authentication in some environments.
+        admin.initializeApp({
+            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        });
         console.log("[Firebase Admin] Initialized successfully using Application Default Credentials.");
     } else {
         console.log("[Firebase Admin] App already initialized. Using existing instance.");
