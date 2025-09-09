@@ -33,12 +33,10 @@ const sharedModelConfig: GenerationCommonConfig = {
 export const ai = genkit({
   plugins: [
     googleAI({
-      // The API key is usually automatically sourced from the GOOGLE_API_KEY environment variable,
-      // or Application Default Credentials are used in a managed environment.
+      // The API key is automatically sourced from Application Default Credentials
+      // in a managed environment like Firebase App Hosting.
     }),
   ],
-  logLevel: 'debug',
-  enableTracingAndMetrics: true,
 });
 
 export const geminiPro = 'gemini-1.0-pro-latest';
