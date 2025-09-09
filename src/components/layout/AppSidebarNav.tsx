@@ -3,77 +3,44 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home, LayoutDashboard } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getBranchInfo, type BranchLoginId, type BranchInfo } from "@/types";
+import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home, LayoutDashboard, HelpCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/tradehunter", icon: Database, label: "Trader Database" },
   { href: "/competitor-insights", icon: Lightbulb, label: "Competitor Insights" },
-  { href: "/estimator", icon: Calculator, label: "Materials Estimator" },
-  { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
+  { href: "/estimator", icon: Calculator, label: "Estimator" },
+  { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
   { href: "/buildwise-intel", icon: Home, label: "BuildWise Intel" },
-  { href: "/smart-team", icon: UsersRound, label: "Smart Team Hub" },
+  { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
+  { href: "/how-to-use", icon: HelpCircle, label: "How to Use" },
 ];
 
 interface AppSidebarNavProps {
-  isTooltip?: boolean;
   onLinkClick?: () => void;
 }
 
-export function AppSidebarNav({ isTooltip = false, onLinkClick }: AppSidebarNavProps) {
+export function AppSidebarNav({ onLinkClick }: AppSidebarNavProps) {
   const pathname = usePathname();
-  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-      const info = getBranchInfo(storedLoggedInId);
-      setBranchInfo(info);
-    }
-  }, []);
-
-  const visibleNavItems = navItems.filter(item => {
-    // Role-based filtering logic removed
-    return true;
-  });
 
   return (
     <>
-      {visibleNavItems.map(({ href, icon: Icon, label }) => {
-        const isActive = pathname === href;
-        const linkContent = (
-          <Link
-            href={href}
-            onClick={onLinkClick}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg ${isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'} transition-colors hover:text-foreground md:h-8 md:w-8`}
-          >
-            <Icon className="h-5 w-5" />
-            <span className="sr-only">{label}</span>
-          </Link>
-        );
-
-        if (isTooltip) {
-          return (
-            <Tooltip key={href}>
-              <TooltipTrigger asChild>
-                {linkContent}
-              </TooltipTrigger>
-              <TooltipContent side="right">{label}</TooltipContent>
-            </Tooltip>
-          );
-        }
-        
+      {navItems.map(({ href, icon: Icon, label }) => {
+        const isActive = pathname.startsWith(href);
         return (
            <Link
             key={href}
             href={href}
             onClick={onLinkClick}
-            className={`flex items-center gap-4 px-2.5 ${isActive ? 'text-foreground' : 'text-muted-foreground'} hover:text-foreground`}
+            className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                isActive 
+                ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+            )}
           >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-4 w-4" />
             {label}
           </Link>
         );

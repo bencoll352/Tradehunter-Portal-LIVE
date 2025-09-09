@@ -1,9 +1,7 @@
 
 "use client"
 
-import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
-
 import {
   Card,
   CardContent,
@@ -11,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 
 interface ChartData {
     name: string;
@@ -22,38 +21,62 @@ interface BranchPerformanceChartProps {
     data: ChartData[];
 }
 
+const chartConfig = {
+  count: {
+    label: "Traders",
+  },
+  active: {
+    label: "Active",
+    color: "hsl(var(--chart-1))",
+  },
+  "hot-leads": {
+    label: "Hot Leads",
+    color: "hsl(var(--chart-2))",
+  },
+  "new-leads": {
+    label: "New Leads",
+    color: "hsl(var(--chart-3))",
+  },
+  inactive: {
+    label: "Inactive",
+    color: "hsl(var(--chart-4))",
+  },
+} satisfies ChartConfig
+
 export function BranchPerformanceChart({ data }: BranchPerformanceChartProps) {
   return (
-    <Card className="shadow-lg border-primary/20">
+    <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-2xl text-primary">Branch Performance Chart</CardTitle>
+        <CardTitle className="text-xl text-primary">Branch Performance Chart</CardTitle>
         <CardDescription>A visual summary of your trader pipeline status.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis 
-                    dataKey="name" 
-                    type="category" 
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: 'hsl(var(--muted))' }}
-                  contentStyle={{ 
-                    background: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: 'var(--radius)',
-                  }}
-                />
-                <Bar dataKey="count" fill="currentColor" radius={[0, 4, 4, 0]} className="fill-primary" />
+        <div className="h-[300px] w-full">
+          <ChartContainer config={chartConfig} className="w-full h-full">
+            <BarChart
+              accessibilityLayer
+              data={data}
+              layout="vertical"
+              margin={{ left: 10, top: 10, right: 10, bottom: 10 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" dataKey="count" hide />
+              <YAxis
+                dataKey="name"
+                type="category"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+                minTickGap={1}
+                className="fill-muted-foreground text-sm"
+              />
+              <Tooltip
+                cursor={{ fill: 'hsl(var(--muted))' }}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar dataKey="count" layout="vertical" radius={5} />
             </BarChart>
-            </ResponsiveContainer>
+          </ChartContainer>
         </div>
       </CardContent>
     </Card>

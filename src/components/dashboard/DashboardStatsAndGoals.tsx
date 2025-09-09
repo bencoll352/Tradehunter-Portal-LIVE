@@ -25,7 +25,6 @@ export function DashboardStatsAndGoals({
   const [monthlyActiveTradersGoal, setMonthlyActiveTradersGoal] = useState<string>(activeTradersGoalInitial > 0 ? String(activeTradersGoalInitial) : "");
 
   const handleSetGoals = () => {
-    // Basic validation example (can be expanded)
     const weeklyGoalNum = parseInt(weeklyNewLeadsGoal, 10);
     const monthlyGoalNum = parseInt(monthlyActiveTradersGoal, 10);
 
@@ -38,7 +37,6 @@ export function DashboardStatsAndGoals({
         return;
     }
     
-    // For now, just show a toast. Persistence will be added later.
     toast({
       title: "Goals Noted (Client-Side)",
       description: "Goal saving and tracking functionality is coming soon!",
@@ -47,17 +45,16 @@ export function DashboardStatsAndGoals({
   };
 
   return (
-    <Card className="shadow-none border w-full">
+    <Card className="shadow-sm">
       <CardHeader>
         <div className="flex items-center gap-3">
             <Target className="h-6 w-6 text-primary" />
-            <div>
-                <CardTitle className="text-lg text-primary">Set Your Branch Goals</CardTitle>
-            </div>
+            <CardTitle className="text-xl text-primary">Set Your Branch Goals</CardTitle>
         </div>
+        <CardDescription>Define your weekly and monthly targets to track progress.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
             <div className="space-y-2">
               <Label htmlFor="weeklyNewLeadsGoal" className="flex items-center gap-1.5 text-sm font-medium">
                 <CalendarDays className="h-4 w-4 text-muted-foreground"/>
@@ -88,7 +85,7 @@ export function DashboardStatsAndGoals({
             </div>
           </div>
           <div className="flex justify-end pt-2">
-            <Button onClick={handleSetGoals} variant="outline" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button onClick={handleSetGoals} className="bg-accent hover:bg-accent/90 text-accent-foreground">
               <Goal className="mr-2 h-5 w-5" /> Set Goals (Coming Soon)
             </Button>
           </div>

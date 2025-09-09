@@ -1,30 +1,15 @@
 
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Logo } from "@/components/icons/Logo";
 import { AppSidebarNav } from "./AppSidebarNav";
-import { Settings, LifeBuoy } from "lucide-react";
-import { usePathname } from 'next/navigation';
-import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
-import { InfoAccordion } from '../common/InfoAccordion';
 import { Sparkles, Database as DataManagementIcon } from 'lucide-react';
 import { UserNav } from './UserNav';
+import { InfoAccordion } from '../common/InfoAccordion';
 
 export function AppSidebar() {
-  const pathname = usePathname();
-  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-      const info = getBranchInfo(storedLoggedInId);
-      setBranchInfo(info);
-    }
-  }, []);
-
   const insightFeatures = [
     "Quickly analyse competitor strategies.",
     "Generate material estimates for projects.",
@@ -39,14 +24,14 @@ export function AppSidebar() {
   ];
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r bg-card sm:flex">
-      <div className="flex h-16 items-center border-b px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r bg-sidebar text-sidebar-foreground sm:flex">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-6 shrink-0">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
           <Logo className="h-8 w-auto" />
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto">
-        <nav className="grid items-start px-4 text-sm font-medium">
+        <nav className="grid items-start p-4 text-sm font-medium">
           <AppSidebarNav />
         </nav>
         <div className="px-4 mt-4">
@@ -56,7 +41,7 @@ export function AppSidebar() {
           ]} />
         </div>
       </div>
-      <div className="mt-auto p-4 border-t">
+      <div className="mt-auto p-4 border-t border-sidebar-border">
         <UserNav />
       </div>
     </aside>

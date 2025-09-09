@@ -32,11 +32,11 @@ export default function AppLayout({
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+    <div className="flex min-h-screen w-full bg-muted/40">
       <AppSidebar />
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-64">
+      <div className="flex flex-col w-full sm:pl-64">
         <AppHeader />
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+        <main className="flex-1 p-4 sm:p-6 md:p-8">
           {children}
         </main>
       </div>
