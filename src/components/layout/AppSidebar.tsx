@@ -25,9 +25,9 @@ export function AppSidebar() {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r bg-sidebar text-sidebar-foreground sm:flex">
-      <div className="flex h-16 items-center border-b border-sidebar-border px-6 shrink-0">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-4 shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
-          <Logo className="h-8 w-auto" />
+          <Logo className="h-10 w-auto" />
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto">

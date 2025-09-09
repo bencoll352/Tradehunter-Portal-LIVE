@@ -9,9 +9,10 @@ export function Logo(props: HTMLAttributes<HTMLDivElement>) {
       <Image 
         src="https://storage.googleapis.com/project-spark-335215.appspot.com/generated/mbbjw4urzzq4/4n2k1o32i8h.png" 
         alt="TradeHunter Pro Logo" 
-        width={200} 
-        height={50}
+        width={150} 
+        height={40}
         priority
+        data-ai-hint="logo"
       />
     </div>
   );
