@@ -318,11 +318,6 @@ export function TraderTableClient({
             </Button>
           )}
 
-          <Button variant="secondary" size="sm" onClick={() => toast({title: "Coming Soon!", description: "This feature is not yet implemented."})}>
-              <Flame className="mr-2 h-4 w-4"/>
-              Bulk Call Traders (CSV)
-          </Button>
-
           <BulkAddTradersDialog
             branchId={branchId}
             existingTraders={allBranchTraders}

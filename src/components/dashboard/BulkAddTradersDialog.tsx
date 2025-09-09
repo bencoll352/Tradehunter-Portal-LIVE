@@ -525,7 +525,7 @@ service cloud.firestore {
       }
     }}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className="bg-accent hover:bg-accent/90 text-accent-foreground">
           <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders (CSV)
         </Button>
       </DialogTrigger>
@@ -533,23 +533,12 @@ service cloud.firestore {
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. <strong>The first row MUST be a header row.</strong> The system uses these header names (case-insensitive, flexible column order) to identify data columns.
-            <br/>The <strong>'Name'</strong> header is mandatory and its column must contain data for each trader.
-            <br/>Other common headers (examples):
-            <br/><code>{EXPECTED_HEADERS.filter(h => h !== "Name" && h !== "Actions").slice(0, 8).join(", ")}, ..., Est. Annual Revenue, Estimated Company Value, Employee Count</code>
-            <br/>(See full list of expected headers by expanding this dialogue or checking "How to Use").
-            <br/>'Actions' column data in the CSV is ignored. Status can be 'Active', 'Inactive', 'Call-Back' (Hot Lead 🔥), or 'New Lead'.
-            <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in Descriptions, Categories, or Addresses) MUST be enclosed in double quotes in your CSV file (e.g., "123 Main St, Suite 100").
-            <br/>Max {MAX_UPLOAD_LIMIT} traders per file.
+            Upload a CSV file. The first row MUST be a header row. The system uses header names (case-insensitive) to find data, so column order does not matter. The 'Name' header is mandatory.
+            <br />
+            Other recommended headers: 
+            <code>Status, Last Activity, Description, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.</code>
+            <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in an Address) MUST be enclosed in double quotes.
           </DialogDescription>
-          <div className="text-sm text-muted-foreground mt-2 text-left">
-            <strong>If fields like 'Owner Name', 'Main Category', 'Workday Timing', 'Notes', 'Est. Annual Revenue', 'Estimated Company Value', or 'Employee Count' are not loading:</strong>
-            <ol className="list-decimal list-inside pl-4 text-xs mt-1">
-              <li>Double-check the exact spelling of these headers in your <strong>raw CSV file</strong> (not just how they appear in Excel or other spreadsheet software).</li>
-              <li>After an upload attempt, open your browser's developer console (usually by right-clicking on the page, selecting 'Inspect' or 'Inspect Element', then finding the 'Console' tab). Look for messages starting with "[CSV Parsing Debug]". These messages will show the headers the system actually detected for problematic rows, and any specific parsing issues for values.</li>
-              <li>Ensure the data cells for these columns are not empty in your CSV.</li>
-            </ol>
-          </div>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
