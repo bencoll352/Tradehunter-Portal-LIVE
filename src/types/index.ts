@@ -5,17 +5,9 @@ import { z } from 'zod';
 
 export const VALID_BRANCH_IDS = ["PURLEY", "LEATHERHEAD", "DORKING", "REDHILL", "BRANCH_D"] as const;
 export const VALID_LOGIN_IDS = [...VALID_BRANCH_IDS, "MANAGER"] as const;
-export const VALID_USER_EMAILS = [
-    "vikram.sundrani@jewson.co.uk",
-    "george.smith@jewson.co.uk",
-    "samantha.jones@jewson.co.uk",
-    "peter.williams@jewson.co.uk",
-    "manager@jewson.co.uk"
-] as const;
 
 export type BranchId = typeof VALID_BRANCH_IDS[number];
 export type BranchLoginId = typeof VALID_LOGIN_IDS[number];
-export type UserEmail = typeof VALID_USER_EMAILS[number];
 export type UserRole = "user" | "manager" | "unknown";
 export type BaseBranchId = Exclude<BranchLoginId, 'MANAGER'>;
 
@@ -24,7 +16,7 @@ export interface BranchInfo {
   baseBranchId: BaseBranchId | null; // The actual branch for data, null if manager isn't associated with one
   displayLoginId: BranchLoginId | null; // What the user logged in as
   role: UserRole;
-  user: UserEmail | null;
+  user: string | null;
   branchName: string;
   branchAddress: string;
 }
@@ -39,42 +31,26 @@ const branchDetails: Record<BaseBranchId, { name: string; address: string; }> = 
 
 
 export const getBranchInfo = (
-  loginId: BranchLoginId | null,
-  userEmail?: string | null
+  loginId: BranchLoginId | null
 ): BranchInfo => {
-  const isManagerEmail = userEmail === "manager@jewson.co.uk";
   
-  if (isManagerEmail) {
-      // If manager logs in with a specific branch ID, associate them with it.
-      if (loginId && loginId !== 'MANAGER' && VALID_BRANCH_IDS.includes(loginId)) {
-        return {
-            baseBranchId: loginId,
-            displayLoginId: loginId,
-            role: "manager",
-            user: "manager@jewson.co.uk",
-            branchName: branchDetails[loginId].name,
-            branchAddress: branchDetails[loginId].address,
-        };
-      }
-      // If manager logs in as 'MANAGER' or with an invalid/null branch ID, they have no specific branch.
+  if (loginId === 'MANAGER') {
       return {
         baseBranchId: null,
         displayLoginId: 'MANAGER',
         role: "manager",
-        user: "manager@jewson.co.uk",
+        user: "Manager",
         branchName: "Manager View",
         branchAddress: "All Branches",
       };
   }
 
-  // Regular user login
   if (loginId && loginId !== 'MANAGER' && VALID_BRANCH_IDS.includes(loginId)) {
-    const userForBranch = VALID_USER_EMAILS.find(email => email !== "manager@jewson.co.uk"); // simplified logic
     return {
       baseBranchId: loginId,
       displayLoginId: loginId,
       role: "user",
-      user: userForBranch || null,
+      user: `${loginId} User`,
       branchName: branchDetails[loginId].name,
       branchAddress: branchDetails[loginId].address,
     };

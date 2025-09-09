@@ -31,15 +31,13 @@ export function UserNav() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-      const storedUser = localStorage.getItem('loggedInUser');
-      const info = getBranchInfo(storedLoggedInId, storedUser);
+      const info = getBranchInfo(storedLoggedInId);
       setBranchInfo(info);
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('loggedInId');
-    localStorage.removeItem('loggedInUser');
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.replace('/login');
   };
@@ -56,7 +54,7 @@ export function UserNav() {
                   <Avatar className="h-8 w-8">
                       <AvatarImage src="/avatars/01.png" alt="@shadcn" />
                       <AvatarFallback>
-                        {branchInfo?.user ? getInitials(branchInfo.user.split('@')[0]) : <User/>}
+                        {branchInfo?.user ? getInitials(branchInfo.user) : <User/>}
                       </AvatarFallback>
                   </Avatar>
               </Button>

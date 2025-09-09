@@ -40,8 +40,7 @@ export function DashboardClientPageContent({
     const initializeDashboard = async () => {
       if (typeof window !== 'undefined') {
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-        const storedUser = localStorage.getItem('loggedInUser');
-        const info = getBranchInfo(storedLoggedInId, storedUser);
+        const info = getBranchInfo(storedLoggedInId);
         setBranchInfo(info);
 
         if (info.baseBranchId && info.role !== 'unknown') {

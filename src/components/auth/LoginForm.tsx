@@ -9,17 +9,13 @@ import { z } from 'zod';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from '@/components/icons/Logo';
-import { VALID_LOGIN_IDS, VALID_USER_EMAILS, type BranchLoginId, type UserEmail } from '@/types';
+import { VALID_LOGIN_IDS, type BranchLoginId } from '@/types';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  email: z.custom<UserEmail>((val) => VALID_USER_EMAILS.includes(val as UserEmail), {
-    message: "Please select a valid user email.",
-  }),
   loginId: z.custom<BranchLoginId>((val) => VALID_LOGIN_IDS.includes(val as BranchLoginId), {
     message: "Please select a valid branch or manager ID.",
   }),
@@ -35,7 +31,6 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: undefined,
       loginId: undefined,
     },
   });
@@ -44,33 +39,7 @@ export function LoginForm() {
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
-      // Basic validation logic for demonstration
-      const isManagerEmail = values.email === 'manager@jewson.co.uk';
-      const isManagerLoginId = values.loginId === 'MANAGER';
-
-      if (isManagerEmail && !isManagerLoginId) {
-        toast({
-          variant: "destructive",
-          title: "Login Error",
-          description: "Manager email can only be used with the 'MANAGER' Branch/Login ID.",
-        });
-        setIsLoading(false);
-        return;
-      }
-      
-      if (!isManagerEmail && isManagerLoginId) {
-        toast({
-          variant: "destructive",
-          title: "Login Error",
-          description: "The 'MANAGER' Branch/Login ID is reserved for the manager email.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-
       localStorage.setItem('loggedInId', values.loginId);
-      localStorage.setItem('loggedInUser', values.email);
 
       toast({
         title: "Login Successful",
@@ -88,33 +57,11 @@ export function LoginForm() {
           <Logo className="h-16 w-auto" />
         </div>
         <CardTitle className="text-2xl">Welcome to TradeHunter Pro</CardTitle>
-        <CardDescription>Enter your credentials to access your branch portal.</CardDescription>
+        <CardDescription>Select your Branch ID to access your portal.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>User Email</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your user email" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {VALID_USER_EMAILS.map(email => (
-                        <SelectItem key={email} value={email}>{email}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="loginId"

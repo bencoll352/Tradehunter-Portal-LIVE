@@ -15,7 +15,6 @@ export function AppHeader() {
 
   const handleLogout = () => {
     localStorage.removeItem('loggedInId');
-    localStorage.removeItem('loggedInUser');
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.replace('/login');
   };
