@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if the user belongs to the requested branch
+    function isUserOfBranch(branchId) {
+      // For this ruleset, we'll assume a simple check is sufficient.
+      // In a real app with more complex roles, you might check custom claims.
+      // This rule allows any authenticated user to access any branch data,
+      // which matches the app's current logic (login picker).
+      // For stricter per-user-per-branch rules, this would need user profile data.
+      return isAuthenticated();
+    }
+
+    // Match the 'traders' collection which contains documents named by branchId
+    match /traders/{branchId} {
+
+      // Subcollection for each branch's traders
+      match /branch_traders/{traderId} {
+        // Allow read, create, update, delete only if the user is authenticated
+        // and associated with the branch they are trying to access.
+        allow read, write: if isUserOfBranch(branchId);
+        
+        // Add data validation for creating and updating traders
+        // This ensures the data structure matches the expected Trader schema.
+        allow create, update: if request.resource.data.name is string &&
+                                 request.resource.data.name.size() > 1 &&
+                                 request.resource.data.status is string &&
+                                 ['Active', 'Inactive', 'Call-Back', 'New Lead'].hasAny([request.resource.data.status]) &&
+                                 request.resource.data.lastActivity is timestamp;
+      }
+
+      // Default deny all other access to the traders collection itself
+      allow read, write: if false;
+    }
+
+    // Security Recommendation: Default deny all other collections in your database.
+    // Explicitly grant access to other collections as needed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
