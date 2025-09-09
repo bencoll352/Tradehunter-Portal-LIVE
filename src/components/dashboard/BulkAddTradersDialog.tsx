@@ -27,13 +27,6 @@ interface BulkAddTradersDialogProps {
   onBulkAddTraders: (branchId: BaseBranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>; // Changed BranchId to BaseBranchId
 }
 
-const EXPECTED_HEADERS = [
-  "Name", "Status", "Last Activity", "Description",
-  "Rating", "🌐Website", "📞 Phone", "Owner Name",
-  "Main Category", "Categories", "Workday Timing", "Address", "Link", "Notes",
-  "Est. Annual Revenue", "Estimated Company Value", "Employee Count", "Actions"
-];
-
 const MAX_UPLOAD_LIMIT = 1000;
 const VALID_STATUSES_LOWER = ["active", "inactive", "call-back", "new lead"];
 
@@ -96,7 +89,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }
     const cleanedValue = String(rawValue).replace(/[^0-9-]+/g, "");
     if (cleanedValue === "" || cleanedValue === "-") {
-        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which is not a valid integer. Field will be undefined.`);
+        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${cleanedValue}" cleaned to "${cleanedValue}", which is not a valid integer. Field will be undefined.`);
         return undefined;
     }
     const parsed = parseInt(cleanedValue, 10);
@@ -533,10 +526,10 @@ service cloud.firestore {
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. The first row MUST be a header row. The system uses header names (case-insensitive) to find data, so column order does not matter. The 'Name' header is mandatory.
+            Upload a CSV file. The first row MUST be a header row. The system uses header names to find data, so column order does not matter. The 'Name' header is mandatory.
             <br />
-            Other recommended headers: 
-            <code>Status, Last Activity, Description, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.</code>
+            Recommended headers: 
+            <code>Name, Status, Last Activity, Description, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.</code>
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in an Address) MUST be enclosed in double quotes.
           </DialogDescription>
         </DialogHeader>
@@ -580,3 +573,5 @@ service cloud.firestore {
     </Dialog>
   );
 }
+
+    
