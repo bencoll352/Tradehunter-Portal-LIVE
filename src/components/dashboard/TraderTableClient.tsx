@@ -255,6 +255,11 @@ export function TraderTableClient({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    initialState: {
+        pagination: {
+            pageSize: 20, // Set the initial page size
+        },
+    },
     state: {
       sorting,
       columnFilters,
@@ -401,3 +406,4 @@ export function TraderTableClient({
     </div>
   );
 }
+    
