@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -46,7 +45,7 @@ export function LoginForm() {
         description: `Welcome! Redirecting you to the dashboard for ${values.loginId}.`,
       });
 
-      router.replace('/tradehunter');
+      router.replace('/dashboard');
     }, 500);
   };
 

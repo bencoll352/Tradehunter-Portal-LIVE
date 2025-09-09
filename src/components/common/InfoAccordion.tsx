@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -23,8 +22,6 @@ interface InfoAccordionProps {
   className?: string;
 }
 
-// This component is no longer used by AppSidebar and might be fully obsolete.
-// Keeping the file for now, but its usage has been removed from the sidebar.
 export function InfoAccordion({ sections, className }: InfoAccordionProps) {
   const defaultOpenValues = sections
     .filter(section => section.defaultOpen)
@@ -35,14 +32,14 @@ export function InfoAccordion({ sections, className }: InfoAccordionProps) {
       {sections.map((section) => {
         const IconComponent = section.icon;
         return (
-          <AccordionItem value={section.id} key={section.id} className="border border-border rounded-md bg-card overflow-hidden">
-            <AccordionTrigger className="px-3 py-2.5 text-sm hover:no-underline data-[state=open]:bg-muted/50">
+          <AccordionItem value={section.id} key={section.id} className="border-0">
+            <AccordionTrigger className="px-3 py-2.5 text-sm hover:no-underline rounded-md bg-muted/50 hover:bg-muted text-foreground">
               <div className="flex items-center gap-2.5">
                 <IconComponent className="h-4 w-4 text-primary" />
                 <span className="font-semibold text-foreground text-left">{section.title}</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 text-xs bg-card">
+            <AccordionContent className="px-3 pb-3 pt-2 text-xs bg-card">
               <div className="space-y-1.5 text-muted-foreground">
                 {section.content.map((point, pIndex) => (
                   <div key={pIndex} className="flex items-start">

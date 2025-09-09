@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -47,13 +46,12 @@ export function DashboardStatsAndGoals({
   };
 
   return (
-    <Card className="shadow-lg w-full border-primary/20">
+    <Card className="shadow-none border w-full">
       <CardHeader>
         <div className="flex items-center gap-3">
-            <Target className="h-8 w-8 text-primary" />
+            <Target className="h-6 w-6 text-primary" />
             <div>
-                <CardTitle className="text-2xl text-primary">Set Your Branch Goals</CardTitle>
-                <CardDescription>Define your weekly and monthly targets to track progress.</CardDescription>
+                <CardTitle className="text-lg text-primary">Set Your Branch Goals</CardTitle>
             </div>
         </div>
       </CardHeader>
@@ -89,7 +87,7 @@ export function DashboardStatsAndGoals({
             </div>
           </div>
           <div className="flex justify-end pt-2">
-            <Button onClick={handleSetGoals} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button onClick={handleSetGoals} variant="outline" className="bg-accent hover:bg-accent/90 text-accent-foreground">
               <Goal className="mr-2 h-5 w-5" /> Set Goals (Coming Soon)
             </Button>
           </div>

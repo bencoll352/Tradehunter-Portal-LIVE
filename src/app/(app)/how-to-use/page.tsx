@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -6,9 +5,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, Sparkles, Database, Calculator, Users, Lightbulb } from "lucide-react"; 
+import { HelpCircle, Sparkles, Database, Calculator, Users, Lightbulb, LayoutDashboard } from "lucide-react"; 
 
 const faqs = [
+  {
+    value: "item-0",
+    question: "What is this Portal?",
+    answer: "This is your central hub for managing customer relationships and analysing market data. Navigate to the Trader Database to view and manage your customers, or use the Insight & Assistance features to get a competitive edge.",
+    icon: <LayoutDashboard className="h-5 w-5 text-primary mr-2" />
+  },
   {
     value: "item-1",
     question: "What is TradeHunter Pro?",
@@ -62,7 +67,7 @@ export default function HowToUsePage() {
             and make the most out of your sales intelligence.
           </p>
 
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
             {faqs.map((faq) => (
               <AccordionItem value={faq.value} key={faq.value} className="border-b border-border">
                 <AccordionTrigger className="text-lg hover:no-underline py-4 text-left">

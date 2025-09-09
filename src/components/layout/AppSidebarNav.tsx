@@ -1,14 +1,14 @@
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home } from "lucide-react";
+import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getBranchInfo, type BranchLoginId, type BranchInfo } from "@/types";
 
 const navItems = [
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/tradehunter", icon: Database, label: "Trader Database" },
   { href: "/competitor-insights", icon: Lightbulb, label: "Competitor Insights" },
   { href: "/estimator", icon: Calculator, label: "Materials Estimator" },
