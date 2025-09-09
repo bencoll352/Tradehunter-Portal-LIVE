@@ -24,6 +24,14 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // This is to suppress a warning from a library (firebase-admin) that is not critical.
+    // It's a known issue with how some libraries are bundled.
+    config.externals.push({
+      'express': 'commonjs express',
+    });
+    return config;
+  },
 };
 
 module.exports = nextConfig;

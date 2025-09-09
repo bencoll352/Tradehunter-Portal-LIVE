@@ -6,17 +6,14 @@ import { type Trader, type BaseBranchId, type ParsedTraderData, TraderSchema } f
 import { FieldValue } from 'firebase-admin/firestore';
 import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
 
-if (!db) {
-  console.warn("[Trader Service] Firestore is not initialized. All trader service operations will fail. Check firebase-admin-config.ts and environment variables.");
-}
-
 /**
  * Ensures that the required Firestore instance is available.
- * Throws an error if Firestore is not initialized.
+ * Throws a clear, specific error if Firestore is not initialized.
  */
 function ensureFirestore() {
     if (!db) {
-      throw new Error("Firestore not initialized. Cannot perform database operations. Check server logs for configuration errors.");
+      console.error("[Trader Service] FATAL: Firestore database instance is not available. This is a server configuration issue.");
+      throw new Error("Firestore not initialized. Cannot perform database operations. Please check the server logs for details on the Firebase Admin SDK initialization failure.");
     }
     return db;
 }
@@ -119,6 +116,8 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
         throw new Error(`Invalid trader data provided for update: ${JSON.stringify(validation.error.flatten().fieldErrors)}`);
     }
     
+    // Important: Pass the original `traderData` to the update method, not the merged `validation.data`
+    // This ensures we only update the fields that were actually changed.
     await traderRef.update(traderData);
     return validation.data;
 }
