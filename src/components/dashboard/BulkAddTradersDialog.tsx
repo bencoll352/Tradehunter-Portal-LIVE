@@ -424,7 +424,14 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 <p className="mt-1 text-xs">
                   <strong>Action:</strong> Go to your Firebase Console, then to Firestore Database, and then to the Rules tab. For development, you can temporarily set them to allow all reads/writes:
                   <pre className="mt-1 p-1.5 bg-muted text-xs rounded-sm overflow-x-auto">
-                    {`rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}`}
+                    {`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}`}
                   </pre>
                    <p className="mt-1 text-xs font-semibold text-destructive-foreground bg-destructive p-1 rounded-sm">Warning: These permissive rules are NOT for production.</p>
                 </p>
