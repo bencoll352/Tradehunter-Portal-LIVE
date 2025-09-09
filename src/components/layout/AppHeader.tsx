@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound } from "lucide-react";
+import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2 } from "lucide-react";
 import { AppSidebarNav } from "./AppSidebarNav";
 import { usePathname } from 'next/navigation';
 
@@ -12,6 +12,7 @@ const headerNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tradehunter", label: "Trader DB", icon: Database },
   { href: "/estimator", label: "Estimator", icon: Calculator },
+  { href: "/buildwise", label: "BuildWise", icon: Building2 },
   { href: "/smart-team", label: "Smart Team", icon: UsersRound },
 ];
 
@@ -29,6 +30,8 @@ export function AppHeader() {
         return 'Competitor Insights';
       case '/estimator':
         return 'Materials Estimator';
+      case '/buildwise':
+        return 'BuildWise';
       case '/smart-team':
         return 'Smart Team Hub';
       case '/staff-training':
