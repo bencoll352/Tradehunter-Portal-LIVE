@@ -45,13 +45,8 @@ export const geminiProVision = 'gemini-pro-vision';
 
 // Helper function to apply default configuration to a model
 export function getModel(modelName: string, overrides: GenerationCommonConfig = {}) {
-  // This helper is no longer strictly necessary with the simplified model strings,
-  // but it's kept for consistency and if more complex configurations are needed later.
-  return {
-    model: modelName,
-    config: {
-      ...sharedModelConfig,
-      ...overrides,
-    }
-  };
+    return {
+        ...sharedModelConfig,
+        ...overrides,
+    };
 }
