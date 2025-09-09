@@ -14,7 +14,7 @@ const navItems = [
   { href: "/estimator", icon: Calculator, label: "Materials Estimator" },
   { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
   { href: "/buildwise-intel", icon: Home, label: "BuildWise Intel" },
-  { href: "/smart-team", icon: UsersRound, label: "Smart Team Hub", roles: ['manager'] },
+  { href: "/smart-team", icon: UsersRound, label: "Smart Team Hub" },
 ];
 
 interface AppSidebarNavProps {
@@ -35,9 +35,8 @@ export function AppSidebarNav({ isTooltip = false, onLinkClick }: AppSidebarNavP
   }, []);
 
   const visibleNavItems = navItems.filter(item => {
-    if (!item.roles) return true; // Visible to all roles
-    if (!branchInfo) return false; // Hide role-specific items if info not loaded
-    return item.roles.includes(branchInfo.role);
+    // Role-based filtering logic removed
+    return true;
   });
 
   return (

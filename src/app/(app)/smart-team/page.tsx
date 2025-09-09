@@ -130,25 +130,6 @@ export default function SmartTeamPage() {
     );
   }
 
-  // Access is now tied to the 'manager' role instead of a specific branch manager
-  if (branchInfo?.role !== 'manager') {
-    return (
-      <Card className="shadow-lg w-full">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
-            <CardTitle className="text-2xl text-destructive">Access Denied</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-lg text-muted-foreground">
-            The Smart Team hub is exclusively available for Manager accounts.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-6"> 
       <Card className="shadow-lg w-full">
