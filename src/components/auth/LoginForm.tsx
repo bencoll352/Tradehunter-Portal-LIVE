@@ -54,7 +54,7 @@ export function LoginForm() {
     <Card className="w-full max-w-md shadow-2xl">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4">
-          <Logo className="h-16 w-auto" />
+          <Logo className="h-16 w-auto" variant="transparent" />
         </div>
         <CardTitle className="text-2xl">Welcome to TradeHunter Pro</CardTitle>
         <CardDescription>Select your Branch ID to access your portal.</CardDescription>
