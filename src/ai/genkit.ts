@@ -18,3 +18,4 @@ export const ai = genkit({
 // Define model constants for easy reference
 export const geminiPro = 'gemini-1.0-pro-latest';
 export const geminiProVision = 'gemini-pro-vision';
+
