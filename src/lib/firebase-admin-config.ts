@@ -1,4 +1,3 @@
-
 // src/lib/firebase-admin-config.ts
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';

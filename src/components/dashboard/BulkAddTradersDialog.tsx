@@ -395,7 +395,19 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         if (result.error) {
           console.error("Server action failed during bulk add with error message from server:", result.error);
           let toastDescription: React.ReactNode;
-          if (result.error.toLowerCase().includes("firestore not initialised")) {
+          if (result.error.toLowerCase().includes("could not refresh access token")) {
+             toastDescription = (
+              <div className="text-sm">
+                <p className="font-semibold">Server Authentication Error</p>
+                <p className="mt-2 text-xs">
+                  The server could not authenticate with Google's services to save the data. This is often a temporary issue or a problem with the server's permissions.
+                </p>
+                <p className="mt-1 text-xs">
+                  <strong>Action:</strong> Please try the upload again in a few moments. If the problem persists, it may require an administrator to check the server's authentication credentials and IAM permissions in the Google Cloud console.
+                </p>
+              </div>
+            );
+          } else if (result.error.toLowerCase().includes("firestore not initialised")) {
             toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server error: Firestore Not Initialised</p>
