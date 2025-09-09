@@ -36,7 +36,7 @@ import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
 import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { ArrowUpDown, ChevronDown, Trash2, Flame, PhoneCall } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Trash2, Flame } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
@@ -318,8 +318,8 @@ export function TraderTableClient({
             </Button>
           )}
 
-          <Button variant="outline" size="sm" onClick={() => toast({title: "Coming Soon!", description: "This feature is not yet implemented."})}>
-              <PhoneCall className="mr-2 h-4 w-4"/>
+          <Button variant="secondary" size="sm" onClick={() => toast({title: "Coming Soon!", description: "This feature is not yet implemented."})}>
+              <Flame className="mr-2 h-4 w-4"/>
               Bulk Call Traders (CSV)
           </Button>
 
