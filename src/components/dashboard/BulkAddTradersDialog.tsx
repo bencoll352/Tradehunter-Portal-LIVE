@@ -470,7 +470,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         console.error("Unexpected client error during bulk add traders operation:", error);
         toast({
           variant: "destructive",
-          title: "Client Upload Error",
+          title: "Client UploadError",
           description: `An unexpected client-side error occurred: ${clientErrorMessage}. Check console.`,
         });
         setIsLoading(false);
