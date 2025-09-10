@@ -264,5 +264,3 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
 
     return { successCount, failureCount };
 }
-
-    

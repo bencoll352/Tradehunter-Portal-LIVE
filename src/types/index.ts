@@ -121,6 +121,7 @@ export const ParsedTraderDataSchema = z.object({
   estimatedAnnualRevenue: z.number().optional(),
   estimatedCompanyValue: z.number().optional(),
   employeeCount: z.number().optional(),
+  callBackDate: z.string().optional(),
 });
 
 export type ParsedTraderData = z.infer<typeof ParsedTraderDataSchema>;
