@@ -501,8 +501,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <p>
               Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory.
             </p>
-            <p>
-              Recommended headers: Name, Status, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link.
+            <p className="text-xs text-muted-foreground">
+              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count, Rating, Website, Status.
             </p>
             <p>
               <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" />
@@ -510,7 +510,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             </p>
             <p>
               <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" />
-              Phone number is used for duplicate checking. Rows with matching phone numbers to existing traders will be skipped.
+              Rows with a phone number that already exists in the database for this branch will be skipped.
             </p>
           </DialogDescription>
         </DialogHeader>
