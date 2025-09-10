@@ -429,19 +429,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                   The server connected to Firestore, but was denied permission to write data. This is likely due to your Firestore Security Rules.
                 </p>
                 <p className="mt-1 text-xs">
-                  <strong>Action:</strong> Go to your Firebase Console, then to Firestore Database, and then to the Rules tab. For development, you can temporarily set them to allow all reads/writes:
-                  <pre className="mt-1 p-1.5 bg-muted text-xs rounded-sm overflow-x-auto">
-                    {`rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}`}
-                  </pre>
-                   <p className="mt-1 text-xs font-semibold text-destructive-foreground bg-destructive p-1 rounded-sm">Warning: These permissive rules are NOT for production.</p>
+                  <strong>Action:</strong> Go to your Firebase Console, select your project, go to the Firestore Database section, and then click on the 'Rules' tab. For development, you can temporarily set them to allow all reads and writes to test if this is the problem.
                 </p>
+                 <p className="mt-1 text-xs font-semibold text-destructive-foreground bg-destructive/80 p-1 rounded-sm">Warning: Open rules are NOT secure for production apps.</p>
               </div>
             );
           }
@@ -590,4 +580,3 @@ service cloud.firestore {
     
 
     
-
