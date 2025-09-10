@@ -405,8 +405,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 <p>
                   The server could not authenticate with Google's services to save the data. This is often a temporary issue or a problem with the server's permissions.
                 </p>
-                <p className="mt-2 text-xs">
-                  <strong>Action:</strong> Please try the upload again in a few moments. If the problem persists, an administrator may need to check the server's authentication credentials and IAM permissions in the Google Cloud console.
+                <p className="mt-2 text-xs font-semibold">
+                  Action: Please try the upload again in a few moments. If the problem persists, an administrator may need to check the server's authentication credentials and IAM permissions in the Google Cloud console.
                 </p>
               </div>
             );
@@ -497,21 +497,25 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
-          <DialogDescription className="space-y-2">
+          <DialogDescription className="space-y-2 pt-2">
             <p>
               Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory.
             </p>
             <p className="text-xs text-muted-foreground">
-              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count, Rating, Website, Status.
+              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
             </p>
-            <p>
-              <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" />
-              Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
-            </p>
-            <p>
-              <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" />
-              Rows with a phone number that already exists in the database for this branch will be skipped.
-            </p>
+            <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <p className="text-xs">
+                    Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
+                </p>
+            </div>
+             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <p className="text-xs">
+                    Rows with a phone number that already exists in the database for this branch will be skipped.
+                </p>
+            </div>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -554,3 +558,4 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
+
