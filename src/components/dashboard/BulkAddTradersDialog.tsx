@@ -501,7 +501,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
               Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory.
             </p>
             <p className="text-xs text-muted-foreground">
-              Recommended headers: Name, Status, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
+              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
             </p>
             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
