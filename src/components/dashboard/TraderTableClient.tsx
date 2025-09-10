@@ -36,7 +36,7 @@ import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
 import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { ArrowUpDown, ChevronDown, Trash2, Flame, PlusCircle, UploadCloud } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Trash2, Flame } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
@@ -47,7 +47,6 @@ type TraderFormValues = z.infer<typeof traderFormSchema>;
 interface TraderTableClientProps {
   initialTraders: Trader[];
   branchId: BaseBranchId;
-  allBranchTraders: Trader[]; // Used for duplicate checking in AddTraderDialog
   onAdd: (values: TraderFormValues) => Promise<boolean>;
   onUpdate: (traderId: string, values: TraderFormValues) => Promise<boolean>;
   onDelete: (traderId: string) => Promise<boolean>;
@@ -58,7 +57,6 @@ interface TraderTableClientProps {
 export function TraderTableClient({
   initialTraders,
   branchId,
-  allBranchTraders,
   onAdd,
   onUpdate,
   onDelete,
@@ -92,22 +90,6 @@ export function TraderTableClient({
   useEffect(() => {
     setTraders(initialTraders);
   }, [initialTraders]);
-
-  const handleAddTrader = async (values: TraderFormValues): Promise<boolean> => {
-    return await onAdd(values);
-  };
-
-  const handleUpdateTrader = async (traderId: string, values: TraderFormValues): Promise<boolean> => {
-    return await onUpdate(traderId, values);
-  };
-
-  const handleDeleteTrader = async (traderId: string): Promise<boolean> => {
-    const success = await onDelete(traderId);
-    if (success) {
-      toast({ title: "Success", description: "Trader deleted." });
-    }
-    return success;
-  };
   
   const handleBulkDelete = async () => {
     const selectedIds = Object.keys(rowSelection);
@@ -133,12 +115,6 @@ export function TraderTableClient({
     setRowSelection({}); // Clear selection after operation
   };
   
-  const handleBulkAddTraders = async (branchId: BaseBranchId, traders: ParsedTraderData[]) => {
-      // This function is now passed directly from props, so we just call it.
-      // The parent (DashboardClientPageContent) will handle the toast and state refresh logic.
-      return await onBulkAdd(traders);
-  };
-
   const columns: ColumnDef<Trader>[] = useMemo(
     () => [
       {
@@ -322,14 +298,14 @@ export function TraderTableClient({
           const trader = row.original;
           return (
             <div className="flex items-center justify-end">
-              <EditTraderDialog trader={trader} onUpdateTrader={(id, values) => handleUpdateTrader(id, values)} />
-              <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => handleDeleteTrader(trader.id)} />
+              <EditTraderDialog trader={trader} onUpdateTrader={(id, values) => onUpdate(id, values)} />
+              <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => onDelete(trader.id)} />
             </div>
           );
         },
       },
     ],
-    [handleDeleteTrader, handleUpdateTrader]
+    [onDelete, onUpdate]
   );
 
   const table = useReactTable({
@@ -408,14 +384,14 @@ export function TraderTableClient({
 
           <BulkAddTradersDialog
             branchId={branchId}
-            existingTraders={allBranchTraders}
-            onBulkAddTraders={(branchId, traders) => handleBulkAddTraders(branchId, traders)}
+            existingTraders={traders}
+            onBulkAddTraders={(branchId, traders) => onBulkAdd(traders)}
           />
 
           <AddTraderDialog 
-            onAddTrader={handleAddTrader} 
+            onAddTrader={onAdd} 
             branchId={branchId}
-            existingTraders={allBranchTraders}
+            existingTraders={traders}
           />
         </div>
       </div>
@@ -494,7 +470,3 @@ export function TraderTableClient({
     </div>
   );
 }
-    
-
-    
-

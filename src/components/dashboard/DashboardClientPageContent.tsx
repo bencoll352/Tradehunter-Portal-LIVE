@@ -23,6 +23,10 @@ interface DashboardClientPageContentProps {
   bulkDeleteTradersAction: (branchId: BaseBranchId, traderIds: string[]) => Promise<BulkDeleteTradersResult>;
 }
 
+/**
+ * @deprecated This component's logic has been moved to the parent page `/app/(app)/tradehunter/page.tsx`.
+ * This file is now obsolete and can be removed in a future cleanup.
+ */
 export function DashboardClientPageContent({
   addTraderAction,
   updateTraderAction,
@@ -103,7 +107,6 @@ export function DashboardClientPageContent({
       try {
         return parseISO(t.lastActivity) >= thirtyDaysAgo;
       } catch (e) {
-        // Using a more specific warning for easier debugging
         console.warn(`[DashboardClientPageContent] Invalid date format for trader ID ${t.id}: "${t.lastActivity}". This trader will not be counted in 'Recently Active'.`);
         return false; 
       }
@@ -233,7 +236,6 @@ export function DashboardClientPageContent({
               key={keyForTable} 
               initialTraders={traders} 
               branchId={currentBaseBranchId!} 
-              allBranchTraders={traders} 
               onAdd={handleAdd}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
