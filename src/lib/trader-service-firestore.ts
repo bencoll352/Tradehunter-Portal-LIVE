@@ -2,14 +2,18 @@
 import { getApps, getApp, initializeApp, type App } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
+// This is the correct way to initialize the Firebase Admin SDK on the server.
+// It ensures that we don't try to initialize the app more than once, which is a common
+// source of errors, especially in a Next.js server environment with hot-reloading.
 let app: App;
 if (getApps().length === 0) {
-  // If no app is initialized, it's likely Genkit or another service will initialize it.
-  // In a server environment managed by Firebase (like Cloud Functions or App Hosting),
-  // initializeApp() can often be called without arguments.
+  // If no app is initialized, we initialize one.
+  // In a Firebase/Google Cloud environment, initializeApp() can often be called without arguments
+  // as it will automatically discover the service account credentials.
   app = initializeApp();
 } else {
-  // If an app is already initialized (e.g., by Genkit), get that app.
+  // If an app is already initialized (e.g., by Genkit), we get the existing app.
+  // This is the key to preventing authentication conflicts.
   app = getApp();
 }
 
