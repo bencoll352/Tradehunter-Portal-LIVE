@@ -101,7 +101,7 @@ export default function DashboardPage() {
         newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
-      <DashboardStatsAndGoals newLeadsCount={newLeadTradersCount} hotLeadsCount={hotLeadTradersCount} />
+      <DashboardStatsAndGoals newLeadsCount={newLeadTradersCount} hotLeadsCount={callBackTradersCount} />
       <BranchPerformanceChart data={chartData} />
     </div>
   );
