@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase-admin-config';
+import { db } from './trader-service-firestore';
 import { type Trader, type BaseBranchId, type ParsedTraderData, TraderSchema } from '@/types';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
