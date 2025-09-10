@@ -535,7 +535,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             Upload a CSV file. The first row MUST be a header row. The system uses header names to find data, so column order does not matter. The 'Name' header is mandatory.
             <br />
             Recommended headers: 
-            <code>Name, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Owner Profile, Notes, Total Assets, Est. Company Value, Est. Annual Revenue, Employee Count, Status.</code>
+            <code>Name, Status, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Notes, Total Assets, Est. Company Value, Est. Annual Revenue, Employee Count.</code>
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in an Address) MUST be enclosed in double quotes.
           </DialogDescription>
         </DialogHeader>
