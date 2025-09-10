@@ -32,7 +32,8 @@ export default function TradeHunterDashboardPage() {
     } catch (error) {
       console.error("Error fetching traders (client catch):", error);
       setTraders([]);
-      toast({ variant: "destructive", title: "Error Loading Data", description: "Failed to load trader data due to an unexpected client-side error." });
+      const errorMessage = error instanceof Error ? error.message : "An unknown client error occurred.";
+      toast({ variant: "destructive", title: "Error Loading Data", description: `Error: Could not get traders for branch ${branchId}: ${errorMessage}` });
     } finally {
       setIsLoading(false);
     }
