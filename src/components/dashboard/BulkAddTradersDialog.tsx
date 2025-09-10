@@ -424,14 +424,14 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           } else if (result.error.toLowerCase().includes("permission_denied") || result.error.toLowerCase().includes("missing or insufficient permissions")) {
             toastDescription = (
               <div className="text-sm">
-                <p className="font-semibold">Server error: Firestore Permission Denied</p>
+                <p className="font-semibold">Server Error: Firestore Permission Denied</p>
                  <p className="mt-2 text-xs">
-                  The server connected to Firestore, but was denied permission to write data. This is likely due to your Firestore Security Rules.
+                  The server connected to Firestore, but your Security Rules are blocking it from writing data.
                 </p>
                 <p className="mt-1 text-xs">
-                  <strong>Action:</strong> Go to your Firebase Console, select your project, go to the Firestore Database section, and then click on the 'Rules' tab. For development, you can temporarily set them to allow all reads and writes to test if this is the problem.
+                  <strong>Action:</strong> Go to your Firebase Console, select your project, go to the Firestore Database section, and then click on the 'Rules' tab. Your rules need to allow write access for authenticated users or the server's service account.
                 </p>
-                 <p className="mt-1 text-xs font-semibold text-destructive-foreground bg-destructive/80 p-1 rounded-sm">Warning: Open rules are NOT secure for production apps.</p>
+                 <p className="mt-1 text-xs font-semibold text-destructive-foreground bg-destructive/80 p-1 rounded-sm">Warning: Be careful with your rules. For development, you can use `allow read, write: if request.auth != null;` to get started, but secure them properly for production.</p>
               </div>
             );
           }
