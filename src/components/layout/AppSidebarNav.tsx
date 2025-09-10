@@ -11,6 +11,7 @@ const navItems = [
   { href: "/tradehunter", icon: Database, label: "Trader Database" },
   { href: "/estimator", icon: Calculator, label: "Estimator" },
   { href: "/buildwise", icon: Building2, label: "BuildWise" },
+  { href: "/buildwise-intel", icon: Lightbulb, label: "Buildwise-Intel" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
   { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use" },
