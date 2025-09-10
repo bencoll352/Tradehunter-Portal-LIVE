@@ -397,7 +397,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         if (result.error) {
           console.error("Server action failed during bulk add with error message from server:", result.error);
           let toastDescription: React.ReactNode;
-          if (result.error.toLowerCase().includes("could not refresh access token")) {
+          const errorMsgLower = result.error.toLowerCase();
+
+          if (errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error")) {
              toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server Authentication Error</p>
@@ -409,7 +411,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 </p>
               </div>
             );
-          } else if (result.error.toLowerCase().includes("firestore not initialised")) {
+          } else if (errorMsgLower.includes("firestore not initialised") || errorMsgLower.includes("firestore not initialized")) {
             toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server error: Firestore Not Initialised</p>
@@ -421,7 +423,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                 </p>
               </div>
             );
-          } else if (result.error.toLowerCase().includes("permission_denied") || result.error.toLowerCase().includes("missing or insufficient permissions")) {
+          } else if (errorMsgLower.includes("permission_denied") || errorMsgLower.includes("missing or insufficient permissions")) {
             toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server Error: Firestore Permission Denied</p>
@@ -522,8 +524,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }}>
       <DialogTrigger asChild>
-        <Button>
-          <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders
+        <Button variant="outline">
+          <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders (CSV)
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
@@ -582,4 +584,3 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     
 
     
-
