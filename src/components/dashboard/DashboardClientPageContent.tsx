@@ -222,8 +222,8 @@ export function DashboardClientPageContent({
       />
       <Card className="shadow-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-primary">Trader Database</CardTitle>
-          <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'} ({currentUserRole})</CardDescription>
+          <CardTitle className="text-xl">Trader Database</CardTitle>
+          <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'}</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
