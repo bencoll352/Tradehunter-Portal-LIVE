@@ -10,7 +10,7 @@ export const ai = genkit({
     googleAI(),
   ],
   logLevel: "debug",
-  enableTracingAndMetrics: true,
+  enableTracingAndMetrics: false,
 });
 
 // Define model constants for easy reference

@@ -1,3 +1,4 @@
+
 // src/lib/firebase-admin-config.ts
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -26,9 +27,9 @@ try {
     console.error(`[Firebase Admin] Error Message: ${error.message}`);
     
     // Provide specific guidance for common errors.
-    if (error.code === 'GOOGLE_APPLICATION_CREDENTIALS_NOT_SET') {
+    if (error.code === 'GOOGLE_APPLICATION_CREDENTIALS_NOT_SET' || (error.message && error.message.includes('Could not determine credentials'))) {
         console.error("[Firebase Admin] This error typically occurs in a local development environment. Make sure you have authenticated with the gcloud CLI by running 'gcloud auth application-default login'.");
-    } else if (error.message.includes('Could not refresh access token')) {
+    } else if (error.message && error.message.includes('Could not refresh access token')) {
          console.error("[Firebase Admin] This error means the server's service account might lack the necessary IAM permissions. For App Hosting, ensure the underlying Cloud Run service account has the 'Firebase Admin SDK Administrator Service Agent' or 'Editor' role on your project.");
     } else {
         console.error("[Firebase Admin] An unexpected error occurred during initialization. This could be due to network issues or incorrect project configuration.");
