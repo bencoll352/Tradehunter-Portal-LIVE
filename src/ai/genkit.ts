@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Centralized Genkit configuration and AI model exports.
@@ -28,6 +27,12 @@ export const ai = genkit({
       path: '.genkit-traces.jsonl',
     },
   },
+  flowStateStore: {
+    provider: 'file',
+    options: {
+      path: '.genkit-flow-state.jsonl',
+    }
+  }
 });
 
 export { geminiPro };

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
@@ -33,7 +32,7 @@ export default function TradeHunterDashboardPage() {
       console.error("Error fetching traders (client catch):", error);
       setTraders([]);
       const errorMessage = error instanceof Error ? error.message : "An unknown client error occurred.";
-      toast({ variant: "destructive", title: "Error Loading Data", description: `Error: Could not get traders for branch ${branchId}: ${errorMessage}` });
+      toast({ variant: "destructive", title: "Error Loading Data", description: `Error: Could not get traders for branch ${branchId}. ${errorMessage}` });
     } finally {
       setIsLoading(false);
     }
