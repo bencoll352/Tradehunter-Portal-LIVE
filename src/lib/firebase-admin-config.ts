@@ -4,15 +4,14 @@ import { db } from './trader-service-firestore';
 
 /**
  * This file previously contained Firebase Admin SDK initialization logic.
- * That logic has been identified as the source of a persistent authentication
- * conflict with the Genkit AI initialization.
+ * That logic has been identified as a source of authentication
+ * conflicts with the Genkit AI initialization.
  *
- * To resolve the "Could not refresh access token" error, all server-side
+ * To resolve authentication errors, all server-side
  * Google service initialization is now handled centrally by Genkit.
  *
- * This file is being kept to avoid breaking imports, but it now re-exports
- * the firestore instance from a new, more appropriately named file.
- * The core initialization logic has been removed.
+ * This file now re-exports the firestore instance from a new, more appropriately
+ * named file that gets the instance from the Genkit-managed app.
  */
 
 export { db };

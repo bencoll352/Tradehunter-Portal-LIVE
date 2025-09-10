@@ -28,15 +28,17 @@ async function seedInitialData(branchId: BaseBranchId): Promise<Trader[]> {
     const tradersToSeed: Trader[] = INITIAL_SEED_TRADERS_DATA.map(traderData => {
       const docRef = branchCollectionRef.doc(); // Auto-generate ID
       
-      const newTraderWithTimestamp: Omit<Trader, 'id'> & { id?: string, lastActivity: Timestamp } = {
+      const newTraderWithTimestamp: Omit<Trader, 'id'> & { id?: string, lastActivity: Timestamp, callBackDate: Timestamp | null } = {
         ...traderData,
         lastActivity: Timestamp.fromDate(new Date(traderData.lastActivity)),
+        callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null
       };
 
       const newTrader: Trader = {
         ...newTraderWithTimestamp,
         id: docRef.id,
         lastActivity: newTraderWithTimestamp.lastActivity.toDate().toISOString(), // Convert back for Zod
+        callBackDate: newTraderWithTimestamp.callBackDate ? newTraderWithTimestamp.callBackDate.toDate().toISOString() : null
       };
 
       // Validate with Zod before adding to batch
@@ -95,6 +97,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader,
     const newTraderForFirestore = {
         ...traderData,
         lastActivity: FieldValue.serverTimestamp(), // Use server timestamp for accuracy
+        callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null
     };
     
     // Validate a mock object first before writing to DB
@@ -116,11 +119,12 @@ export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader,
     const newDoc = await newDocRef.get();
     const newDocData = newDoc.data();
     
-    const finalTrader: Trader = {
+    const finalTrader = TraderSchema.parse({
       ...newDocData,
       id: newDoc.id,
       lastActivity: (newDocData!.lastActivity as Timestamp).toDate().toISOString(),
-    } as Trader;
+      callBackDate: (newDocData!.callBackDate as Timestamp)?.toDate().toISOString() || null,
+    });
 
 
     return finalTrader;
@@ -140,6 +144,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     const dataForUpdate = {
       ...traderData,
       lastActivity: FieldValue.serverTimestamp(), // Always update last activity on any change
+      callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null,
     };
 
     // Validate a mock object with merged data
@@ -161,11 +166,12 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     // Fetch and return the updated document
     const updatedDoc = await traderRef.get();
     const updatedDocData = updatedDoc.data();
-    const finalTrader = {
+    const finalTrader = TraderSchema.parse({
       ...updatedDocData,
       id: updatedDoc.id,
-      lastActivity: (updatedDocData!.lastActivity as Timestamp).toDate().toISOString()
-    } as Trader;
+      lastActivity: (updatedDocData!.lastActivity as Timestamp).toDate().toISOString(),
+      callBackDate: (updatedDocData!.callBackDate as Timestamp)?.toDate().toISOString() || null,
+    });
 
     return finalTrader;
 }
