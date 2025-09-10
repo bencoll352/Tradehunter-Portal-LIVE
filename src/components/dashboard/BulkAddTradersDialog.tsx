@@ -402,62 +402,28 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           if (errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials")) {
              toastDescription = (
               <div className="text-sm">
-                <p className="font-semibold text-base">Server Authentication Error</p>
-                <p className="mt-2">
+                <p>
                   The server could not authenticate with Google's services to save the data. This is often a temporary issue or a problem with the server's permissions.
                 </p>
-                <p className="mt-1 text-xs">
+                <p className="mt-2 text-xs">
                   <strong>Action:</strong> Please try the upload again in a few moments. If the problem persists, an administrator may need to check the server's authentication credentials and IAM permissions in the Google Cloud console.
                 </p>
               </div>
             );
-          } else if (errorMsgLower.includes("firestore not initialised") || errorMsgLower.includes("firestore not initialized")) {
-            toastDescription = (
-              <div className="text-sm">
-                <p className="font-semibold">Server error: Firestore Not Initialised</p>
-                <p className="mt-2 text-xs">
-                  The application's backend couldn't connect to Firebase. This is usually due to missing or incorrect Firebase configuration environment variables.
-                </p>
-                <p className="mt-1 text-xs">
-                  <strong>Action:</strong> Please check your <strong>server logs</strong> (your local Next.js terminal, or Firebase console for deployed apps) for `[Firebase Setup]` messages. Ensure `NEXT_PUBLIC_FIREBASE_PROJECT_ID` and other Firebase variables are correctly set in your `.env.local` file (and restart your dev server) or in your hosting environment.
-                </p>
-              </div>
-            );
-          } else if (errorMsgLower.includes("permission_denied") || errorMsgLower.includes("missing or insufficient permissions")) {
-            toastDescription = (
-              <div className="text-sm">
-                <p className="font-semibold">Server Error: Firestore Permission Denied</p>
-                 <p className="mt-2 text-xs">
-                  The server connected to Firestore, but your Security Rules are blocking it from writing data.
-                </p>
-                <p className="mt-1 text-xs">
-                  <strong>Action:</strong> Go to your Firebase Console, select your project, go to the Firestore Database section, and then click on the 'Rules' tab. Your rules need to allow write access for authenticated users or the server's service account.
-                </p>
-                 <p className="mt-1 text-xs font-semibold text-destructive-foreground bg-destructive/80 p-1 rounded-sm">Warning: Be careful with your rules. For development, you can use `allow read, write: if request.auth != null;` to get started, but secure them properly for production.</p>
-              </div>
-            );
+            toast({
+              variant: "destructive",
+              title: "Server Authentication Error",
+              description: toastDescription,
+              duration: 20000,
+            });
+          } else {
+             toast({
+              variant: "destructive",
+              title: "Bulk Upload Failed on Server",
+              description: result.error,
+              duration: 15000,
+            });
           }
-          else {
-            toastDescription = (
-              <div className="text-sm">
-                <p className="font-semibold">Server error: {result.error}</p>
-                <p className="mt-2 text-xs">
-                  This often means an issue with the data in your CSV (e.g., very long text, invalid characters not caught by parsing),
-                  or a problem with the Firestore database setup (like security rules or quotas).
-                </p>
-                <p className="mt-1 text-xs">
-                  Please <strong>check your server logs</strong> for detailed Firestore error messages.
-                  Also, review your CSV data for the traders being uploaded.
-                </p>
-              </div>
-            );
-          }
-          toast({
-            variant: "destructive",
-            title: "Bulk Upload Failed on Server",
-            description: toastDescription,
-            duration: 20000,
-          });
           setIsLoading(false);
           return;
         }
@@ -531,11 +497,21 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
-          <DialogDescription>
-            Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory. Recommended headers:
-            Name, Status, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link.
-            <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
-             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Phone number is used for duplicate checking. Rows with matching phone numbers to existing traders will be skipped.
+          <DialogDescription className="space-y-2">
+            <p>
+              Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory.
+            </p>
+            <p>
+              Recommended headers: Name, Status, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link.
+            </p>
+            <p>
+              <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" />
+              Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
+            </p>
+            <p>
+              <AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" />
+              Phone number is used for duplicate checking. Rows with matching phone numbers to existing traders will be skipped.
+            </p>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
