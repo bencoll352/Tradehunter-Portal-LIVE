@@ -522,7 +522,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button>
           <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders
         </Button>
       </DialogTrigger>
