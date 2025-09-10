@@ -22,12 +22,12 @@ export const ai = genkit({
   //   provider: 'firebase',
   // },
   // Log all traces to a local file.
-  // traceStore: {
-  //   provider: 'file',
-  //   options: {
-  //     path: '.genkit-traces.jsonl',
-  //   },
-  // },
+  traceStore: {
+    provider: 'file',
+    options: {
+      path: '.genkit-traces.jsonl',
+    },
+  },
 });
 
 export { geminiPro };
