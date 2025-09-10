@@ -1,5 +1,5 @@
 // src/lib/trader-service-firestore.ts
-import { getApps, getApp, type App, initializeApp } from 'firebase-admin/app';
+import { getApps, getApp, type App } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 // This file ensures a single instance of the Firebase Admin SDK is used server-side,
@@ -7,10 +7,10 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 let app: App;
 if (!getApps().length) {
-  // If no app is initialized (e.g., when running a script directly), initialize one.
-  // In a deployed environment like App Hosting, Genkit usually initializes the app first.
-  app = initializeApp();
-  console.log("[Firebase Admin] Initialized a new default Firebase app.");
+  // This code path should not be hit in a typical App Hosting environment
+  // where Genkit initializes first. It's a fallback.
+  app = require('firebase-admin/app').initializeApp();
+  console.log("[Firebase Admin] Initialized a new default Firebase app as a fallback.");
 } else {
   // If an app is already initialized (e.g., by Genkit), get the existing default app.
   // This is the key step to prevent the "already exists" error and auth conflicts.

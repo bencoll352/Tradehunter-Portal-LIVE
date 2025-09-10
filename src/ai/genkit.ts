@@ -1,11 +1,8 @@
-import { genkit, configureGenkit } from 'genkit';
+import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
 
 // Initialize Genkit with the Google AI plugin.
-// The API key is automatically sourced from Application Default Credentials
-// in a managed environment like Firebase App Hosting.
-// This simplified initialization allows Genkit to be the primary manager
-// of Google Cloud authentication, resolving potential conflicts.
+// This will also initialize the default Firebase Admin app instance if not already present.
 export const ai = genkit({
   plugins: [
     googleAI(),
