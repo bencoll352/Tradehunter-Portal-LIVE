@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home, LayoutDashboard, HelpCircle, Building2 } from "lucide-react";
+import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home, LayoutDashboard, HelpCircle, Building2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/buildwise-intel", icon: Lightbulb, label: "Buildwise-Intel" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
   { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
+  { href: "/quality-control", icon: ShieldCheck, label: "Quality Control" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use" },
 ];
 

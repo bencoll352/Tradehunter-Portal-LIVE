@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle } from "lucide-react";
+import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle, ShieldCheck } from "lucide-react";
 import { AppSidebarNav } from "./AppSidebarNav";
 import { usePathname } from 'next/navigation';
 
@@ -33,6 +33,8 @@ export function AppHeader() {
         return 'How to Use';
       case '/staff-training':
           return 'Staff Training';
+      case '/quality-control':
+          return 'Quality Control';
       default:
         // Attempt to find in any nav list
         const allNavs = [...mainNavItems, ...navItems];
@@ -98,6 +100,7 @@ const navItems = [
   { href: "/buildwise", icon: Building2, label: "BuildWise" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
   { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
+  { href: "/quality-control", icon: ShieldCheck, label: "Quality Control" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use" },
 ];
 import { Logo } from "../icons/Logo";
