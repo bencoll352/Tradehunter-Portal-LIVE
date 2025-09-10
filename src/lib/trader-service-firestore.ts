@@ -8,7 +8,8 @@ let app: App;
 // Next.js with hot-reloading and where other services (like Genkit) might also
 // initialize the Admin SDK.
 
-if (getApps().length === 0) {
+const apps = getApps();
+if (apps.length === 0) {
   // If no app is initialized anywhere in the project, we initialize a new one.
   // In a deployed Google Cloud environment (like Cloud Run, Cloud Functions),
   // calling initializeApp() without arguments automatically discovers the
