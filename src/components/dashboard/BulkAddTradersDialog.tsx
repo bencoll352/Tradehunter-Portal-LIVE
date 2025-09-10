@@ -402,8 +402,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           if (errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials")) {
              toastDescription = (
               <div className="text-sm">
-                <p className="font-semibold">Server Authentication Error</p>
-                <p className="mt-2 text-xs">
+                <p className="font-semibold text-base">Server Authentication Error</p>
+                <p className="mt-2">
                   The server could not authenticate with Google's services to save the data. This is often a temporary issue or a problem with the server's permissions.
                 </p>
                 <p className="mt-1 text-xs">
@@ -578,3 +578,4 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
+
