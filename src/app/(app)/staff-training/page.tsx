@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -114,7 +114,7 @@ function InternalTrainer() {
     };
     
     return (
-        <Card className="shadow-none border-none flex flex-col h-full">
+        <Card className="shadow-none border-none flex flex-col h-full bg-transparent">
             <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden p-0">
                 {!isScenarioSet ? (
                     <div className="space-y-4 p-4 rounded-lg border bg-background animate-in fade-in-50">
@@ -216,17 +216,17 @@ function InternalTrainer() {
 
 function SpeechTrainerLink() {
     return (
-        <div className="p-4">
+        <div className="p-4 flex justify-center items-center h-full">
              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
                 <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", "border-teal-500/50 text-teal-500 bg-teal-500/10")}>
                     <Mic className="h-12 w-12" />
                 </div>
-                <CardTitle className="text-xl text-primary mb-1">Speech Sales Trainer</CardTitle>
+                <CardTitle className="text-xl text-primary mb-1">Apex Speech Trainer</CardTitle>
                 <div className="flex items-center gap-1.5 mb-2">
                     <p className="text-sm font-semibold text-accent">External Application</p>
                 </div>
                 <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
-                    "Launch the full-featured Speech Sales Trainer application in a new window for advanced, voice-based simulations and scenarios."
+                    Launch the full-featured Speech Sales Trainer application in a new window for advanced, voice-based simulations and scenarios.
                 </CardDescription>
                 <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
                     <Link href={apexSalesTrainerUrl} target="_blank" rel="noopener noreferrer">
@@ -376,7 +376,7 @@ const contentFormSchema = z.object({
 type ContentFormValues = z.infer<typeof contentFormSchema>;
 
 
-function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMaterial[]) => void }) {
+function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMaterial) => void }) {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     const form = useForm<ContentFormValues>({
@@ -386,17 +386,17 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
     const fileRef = form.register("files");
 
     const onSubmit = (values: ContentFormValues) => {
-        const files = values.files;
-        if (!files || files.length === 0) {
+        const file = values.files?.[0];
+        if (!file) {
             toast({
                 variant: 'destructive',
-                title: "File(s) Required",
-                description: "Please select one or more image files to upload.",
+                title: "File Required",
+                description: "Please select a file to upload.",
             });
             return;
         }
 
-        const newMaterials: TrainingMaterial[] = Array.from(files).map((file: any) => ({
+        const newMaterial: TrainingMaterial = {
             id: `material_${Date.now()}_${file.name}`,
             title: values.title || file.name,
             description: values.description,
@@ -405,13 +405,13 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
             file: file,
             type: file.type.split('/')[1]?.toUpperCase() || 'File',
             dateAdded: format(new Date(), "MMMM d, yyyy"),
-        }));
+        };
         
-        onAddContent(newMaterials);
+        onAddContent(newMaterial);
 
         toast({
             title: "Content Added",
-            description: `${newMaterials.length} file(s) have been added to the portal.`,
+            description: `${newMaterial.title} has been added to the portal.`,
         });
         setOpen(false);
         form.reset();
@@ -429,7 +429,7 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                 <DialogHeader>
                     <DialogTitle>Add New Content</DialogTitle>
                     <DialogDescription>
-                        Add new files to your content library. You can select multiple images.
+                        Add a new file to your content library.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -478,6 +478,7 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                                         <SelectItem value="Mindset">Mindset</SelectItem>
                                         <SelectItem value="Product Guide">Product Guide</SelectItem>
                                         <SelectItem value="Image">Image</SelectItem>
+                                        <SelectItem value="Other">Other</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -502,9 +503,9 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                             name="files"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Files (Images)</FormLabel>
+                                    <FormLabel>File</FormLabel>
                                     <FormControl>
-                                        <Input type="file" accept="image/png, image/jpeg, image/gif" {...fileRef} multiple />
+                                        <Input type="file" {...fileRef} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -542,6 +543,8 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
 
     if (!material) return null;
 
+    const isImage = material.file?.type.startsWith('image/');
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
@@ -549,9 +552,13 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                     <DialogTitle>{material.title}</DialogTitle>
                     {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
-                <div className="flex-grow overflow-auto">
+                <div className="flex-grow overflow-auto p-6">
                    {fileUrl ? (
-                        <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
+                        isImage ? (
+                            <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto" />
+                        ) : (
+                            <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
+                        )
                    ) : material.content ? (
                        <ScrollArea className="h-full">
                            <div className="p-6">{material.content}</div>
@@ -570,14 +577,21 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
     )
 }
 
+function getFileIcon(type: string): React.ElementType {
+    const fileType = type.toLowerCase();
+    if (fileType.includes('pdf')) return FileCode;
+    if (['png', 'jpg', 'jpeg', 'gif', 'svg'].some(ext => fileType.includes(ext))) return FileImage;
+    return FileText;
+}
+
 function TrainingMaterialPortal() {
     const [materials, setMaterials] = useState<TrainingMaterial[]>(initialTrainingMaterials);
     const [selectedMaterial, setSelectedMaterial] = useState<TrainingMaterial | null>(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const { toast } = useToast();
 
-    const handleAddContent = (newMaterials: TrainingMaterial[]) => {
-        setMaterials(prev => [...prev, ...newMaterials]);
+    const handleAddContent = (newMaterial: TrainingMaterial) => {
+        setMaterials(prev => [...prev, newMaterial]);
     };
 
     const handleViewMaterial = (material: TrainingMaterial) => {
@@ -609,27 +623,30 @@ function TrainingMaterialPortal() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {materials.map((material) => (
-                        <TableRow key={material.id}>
-                            <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
-                                    {material.title}
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                <Badge variant="outline">{material.type}</Badge>
-                            </TableCell>
-                            <TableCell>{material.category}</TableCell>
-                            <TableCell>{material.dateAdded}</TableCell>
-                            <TableCell className="text-right">
-                                <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                    {materials.map((material) => {
+                        const Icon = getFileIcon(material.type);
+                        return (
+                            <TableRow key={material.id}>
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-2">
+                                        <Icon className="h-4 w-4 text-muted-foreground" />
+                                        {material.title}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline">{material.type}</Badge>
+                                </TableCell>
+                                <TableCell>{material.category}</TableCell>
+                                <TableCell>{material.dateAdded}</TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    )}
                     </TableBody>
                 </Table>
             </CardContent>
@@ -661,13 +678,17 @@ export default function StaffTrainingPage() {
                 <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
                     <Tabs defaultValue="internal-trainer" className="w-full flex-grow flex flex-col">
                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="internal-trainer">Text-Based Trainer</TabsTrigger>
-                            <TabsTrigger value="speech-trainer">Speech Sales Trainer</TabsTrigger>
+                            <TabsTrigger value="internal-trainer">
+                                <User className="mr-2 h-4 w-4" /> Role-Play Trainer
+                            </TabsTrigger>
+                            <TabsTrigger value="speech-trainer">
+                                <Mic className="mr-2 h-4 w-4" /> Speech Trainer
+                            </TabsTrigger>
                         </TabsList>
-                        <TabsContent value="internal-trainer" className="flex-grow">
+                        <TabsContent value="internal-trainer" className="flex-grow mt-4">
                             <InternalTrainer />
                         </TabsContent>
-                        <TabsContent value="speech-trainer" className="flex-grow">
+                        <TabsContent value="speech-trainer" className="flex-grow mt-4">
                             <SpeechTrainerLink />
                         </TabsContent>
                     </Tabs>

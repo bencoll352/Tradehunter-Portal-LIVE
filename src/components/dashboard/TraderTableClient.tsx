@@ -82,7 +82,6 @@ export function TraderTableClient({
     employeeCount: false,
     reviews: false,
     status: false,
-    callBackDate: false,
   });
   const [rowSelection, setRowSelection] = useState({});
   const { toast } = useToast();

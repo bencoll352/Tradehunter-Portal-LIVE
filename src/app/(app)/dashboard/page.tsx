@@ -9,7 +9,7 @@ import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
 import { BranchPerformanceChart } from '@/components/dashboard/BranchPerformanceChart';
 import { MiniDashboardStats } from '@/components/dashboard/MiniDashboardStats';
-import { parseISO } from 'date-fns';
+import { parseISO }from 'date-fns';
 
 export default function DashboardPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -57,7 +57,8 @@ export default function DashboardPage() {
     try {
       // Ensure lastActivity is a valid string before parsing
       if (typeof t.lastActivity === 'string') {
-        return parseISO(t.lastActivity) >= thirtyDaysAgo;
+        const activityDate = parseISO(t.lastActivity);
+        return activityDate >= thirtyDaysAgo;
       }
       return false;
     } catch (e) {
@@ -98,14 +99,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <MiniDashboardStats 
+       <MiniDashboardStats 
         liveTradersCount={activeTradersCount}
         callBackTradersCount={callBackTradersCount}
         newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
-      <DashboardStatsAndGoals newLeadsCount={newLeadTradersCount} hotLeadsCount={callBackTradersCount} />
-      <BranchPerformanceChart data={chartData} />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          <BranchPerformanceChart data={chartData} />
+        </div>
+        <div className="lg:col-span-2">
+          <DashboardStatsAndGoals newLeadsCount={newLeadTradersCount} hotLeadsCount={callBackTradersCount} />
+        </div>
+      </div>
     </div>
   );
 }

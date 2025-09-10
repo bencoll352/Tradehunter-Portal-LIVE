@@ -45,11 +45,11 @@ export function DashboardStatsAndGoals({
   };
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm h-full">
       <CardHeader>
         <div className="flex items-center gap-3">
             <Target className="h-6 w-6 text-primary" />
-            <CardTitle className="text-xl text-primary">Set Your Branch Goals</CardTitle>
+            <CardTitle className="text-xl text-primary">Branch Goals & Targets</CardTitle>
         </div>
         <CardDescription>Define your weekly and monthly targets to track progress.</CardDescription>
       </CardHeader>
@@ -58,7 +58,7 @@ export function DashboardStatsAndGoals({
             <div className="space-y-2">
               <Label htmlFor="weeklyNewLeadsGoal" className="flex items-center gap-1.5 text-sm font-medium">
                 <CalendarDays className="h-4 w-4 text-muted-foreground"/>
-                Weekly New Leads Goal
+                Weekly New Leads
               </Label>
               <Input
                 id="weeklyNewLeadsGoal"
@@ -72,7 +72,7 @@ export function DashboardStatsAndGoals({
             <div className="space-y-2">
               <Label htmlFor="monthlyActiveTradersGoal" className="flex items-center gap-1.5 text-sm font-medium">
                 <CheckCircle className="h-4 w-4 text-muted-foreground"/>
-                Monthly Active Traders Reached Goal
+                Monthly Active Traders
               </Label>
               <Input
                 id="monthlyActiveTradersGoal"
