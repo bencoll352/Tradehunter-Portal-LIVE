@@ -522,8 +522,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-          <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders (CSV)
+        <Button variant="outline">
+          <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
@@ -568,7 +568,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogClose asChild>
             <Button variant="outline" disabled={isLoading}>Cancel</Button>
           </DialogClose>
-          <Button onClick={handleSubmit} disabled={isLoading || !selectedFile} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Button onClick={handleSubmit} disabled={isLoading || !selectedFile}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
             Upload Traders
           </Button>

@@ -36,7 +36,7 @@ import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
 import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { ArrowUpDown, ChevronDown, Trash2, Flame } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Trash2, Flame, PlusCircle, UploadCloud } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
@@ -269,8 +269,9 @@ export function TraderTableClient({
         header: "Status",
         cell: ({ row }) => {
           const status = row.getValue("status") as string;
-          let badgeVariant: "default" | "secondary" | "destructive" = "secondary";
+          let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary";
           if (status === "Active") badgeVariant = "default";
+          if (status === 'New Lead') badgeVariant = 'outline';
           if (status === "Call-Back") return <Badge variant="destructive"><Flame className="mr-1 h-3 w-3" />Hot Lead</Badge>
           return <Badge variant={badgeVariant}>{status}</Badge>;
         },

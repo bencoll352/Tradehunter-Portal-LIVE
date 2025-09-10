@@ -20,28 +20,24 @@ export function AppHeader() {
   const pathname = usePathname();
 
   const getPageTitle = () => {
-    const currentPath = `/${pathname.split('/')[1]}`; // Get base path
-    switch (currentPath) {
-      case '/dashboard':
-        return 'Dashboard';
-      case '/tradehunter':
-        return 'Trader Database';
-      case '/competitor-insights':
-        return 'Competitor Insights';
-      case '/estimator':
-        return 'Materials Estimator';
-      case '/buildwise':
-        return 'BuildWise';
-      case '/smart-team':
-        return 'Smart Team Hub';
-      case '/staff-training':
-        return 'Staff Training';
-      case '/buildwise-intel':
-        return 'BuildWise Intel';
+    // Find the main section first, e.g. /smart-team/outreach-pro -> /smart-team
+    const currentMainPath = `/${pathname.split('/')[1]}`;
+    const navItem = navItems.find(item => item.href === currentMainPath) || mainNavItems.find(item => item.href === currentMainPath);
+    
+    // Fallback for nested pages to show parent's name
+    if (navItem) return navItem.label;
+
+    // Specific titles for pages not in main nav
+    switch (pathname) {
       case '/how-to-use':
         return 'How to Use';
+      case '/staff-training':
+          return 'Staff Training';
       default:
-        return 'Dashboard';
+        // Attempt to find in any nav list
+        const allNavs = [...mainNavItems, ...navItems];
+        const anyNavItem = allNavs.find(item => pathname.startsWith(item.href));
+        return anyNavItem?.label || 'Dashboard';
     }
   };
 
@@ -54,8 +50,13 @@ export function AppHeader() {
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground border-r-0">
-           <nav className="grid gap-6 text-lg font-medium p-4">
+        <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground border-r-0 p-0">
+           <div className="flex h-16 items-center border-b border-sidebar-border px-4 shrink-0">
+                <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
+                <Logo variant="transparent" className="h-10 w-auto" />
+                </Link>
+            </div>
+           <nav className="grid gap-2 text-sm font-medium p-4">
             <AppSidebarNav onLinkClick={() => document.querySelector<HTMLButtonElement>('[data-radix-collection-item] > button[aria-expanded="true"]')?.click()} />
           </nav>
         </SheetContent>
@@ -78,3 +79,25 @@ export function AppHeader() {
     </header>
   );
 }
+
+// Re-declaring nav items here to avoid circular dependency if imported,
+// and to ensure getPageTitle has access to all possible pages.
+// In a larger app, this might be centralized in a separate file.
+const mainNavItems = [
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/tradehunter", icon: Database, label: "Trader Database" },
+  { href: "/estimator", icon: Calculator, label: "Estimator" },
+  { href: "/buildwise", icon: Building2, label: "BuildWise" },
+  { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
+];
+
+const navItems = [
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/tradehunter", icon: Database, label: "Trader Database" },
+  { href: "/estimator", icon: Calculator, label: "Estimator" },
+  { href: "/buildwise", icon: Building2, label: "BuildWise" },
+  { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
+  { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
+  { href: "/how-to-use", icon: HelpCircle, label: "How to Use" },
+];
+import { Logo } from "../icons/Logo";
