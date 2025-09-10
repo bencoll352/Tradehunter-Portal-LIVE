@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,18 +12,32 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    // This check runs only on the client-side
     const loggedInId = localStorage.getItem('loggedInId');
-    if (!loggedInId) {
+    if (loggedInId) {
+      setIsAuthenticated(true);
+    } else {
       router.replace('/login');
     }
+    setIsLoading(false);
   }, [router]);
 
-  if (!isClient) {
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    // This will show a loader while redirecting, or nothing if the redirect is fast.
+    // It prevents rendering the children for an unauthenticated user.
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
