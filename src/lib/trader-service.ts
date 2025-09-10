@@ -1,3 +1,4 @@
+
 'use server';
 
 import { db } from './trader-service-firestore';
@@ -190,6 +191,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
             status: parsedData.status || 'New Lead',
             lastActivity: parsedData.lastActivity ? Timestamp.fromDate(new Date(parsedData.lastActivity)) : FieldValue.serverTimestamp(),
             description: parsedData.description || null,
+            reviews: parsedData.reviews || null,
             rating: parsedData.rating || null,
             website: parsedData.website || null,
             phone: parsedData.phone || null,
@@ -201,6 +203,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
             ownerProfileLink: parsedData.ownerProfileLink || null,
             notes: parsedData.notes || null,
             callBackDate: parsedData.callBackDate ? Timestamp.fromDate(new Date(parsedData.callBackDate)) : null,
+            totalAssets: parsedData.totalAssets || null,
             estimatedAnnualRevenue: parsedData.estimatedAnnualRevenue || null,
             estimatedCompanyValue: parsedData.estimatedCompanyValue || null,
             employeeCount: parsedData.employeeCount || null,

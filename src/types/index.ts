@@ -79,6 +79,7 @@ export const TraderSchema = z.object({
     status: TraderStatusSchema,
     lastActivity: z.string(), // ISO 8601 date string
     description: z.string().optional().nullable(),
+    reviews: z.number().optional().nullable(),
     rating: z.number().optional().nullable(),
     website: z.string().optional().nullable(),
     phone: z.string().optional().nullable(),
@@ -90,6 +91,7 @@ export const TraderSchema = z.object({
     ownerProfileLink: z.string().optional().nullable(),
     notes: z.string().optional().nullable(),
     callBackDate: z.string().optional().nullable(), // ISO 8601 date string
+    totalAssets: z.number().optional().nullable(),
     estimatedAnnualRevenue: z.number().optional().nullable(),
     estimatedCompanyValue: z.number().optional().nullable(),
     employeeCount: z.number().optional().nullable(),
@@ -104,6 +106,7 @@ export const ParsedTraderDataSchema = z.object({
   status: TraderStatusSchema.optional().default('New Lead'),
   lastActivity: z.string().optional(), // Date string from CSV
   description: z.string().optional(),
+  reviews: z.number().optional(),
   rating: z.number().optional(),
   website: z.string().optional(),
   phone: z.string().optional(),
@@ -114,6 +117,7 @@ export const ParsedTraderDataSchema = z.object({
   address: z.string().optional(),
   ownerProfileLink: z.string().optional(),
   notes: z.string().optional(),
+  totalAssets: z.number().optional(),
   estimatedAnnualRevenue: z.number().optional(),
   estimatedCompanyValue: z.number().optional(),
   employeeCount: z.number().optional(),

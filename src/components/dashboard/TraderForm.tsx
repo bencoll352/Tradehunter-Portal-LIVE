@@ -34,6 +34,7 @@ export const traderFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   status: z.enum(["Active", "Inactive", "Call-Back", "New Lead"]),
   description: z.string().optional().nullable(),
+  reviews: z.coerce.number().int().min(0, { message: "Reviews must be a positive integer." }).optional().nullable(),
   rating: z.coerce.number().min(0).max(5).optional().nullable(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')).nullable(),
   phone: z.string().optional().nullable(),
@@ -45,6 +46,7 @@ export const traderFormSchema = z.object({
   workdayTiming: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   callBackDate: z.string().optional().nullable(), // ISO date string
+  totalAssets: z.coerce.number().min(0, { message: "Total Assets must be a positive number." }).optional().nullable(),
   estimatedAnnualRevenue: z.coerce.number().min(0, { message: "Est. Annual Revenue must be a positive number." }).optional().nullable(),
   estimatedCompanyValue: z.coerce.number().min(0, { message: "Est. Company Value must be a positive number." }).optional().nullable(),
   employeeCount: z.coerce.number().int().min(0, { message: "Employee count must be a positive integer." }).optional().nullable(),
@@ -64,6 +66,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
       name: defaultValues?.name || "",
       status: defaultValues?.status || "Active",
       description: defaultValues?.description ?? null,
+      reviews: defaultValues?.reviews ?? null,
       rating: defaultValues?.rating ?? null, 
       website: defaultValues?.website ?? null,
       phone: defaultValues?.phone ?? null,
@@ -75,6 +78,7 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
       workdayTiming: defaultValues?.workdayTiming ?? null,
       notes: defaultValues?.notes ?? null,
       callBackDate: defaultValues?.callBackDate ?? null,
+      totalAssets: defaultValues?.totalAssets ?? null,
       estimatedAnnualRevenue: defaultValues?.estimatedAnnualRevenue ?? null,
       estimatedCompanyValue: defaultValues?.estimatedCompanyValue ?? null,
       employeeCount: defaultValues?.employeeCount ?? null,
@@ -139,7 +143,22 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             )}
             />
         </div>
-        <FormField
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="reviews"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reviews</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="50" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseInt(e.target.value, 10))} value={field.value ?? ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
             control={form.control}
             name="employeeCount"
             render={({ field }) => (
@@ -152,16 +171,17 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
               </FormItem>
             )}
           />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="estimatedAnnualRevenue"
+            name="totalAssets"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Est. Annual Revenue (£)</FormLabel>
+                <FormLabel>Total Assets (£)</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="100000" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} />
+                  <Input type="number" placeholder="500000" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -181,6 +201,21 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="estimatedAnnualRevenue"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Est. Annual Revenue (£)</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="100000" {...field} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} value={field.value ?? ''} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
 
         <FormField
           control={form.control}

@@ -78,6 +78,13 @@ export function TraderTableClient({
     address: false,
     description: false,
     notes: false,
+    totalAssets: false,
+    estimatedCompanyValue: false,
+    estimatedAnnualRevenue: false,
+    employeeCount: false,
+    reviews: false,
+    status: false,
+    callBackDate: false,
   });
   const [rowSelection, setRowSelection] = useState({});
   const { toast } = useToast();
@@ -171,6 +178,93 @@ export function TraderTableClient({
         cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
       },
       {
+        accessorKey: "description",
+        header: "Description",
+      },
+      {
+        accessorKey: "reviews",
+        header: "Reviews",
+      },
+      {
+        accessorKey: "rating",
+        header: "Rating",
+      },
+      {
+        accessorKey: "website",
+        header: "Website",
+      },
+      {
+        accessorKey: "phone",
+        header: "Phone",
+      },
+      {
+        accessorKey: "ownerName",
+        header: "Owner Name",
+      },
+      {
+        accessorKey: "ownerProfileLink",
+        header: "Owner Profile",
+      },
+      {
+        accessorKey: "mainCategory",
+        header: "Main Category",
+      },
+      {
+        accessorKey: "categories",
+        header: "Categories",
+      },
+      {
+        accessorKey: "workdayTiming",
+        header: "Workday Timing",
+      },
+      {
+        accessorKey: "address",
+        header: "Address",
+      },
+      {
+        accessorKey: "totalAssets",
+        header: "Total Assets",
+        cell: ({ row }) => {
+          const amount = parseFloat(row.getValue("totalAssets"));
+          if (isNaN(amount)) return "-";
+          const formatted = new Intl.NumberFormat("en-GB", {
+            style: "currency",
+            currency: "GBP",
+          }).format(amount);
+          return <div className="text-right font-medium">{formatted}</div>;
+        },
+      },
+      {
+        accessorKey: "estimatedCompanyValue",
+        header: "Estimated Company Value",
+        cell: ({ row }) => {
+          const amount = parseFloat(row.getValue("estimatedCompanyValue"));
+          if (isNaN(amount)) return "-";
+          const formatted = new Intl.NumberFormat("en-GB", {
+            style: "currency",
+            currency: "GBP",
+          }).format(amount);
+          return <div className="text-right font-medium">{formatted}</div>;
+        },
+      },
+      {
+        accessorKey: "estimatedAnnualRevenue",
+        header: "Estimated Annual Revenue",
+        cell: ({ row }) => {
+          const amount = parseFloat(row.getValue("estimatedAnnualRevenue"));
+          if (isNaN(amount)) return "-";
+          const formatted = new Intl.NumberFormat("en-GB", {
+            style: "currency",
+            currency: "GBP",
+          }).format(amount);
+          return <div className="text-right font-medium">{formatted}</div>;
+        },
+      },
+      {
+        accessorKey: "employeeCount",
+        header: "Employee Count",
+      },
+      {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => {
@@ -217,17 +311,10 @@ export function TraderTableClient({
           }
         },
       },
-      { accessorKey: "rating", header: "Rating" },
-      { accessorKey: "website", header: "Website" },
-      { accessorKey: "phone", header: "Phone" },
-      { accessorKey: "address", header: "Address" },
-      { accessorKey: "ownerName", header: "Owner Name" },
-      { accessorKey: "mainCategory", header: "Main Category" },
-      { accessorKey: "categories", header: "Categories" },
-      { accessorKey: "workdayTiming", header: "Workday Timing" },
-      { accessorKey: "ownerProfileLink", header: "Owner Profile Link" },
-      { accessorKey: "description", header: "Description" },
-      { accessorKey: "notes", header: "Notes" },
+      {
+        accessorKey: "notes",
+        header: "Notes",
+      },
       {
         id: "actions",
         cell: ({ row }) => {

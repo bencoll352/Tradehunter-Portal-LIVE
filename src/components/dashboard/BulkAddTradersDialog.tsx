@@ -283,6 +283,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         status: parsedStatus,
         lastActivity: lastActivityValue,
         description: getRowValue(row, ["Description"]),
+        reviews: parseIntValue(getRowValue(row, ["Reviews"]), "Reviews", name),
         rating: parseNumericValue(getRowValue(row, ["Rating"]), "Rating", name),
         website: getRowValue(row, ["🌐Website", "Website"]),
         phone: phoneValue,
@@ -291,10 +292,11 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         categories: getRowValue(row, ["Categories"]),
         workdayTiming: workdayTimingValue,
         address: getRowValue(row, ["Address"]),
-        ownerProfileLink: getRowValue(row, ["Link"]),
+        ownerProfileLink: getRowValue(row, ["Link", "Owner Profile"]),
         notes: getRowValue(row, ["Notes"]),
+        totalAssets: parseNumericValue(getRowValue(row, ["Total Assets"]), "Total Assets", name),
         estimatedAnnualRevenue: parseNumericValue(getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue", "Annual Revenue"]), "Est. Annual Revenue", name),
-        estimatedCompanyValue: parseNumericValue(getRowValue(row, ["Estimated Company Value", "Est. Company Value", "Company Value", "Total Assets"]), "Estimated Company Value", name),
+        estimatedCompanyValue: parseNumericValue(getRowValue(row, ["Estimated Company Value", "Est. Company Value", "Company Value"]), "Estimated Company Value", name),
         employeeCount: parseIntValue(getRowValue(row, ["Employee Count"]), "Employee Count", name),
       };
       tradersToProcess.push(trader);
@@ -541,7 +543,7 @@ service cloud.firestore {
             Upload a CSV file. The first row MUST be a header row. The system uses header names to find data, so column order does not matter. The 'Name' header is mandatory.
             <br />
             Recommended headers: 
-            <code>Name, Status, Last Activity, Description, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.</code>
+            <code>Name, Description, Reviews, Rating, Website, Phone, Owner Name, Owner Profile, Main Category, Categories, Workday Timing, Address, Total Assets, Estimated Company Value, Estimated Annual Revenue, Employee Count, Status, Notes.</code>
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in an Address) MUST be enclosed in double quotes.
           </DialogDescription>
         </DialogHeader>
@@ -585,7 +587,7 @@ service cloud.firestore {
     </Dialog>
   );
 }
-
     
 
     
+
