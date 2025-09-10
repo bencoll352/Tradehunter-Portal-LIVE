@@ -399,7 +399,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           let toastDescription: React.ReactNode;
           const errorMsgLower = result.error.toLowerCase();
 
-          if (errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error")) {
+          if (errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials")) {
              toastDescription = (
               <div className="text-sm">
                 <p className="font-semibold">Server Authentication Error</p>
@@ -407,7 +407,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
                   The server could not authenticate with Google's services to save the data. This is often a temporary issue or a problem with the server's permissions.
                 </p>
                 <p className="mt-1 text-xs">
-                  <strong>Action:</strong> Please try the upload again in a few moments. If the problem persists, it may require an administrator to check the server's authentication credentials and IAM permissions in the Google Cloud console.
+                  <strong>Action:</strong> Please try the upload again in a few moments. If the problem persists, an administrator may need to check the server's authentication credentials and IAM permissions in the Google Cloud console.
                 </p>
               </div>
             );
@@ -532,10 +532,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         <DialogHeader>
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file. The first row MUST be a header row. The system uses header names to find data so column order does not matter. The 'Name' header is mandatory. Recommended headers: 
+            Upload a CSV file. The system uses header names to find data so column order does not matter. The 'Name' header is mandatory. Recommended headers: 
             Name, Status, Description, Reviews, Rating, Website, Phone, Owner Name, Main Category, Categories, Workday Timing, Address, Link, Notes, Total Assets, Est. Company Value, Est. Annual Revenue, Employee Count.
             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Fields containing commas (e.g., in an Address) MUST be enclosed in double quotes.
-             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Phone number is used for duplicate checking. Rows with matching phone numbers will be skipped if they already exist.
+             <br/><AlertTriangle className="inline h-4 w-4 mr-1 text-amber-500" /> Phone number is used for duplicate checking. Rows with matching phone numbers to existing traders will be skipped.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

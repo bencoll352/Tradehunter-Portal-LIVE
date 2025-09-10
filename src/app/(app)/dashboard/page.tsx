@@ -56,7 +56,11 @@ export default function DashboardPage() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     try {
-      return parseISO(t.lastActivity) >= thirtyDaysAgo;
+      // Ensure lastActivity is a valid string before parsing
+      if (typeof t.lastActivity === 'string') {
+        return parseISO(t.lastActivity) >= thirtyDaysAgo;
+      }
+      return false;
     } catch (e) {
       return false; 
     }
