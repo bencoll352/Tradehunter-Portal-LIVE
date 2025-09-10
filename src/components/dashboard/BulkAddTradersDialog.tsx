@@ -24,7 +24,7 @@ import { normalizePhoneNumber } from "@/lib/utils";
 interface BulkAddTradersDialogProps {
   branchId: BaseBranchId; // Changed BranchId to BaseBranchId
   existingTraders: Trader[];
-  onBulkAddTraders: (branchId: BaseBranchId, traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>; // Changed BranchId to BaseBranchId
+  onBulkAddTraders: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>; // Changed BranchId to BaseBranchId
 }
 
 const MAX_UPLOAD_LIMIT = 1000;
@@ -392,7 +392,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     let newTradersAddedCount = 0;
     if (validTraders.length > 0) {
       try {
-        const result = await onBulkAddTraders(branchId, validTraders);
+        const result = await onBulkAddTraders(validTraders);
 
         if (result.error) {
           console.error("Server action failed during bulk add with error message from server:", result.error);

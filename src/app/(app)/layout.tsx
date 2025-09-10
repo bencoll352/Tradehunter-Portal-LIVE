@@ -17,17 +17,20 @@ export default function AppLayout({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // This check runs only on the client-side
+    // This effect should only run on the client side.
     const loggedInId = localStorage.getItem('loggedInId');
     if (loggedInId) {
       setIsAuthenticated(true);
     } else {
+      // If not authenticated, redirect to the login page.
       router.replace('/login');
     }
+    // Once the check is complete, stop loading.
     setIsLoading(false);
   }, [router]);
 
   if (isLoading) {
+    // While checking for authentication, show a loading spinner.
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -36,8 +39,8 @@ export default function AppLayout({
   }
 
   if (!isAuthenticated) {
-    // This will show a loader while redirecting, or nothing if the redirect is fast.
-    // It prevents rendering the children for an unauthenticated user.
+    // If not authenticated after the check, show a loading spinner while redirecting.
+    // This prevents rendering the children for an unauthenticated user.
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -45,6 +48,7 @@ export default function AppLayout({
     );
   }
 
+  // If authenticated, render the app layout.
   return (
     <div className="flex min-h-screen w-full bg-muted/40">
       <AppSidebar key="app-sidebar" />
