@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2 } from "lucide-react";
+import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle } from "lucide-react";
 import { AppSidebarNav } from "./AppSidebarNav";
 import { usePathname } from 'next/navigation';
 
