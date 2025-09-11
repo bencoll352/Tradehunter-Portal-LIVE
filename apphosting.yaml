@@ -6,6 +6,7 @@ runConfig:
   # more instances in response to increased traffic.
   maxInstances: 1
 iam:
+  serviceAccount: tradehunter-pro-portal
   roles:
-    - type: firebase.admin
+    - type: predefined
       role: firebase.admin
