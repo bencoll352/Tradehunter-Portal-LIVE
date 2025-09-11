@@ -499,7 +499,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-             Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory.
+              Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The &apos;Name&apos; header is mandatory.
             </p>
             <p className="text-xs text-muted-foreground">
              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
