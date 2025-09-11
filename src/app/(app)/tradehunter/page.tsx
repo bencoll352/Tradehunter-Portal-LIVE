@@ -27,7 +27,16 @@ export default function TradeHunterDashboardPage() {
         setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       } else {
         setTraders([]);
-        toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data. Server might be busy or there could be a configuration issue." });
+        let description = "Could not load trader data. The server might be busy, or there could be a configuration issue. Please try again in a few moments.";
+        if (result.error?.includes("permission-denied") || result.error?.includes("permission_denied") || result.error?.includes("not initialized")) {
+          description = "A server permission error has occurred and has been logged to the server. Try again, and if the error persists, contact an administrator.";
+        }
+        toast({ 
+          variant: "destructive", 
+          title: "Error Loading Data", 
+          description: description,
+          duration: 10000,
+        });
       }
     } catch (error) {
       console.error("Error fetching traders (client catch):", error);
