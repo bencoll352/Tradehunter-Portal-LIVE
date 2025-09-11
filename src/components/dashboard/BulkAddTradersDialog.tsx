@@ -499,15 +499,15 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-             Upload a CSV file. The system uses header names for data mapping so column order doesn't matter. The 'Name' header is MANDATORY.
+              Upload a CSV file. The system uses header names for data mapping so column order doesn't matter. The 'Name' header is MANDATORY.
             </p>
             <p className="text-xs text-muted-foreground">
-             Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
+              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
             </p>
             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs">
-                    Fields containing commas (e.g., &quot;123 Main St, Anytown&quot;) MUST be enclosed in double quotes.
+                    Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
                 </p>
             </div>
              <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
@@ -551,7 +551,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           </DialogClose>
           <Button onClick={handleSubmit} disabled={isLoading || !selectedFile}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-            Upload Traders
+            Upload & Process
           </Button>
         </DialogFooter>
       </DialogContent>
