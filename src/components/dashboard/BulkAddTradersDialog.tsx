@@ -399,7 +399,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           let toastDescription: React.ReactNode;
           const errorMsgLower = result.error.toLowerCase();
 
-          if (errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials")) {
+          if (errorMsgLower.includes("permission_denied") || errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials")) {
              toastDescription = (
               <div className="text-sm">
                 <p>
@@ -499,10 +499,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-              Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory.
+             Upload a CSV file. The system uses header names for data mapping, so column order does not matter. The 'Name' header is mandatory.
             </p>
             <p className="text-xs text-muted-foreground">
-              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
+             Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
             </p>
             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
