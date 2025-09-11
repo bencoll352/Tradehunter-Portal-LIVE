@@ -399,7 +399,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           let toastDescription: React.ReactNode;
           const errorMsgLower = result.error.toLowerCase();
 
-          if (errorMsgLower.includes("permission_denied") || errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials")) {
+          if (errorMsgLower.includes("permission_denied") || errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials") || errorMsgLower.includes("server configuration error")) {
              toastDescription = (
               <div className="text-sm">
                 <p>
@@ -558,5 +558,3 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
-
-    
