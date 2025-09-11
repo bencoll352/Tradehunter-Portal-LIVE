@@ -124,7 +124,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         // Basic validation of date parts
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
           const tempDate = new Date(Date.UTC(year, month, day));
-          // Verify that creating the date didn't roll over (e.g. 31st Feb -> 3rd Mar)
+          // Verify that creating the date didn't roll over (e.g., 31st Feb -> 3rd Mar)
           if (tempDate.getUTCFullYear() === year && tempDate.getUTCMonth() === month && tempDate.getUTCDate() === day) {
              date = tempDate;
              break;
