@@ -403,7 +403,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
              toastDescription = (
               <div className="text-sm">
                 <p>
-                  The server could not authenticate with Google's services to save the data. This is often a temporary issue or a problem with the server's permissions.
+                 The server could not authenticate with Google's services to save the data. This is often a temporary issue or a problem with the server's permissions.
                 </p>
                 <p className="mt-2 text-xs font-semibold">
                   Action: Please try the upload again in a few moments. If the problem persists, an administrator may need to check the server's authentication credentials and IAM permissions in the Google Cloud console.
