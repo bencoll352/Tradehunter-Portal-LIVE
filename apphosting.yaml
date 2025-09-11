@@ -1,12 +1,13 @@
 # Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
 
+# A service account with the "Firebase Admin" role is required for the backend
+# to access other Google Cloud services.
+# You can create a service account in the Google Cloud console:
+# https://console.cloud.google.com/iam-admin/serviceaccounts
+serviceAccount: tradehunter-pro-portal
+
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
-iam:
-  serviceAccount: tradehunter-pro-portal
-  roles:
-    - type: predefined
-      role: firebase.admin
