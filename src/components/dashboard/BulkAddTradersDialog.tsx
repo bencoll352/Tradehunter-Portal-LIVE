@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -399,7 +398,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           let toastDescription: React.ReactNode;
           const errorMsgLower = result.error.toLowerCase();
 
-          if (errorMsgLower.includes("permission_denied") || errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials") || errorMsgLower.includes("server configuration error")) {
+          if (errorMsgLower.includes("permission-denied") || errorMsgLower.includes("could not refresh access token") || errorMsgLower.includes("server authentication error") || errorMsgLower.includes("default credentials") || errorMsgLower.includes("server configuration error")) {
              toastDescription = (
               <div className="text-sm">
                 <p>
@@ -491,7 +490,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add Traders (CSV)
+          <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add New Traders
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
@@ -499,7 +498,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-              Upload a CSV file. The system uses header names for data mapping so column order doesn't matter. The 'Name' header is MANDATORY.
+             Upload a CSV file. The system uses header names for data mapping so column order doesn't matter. The 'Name' header is MANDATORY.
             </p>
             <p className="text-xs text-muted-foreground">
               Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
