@@ -33,4 +33,3 @@ export const ai = genkit({
 });
 
 export { geminiPro };
-
