@@ -402,7 +402,8 @@ export function TraderForm({ onSubmit, defaultValues, isLoading, submitButtonTex
 
         <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
           {isLoading ? "Saving..." : submitButtonText}
-        </Button>      </form>
+        </Button>
+      </form>
     </Form>
   );
 }
