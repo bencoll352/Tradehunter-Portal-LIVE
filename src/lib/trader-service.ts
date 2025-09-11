@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from './trader-service-firestore';
+import { getDb } from './trader-service-firestore';
 import { type Trader, type BaseBranchId, type ParsedTraderData, TraderSchema } from '@/types';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
@@ -11,11 +11,8 @@ import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
  * Throws a clear, specific error if Firestore is not initialized.
  */
 function ensureFirestore() {
-    if (!db) {
-      console.error("[Trader Service] FATAL: Firestore database instance is not available. This is a server configuration issue.");
-      throw new Error("Firestore not initialized. Cannot perform database operations. Please check the server logs for details on the Firebase Admin SDK initialization failure.");
-    }
-    return db;
+    // getDb() will throw an error if it can't initialize, so this is our check.
+    return getDb();
 }
 
 

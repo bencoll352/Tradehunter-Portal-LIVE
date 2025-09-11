@@ -28,7 +28,7 @@ export default function TradeHunterDashboardPage() {
       } else {
         setTraders([]);
         let description = "Could not load trader data. The server might be busy, or there could be a configuration issue. Please try again in a few moments.";
-        if (result.error?.includes("permission-denied") || result.error?.includes("permission_denied") || result.error?.includes("not initialized")) {
+        if (result.error?.includes("permission-denied") || result.error?.includes("permission_denied") || result.error?.includes("not initialized") || result.error?.includes("Server configuration error")) {
           description = "A server permission error has occurred and has been logged to the server. Try again, and if the error persists, contact an administrator.";
         }
         toast({ 
