@@ -12,16 +12,18 @@ function initializeDb() {
   try {
     const apps = getApps();
     let app: App;
+    // This is the core fix: check if an app is already initialized.
+    // If it is (by Genkit or another service), reuse it. Otherwise, create a new one.
     if (apps.length === 0) {
-      console.log('[trader-service-firestore] Initializing a new Firebase Admin app as none exist.');
+      console.log('[trader-service-firestore] No existing Firebase Admin app found. Initializing a new one.');
       app = initializeApp();
     } else {
-      console.log('[trader-service-firestore] Using the existing default Firebase Admin app.');
-      app = getApp(); // Get the default app already initialized (likely by Genkit)
+      console.log('[trader-service-firestore] Found existing Firebase Admin app. Reusing it.');
+      app = getApp(); // Get the default app already initialized
     }
     
-    console.log('[trader-service-firestore] Firestore service obtained successfully.');
     db = getFirestore(app);
+    console.log('[trader-service-firestore] Firestore service obtained successfully.');
     return db;
 
   } catch (error) {
@@ -41,5 +43,3 @@ export function getDb(): Firestore {
     }
     return firestore;
 }
-
-    
