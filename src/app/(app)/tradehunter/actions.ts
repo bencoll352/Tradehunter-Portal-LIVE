@@ -49,7 +49,7 @@ export async function addTraderAction(branchId: BaseBranchId, values: TraderForm
         if (errorMessage.startsWith('TRADER_DEUPLICATE_PHONE')) {
              return { data: null, error: `Could not add trader. Reason: A trader with this phone number already exists.` };
         }
-        return { data: null, error: errorMessage };
+        return { data: null, error: `Could not add trader. Reason: ${errorMessage}` };
     }
 }
 
@@ -68,7 +68,7 @@ export async function updateTraderAction(branchId: BaseBranchId, traderId: strin
     } catch (error) {
         console.error(`[Action] Failed to update trader ${traderId} in ${branchId}:`, error);
         const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred.";
-        return { data: null, error: errorMessage };
+        return { data: null, error: `Could not update trader. Reason: ${errorMessage}` };
     }
 }
 
@@ -86,7 +86,7 @@ export async function deleteTraderAction(branchId: BaseBranchId, traderId: strin
     } catch (error) {
         console.error(`[Action] Failed to delete trader ${traderId} from ${branchId}:`, error);
         const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred.";
-        return { success: false, error: errorMessage };
+        return { success: false, error: `Could not delete trader. Reason: ${errorMessage}` };
     }
 }
 
