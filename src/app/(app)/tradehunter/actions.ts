@@ -63,7 +63,6 @@ export async function deleteTraderAction(branchId: BaseBranchId, traderId: strin
     }
 }
 
-
 export async function bulkAddTradersAction(branchId: BaseBranchId, traders: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> {
     try {
         const newTraders = await bulkAddTradersToDb(branchId, traders);

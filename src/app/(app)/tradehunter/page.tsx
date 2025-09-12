@@ -27,22 +27,18 @@ export default function TradeHunterDashboardPage() {
         setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       } else {
         setTraders([]);
-        let description = "Could not load trader data. The server might be busy, or there could be a configuration issue. Please try again in a few moments.";
-        if (result.error?.includes("permission-denied") || result.error?.includes("permission_denied") || result.error?.includes("not initialized") || result.error?.includes("Server configuration error")) {
-          description = "A server permission error has occurred and has been logged to the server. Try again, and if the error persists, contact an administrator.";
-        }
         toast({ 
           variant: "destructive", 
           title: "Error Loading Data", 
-          description: description,
+          description: result.error || "Could not load trader data.",
           duration: 10000,
         });
       }
     } catch (error) {
-      console.error("Error fetching traders (client catch):", error);
+      console.error("Error fetching traders:", error);
       setTraders([]);
       const errorMessage = error instanceof Error ? error.message : "An unknown client error occurred.";
-      toast({ variant: "destructive", title: "Error Loading Data", description: `Error: Could not get traders for branch ${branchId}. ${errorMessage}` });
+      toast({ variant: "destructive", title: "Client Error", description: `Could not get traders for branch ${branchId}. ${errorMessage}` });
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +65,7 @@ export default function TradeHunterDashboardPage() {
 
   const handleAdd = async (values: TraderFormValues): Promise<boolean> => {
     if (!currentBaseBranchId || currentUserRole === 'unknown') {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot add trader: Invalid Branch ID or Role. Please re-login." });
+      toast({ variant: "destructive", title: "Error", description: "Cannot add trader: Invalid Branch ID or Role." });
       return false;
     }
     const result = await addTraderAction(currentBaseBranchId, values);
@@ -84,7 +80,7 @@ export default function TradeHunterDashboardPage() {
 
   const handleUpdate = async (traderId: string, values: TraderFormValues): Promise<boolean> => {
      if (!currentBaseBranchId || currentUserRole === 'unknown') {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot update trader: Invalid Branch ID or Role. Please re-login." });
+      toast({ variant: "destructive", title: "Error", description: "Cannot update trader: Invalid Branch ID or Role." });
       return false;
     }
     const result = await updateTraderAction(currentBaseBranchId, traderId, values);
@@ -99,7 +95,7 @@ export default function TradeHunterDashboardPage() {
 
   const handleDelete = async (traderId: string): Promise<boolean> => {
      if (!currentBaseBranchId || currentUserRole === 'unknown') {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot delete trader: Invalid Branch ID or Role. Please re-login." });
+      toast({ variant: "destructive", title: "Error", description: "Cannot delete trader: Invalid Branch ID or Role." });
       return false;
     }
     const result = await deleteTraderAction(currentBaseBranchId, traderId);
@@ -114,12 +110,10 @@ export default function TradeHunterDashboardPage() {
 
   const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
     if (!currentBaseBranchId || currentUserRole === 'unknown') {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk add: Invalid Branch ID or Role. Please re-login." });
       return { data: null, error: "Invalid or missing Branch ID/Role." };
     }
     const result = await bulkAddTradersAction(currentBaseBranchId, tradersToCreate); 
     if (result.data && result.data.length > 0 && currentBaseBranchId) { 
-      // Refresh all data to get accurate server-side timestamps
       await fetchTraders(currentBaseBranchId);
     } 
     return result;
@@ -127,7 +121,6 @@ export default function TradeHunterDashboardPage() {
 
   const handleBulkDelete = async (traderIds: string[]): Promise<BulkDeleteTradersResult> => {
     if (!currentBaseBranchId || currentUserRole === 'unknown') {
-      toast({ variant: "destructive", title: "Operation Aborted", description: "Cannot bulk delete: Invalid Branch ID or Role. Please re-login." });
       return { successCount: 0, failureCount: traderIds.length, error: "Invalid or missing Branch ID/Role." };
     }
     const result = await bulkDeleteTradersAction(currentBaseBranchId, traderIds);

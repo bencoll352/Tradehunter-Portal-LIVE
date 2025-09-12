@@ -69,7 +69,6 @@ export function TraderTableClient({
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    // Hide columns by default, can be toggled
     ownerProfileLink: false,
     workdayTiming: false,
     categories: false,
@@ -110,7 +109,7 @@ export function TraderTableClient({
         duration: 8000,
       });
     }
-    setRowSelection({}); // Clear selection after operation
+    setRowSelection({});
   };
   
   const columns: ColumnDef<Trader>[] = useMemo(
@@ -278,9 +277,12 @@ export function TraderTableClient({
           </Button>
         ),
         cell: ({ row }) => {
-          const date = row.getValue("lastActivity") as string;
+          const dateValue = row.getValue("lastActivity");
+          if (typeof dateValue !== 'string') {
+            return <span className="text-destructive text-xs">Invalid Date</span>;
+          }
           try {
-            return date ? format(parseISO(date), "dd/MM/yyyy") : <span className="text-muted-foreground">-</span>;
+            return format(parseISO(dateValue), "dd/MM/yyyy");
           } catch(e) {
             return <span className="text-destructive text-xs">Invalid Date</span>
           }
@@ -319,7 +321,7 @@ export function TraderTableClient({
     onRowSelectionChange: setRowSelection,
     initialState: {
         pagination: {
-            pageSize: 20, // Set the initial page size
+            pageSize: 20,
         },
     },
     state: {
