@@ -391,7 +391,6 @@ export function TraderTableClient({
           <AddTraderDialog 
             onAddTrader={onAdd} 
             branchId={branchId}
-            existingTraders={traders}
           />
         </div>
       </div>

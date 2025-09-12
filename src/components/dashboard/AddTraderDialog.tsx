@@ -14,7 +14,6 @@ import {
 import { TraderForm, traderFormSchema } from "./TraderForm";
 import type { z } from "zod";
 import { PlusCircle } from "lucide-react";
-import type { Trader } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddTraderDialogProps {
