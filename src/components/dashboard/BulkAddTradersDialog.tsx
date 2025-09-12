@@ -72,14 +72,17 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     });
 
     if (parseResults.errors.length) {
+      console.error("CSV Parsing Errors:", parseResults.errors);
       toast({
         variant: "destructive",
         title: "CSV Parsing Error",
         description: `Problem on row ${parseResults.errors[0].row}: ${parseResults.errors[0].message}`,
         duration: 10000,
       });
+      // Continue parsing despite errors, as Papaparse often recovers.
     }
-
+    
+    // Helper to find a value in a row by checking multiple possible header names (case-insensitive)
     const getRowValue = (row: any, headers: string[]) => {
       for (const header of headers) {
         const foundKey = Object.keys(row).find(key => key.toLowerCase() === header.toLowerCase());
@@ -88,10 +91,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return undefined;
     };
     
-    const tradersToProcess = parseResults.data.map((row: any) => {
+    const tradersToProcess = parseResults.data.map((row: any, index: number) => {
+      // The 'Name' header is mandatory. If it's missing, we can't process the row.
       const name = getRowValue(row, ["Name"])?.trim();
       if (!name) return null;
 
+      // Helper to parse numeric values, cleaning up currency symbols, etc.
       const parseNumeric = (headers: string[]) => {
         const val = getRowValue(row, headers);
         if (!val) return undefined;
@@ -114,6 +119,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       else if (statusRaw === 'inactive') status = 'Inactive';
       else if (statusRaw === 'call-back') status = 'Call-Back';
 
+      // Map CSV columns to ParsedTraderData object
       return {
         name,
         status,
@@ -138,17 +144,20 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
     }).filter((t): t is ParsedTraderData => t !== null);
 
+    // --- Duplicate Checking ---
     const validTraders: ParsedTraderData[] = [];
     const processedPhoneNumbersInCsv = new Set<string>();
     const duplicatePhonesInCsv = new Set<string>();
     let skippedCount = 0;
 
+    // Create a set of existing phone numbers for quick lookups
     const existingNormalizedPhones = new Set(existingTraders.map(t => normalizePhoneNumber(t.phone)));
 
     for (const trader of tradersToProcess) {
       const normalizedPhone = normalizePhoneNumber(trader.phone);
       let isDuplicate = false;
       if (normalizedPhone) {
+        // Check if phone exists in DB or has been seen already in this CSV
         if (existingNormalizedPhones.has(normalizedPhone) || processedPhoneNumbersInCsv.has(normalizedPhone)) {
           isDuplicate = true;
           if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
@@ -201,6 +210,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     if (validTraders.length > 0) {
       try {
         const result = await onBulkAddTraders(validTraders);
+        // Handle specific server authentication error
         if (result.error) {
             let toastDescription: React.ReactNode = result.error;
             if (result.error.includes("authenticate") || result.error.includes("permission")) {
@@ -218,7 +228,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             duration: 15000,
           });
           setIsLoading(false);
-          return;
+          return; // Stop execution on critical error
         }
         if (result.data) {
           newTradersAddedCount = result.data.length;
@@ -234,9 +244,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }
 
+    // --- Show Summary Toast ---
     let summaryMessages = [];
     if (newTradersAddedCount > 0) summaryMessages.push(`${newTradersAddedCount} new trader(s) added.`);
-    if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) skipped as duplicates.`);
+    if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) skipped as duplicates (phone already exists in DB or CSV).`);
     if (duplicatePhonesInCsv.size > 0) summaryMessages.push(`Duplicate phones found within the CSV: ${Array.from(duplicatePhonesInCsv).slice(0, 3).join(', ')}${duplicatePhonesInCsv.size > 3 ? '...' : ''}.`);
     
     if (summaryMessages.length > 0) {
@@ -264,7 +275,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-             Upload a CSV file. The system uses header names for data mapping, so column order doesn't matter. The 'Name' header is MANDATORY.
+             Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. The 'Name' header is MANDATORY.
             </p>
              <p className="text-xs text-muted-foreground">
               Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
@@ -278,7 +289,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
              <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs">
-                    Rows with a phone number that already exists will be skipped.
+                    Rows with a phone number that already exists in the database or earlier in the same file will be skipped to prevent duplicates.
                 </p>
             </div>
           </DialogDescription>
