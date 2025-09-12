@@ -27,6 +27,18 @@ interface BulkAddTradersDialogProps {
 
 const MAX_UPLOAD_LIMIT = 1000;
 
+const safeParseFloat = (val: any) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = parseFloat(String(val).replace(/[£,]/g, ''));
+    return isNaN(num) ? null : num;
+};
+
+const safeParseInt = (val: any) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = parseInt(String(val).replace(/,/g, ''), 10);
+    return isNaN(num) ? null : num;
+};
+
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -102,8 +114,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           status: getRowValue(row, ["Status"]),
           lastActivity: getRowValue(row, ["Last Activity"]),
           description: getRowValue(row, ["Description"]),
-          reviews: getRowValue(row, ["Reviews (tradesMade)", "Reviews"]),
-          rating: getRowValue(row, ["Rating"]),
+          reviews: safeParseInt(getRowValue(row, ["Reviews (tradesMade)", "Reviews"])),
+          rating: safeParseFloat(getRowValue(row, ["Rating"])),
           website: getRowValue(row, ["Website"]),
           phone: String(getRowValue(row, ["Phone"]) || ''),
           ownerName: getRowValue(row, ["Owner Name", "Owner"]),
@@ -113,10 +125,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           address: getRowValue(row, ["Address"]),
           ownerProfileLink: getRowValue(row, ["Link (ownerProfileLink)", "Link", "Owner Profile"]),
           notes: getRowValue(row, ["Notes", "Review Keywords"]),
-          totalAssets: getRowValue(row, ["Total Assets"]),
-          estimatedAnnualRevenue: getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]),
-          estimatedCompanyValue: getRowValue(row, ["Estimated Company Value", "Est. Company Value"]),
-          employeeCount: getRowValue(row, ["Employee Count"]),
+          totalAssets: safeParseFloat(getRowValue(row, ["Total Assets"])),
+          estimatedAnnualRevenue: safeParseFloat(getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"])),
+          estimatedCompanyValue: safeParseFloat(getRowValue(row, ["Estimated Company Value", "Est. Company Value"])),
+          employeeCount: safeParseInt(getRowValue(row, ["Employee Count"])),
         };
       })
       .filter((t): t is ParsedTraderData => t !== null);
@@ -274,5 +286,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    

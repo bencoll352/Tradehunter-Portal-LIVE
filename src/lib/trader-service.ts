@@ -337,18 +337,23 @@ export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'i
   }
 }
 
-export async function updateTask(branchId: BaseBranchId, taskId: string, taskData: Partial<Task>): Promise<Task> {
-  try {
-    if (!taskData.traderId) throw new Error('traderId is required to update a task.');
-    const tasksCollection = getTasksCollection(branchId, taskData.traderId);
-    const taskRef = tasksCollection.doc(taskId);
-await taskRef.update(taskData);
-    const updatedDoc = await taskRef.get();
-    return { id: taskId, ...updatedDoc.data() } as Task;
-  } catch (error: any) {
-    console.error('[TRADER_SERVICE_ERROR:updateTask]', error);
-    throw new Error(`Could not update task. Reason: ${error.message}`);
-  }
+export async function updateTask(branchId: BaseBranchId, traderId: string, taskId: string, taskData: Partial<Omit<Task, 'id' | 'traderId'>>): Promise<Task> {
+    try {
+        if (!traderId) throw new Error('traderId is required to update a task.');
+        const taskRef = getTasksCollection(branchId, traderId).doc(taskId);
+        await taskRef.update(taskData);
+        const updatedDoc = await taskRef.get();
+        const updatedData = updatedDoc.data();
+        if (!updatedData) throw new Error('Failed to retrieve updated task data.');
+        return { 
+            id: taskId, 
+            traderId: traderId,
+            ...updatedData 
+        } as Task;
+    } catch (error: any) {
+        console.error('[TRADER_SERVICE_ERROR:updateTask]', error);
+        throw new Error(`Could not update task. Reason: ${error.message}`);
+    }
 }
 
 export async function deleteTask(branchId: BaseBranchId, traderId: string, taskId: string): Promise<void> {
@@ -360,5 +365,3 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
-
-    
