@@ -1,7 +1,7 @@
 // src/lib/firebase.ts
-import { initializeApp, getApps, type FirebaseOptions } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { initializeApp, getApps, getApp, type FirebaseApp, type FirebaseOptions } from "firebase/app";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getAuth, type Auth } from "firebase/auth";
 
 const firebaseConfig: FirebaseOptions = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,39 +12,48 @@ const firebaseConfig: FirebaseOptions = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-let app;
-if (!getApps().length) {
-    try {
-        app = initializeApp(firebaseConfig);
-        console.log("[Firebase Setup] Firebase app initialized successfully.");
-    } catch (error) {
-        console.error("[Firebase Setup] Error initializing Firebase app:", error);
-        // Check for common configuration errors
-        if (!firebaseConfig.projectId) {
-            console.error("[Firebase Setup] Firebase initialization failed: 'projectId' is missing. Ensure NEXT_PUBLIC_FIREBASE_PROJECT_ID is set in your environment variables.");
-        }
-        if (!firebaseConfig.apiKey) {
-            console.error("[Firebase Setup] Firebase initialization failed: 'apiKey' is missing. Ensure NEXT_PUBLIC_FIREBASE_API_KEY is set in your environment variables.");
-        }
+let app: FirebaseApp | undefined;
+let db: Firestore | null = null;
+let auth: Auth | null = null;
+
+// This function provides a robust way to get the Firebase App instance.
+function getFirebaseApp(): FirebaseApp | undefined {
+    if (getApps().length > 0) {
+        return getApp();
     }
-} else {
-    app = getApps()[0];
-    console.log("[Firebase Setup] Firebase app already initialized.");
+    // Validate that the config is populated before trying to initialize
+    if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+        try {
+            const newApp = initializeApp(firebaseConfig);
+            console.log("[Firebase Setup] Firebase app initialized successfully.");
+            return newApp;
+        } catch (error) {
+            console.error("[Firebase Setup] Error initializing Firebase app:", error);
+            return undefined;
+        }
+    } else {
+        console.error("[Firebase Setup] CRITICAL: Firebase configuration is missing or incomplete. Ensure NEXT_PUBLIC_FIREBASE_API_KEY and NEXT_PUBLIC_FIREBASE_PROJECT_ID are set in your environment variables.");
+        return undefined;
+    }
 }
 
+// Initialize the app.
+app = getFirebaseApp();
 
-let db, auth;
-
-try {
-    db = getFirestore(app);
-    auth = getAuth(app);
-    console.log("[Firebase Setup] Firestore and Auth services obtained.");
-} catch(e) {
-    console.error("[Firebase Setup] Could not initialize Firestore or Auth. This is often due to a faulty Firebase config.", e);
-    // Setting to null so the app can gracefully degrade
-    db = null;
-    auth = null;
+// Only try to get other services if the app was successfully initialized.
+if (app) {
+    try {
+        db = getFirestore(app);
+        auth = getAuth(app);
+        console.log("[Firebase Setup] Firestore and Auth services obtained successfully.");
+    } catch (e) {
+        console.error("[Firebase Setup] Error obtaining Firestore or Auth service.", e);
+        // Ensure they are null if there's an error.
+        db = null;
+        auth = null;
+    }
+} else {
+    console.error("[Firebase Setup] Firebase app initialization failed. Firestore and Auth services will not be available.");
 }
 
 
