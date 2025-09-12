@@ -16,7 +16,7 @@ function ensureFirestore() {
         return getDb();
     } catch(e) {
         console.error("[Trader Service] Firestore could not be initialized.", e);
-        throw new Error("Failed to connect to the database service.");
+        throw new Error(`Failed to connect to the database service. Reason: ${e instanceof Error ? e.message : 'Unknown initialization error'}`);
     }
 }
 
@@ -89,10 +89,14 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
         // Map Firestore documents to Trader objects
         return snapshot.docs.map(doc => {
         const data = doc.data();
+        // Safely handle nullable timestamps
+        const lastActivityISO = (data.lastActivity as Timestamp)?.toDate()?.toISOString() ?? new Date(0).toISOString();
+        const callBackDateISO = (data.callBackDate instanceof Timestamp) ? (data.callBackDate as Timestamp).toDate().toISOString() : null;
+
         const dataWithISOString = {
             ...data,
-            lastActivity: (data.lastActivity as Timestamp)?.toDate().toISOString(),
-            callBackDate: (data.callBackDate instanceof Timestamp) ? (data.callBackDate as Timestamp).toDate().toISOString() : null,
+            lastActivity: lastActivityISO,
+            callBackDate: callBackDateISO,
         }
 
         const validatedData = TraderSchema.safeParse({ ...dataWithISOString, id: doc.id });

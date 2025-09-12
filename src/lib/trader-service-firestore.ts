@@ -1,11 +1,11 @@
 
-import { initializeApp, getApps, App, getApp, type ServiceAccount } from 'firebase-admin/app';
+import { initializeApp, getApps, App, getApp, type ServiceAccount, cert } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 
 // This is a singleton pattern to ensure we only initialize the DB once.
 let db: Firestore | null = null;
 
-function initializeDb() {
+function initializeDb(): Firestore {
   if (db) {
     // If the database is already initialized, return the existing instance.
     return db;
@@ -18,15 +18,24 @@ function initializeDb() {
     if (apps.length === 0) {
       // If no apps are initialized, initialize a new one.
       // This happens on the first call in a new server environment.
-      
-      // When running in a Google Cloud environment (like App Hosting),
-      // the SDK can often find the credentials automatically.
-      // If not, it might require explicit configuration.
-      const serviceAccountKey = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON 
-        ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
-        : undefined;
+      let serviceAccount: ServiceAccount | undefined = undefined;
 
-      app = initializeApp(serviceAccountKey ? { credential: { projectId: serviceAccountKey.project_id, clientEmail: serviceAccountKey.client_email, privateKey: serviceAccountKey.private_key } as ServiceAccount } : {});
+      // The GOOGLE_APPLICATION_CREDENTIALS_JSON env var is the recommended way to securely
+      // provide credentials in a server environment.
+      if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+        try {
+          const serviceAccountKey = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+          serviceAccount = serviceAccountKey;
+          console.log('[trader-service-firestore] Using service account from GOOGLE_APPLICATION_CREDENTIALS_JSON.');
+        } catch (e) {
+          console.error('[trader-service-firestore] Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON. Ensure it is a valid JSON string.', e);
+          throw new Error("Invalid server configuration: GOOGLE_APPLICATION_CREDENTIALS_JSON is not valid JSON.");
+        }
+      } else {
+         console.warn('[trader-service-firestore] WARNING: GOOGLE_APPLICATION_CREDENTIALS_JSON is not set. The Admin SDK will try to use default credentials. This may fail in some environments.');
+      }
+      
+      app = initializeApp(serviceAccount ? { credential: cert(serviceAccount) } : undefined);
       
     } else {
       // If apps already exist, get the default app.
@@ -44,7 +53,10 @@ function initializeDb() {
     // In case of any error during initialization, we set db to null and throw
     // to prevent the application from proceeding with a broken database connection.
     db = null;
-    throw new Error("Server configuration error: Could not connect to the database. This might be due to missing or incorrect service account credentials.");
+    if (error instanceof Error && error.message.includes('Could not load the default credentials')) {
+        throw new Error("Server configuration error: Could not connect to the database. The GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is likely missing or incorrect for this server environment.");
+    }
+    throw new Error(`Server configuration error: Could not connect to the database. Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
