@@ -37,7 +37,7 @@ export async function getFirebaseAdmin() {
     } catch (error: any) {
       console.error('[Firebase Admin] Error initializing Firebase Admin SDK:', error.message);
       // Provide a more descriptive error for easier debugging.
-      throw new Error(`[Firebase Admin] CRITICAL: Could not initialize. This is likely due to an invalid or missing GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable. Please verify it is a valid JSON service account key. Error: ${error.message}`);
+      throw new Error(`[Firebase Admin] CRITICAL: Could not initialize. This is likely due to an invalid or missing GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable. Please verify it is a valid JSON service account key. Original error: ${error.message}`);
     }
   } else {
     console.log('[Firebase Admin] Using existing Firebase Admin app.');
