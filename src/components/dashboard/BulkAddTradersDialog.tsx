@@ -219,18 +219,18 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-             Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. A 'Name' header is MANDATORY.
+              Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order does not matter. The only MANDATORY column is 'Name'.
             </p>
              <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs">
-                    Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
+                    Fields with commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
                 </p>
             </div>
              <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs">
-                    Rows with a phone number that already exists in the database or earlier in the same file will be skipped to prevent duplicates.
+                    Rows with a phone number that already exists in the database or earlier in the file will be skipped.
                 </p>
             </div>
           </DialogDescription>
@@ -279,3 +279,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
