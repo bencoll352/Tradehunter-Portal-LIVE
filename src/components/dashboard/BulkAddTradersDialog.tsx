@@ -161,7 +161,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const result = await onBulkAddTraders(validTraders);
         
         if (result.error) {
-            toast({
+            // This toast is now primarily for server-side errors returned from the action.
+             toast({
                 variant: "destructive",
                 title: "Bulk Upload Failed",
                 description: `${result.error}`,
