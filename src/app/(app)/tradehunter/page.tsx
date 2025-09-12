@@ -10,8 +10,27 @@ import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { getTradersAction, addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions';
+import { Users, Flame, UserPlus } from 'lucide-react';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
+
+function StatCard({ title, value, icon: Icon, description, iconBgColor }: { title: string, value: string | number, icon: React.ElementType, description: string, iconBgColor: string }) {
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-primary">{title}</CardTitle>
+                <div className={`rounded-full p-1.5 ${iconBgColor}`}>
+                  <Icon className="h-4 w-4 text-primary-foreground" />
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+                <p className="text-xs text-muted-foreground">{description}</p>
+            </CardContent>
+        </Card>
+    );
+}
+
 
 export default function TradeHunterDashboardPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -61,6 +80,14 @@ export default function TradeHunterDashboardPage() {
     };
     initializeDashboard();
   }, [fetchTraders]);
+  
+  const stats = useMemo(() => {
+    const activeTraders = traders.filter(t => t.status === 'Active').length;
+    const hotLeads = traders.filter(t => t.status === 'Call-Back').length;
+    const newLeads = traders.filter(t => t.status === 'New Lead').length;
+    return { activeTraders, hotLeads, newLeads };
+  }, [traders]);
+
 
   const currentBaseBranchId = useMemo(() => branchInfo?.baseBranchId, [branchInfo]);
   const currentUserRole = useMemo(() => branchInfo?.role, [branchInfo]);
@@ -76,14 +103,14 @@ export default function TradeHunterDashboardPage() {
       toast({ title: "Success", description: `${result.data.name} added.`});
       return true; // Indicate success
     }
-    // If there's an error, show it and indicate failure
-    const errorMessage = result.error || "Failed to add trader.";
+    
     const toastProps = {
         variant: "destructive" as const,
         title: "Error Adding Trader",
-        description: errorMessage,
+        description: result.error || "Failed to add trader.",
     };
-    if (errorMessage.includes("phone number already exists")) {
+
+    if (result.error?.includes("phone number already exists")) {
         toastProps.title = "Duplicate Trader";
         toastProps.description = "A trader with this phone number already exists.";
     }
@@ -132,13 +159,13 @@ export default function TradeHunterDashboardPage() {
     const result = await bulkAddTradersAction(currentBaseBranchId, tradersToCreate); 
     
     if (result.error) {
-       toast({
+      toast({
         variant: "destructive",
         title: "Bulk Upload Failed",
         description: result.error,
         duration: 10000,
       });
-      return result;
+      return { data: null, error: result.error };
     }
     
     if (result.data && currentBaseBranchId) { 
@@ -158,7 +185,7 @@ export default function TradeHunterDashboardPage() {
           duration: 10000,
       });
     } 
-    return result;
+    return { data: result.data, error: null };
   };
 
   const handleBulkDelete = async (traderIds: string[]): Promise<BulkDeleteTradersResult> => {
@@ -207,6 +234,30 @@ export default function TradeHunterDashboardPage() {
   
   return (
     <div className="space-y-6"> 
+        <div className="grid gap-4 md:grid-cols-3">
+            <StatCard 
+                title="Active Traders" 
+                value={stats.activeTraders} 
+                icon={Users}
+                description="Total traders with 'Active' status"
+                iconBgColor="bg-primary"
+            />
+            <StatCard 
+                title="Hot Leads" 
+                value={stats.hotLeads} 
+                icon={Flame}
+                description="Traders marked for immediate 'Call-Back'"
+                iconBgColor="bg-orange-500"
+            />
+            <StatCard 
+                title="New Leads" 
+                value={stats.newLeads} 
+                icon={UserPlus}
+                description="Recently identified traders to be qualified"
+                iconBgColor="bg-blue-500"
+            />
+        </div>
+
       <Card className="shadow-md">
         <CardHeader>
           <CardTitle className="text-xl">Trader Database</CardTitle>

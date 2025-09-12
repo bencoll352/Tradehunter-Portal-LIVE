@@ -41,6 +41,9 @@ import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
 import type { traderFormSchema } from "./TraderForm";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -69,17 +72,15 @@ export function TraderTableClient({
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    // Hide less important columns by default
     ownerProfileLink: false,
     workdayTiming: false,
-    categories: false,
     address: false,
     description: false,
     notes: false,
-    totalAssets: false,
-    estimatedCompanyValue: false,
-    estimatedAnnualRevenue: false,
-    employeeCount: false,
+    categories: false,
     reviews: false,
+    callBackDate: false,
   });
   const [rowSelection, setRowSelection] = useState({});
   const { toast } = useToast();
@@ -111,6 +112,11 @@ export function TraderTableClient({
     }
     setRowSelection({});
   };
+
+  const mainCategories = useMemo(() => {
+    const categories = new Set(traders.map(t => t.mainCategory).filter(Boolean));
+    return Array.from(categories) as string[];
+  }, [traders]);
   
   const columns: ColumnDef<Trader>[] = useMemo(
     () => [
@@ -151,136 +157,67 @@ export function TraderTableClient({
         cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
       },
       {
-        accessorKey: "description",
-        header: "Description",
-      },
-      {
-        accessorKey: "reviews",
-        header: "Reviews",
-      },
-      {
-        accessorKey: "rating",
-        header: "Rating",
-      },
-      {
-        accessorKey: "website",
-        header: "Website",
-      },
-      {
-        accessorKey: "phone",
-        header: "Phone",
-      },
-      {
-        accessorKey: "ownerName",
-        header: "Owner Name",
-      },
-      {
-        accessorKey: "ownerProfileLink",
-        header: "Owner Profile",
-      },
-      {
-        accessorKey: "mainCategory",
-        header: "Main Category",
-      },
-      {
-        accessorKey: "categories",
-        header: "Categories",
-      },
-      {
-        accessorKey: "workdayTiming",
-        header: "Workday Timing",
-      },
-      {
-        accessorKey: "address",
-        header: "Address",
-      },
-      {
-        accessorKey: "totalAssets",
-        header: "Total Assets",
+        accessorKey: "estimatedAnnualRevenue",
+        header: ({ column }) => (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Est. Annual Revenue
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
         cell: ({ row }) => {
-          const amount = parseFloat(row.getValue("totalAssets"));
-          if (isNaN(amount)) return "-";
-          const formatted = new Intl.NumberFormat("en-GB", {
-            style: "currency",
-            currency: "GBP",
-          }).format(amount);
+          const amount = parseFloat(row.getValue("estimatedAnnualRevenue"));
+          if (isNaN(amount)) return <span className="text-muted-foreground">-</span>;
+          const formatted = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
           return <div className="text-right font-medium">{formatted}</div>;
         },
       },
       {
         accessorKey: "estimatedCompanyValue",
-        header: "Estimated Company Value",
+        header: ({ column }) => (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Est. Company Value
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
         cell: ({ row }) => {
           const amount = parseFloat(row.getValue("estimatedCompanyValue"));
-          if (isNaN(amount)) return "-";
-          const formatted = new Intl.NumberFormat("en-GB", {
-            style: "currency",
-            currency: "GBP",
-          }).format(amount);
-          return <div className="text-right font-medium">{formatted}</div>;
-        },
-      },
-      {
-        accessorKey: "estimatedAnnualRevenue",
-        header: "Estimated Annual Revenue",
-        cell: ({ row }) => {
-          const amount = parseFloat(row.getValue("estimatedAnnualRevenue"));
-          if (isNaN(amount)) return "-";
-          const formatted = new Intl.NumberFormat("en-GB", {
-            style: "currency",
-            currency: "GBP",
-          }).format(amount);
+          if (isNaN(amount)) return <span className="text-muted-foreground">-</span>;
+          const formatted = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
           return <div className="text-right font-medium">{formatted}</div>;
         },
       },
       {
         accessorKey: "employeeCount",
-        header: "Employee Count",
+        header: ({ column }) => (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+            Employees
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => <div className="text-center">{row.getValue("employeeCount") ?? <span className="text-muted-foreground">-</span>}</div>,
       },
       {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => {
           const status = row.getValue("status") as string;
-          let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary";
-          if (status === "Active") badgeVariant = "default";
-          if (status === 'New Lead') badgeVariant = 'outline';
-          if (status === "Call-Back") return <Badge variant="destructive"><Flame className="mr-1 h-3 w-3" />Hot Lead</Badge>
-          return <Badge variant={badgeVariant}>{status}</Badge>;
+          if (status === "Call-Back") return <Badge className="bg-orange-500 hover:bg-orange-500/80 text-white"><Flame className="mr-1 h-3 w-3" />Hot Lead</Badge>
+          if (status === 'New Lead') return <Badge className="bg-blue-500 hover:bg-blue-500/80 text-white">New Lead</Badge>
+          if (status === "Active") return <Badge variant="default">Active</Badge>;
+          return <Badge variant="secondary">{status}</Badge>;
         },
       },
        {
-        accessorKey: "callBackDate",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Call-Back Date
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => {
-          const date = row.getValue("callBackDate") as string;
-          return date ? format(parseISO(date), "dd/MM/yyyy") : <span className="text-muted-foreground">-</span>;
-        },
-      },
-      {
         accessorKey: "lastActivity",
         header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
             Last Activity
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
         cell: ({ row }) => {
           const dateValue = row.getValue("lastActivity");
-          if (typeof dateValue !== 'string') {
-            return <span className="text-destructive text-xs">Invalid Date</span>;
-          }
+          if (typeof dateValue !== 'string') return <span className="text-destructive text-xs">Invalid Date</span>;
           try {
             return format(parseISO(dateValue), "dd/MM/yyyy");
           } catch(e) {
@@ -288,10 +225,22 @@ export function TraderTableClient({
           }
         },
       },
+      { accessorKey: "description", header: "Description" },
+      { accessorKey: "notes", header: "Notes" },
+      { accessorKey: "rating", header: "Rating" },
       {
-        accessorKey: "notes",
-        header: "Notes",
+        accessorKey: "website",
+        header: "Website",
+        cell: ({ row }) => {
+            const website = row.getValue("website") as string | undefined;
+            if (!website) return <span className="text-muted-foreground">-</span>;
+            return <a href={website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a>
+        }
       },
+      { accessorKey: "phone", header: "Phone" },
+      { accessorKey: "ownerName", header: "Owner Name" },
+      { accessorKey: "mainCategory", header: "Main Category" },
+      { accessorKey: "categories", header: "Categories" },
       {
         id: "actions",
         cell: ({ row }) => {
@@ -334,15 +283,37 @@ export function TraderTableClient({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between py-4">
-        <Input
-          placeholder="Filter traders by name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+      <div className="flex items-center justify-between py-4 gap-2">
+        <div className="flex items-center gap-2">
+            <Input
+            placeholder="Filter by name..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+                table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+            className="max-w-xs"
+            />
+            <Select
+              value={(table.getColumn('mainCategory')?.getFilterValue() as string) ?? 'all'}
+              onValueChange={(value) => {
+                if (value === 'all') {
+                  table.getColumn('mainCategory')?.setFilterValue(undefined);
+                } else {
+                  table.getColumn('mainCategory')?.setFilterValue(value);
+                }
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {mainCategories.map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+        </div>
         <div className="flex items-center gap-2">
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
