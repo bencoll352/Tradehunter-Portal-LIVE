@@ -215,28 +215,34 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
-          <DialogDescription className="space-y-2 pt-2">
+          <DialogTitle>To Bulk Add New Traders (CSV)</DialogTitle>
+          <DialogDescription className="space-y-4 pt-2 text-foreground/90">
             <p>
-              Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order does not matter. The only MANDATORY column is 'Name'.
+              For a successful upload, ensure the spreadsheet adheres to the specified format as outlined below. The only required column is 'Name'. The uploader will automatically skip any traders whose phone number is already present in the database.
             </p>
-             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
+             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                <p className="text-xs">
-                    Fields with commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
+                <p className="text-xs font-medium">
+                    Rows with a 'Name' field are mandatory. Any rows without a name will be skipped.
                 </p>
             </div>
-             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
+             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                <p className="text-xs">
-                    Rows with a phone number that already exists in the database or earlier in the file will be skipped.
+                <p className="text-xs font-medium">
+                    For 'Owner Name', 'Main Category' and 'Workday Timing' ensure headers are exact as specified.
+                </p>
+            </div>
+            <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <p className="text-xs font-medium">
+                    Fields with commas (e.g., “123 Main St, Anytown”) MUST be enclosed in double quotes.
                 </p>
             </div>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="csv-trader-upload">Upload CSV File</Label>
+            <Label htmlFor="csv-trader-upload" className="font-semibold">Upload CSV File</Label>
             <div className="relative">
               <Input
                 id="csv-trader-upload"
@@ -268,6 +274,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" disabled={isLoading}>Cancel</Button>
+
           </DialogClose>
           <Button onClick={handleSubmit} disabled={isLoading || !selectedFile}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
