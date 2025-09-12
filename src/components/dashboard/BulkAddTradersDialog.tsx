@@ -19,7 +19,6 @@ import type { BaseBranchId, ParsedTraderData, Trader } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Papa from "papaparse";
-import { normalizePhoneNumber } from "@/lib/utils";
 
 interface BulkAddTradersDialogProps {
   branchId: BaseBranchId;
@@ -29,7 +28,7 @@ interface BulkAddTradersDialogProps {
 
 const MAX_UPLOAD_LIMIT = 1000;
 
-export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTraders }: BulkAddTradersDialogProps) {
+export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -47,7 +46,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         reader.readAsText(file);
       } else {
         toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a CSV file (.csv)." });
-        if (fileInputRef.current) fileInputRef.current.value = "";
+        if (fileInputref.current) fileInputref.current.value = "";
         setSelectedFile(null);
         setFileContent(null);
       }
@@ -71,72 +70,55 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         transformHeader: header => header.trim(),
         quoteChar: '"',
         escapeChar: '"',
-        dynamicTyping: true,
     });
 
     if (parseResults.errors.length) {
-      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter');
+      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields');
       if (criticalError) {
         toast({
             variant: "destructive",
             title: "CSV Parsing Error",
-            description: `Problem on row ${criticalError.row + 1}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`,
+            description: `Problem on row ${criticalError.row + 2}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`,
             duration: 10000,
         });
-        throw new Error(`Parsing error on row ${criticalError.row + 1}`);
+        throw new Error(`Parsing error on row ${criticalError.row + 2}`);
       }
     }
     
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
-      const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
-      for (const key in row) {
-        if (lowerCaseHeaders.includes(key.toLowerCase())) {
-          const value = row[key];
-          if (value !== null && value !== undefined && String(value).trim() !== '') {
-            return value;
-          }
+        const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
+        for (const key in row) {
+            if (lowerCaseHeaders.includes(key.toLowerCase())) {
+            const value = row[key];
+            if (value !== null && value !== undefined && String(value).trim() !== '') {
+                return value;
+            }
+            }
         }
-      }
-      return undefined;
+        return undefined;
     };
     
     const tradersToProcess = (parseResults.data as any[])
-      .map((row: any, index: number): ParsedTraderData | null => {
+      .map((row: any): ParsedTraderData | null => {
         const name = getRowValue(row, ["Name"])?.trim();
-        if (!name) return null;
-        
-        // Detailed logging for problematic fields
-        const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
-        if(!ownerName) {
-            console.warn(`[CSV Debug] Row ${index + 2}: "Owner Name" not found. Detected headers:`, Object.keys(row));
-        }
-
-        const mainCategory = getRowValue(row, ["Main Category", "Category"]);
-        if(!mainCategory) {
-            console.warn(`[CSV Debug] Row ${index + 2}: "Main Category" not found. Detected headers:`, Object.keys(row));
-        }
-        
-        const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
-        if(!workdayTiming) {
-            console.warn(`[CSV Debug] Row ${index + 2}: "Workday Timing" not found. Detected headers:`, Object.keys(row));
-        }
+        if (!name) return null; // Skip rows without a name
 
         return {
           name,
           status: getRowValue(row, ["Status"]),
           lastActivity: getRowValue(row, ["Last Activity"]),
           description: getRowValue(row, ["Description"]),
-          reviews: getRowValue(row, ["Reviews"]),
+          reviews: getRowValue(row, ["Reviews (tradesMade)", "Reviews"]),
           rating: getRowValue(row, ["Rating"]),
           website: getRowValue(row, ["Website"]),
           phone: String(getRowValue(row, ["Phone"]) || ''),
-          ownerName: ownerName,
-          mainCategory: mainCategory,
+          ownerName: getRowValue(row, ["Owner Name", "Owner"]),
+          mainCategory: getRowValue(row, ["Main Category", "Category"]),
           categories: getRowValue(row, ["Categories"]),
-          workdayTiming: workdayTiming,
+          workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]),
           address: getRowValue(row, ["Address"]),
-          ownerProfileLink: getRowValue(row, ["Link", "Owner Profile"]),
-          notes: getRowValue(row, ["Notes"]),
+          ownerProfileLink: getRowValue(row, ["Link (ownerProfileLink)", "Link", "Owner Profile"]),
+          notes: getRowValue(row, ["Notes", "Review Keywords"]),
           totalAssets: getRowValue(row, ["Total Assets"]),
           estimatedAnnualRevenue: getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]),
           estimatedCompanyValue: getRowValue(row, ["Estimated Company Value", "Est. Company Value"]),
@@ -145,32 +127,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       })
       .filter((t): t is ParsedTraderData => t !== null);
 
-    const validTraders: ParsedTraderData[] = [];
-    const processedPhoneNumbersInCsv = new Set<string>();
-    const duplicatePhonesInCsv = new Set<string>();
-    let skippedCount = 0;
-
-    const existingNormalizedPhones = new Set(existingTraders.map(t => normalizePhoneNumber(t.phone)));
-
-    for (const trader of tradersToProcess) {
-      const normalizedPhone = normalizePhoneNumber(trader.phone);
-      let isDuplicate = false;
-      if (normalizedPhone) {
-        if (existingNormalizedPhones.has(normalizedPhone) || processedPhoneNumbersInCsv.has(normalizedPhone)) {
-          isDuplicate = true;
-          if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
-            duplicatePhonesInCsv.add(trader.phone || 'N/A');
-          }
-        }
-      }
-      if (isDuplicate) {
-        skippedCount++;
-      } else {
-        validTraders.push(trader);
-        if (normalizedPhone) processedPhoneNumbersInCsv.add(normalizedPhone);
-      }
-    }
-    return { validTraders, skippedCount, duplicatePhonesInCsv };
+    return { validTraders: tradersToProcess, skippedCount: 0, duplicatePhonesInCsv: new Set() };
   };
 
   const handleSubmit = async () => {
@@ -189,13 +146,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         return;
     }
     
-    const { validTraders, skippedCount, duplicatePhonesInCsv } = parseResult;
+    const { validTraders } = parseResult;
 
-    if (validTraders.length === 0 && skippedCount === 0) {
+    if (validTraders.length === 0) {
       toast({
         variant: "destructive",
         title: "Bulk Upload Failed",
-        description: "Could not parse any traders from the file. Please check the file format and ensure the 'Name' header is present.",
+        description: "Could not parse any traders from the file. Please check the file format and ensure the 'Name' header is present and that rows are not empty.",
         duration: 8000,
       });
       setIsLoading(false);
@@ -213,50 +170,41 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       return;
     }
 
-    let newTradersAddedCount = 0;
-    if (validTraders.length > 0) {
-      try {
+    try {
         const result = await onBulkAddTraders(validTraders);
+        
         if (result.error) {
-          toast({
+            toast({
+                variant: "destructive",
+                title: "Bulk Upload Failed",
+                description: `${result.error}. Please try again later or contact support if the issue persists.`,
+                duration: 10000,
+            });
+        } else {
+             const newCount = result.data?.length || 0;
+             const skippedCount = validTraders.length - newCount;
+             let summaryMessages = [];
+             if (newCount > 0) summaryMessages.push(`${newCount} new trader(s) added successfully.`);
+             if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates (phone number already exists).`);
+             if (summaryMessages.length === 0) summaryMessages.push("No new traders were added.");
+
+             toast({
+                title: "Bulk Upload Processed",
+                description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
+                duration: 10000,
+            });
+            setOpen(false);
+            clearFile();
+        }
+    } catch (error) {
+        toast({
             variant: "destructive",
-            title: "Bulk Upload Failed",
-            description: `${result.error}. Please try again later or contact support if the issue persists.`,
-            duration: 10000,
-          });
-          setIsLoading(false);
-          return;
-        }
-        if (result.data) {
-          newTradersAddedCount = result.data.length;
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Client Error",
-          description: `An unexpected client error occurred. Check console for details.`,
+            title: "Client Error",
+            description: `An unexpected client error occurred during bulk upload. Check console for details.`,
         });
+    } finally {
         setIsLoading(false);
-        return;
-      }
     }
-
-    let summaryMessages = [];
-    if (newTradersAddedCount > 0) summaryMessages.push(`${newTradersAddedCount} new trader(s) added.`);
-    if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) skipped as duplicates.`);
-    if (duplicatePhonesInCsv.size > 0) summaryMessages.push(`Duplicate phones found within the CSV: ${Array.from(duplicatePhonesInCsv).slice(0, 3).join(', ')}${duplicatePhonesInCsv.size > 3 ? '...' : ''}.`);
-    
-    if (summaryMessages.length > 0) {
-        toast({
-            title: "Bulk Upload Processed",
-            description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
-            duration: 10000,
-        });
-    }
-
-    setOpen(false);
-    clearFile();
-    setIsLoading(false);
   };
 
   return (
@@ -273,10 +221,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             <p>
              Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. A 'Name' header is MANDATORY. Any traders with a duplicate phone number will be SKIPPED.
             </p>
-             <p className="text-xs text-muted-foreground">
-              Your situation may require unique CSV column headers. The system will now attempt to match aliases for Owner Name, Main Category & Workday Timing if those columns are not detected.
-            </p>
-            <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
+             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs">
                     Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.

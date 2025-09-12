@@ -5,6 +5,7 @@ import { getDb } from './trader-service-firestore';
 import { type Trader, type BaseBranchId, type ParsedTraderData, TraderSchema } from '@/types';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
+import { normalizePhoneNumber } from './utils';
 
 /**
  * Ensures Firestore is initialized and returns the instance.
@@ -117,12 +118,24 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
 export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader, 'id' | 'lastActivity'>): Promise<Trader> {
     const firestore = ensureFirestore();
     const branchCollectionRef = firestore.collection('traders').doc(branchId).collection('branch_traders');
+    
+    // Check for duplicate phone number before adding
+    if (traderData.phone) {
+        const normalizedPhone = normalizePhoneNumber(traderData.phone);
+        const querySnapshot = await branchCollectionRef.where('phone', '==', normalizedPhone).get();
+        if (!querySnapshot.empty) {
+            // A more specific error could be thrown here and caught in the action
+            throw new Error(`TRADER_DEUPLICATE_PHONE: A trader with this phone number already exists.`);
+        }
+    }
+
     const newDocRef = branchCollectionRef.doc(); // Auto-generate new document ID
     
     const newTraderForFirestore = {
         ...traderData,
         lastActivity: FieldValue.serverTimestamp(), // Use server timestamp for creation
-        callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null
+        callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null,
+        phone: traderData.phone ? normalizePhoneNumber(traderData.phone) : null,
     };
     
     const mockTraderForValidation: Trader = {
@@ -168,11 +181,14 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     }
     const existingData = doc.data() as Trader;
 
-    const dataForUpdate = {
+    const dataForUpdate: any = {
       ...traderData,
       lastActivity: FieldValue.serverTimestamp(),
       callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null,
     };
+    if (traderData.phone) {
+        dataForUpdate.phone = normalizePhoneNumber(traderData.phone);
+    }
 
     const mockTraderForValidation: Trader = {
         ...existingData,
@@ -212,7 +228,7 @@ export async function deleteTrader(branchId: BaseBranchId, traderId: string): Pr
 }
 
 /**
- * Adds multiple traders to a branch in a single batch operation.
+ * Adds multiple traders to a branch in a single batch operation, skipping duplicates.
  * @param branchId The ID of the branch.
  * @param traders An array of parsed trader data from a CSV or other source.
  * @returns A promise that resolves with an array of the newly created Trader objects.
@@ -221,10 +237,24 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
     try {
         const firestore = ensureFirestore();
         const branchCollectionRef = firestore.collection('traders').doc(branchId).collection('branch_traders');
+        
+        // 1. Get all existing phone numbers for the branch to check for duplicates.
+        const existingTradersSnapshot = await branchCollectionRef.select('phone').get();
+        const existingPhones = new Set(existingTradersSnapshot.docs.map(doc => doc.data().phone).filter(Boolean));
+        
         const batch = firestore.batch();
         const newTraders: Trader[] = [];
+        const phonesInThisBatch = new Set<string>();
 
         for (const parsedData of traders) {
+            const normalizedPhone = parsedData.phone ? normalizePhoneNumber(parsedData.phone) : null;
+            
+            // 2. Skip if phone number is a duplicate (either in DB or in this batch)
+            if (normalizedPhone && (existingPhones.has(normalizedPhone) || phonesInThisBatch.has(normalizedPhone))) {
+                console.log(`[Trader Service] Skipping duplicate phone number in bulk add: ${normalizedPhone}`);
+                continue; 
+            }
+
             const newDocRef = branchCollectionRef.doc();
             const traderForFirestore = {
                 name: parsedData.name,
@@ -234,7 +264,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
                 reviews: parsedData.reviews || null,
                 rating: parsedData.rating || null,
                 website: parsedData.website || null,
-                phone: parsedData.phone || null,
+                phone: normalizedPhone,
                 ownerName: parsedData.ownerName || null,
                 mainCategory: parsedData.mainCategory || null,
                 categories: parsedData.categories || null,
@@ -250,16 +280,19 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
             };
             
             const mockTraderForValidation: Trader = {
-            ...traderForFirestore,
-            id: newDocRef.id,
-            lastActivity: new Date().toISOString(),
-            callBackDate: traderForFirestore.callBackDate ? traderForFirestore.callBackDate.toDate().toISOString() : null,
+                ...traderForFirestore,
+                id: newDocRef.id,
+                lastActivity: new Date().toISOString(),
+                callBackDate: traderForFirestore.callBackDate ? traderForFirestore.callBackDate.toDate().toISOString() : null,
             }
 
             const validation = TraderSchema.safeParse(mockTraderForValidation);
             if (validation.success) {
                 batch.set(newDocRef, traderForFirestore);
                 newTraders.push(validation.data);
+                if (normalizedPhone) {
+                    phonesInThisBatch.add(normalizedPhone);
+                }
             } else {
                 console.warn(`[Trader Service] Skipping invalid trader object in bulk add for branch ${branchId}:`, validation.error.flatten().fieldErrors);
             }
@@ -272,6 +305,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
         throw new Error(`A database error occurred during the bulk upload process. Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
+
 
 /**
  * Deletes multiple traders from a branch in batches.
