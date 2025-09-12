@@ -106,8 +106,8 @@ export const ParsedTraderDataSchema = z.object({
   status: TraderStatusSchema.optional().default('New Lead'),
   lastActivity: z.string().optional(), // Date string from CSV
   description: z.string().optional(),
-  reviews: z.number().optional(),
-  rating: z.number().optional(),
+  reviews: z.coerce.number().optional(),
+  rating: z.coerce.number().optional(),
   website: z.string().optional(),
   phone: z.string().optional(),
   ownerName: z.string().optional(),
@@ -117,10 +117,10 @@ export const ParsedTraderDataSchema = z.object({
   address: z.string().optional(),
   ownerProfileLink: z.string().optional(),
   notes: z.string().optional(),
-  totalAssets: z.number().optional(),
-  estimatedAnnualRevenue: z.number().optional(),
-  estimatedCompanyValue: z.number().optional(),
-  employeeCount: z.number().optional(),
+  totalAssets: z.coerce.number().optional(),
+  estimatedAnnualRevenue: z.coerce.number().optional(),
+  estimatedCompanyValue: z.coerce.number().optional(),
+  employeeCount: z.coerce.number().optional(),
   callBackDate: z.string().optional(),
 });
 
