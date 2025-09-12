@@ -85,7 +85,7 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
       const dataWithISOString = {
         ...data,
         lastActivity: (data.lastActivity as Timestamp)?.toDate().toISOString(),
-        callBackDate: (data.callBackDate as Timestamp)?.toDate().toISOString() || null,
+        callBackDate: (data.callBackDate instanceof Timestamp) ? (data.callBackDate as Timestamp).toDate().toISOString() : null,
       }
 
       // Validate data against the schema
@@ -142,7 +142,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader,
       ...newDocData,
       id: newDoc.id,
       lastActivity: (newDocData!.lastActivity as Timestamp).toDate().toISOString(),
-      callBackDate: (newDocData!.callBackDate as Timestamp)?.toDate().toISOString() || null,
+      callBackDate: (newDocData!.callBackDate instanceof Timestamp) ? (newDocData!.callBackDate as Timestamp).toDate().toISOString() : null,
     });
 
     return finalTrader;
@@ -194,7 +194,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
       ...updatedDocData,
       id: updatedDoc.id,
       lastActivity: (updatedDocData!.lastActivity as Timestamp).toDate().toISOString(),
-      callBackDate: (updatedDocData!.callBackDate as Timestamp)?.toDate().toISOString() || null,
+      callBackDate: (updatedDocData!.callBackDate instanceof Timestamp) ? (updatedDocData!.callBackDate as Timestamp).toDate().toISOString() : null,
     });
 
     return finalTrader;
@@ -303,3 +303,5 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
     await Promise.all(batchPromises);
     return { successCount, failureCount };
 }
+
+    
