@@ -95,6 +95,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const tradersToProcess = (parseResults.data as any[])
       .map((row: any): ParsedTraderData | null => {
         const rawName = getRowValue(row, ["Name"]);
+        // Safely check and trim the name. Skip if the name is null, undefined, or an empty string after trimming.
         const name = rawName ? String(rawName).trim() : null;
         if (!name) return null; // Skip rows without a name
 
@@ -275,7 +276,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-    
-    
-
-    
