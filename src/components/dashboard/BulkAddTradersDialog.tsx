@@ -177,7 +177,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
             toast({
                 variant: "destructive",
                 title: "Bulk Upload Failed",
-                description: `${result.error}. Please try again later or contact support if the issue persists.`,
+                description: `${result.error}`,
                 duration: 10000,
             });
         } else {
@@ -221,13 +221,13 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
             <p>
              Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. A 'Name' header is MANDATORY.
             </p>
-             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
+             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs">
                     Fields containing commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes.
                 </p>
             </div>
-             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
+             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs">
                     Rows with a phone number that already exists in the database or earlier in the same file will be skipped to prevent duplicates.
@@ -238,27 +238,31 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="csv-trader-upload">Upload CSV File</Label>
-            <div className="flex items-center gap-2">
+            <div className="relative">
               <Input
                 id="csv-trader-upload"
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept=".csv,text/csv"
-                className="flex-grow"
+                className="w-full h-12 pl-3 pr-10 text-sm border-dashed"
                 disabled={isLoading}
               />
-              {selectedFile && (
-                <Button variant="ghost" size="icon" onClick={clearFile} aria-label="Clear file" disabled={isLoading}>
-                  <XCircle className="h-5 w-5 text-muted-foreground hover:text-destructive" />
-                </Button>
-              )}
+               {!selectedFile && <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground text-sm">Choose file or drag it here</span>}
             </div>
-            {selectedFile && (
-              <p className="text-xs text-muted-foreground mt-1">
-                <FileText className="inline h-3 w-3 mr-1" />
-                {selectedFile.name} ({ (selectedFile.size / 1024).toFixed(2) } KB)
-              </p>
+
+            {selectedFile ? (
+              <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                <p className="flex items-center gap-1">
+                    <FileText className="inline h-3 w-3" />
+                    {selectedFile.name} ({ (selectedFile.size / 1024).toFixed(2) } KB)
+                </p>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={clearFile} aria-label="Clear file" disabled={isLoading}>
+                  <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                </Button>
+              </div>
+            ) : (
+                 <p className="text-xs text-muted-foreground mt-1">Supported file format: .csv</p>
             )}
           </div>
         </div>

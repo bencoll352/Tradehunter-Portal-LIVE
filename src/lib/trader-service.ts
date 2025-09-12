@@ -307,7 +307,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
         return newTraders;
     } catch (error) {
         console.error('[Trader Service] Error during bulkAddTraders:', error);
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        const errorMessage = error instanceof Error ? error.message : "A database error occurred during the bulk save operation.";
         throw new Error(`TRADER_SERVICE_ERROR: Could not save traders. Reason: ${errorMessage}`);
     }
 }

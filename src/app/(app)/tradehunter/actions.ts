@@ -98,15 +98,15 @@ export async function deleteTraderAction(branchId: BaseBranchId, traderId: strin
  */
 export async function bulkAddTradersAction(branchId: BaseBranchId, traders: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> {
     try {
-        const newTraders = await bulkAddTradersToDb(branchId, traders);
-        if (newTraders.length > 0) {
+        const result = await bulkAddTradersToDb(branchId, traders);
+        if (result.length > 0) {
             revalidatePath('/tradehunter');
         }
-        return { data: newTraders, error: null };
+        return { data: result, error: null };
     } catch (error) {
         console.error(`[Action] Failed to bulk add traders to ${branchId}:`, error);
         const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred during bulk add.";
-        return { data: null, error: `${errorMessage}` };
+        return { data: null, error: `TRADER_SERVICE_ERROR: Could not save traders. Reason: ${errorMessage}` };
     }
 }
 
