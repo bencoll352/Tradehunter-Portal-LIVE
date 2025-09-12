@@ -1,6 +1,6 @@
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { getFirebaseAdmin } from './trader-service-firestore';
+import { firestore } from './firebase-admin'; // Correctly import from server-only file
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 import type { z } from 'zod';
@@ -11,12 +11,10 @@ type TraderFormValues = z.infer<typeof traderFormSchema>;
 
 // --- Firestore Collection Reference ---
 const getTradersCollection = (branchId: BaseBranchId) => {
-  const { firestore } = getFirebaseAdmin();
   return firestore.collection('traders').doc(branchId).collection('branchTraders');
 };
 
 const getTasksCollection = (branchId: BaseBranchId, traderId: string) => {
-    const { firestore } = getFirebaseAdmin();
     return firestore.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
 }
 
@@ -248,7 +246,6 @@ export async function deleteTrader(branchId: BaseBranchId, traderId: string): Pr
 }
 
 export async function bulkAddTraders(branchId: BaseBranchId, tradersData: ParsedTraderData[]): Promise<Trader[]> {
-  const { firestore } = getFirebaseAdmin();
   const tradersCollection = firestore.collection('traders').doc(branchId).collection('branchTraders');
   const batch = firestore.batch();
   const addedTraders: Trader[] = [];
@@ -309,7 +306,6 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
 
 export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: string[]): Promise<{ successCount: number; failureCount: number }> {
   try {
-    const { firestore } = getFirebaseAdmin();
     const tradersCollection = firestore.collection('traders').doc(branchId).collection('branchTraders');
     const batch = firestore.batch();
 
@@ -342,7 +338,7 @@ export async function updateTask(branchId: BaseBranchId, taskId: string, taskDat
     if (!taskData.traderId) throw new Error('traderId is required to update a task.');
     const tasksCollection = getTasksCollection(branchId, taskData.traderId);
     const taskRef = tasksCollection.doc(taskId);
-    await taskRef.update(taskData);
+await taskRef.update(taskData);
     const updatedDoc = await taskRef.get();
     return { id: taskId, ...updatedDoc.data() } as Task;
   } catch (error: any) {
@@ -353,7 +349,6 @@ export async function updateTask(branchId: BaseBranchId, taskId: string, taskDat
 
 export async function deleteTask(branchId: BaseBranchId, taskId: string): Promise<void> {
   try {
-    const { firestore } = getFirebaseAdmin();
     // This assumes tasks are in a subcollection under a trader, which is complex to query directly.
     // A better approach for deletion might require knowing the traderId.
     // For now, this is a placeholder for a more robust implementation if needed.
