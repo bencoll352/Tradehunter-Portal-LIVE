@@ -1,5 +1,5 @@
 
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getFirebaseAdmin } from './trader-service-firestore';
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
@@ -88,11 +88,27 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
     }
     const traders = snapshot.docs.map(doc => {
       const data = doc.data();
+
+      // Safely convert Firestore Timestamps to ISO strings
+      const toISOString = (timestamp: any): string | null => {
+          if (timestamp instanceof Timestamp) {
+              return timestamp.toDate().toISOString();
+          }
+          if (timestamp && typeof timestamp.toDate === 'function') {
+               return timestamp.toDate().toISOString();
+          }
+          if (typeof timestamp === 'string') {
+            const date = new Date(timestamp);
+            if(!isNaN(date.getTime())) return date.toISOString();
+          }
+          return null;
+      }
+      
       return {
         id: doc.id,
         name: data.name || 'N/A',
         status: data.status || 'Inactive',
-        lastActivity: data.lastActivity ? (data.lastActivity.toDate ? data.lastActivity.toDate().toISOString() : new Date(data.lastActivity).toISOString()) : new Date(0).toISOString(),
+        lastActivity: toISOString(data.lastActivity) || new Date(0).toISOString(),
         description: data.description ?? null,
         reviews: data.reviews ?? null,
         rating: data.rating ?? null,
@@ -105,7 +121,7 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
         address: data.address ?? null,
         ownerProfileLink: data.ownerProfileLink ?? null,
         notes: data.notes ?? null,
-        callBackDate: data.callBackDate ? (data.callBackDate.toDate ? data.callBackDate.toDate().toISOString() : new Date(data.callBackDate).toISOString()) : null,
+        callBackDate: toISOString(data.callBackDate),
         totalAssets: data.totalAssets ?? null,
         estimatedAnnualRevenue: data.estimatedAnnualRevenue ?? null,
         estimatedCompanyValue: data.estimatedCompanyValue ?? null,
@@ -135,12 +151,13 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
     const data = newTraderDoc.data();
 
     if (!data) throw new Error("Could not retrieve new trader after creation.");
+     const lastActivity = data.lastActivity as Timestamp;
 
     return {
       id: docRef.id,
       name: data.name,
       status: data.status,
-      lastActivity: data.lastActivity.toDate().toISOString(),
+      lastActivity: lastActivity.toDate().toISOString(),
       ...data
     } as Trader;
   } catch (error: any) {
@@ -167,12 +184,13 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     const data = updatedDoc.data();
 
     if (!data) throw new Error("Could not retrieve updated trader.");
+     const lastActivity = data.lastActivity as Timestamp;
 
     return {
       id: traderId,
       name: data.name,
       status: data.status,
-      lastActivity: data.lastActivity.toDate().toISOString(),
+      lastActivity: lastActivity.toDate().toISOString(),
       ...data
     } as Trader;
   } catch (error: any) {

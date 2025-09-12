@@ -49,8 +49,8 @@ export default function TradeHunterDashboardPage() {
         setTraders([]);
         toast({ 
           variant: "destructive", 
-          title: "Error Loading Data", 
-          description: result.error || "Could not load trader data.",
+          title: "Error Fetching Data", 
+          description: result.error || "Could not load trader data for an unknown reason.",
           duration: 10000,
         });
       }
@@ -58,7 +58,7 @@ export default function TradeHunterDashboardPage() {
       console.error("Error fetching traders:", error);
       setTraders([]);
       const errorMessage = error instanceof Error ? error.message : "An unknown client error occurred.";
-      toast({ variant: "destructive", title: "Client Error", description: `Could not get traders for branch ${branchId}. ${errorMessage}` });
+      toast({ variant: "destructive", title: "Client Error", description: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -79,8 +79,7 @@ export default function TradeHunterDashboardPage() {
       }
     };
     initializeDashboard();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchTraders]);
   
   const stats = useMemo(() => {
     const activeTraders = traders.filter(t => t.status === 'Active').length;
