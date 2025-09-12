@@ -384,7 +384,6 @@ export function TraderTableClient({
 
           <BulkAddTradersDialog
             branchId={branchId}
-            existingTraders={traders}
             onBulkAddTraders={onBulkAdd}
           />
 

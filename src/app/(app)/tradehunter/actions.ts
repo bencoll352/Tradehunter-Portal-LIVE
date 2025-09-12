@@ -28,7 +28,7 @@ export async function getTradersAction(branchId: BaseBranchId): Promise<{ data: 
     } catch (error) {
         console.error(`[Action] Failed to get traders for ${branchId}:`, error);
         const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred.";
-        return { data: null, error: `TRADER_SERVICE_ERROR: Could not get traders. Reason: ${errorMessage}` };
+        return { data: null, error: `Could not get traders. Reason: ${errorMessage}` };
     }
 }
 
