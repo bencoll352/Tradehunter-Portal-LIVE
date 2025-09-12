@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -93,11 +92,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
         const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
         for (const key in row) {
-            if (lowerCaseHeaders.includes(key.toLowerCase())) {
-            const value = row[key];
-            if (value !== null && value !== undefined && String(value).trim() !== '') {
-                return value;
-            }
+            // Ensure key is a string and can be lowercased before comparison
+            if (typeof key === 'string' && lowerCaseHeaders.includes(key.toLowerCase())) {
+                const value = row[key];
+                if (value !== null && value !== undefined && String(value).trim() !== '') {
+                    return value;
+                }
             }
         }
         return undefined;
