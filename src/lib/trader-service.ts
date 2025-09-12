@@ -76,6 +76,30 @@ function parseActivityDate(dateString: string | undefined): string {
     return !isNaN(fallbackDate.getTime()) ? fallbackDate.toISOString() : new Date().toISOString();
 }
 
+/**
+ * Safely converts a Firestore Timestamp or a string to an ISO string.
+ * Returns null if the input is invalid or cannot be converted.
+ */
+const safeToISOString = (value: any): string | null => {
+    if (!value) return null;
+
+    if (value instanceof Timestamp) {
+        return value.toDate().toISOString();
+    }
+    // Handle cases where it might be a plain object from Firestore SDK on the client
+    if (typeof value === 'object' && value !== null && typeof (value as any).toDate === 'function') {
+        return (value as any).toDate().toISOString();
+    }
+    // Handle if it's already a string
+    if (typeof value === 'string') {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+            return date.toISOString();
+        }
+    }
+    // Return null for any other invalid type
+    return null;
+}
 
 // --- Main Service Functions ---
 
@@ -88,27 +112,12 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
     }
     const traders = snapshot.docs.map(doc => {
       const data = doc.data();
-
-      // Safely convert Firestore Timestamps to ISO strings
-      const toISOString = (timestamp: any): string | null => {
-          if (timestamp instanceof Timestamp) {
-              return timestamp.toDate().toISOString();
-          }
-          if (timestamp && typeof timestamp.toDate === 'function') {
-               return timestamp.toDate().toISOString();
-          }
-          if (typeof timestamp === 'string') {
-            const date = new Date(timestamp);
-            if(!isNaN(date.getTime())) return date.toISOString();
-          }
-          return null;
-      }
       
       return {
         id: doc.id,
         name: data.name || 'N/A',
         status: data.status || 'Inactive',
-        lastActivity: toISOString(data.lastActivity) || new Date(0).toISOString(),
+        lastActivity: safeToISOString(data.lastActivity) || new Date(0).toISOString(),
         description: data.description ?? null,
         reviews: data.reviews ?? null,
         rating: data.rating ?? null,
@@ -121,7 +130,7 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
         address: data.address ?? null,
         ownerProfileLink: data.ownerProfileLink ?? null,
         notes: data.notes ?? null,
-        callBackDate: toISOString(data.callBackDate),
+        callBackDate: safeToISOString(data.callBackDate),
         totalAssets: data.totalAssets ?? null,
         estimatedAnnualRevenue: data.estimatedAnnualRevenue ?? null,
         estimatedCompanyValue: data.estimatedCompanyValue ?? null,

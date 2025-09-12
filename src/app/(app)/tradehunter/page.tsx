@@ -54,11 +54,11 @@ export default function TradeHunterDashboardPage() {
           duration: 10000,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching traders:", error);
       setTraders([]);
-      const errorMessage = error instanceof Error ? error.message : "An unknown client error occurred.";
-      toast({ variant: "destructive", title: "Client Error", description: errorMessage });
+      const errorMessage = error?.message || "An unknown client error occurred.";
+      toast({ variant: "destructive", title: "Client Error", description: `Could not get traders. Reason: ${errorMessage}` });
     } finally {
       setIsLoading(false);
     }
