@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode, BrainCircuit, ShieldAlert } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -260,76 +261,55 @@ const initialTrainingMaterials: TrainingMaterial[] = [
       tags: "growth, mindset, psychology",
       dateAdded: "September 8, 2025",
       content: (
-        <div className="prose prose-sm lg:prose-base max-w-none text-foreground">
-            <h2 className="text-xl font-bold text-primary">The Growth Mindset: Enhanced Visual Training Summary</h2>
-            <div className="text-sm space-y-1 mb-6">
+        <div className="prose prose-sm lg:prose-base max-w-none text-foreground p-4">
+            <h2 className="text-2xl font-bold text-primary mb-4">The Growth Mindset: A Visual Guide</h2>
+            <div className="text-sm space-y-1 mb-6 text-muted-foreground">
                 <p><strong>Authors:</strong> Dan Strutzel & Traci Shoblom</p>
-                <p><strong>Focus:</strong> Personal development and mindset transformation</p>
-                <p><strong>Intended Audience:</strong> Professionals, students, and individuals seeking personal growth</p>
+                <p><strong>Focus:</strong> Shifting from a fixed to a growth-oriented perspective to unlock potential.</p>
             </div>
 
-            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg">
-                <h3 className="text-lg font-semibold mt-0">Executive Overview</h3>
+            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg mb-8">
+                <h3 className="text-lg font-semibold mt-0">Executive Summary</h3>
                 <p className="mt-2">
-                    "The Growth Mindset" is a comprehensive guide that combines psychological principles with practical
-                    strategies to help individuals transform their lives through mindset change. The book presents a structured
-                    approach using the GROW! system and includes a complete 30-day implementation challenge.
+                    This guide contrasts the "Fixed Mindset" with the "Growth Mindset." A fixed mindset assumes abilities are static, leading to avoidance of challenges. A growth mindset sees abilities as developable through dedication, leading to resilience, a love of learning, and higher achievement. Adopting a growth mindset is critical for success in sales and personal development.
                 </p>
             </div>
 
-            <h3 className="text-lg font-semibold mt-6 mb-4">Core Concepts & Key Principles</h3>
-
-            <div className="border rounded-lg p-4">
-                <h4 className="font-semibold text-center mb-4">1. Growth vs. Fixed Mindset Foundation</h4>
-                <div className="flex flex-col md:flex-row justify-around items-start gap-8">
-                    {/* Growth Mindset */}
-                    <div className="flex-1 text-center">
-                        <p className="text-lg font-bold text-green-600 mb-2">Growth Mindset</p>
-                        <div className="relative flex justify-center items-center h-24">
-                           <div className="absolute h-16 w-16 bg-green-200/50 rounded-full flex items-center justify-center font-bold text-green-800">
-                                GROWTH
-                           </div>
-                           <svg className="absolute top-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                <path d="M20,90 Q25,50 30,10" stroke="hsl(var(--primary))" fill="none" strokeWidth="2" markerEnd="url(#arrow-up)" />
-                                <path d="M50,90 Q50,50 50,10" stroke="hsl(var(--primary))" fill="none" strokeWidth="2" markerEnd="url(#arrow-up)" />
-                                <path d="M80,90 Q75,50 70,10" stroke="hsl(var(--primary))" fill="none" strokeWidth="2" markerEnd="url(#arrow-up)" />
-                           </svg>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Fixed Mindset Column */}
+                <div className="border border-red-500/30 rounded-lg p-4 bg-red-500/5">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="flex-shrink-0 bg-red-100 dark:bg-red-900/50 p-2 rounded-full">
+                            <ShieldAlert className="h-6 w-6 text-red-600 dark:text-red-400" />
                         </div>
-                        <ul className="mt-4 text-left list-disc list-inside space-y-1">
-                            <li>Embraces challenges</li>
-                            <li>Persists through obstacles</li>
-                            <li>Sees effort as path to mastery</li>
-                            <li>Learns from criticism</li>
-                            <li>Finds inspiration in others</li>
-                        </ul>
+                        <h3 className="text-xl font-bold text-red-700 dark:text-red-400">Fixed Mindset</h3>
                     </div>
+                    <ul className="space-y-3 text-sm">
+                        <li className="flex items-start gap-2"><strong>Avoids:</strong> Challenges, for fear of failure.</li>
+                        <li className="flex items-start gap-2"><strong>Reacts:</strong> Gives up easily when faced with obstacles.</li>
+                        <li className="flex items-start gap-2"><strong>Views Effort:</strong> As fruitless or a sign of weakness.</li>
+                        <li className="flex items-start gap-2"><strong>Handles Criticism:</strong> Ignores or is defensive about feedback.</li>
+                        <li className="flex items-start gap-2"><strong>Sees Others' Success:</strong> As a threat or intimidating.</li>
+                    </ul>
+                </div>
 
-                    {/* Fixed Mindset */}
-                     <div className="flex-1 text-center">
-                        <p className="text-lg font-bold text-red-600 mb-2">Fixed Mindset</p>
-                        <div className="relative flex flex-col justify-center items-center h-24">
-                           <div className="h-16 w-16 bg-red-200/50 rounded-full flex items-center justify-center font-bold text-red-800 mb-1">
-                                FIXED
-                           </div>
-                           <div className="w-24 h-2 bg-red-500 rounded"></div>
+                {/* Growth Mindset Column */}
+                <div className="border border-green-500/30 rounded-lg p-4 bg-green-500/5">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="flex-shrink-0 bg-green-100 dark:bg-green-900/50 p-2 rounded-full">
+                            <BrainCircuit className="h-6 w-6 text-green-600 dark:text-green-400" />
                         </div>
-                        <ul className="mt-4 text-left list-disc list-inside space-y-1">
-                            <li>Avoids challenges</li>
-                            <li>Gives up easily</li>
-                            <li>Sees effort as sign of weakness</li>
-                            <li>Ignores useful criticism</li>
-                            <li>Feels threatened by others</li>
-                        </ul>
+                        <h3 className="text-xl font-bold text-green-700 dark:text-green-400">Growth Mindset</h3>
                     </div>
+                    <ul className="space-y-3 text-sm">
+                        <li className="flex items-start gap-2"><strong>Embraces:</strong> Challenges as opportunities to grow.</li>
+                        <li className="flex items-start gap-2"><strong>Persists:</strong> Views setbacks as part of the learning process.</li>
+                        <li className="flex items-start gap-2"><strong>Views Effort:</strong> As the direct path to mastery.</li>
+                        <li className="flex items-start gap-2"><strong>Handles Criticism:</strong> Learns from it and seeks feedback.</li>
+                        <li className="flex items-start gap-2"><strong>Finds Inspiration:</strong> In the success of others.</li>
+                    </ul>
                 </div>
             </div>
-             <svg width="0" height="0">
-              <defs>
-                <marker id="arrow-up" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(var(--primary))"></path>
-                </marker>
-              </defs>
-            </svg>
         </div>
       )
     },
@@ -342,24 +322,39 @@ const initialTrainingMaterials: TrainingMaterial[] = [
       tags: "persuasion, sales, techniques, Cialdini",
       dateAdded: "September 8, 2025",
       content: (
-        <div className="prose prose-sm lg:prose-base max-w-none text-foreground">
-           <h2 className="text-xl font-bold text-primary">Persuasion Mastery Programme</h2>
-            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg mb-6">
-                <p className="mt-0">
-                    A 10-week comprehensive training program in psychological influence tailored for UK sales contexts.
+        <div className="prose prose-sm lg:prose-base max-w-none text-foreground p-4">
+           <h2 className="text-2xl font-bold text-primary mb-4">Persuasion Mastery: Core Principles</h2>
+            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg mb-8">
+                <p className="mt-0 text-lg">
+                    Based on Dr. Robert Cialdini's groundbreaking work, these six principles are the pillars of ethical and effective influence. Mastering them is key to excelling in sales.
                 </p>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Core Principles Covered:</h3>
-            <ul className="list-disc list-outside ml-5 space-y-2">
-                <li><strong>Reciprocation:</strong> The obligation to give back what you have received from others.</li>
-                <li><strong>Commitment & Consistency:</strong> The desire to be consistent with what we have already done.</li>
-                <li><strong>Social Proof:</strong> The tendency to see an action as more appropriate when others are doing it.</li>
-                <li><strong>Liking:</strong> The tendency to agree with people we like.</li>
-                <li><strong>Authority:</strong> The tendency to obey authority figures.</li>
-                <li><strong>Scarcity:</strong> The desire for things that are less available.</li>
-            </ul>
-             <h3 className="text-lg font-semibold mt-6 mb-2">UK-Specific Application:</h3>
-             <p>This programme tailors these universal principles to the nuances of British business culture and regulations, providing actionable strategies for immediate implementation.</p>
+            <div className="space-y-6">
+                <div>
+                    <h3 className="text-lg font-semibold text-accent">1. Reciprocation</h3>
+                    <p className="mt-1 text-muted-foreground">People feel obligated to give back to others who have given to them first. In sales, this means providing genuine value upfront (e.g., helpful advice, a small sample, useful market insight) before asking for anything in return.</p>
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold text-accent">2. Commitment & Consistency</h3>
+                    <p className="mt-1 text-muted-foreground">People want to be consistent with what they have previously said or done. Start with small, easy commitments (e.g., agreeing to a short meeting, answering a simple question) and build from there. This makes it easier for them to say "yes" to larger requests later.</p>
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold text-accent">3. Social Proof</h3>
+                    <p className="mt-1 text-muted-foreground">When people are uncertain, they look to the actions and behaviors of others to determine their own. Use testimonials, case studies, and mention popular products ("our best-selling cladding") to show that others are making similar choices.</p>
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold text-accent">4. Liking</h3>
+                    <p className="mt-1 text-muted-foreground">People are more likely to be persuaded by those they like. Build genuine rapport by finding common ground, offering sincere compliments, and demonstrating that you are working together towards a common goal.</p>
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold text-accent">5. Authority</h3>
+                    <p className="mt-1 text-muted-foreground">People tend to obey authority figures. Establish your credibility by highlighting your expertise, experience, and knowledge of the industry and products. Dress professionally and speak confidently.</p>
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold text-accent">6. Scarcity</h3>
+                    <p className="mt-1 text-muted-foreground">People desire more of those things they can have less of. Use this ethically by highlighting genuine limited-time offers, exclusive products, or potential stock shortages. For example, "This is the last batch we'll have at this price."</p>
+                </div>
+            </div>
         </div>
       )
     }
@@ -551,19 +546,19 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                     <DialogTitle>{material.title}</DialogTitle>
                     {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
-                <div className="flex-grow overflow-auto p-6">
+                <div className="flex-grow overflow-auto">
                    {fileUrl ? (
                         isImage ? (
-                            <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto" />
+                            <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-6" />
                         ) : (
                             <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
                         )
                    ) : material.content ? (
                        <ScrollArea className="h-full">
-                           <div className="p-6">{material.content}</div>
+                           <div className="p-2">{material.content}</div>
                        </ScrollArea>
                    ) : (
-                       <div className="flex items-center justify-center h-full text-muted-foreground">
+                       <div className="flex items-center justify-center h-full text-muted-foreground p-6">
                            <p>No viewable content available for this item.</p>
                        </div>
                    )}
