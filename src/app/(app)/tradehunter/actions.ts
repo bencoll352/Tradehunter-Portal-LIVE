@@ -26,7 +26,6 @@ export async function getTradersAction(
     return { data: traders, error: null };
   } catch (error: any) {
     console.error(`[Action Error: getTradersAction]`, error);
-    // Return a simple, clean error message
     return { data: null, error: error.message };
   }
 }

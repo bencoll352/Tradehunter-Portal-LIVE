@@ -79,7 +79,8 @@ export default function TradeHunterDashboardPage() {
       }
     };
     initializeDashboard();
-  }, [fetchTraders]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const stats = useMemo(() => {
     const activeTraders = traders.filter(t => t.status === 'Active').length;
