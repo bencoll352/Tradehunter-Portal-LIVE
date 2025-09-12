@@ -153,13 +153,16 @@ export async function updateTaskAction(
  */
 export async function deleteTaskAction(
   branchId: BaseBranchId,
+  traderId: string,
   taskId: string
 ): Promise<{ success: boolean; error: string | null }> {
   try {
-    await deleteTask(branchId, taskId);
+    await deleteTask(branchId, traderId, taskId);
     return { success: true, error: null };
   } catch (error: any) {
     console.error(`[Action Error: deleteTaskAction]`, error);
     return { success: false, error: error.message };
   }
 }
+
+    

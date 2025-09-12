@@ -74,7 +74,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (parseResults.errors.length) {
       const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields' && e.code !== 'TooFewFields');
       if (criticalError) {
-        // This is a more robust way to throw an error that the handleSubmit can catch.
         throw new Error(`Parsing error on row ${criticalError.row + 2}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`);
       }
     }
@@ -95,7 +94,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const tradersToProcess = (parseResults.data as any[])
       .map((row: any): ParsedTraderData | null => {
         const rawName = getRowValue(row, ["Name"]);
-        // Safely check and trim the name. Skip if the name is null, undefined, or an empty string after trimming.
         const name = rawName ? String(rawName).trim() : null;
         if (!name) return null; // Skip rows without a name
 
@@ -161,7 +159,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const result = await onBulkAddTraders(validTraders);
         
         if (result.error) {
-            // This toast is now primarily for server-side errors returned from the action.
              toast({
                 variant: "destructive",
                 title: "Bulk Upload Failed",
@@ -277,3 +274,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
