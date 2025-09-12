@@ -219,7 +219,12 @@ export function TraderTableClient({
           const dateValue = row.getValue("lastActivity");
           if (typeof dateValue !== 'string') return <span className="text-destructive text-xs">Invalid Date</span>;
           try {
-            return format(parseISO(dateValue), "dd/MM/yyyy");
+            const date = parseISO(dateValue);
+            // Check for a very old or invalid date, which might indicate a problem.
+            if (date.getFullYear() < 1971) {
+                return <span className="text-muted-foreground text-xs">No activity</span>;
+            }
+            return format(date, "dd/MM/yyyy");
           } catch(e) {
             return <span className="text-destructive text-xs">Invalid Date</span>
           }

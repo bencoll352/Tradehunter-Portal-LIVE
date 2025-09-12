@@ -98,9 +98,14 @@ const safeToISOString = (value: any): string | null => {
     }
     // Handle if it's already a string
     if (typeof value === 'string') {
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-            return date.toISOString();
+        try {
+            const date = new Date(value);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString();
+            }
+        } catch(e) {
+            // Invalid date string format
+            return null;
         }
     }
     // Return null for any other invalid type
@@ -276,7 +281,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
       categories: rawTrader.categories ?? null,
       workdayTiming: rawTrader.workdayTiming ?? null,
       address: rawTrader.address ?? null,
-      ownerProfileLink: raw.ownerProfileLink ?? null,
+      ownerProfileLink: rawTrader.ownerProfileLink ?? null,
       notes: rawTrader.notes ?? null,
       callBackDate: rawTrader.callBackDate ? new Date(rawTrader.callBackDate).toISOString() : null,
       totalAssets: rawTrader.totalAssets ?? null,
