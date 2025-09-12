@@ -1,15 +1,19 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react"; 
-import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
+import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId, Task } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { getTradersAction } from '@/app/(app)/tradehunter/actions';
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
 import { BranchPerformanceChart } from '@/components/dashboard/BranchPerformanceChart';
 import { MiniDashboardStats } from '@/components/dashboard/MiniDashboardStats';
 import { parseISO }from 'date-fns';
+import { TaskManagement } from '@/components/dashboard/TaskManagement';
+import { CalendarIntegration } from '@/components/dashboard/CalendarIntegration';
+import { ReportingAndExporting } from '@/components/dashboard/ReportingAndExporting';
 
 export default function DashboardPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -36,7 +40,7 @@ export default function DashboardPage() {
           } catch (error) {
             console.error("Failed to fetch initial traders:", error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-            toast({ variant: "destructive", title: "Network Error", description: `Could not connect to the server to load data. ${errorMessage}` });
+            toast({ variant: "destructive", title: "NetworkError", description: `Could not connect to the server to load data. ${errorMessage}` });
           }
           finally {
             setIsLoading(false);
@@ -49,6 +53,36 @@ export default function DashboardPage() {
     initializeData();
   }, [toast]);
   
+  const allTasks = traders.flatMap(t => t.tasks || []);
+
+  const handleTaskCreate = (task: Task) => {
+    setTraders(prevTraders => 
+      prevTraders.map(t => 
+        t.id === task.traderId 
+          ? { ...t, tasks: [...(t.tasks || []), task] } 
+          : t
+      )
+    );
+  };
+
+  const handleTaskUpdate = (updatedTask: Task) => {
+    setTraders(prevTraders =>
+      prevTraders.map(t =>
+        t.id === updatedTask.traderId
+          ? { ...t, tasks: (t.tasks || []).map(task => task.id === updatedTask.id ? updatedTask : task) }
+          : t
+      )
+    );
+  };
+
+  const handleTaskDelete = (taskId: string) => {
+    setTraders(prevTraders =>
+      prevTraders.map(t => 
+        ({ ...t, tasks: (t.tasks || []).filter(task => task.id !== taskId) })
+      )
+    );
+  };
+
   const activeTradersCount = traders.filter(t => t.status === 'Active').length;
   const callBackTradersCount = traders.filter(t => t.status === 'Call-Back').length;
   const newLeadTradersCount = traders.filter(t => t.status === 'New Lead').length;
@@ -56,7 +90,6 @@ export default function DashboardPage() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     try {
-      // Ensure lastActivity is a valid string before parsing
       if (typeof t.lastActivity === 'string') {
         const activityDate = parseISO(t.lastActivity);
         return activityDate >= thirtyDaysAgo;
@@ -112,6 +145,23 @@ export default function DashboardPage() {
         </div>
         <div className="lg:col-span-2">
           <DashboardStatsAndGoals newLeadsCount={newLeadTradersCount} hotLeadsCount={callBackTradersCount} />
+        </div>
+      </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <TaskManagement 
+            traderId={traders[0]?.id || ''} 
+            tasks={allTasks} 
+            onTaskCreate={handleTaskCreate} 
+            onTaskUpdate={handleTaskUpdate} 
+            onTaskDelete={handleTaskDelete} 
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <CalendarIntegration tasks={allTasks} />
+        </div>
+        <div className="lg:col-span-1">
+          <ReportingAndExporting traders={traders} />
         </div>
       </div>
     </div>

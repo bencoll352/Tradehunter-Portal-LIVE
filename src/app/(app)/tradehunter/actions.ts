@@ -9,9 +9,13 @@ import {
   deleteTrader,
   bulkAddTraders,
   bulkDeleteTraders,
+  createTask,
+  updateTask,
+  deleteTask,
 } from '@/lib/trader-service';
-import type { BaseBranchId, ParsedTraderData, Trader } from '@/types';
+import type { BaseBranchId, ParsedTraderData, Trader, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
+import { TaskSchema } from '@/types';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -109,4 +113,53 @@ export async function bulkDeleteTradersAction(
         console.error(`[Action Error: bulkDeleteTradersAction]`, error);
         return { successCount: 0, failureCount: traderIds.length, error: error.message };
     }
+}
+
+/**
+ * Creates a new task for a trader.
+ */
+export async function createTaskAction(
+  branchId: BaseBranchId,
+  taskData: Omit<Task, 'id'>
+): Promise<{ data: Task | null; error: string | null }> {
+  try {
+    const newTask = await createTask(branchId, taskData);
+    return { data: newTask, error: null };
+  } catch (error: any) {
+    console.error(`[Action Error: createTaskAction]`, error);
+    return { data: null, error: error.message };
+  }
+}
+
+/**
+ * Updates an existing task.
+ */
+export async function updateTaskAction(
+  branchId: BaseBranchId,
+  taskId: string,
+  taskData: Partial<Task>
+): Promise<{ data: Task | null; error: string | null }> {
+  try {
+    const updatedTask = await updateTask(branchId, taskId, taskData);
+    return { data: updatedTask, error: null };
+  } catch (error: any) {
+    console.error(`[Action Error: updateTaskAction]`, error);
+    return { data: null, error: error.message };
+  }
+}
+
+/**
+ * Deletes a task.
+ */
+export async function deleteTaskAction(
+  branchId: BaseBranchId,
+  taskId: string
+): Promise<{ success: boolean; error: string | null }> {
+  try {
+    await deleteTask(branchId, taskId);
+    return { success: true, error: null };
+  } catch (error: any) {
+    console.error(`[Action Error: deleteTaskAction]`, error);
+    return { success: false, error: error.message };
+  }
 }

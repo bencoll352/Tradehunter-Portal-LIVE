@@ -1,7 +1,7 @@
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getFirebaseAdmin } from './trader-service-firestore';
-import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus } from '@/types';
+import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 import type { z } from 'zod';
 import { normalizePhoneNumber } from './utils';
@@ -14,6 +14,11 @@ const getTradersCollection = async (branchId: BaseBranchId) => {
   const { firestore } = await getFirebaseAdmin();
   return firestore.collection('traders').doc(branchId).collection('branchTraders');
 };
+
+const getTasksCollection = async (branchId: BaseBranchId, traderId: string) => {
+    const { firestore } = await getFirebaseAdmin();
+    return firestore.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
+}
 
 
 // --- Helper Functions ---
@@ -271,7 +276,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
       categories: rawTrader.categories ?? null,
       workdayTiming: rawTrader.workdayTiming ?? null,
       address: rawTrader.address ?? null,
-      ownerProfileLink: rawTrader.ownerProfileLink ?? null,
+      ownerProfileLink: raw.ownerProfileLink ?? null,
       notes: rawTrader.notes ?? null,
       callBackDate: rawTrader.callBackDate ? new Date(rawTrader.callBackDate).toISOString() : null,
       totalAssets: rawTrader.totalAssets ?? null,
@@ -316,3 +321,42 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
   }
 }
 
+export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'id'>): Promise<Task> {
+  try {
+    const tasksCollection = await getTasksCollection(branchId, taskData.traderId);
+    const docRef = await tasksCollection.add(taskData);
+    return { id: docRef.id, ...taskData } as Task;
+  } catch (error: any) {
+    console.error('[TRADER_SERVICE_ERROR:createTask]', error);
+    throw new Error(`Could not create task. Reason: ${error.message}`);
+  }
+}
+
+export async function updateTask(branchId: BaseBranchId, taskId: string, taskData: Partial<Task>): Promise<Task> {
+  try {
+    if (!taskData.traderId) throw new Error('traderId is required to update a task.');
+    const tasksCollection = await getTasksCollection(branchId, taskData.traderId);
+    const taskRef = tasksCollection.doc(taskId);
+    await taskRef.update(taskData);
+    const updatedDoc = await taskRef.get();
+    return { id: taskId, ...updatedDoc.data() } as Task;
+  } catch (error: any) {
+    console.error('[TRADER_SERVICE_ERROR:updateTask]', error);
+    throw new Error(`Could not update task. Reason: ${error.message}`);
+  }
+}
+
+export async function deleteTask(branchId: BaseBranchId, taskId: string): Promise<void> {
+  try {
+    const { firestore } = await getFirebaseAdmin();
+    const querySnapshot = await firestore.collectionGroup('tasks').where('id', '==', taskId).get();
+    if (querySnapshot.empty) {
+        throw new Error('Task not found');
+    }
+    const taskDoc = querySnapshot.docs[0];
+    await taskDoc.ref.delete();
+} catch (error: any) {
+    console.error('[TRADER_SERVICE_ERROR:deleteTask]', error);
+    throw new Error(`Could not delete task. Reason: ${error.message}`);
+  }
+}
