@@ -133,11 +133,13 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
 function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Trader[] {
   return snapshot.docs.map(doc => {
     const data = doc.data();
+    // Provide a default for lastActivity to prevent crashes if it's missing
+    const lastActivity = safeToISOString(data.lastActivity) || new Date(0).toISOString();
     return {
       id: doc.id,
       name: data.name || 'N/A',
       status: data.status || 'Inactive',
-      lastActivity: safeToISOString(data.lastActivity) || new Date(0).toISOString(),
+      lastActivity: lastActivity,
       description: data.description ?? null,
       reviews: data.reviews ?? null,
       rating: data.rating ?? null,
@@ -313,3 +315,4 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
     throw new Error(`Could not bulk delete traders. Reason: ${error.message}`);
   }
 }
+

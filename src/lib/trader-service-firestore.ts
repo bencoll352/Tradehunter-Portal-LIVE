@@ -23,9 +23,10 @@ export async function getFirebaseAdmin() {
     try {
       const serviceAccountJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
       if (!serviceAccountJson) {
-        throw new Error("The GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set.");
+        throw new Error("The GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set. This is required for server-side operations.");
       }
 
+      // Parse the service account JSON from the environment variable.
       const serviceAccount = JSON.parse(serviceAccountJson);
 
       admin.initializeApp({
@@ -35,7 +36,8 @@ export async function getFirebaseAdmin() {
       console.log('[Firebase Admin] Firebase Admin SDK initialized successfully.');
     } catch (error: any) {
       console.error('[Firebase Admin] Error initializing Firebase Admin SDK:', error.message);
-      throw new Error(`[Firebase Admin] CRITICAL: Could not initialize. Check server environment configuration. Error: ${error.message}`);
+      // Provide a more descriptive error for easier debugging.
+      throw new Error(`[Firebase Admin] CRITICAL: Could not initialize. This is likely due to an invalid or missing GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable. Please verify it is a valid JSON service account key. Error: ${error.message}`);
     }
   } else {
     console.log('[Firebase Admin] Using existing Firebase Admin app.');
