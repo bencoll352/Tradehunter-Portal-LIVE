@@ -266,8 +266,14 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
         }
     }
     
-    await batch.commit();
-    return newTraders;
+    try {
+        await batch.commit();
+        return newTraders;
+    } catch (error) {
+        console.error('[Trader Service] Error during bulkAddTraders batch commit:', error);
+        // This makes the error more specific for the action to catch
+        throw new Error('A database error occurred during the bulk upload process.');
+    }
 }
 
 /**
@@ -303,5 +309,3 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
     await Promise.all(batchPromises);
     return { successCount, failureCount };
 }
-
-    

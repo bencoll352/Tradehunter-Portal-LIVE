@@ -205,7 +205,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           toast({
             variant: "destructive",
             title: "Bulk Upload Failed",
-            description: `A TRADER_SERVICE error has occurred. Please try again. ${result.error}`,
+            description: `${result.error}. Please try again later or contact support if the issue persists.`,
             duration: 10000,
           });
           setIsLoading(false);
