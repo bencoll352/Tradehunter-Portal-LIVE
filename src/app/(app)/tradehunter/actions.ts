@@ -100,8 +100,12 @@ export async function bulkAddTradersAction(branchId: BaseBranchId, traders: Pars
         return { data: newTraders, error: null };
     } catch (error) {
         console.error(`[Action] Failed to bulk add traders to ${branchId}:`, error);
-        const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred during bulk add.";
-        return { data: null, error: errorMessage };
+        let errorMessage = "An unknown server error occurred during bulk add.";
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        // Create a more specific error message for the client
+        return { data: null, error: `TRADER_SERVICE_ERROR: Could not save traders. Reason: ${errorMessage}` };
     }
 }
 

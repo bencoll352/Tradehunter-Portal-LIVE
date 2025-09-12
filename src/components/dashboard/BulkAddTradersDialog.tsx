@@ -65,85 +65,69 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
   const parseAndValidateData = (): { validTraders: ParsedTraderData[], skippedCount: number, duplicatePhonesInCsv: Set<string> } => {
     if (!fileContent) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
 
-    // More robust Papaparse config
     const parseResults = Papa.parse(fileContent, {
         header: true,
         skipEmptyLines: 'greedy',
         transformHeader: header => header.trim(),
         quoteChar: '"',
         escapeChar: '"',
-        dynamicTyping: true, // Automatically convert numbers, booleans
+        dynamicTyping: true,
     });
 
     if (parseResults.errors.length) {
-      console.error("CSV Parsing Errors:", parseResults.errors);
-      // Find the first critical error
-      const firstError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter');
-      if (firstError) {
-         toast({
+      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter');
+      if (criticalError) {
+        toast({
             variant: "destructive",
             title: "CSV Parsing Error",
-            description: `Problem on row ${firstError.row}: ${firstError.message}. Please check for unclosed quotes or formatting issues.`,
+            description: `Problem on row ${criticalError.row + 1}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`,
             duration: 10000,
         });
-        // Throw an error to stop execution
-        throw new Error(`Parsing error on row ${firstError.row}: ${firstError.message}`);
+        throw new Error(`Parsing error on row ${criticalError.row + 1}`);
       }
     }
     
-    // Flexible header matching function
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
       const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
       for (const key in row) {
         if (lowerCaseHeaders.includes(key.toLowerCase())) {
           const value = row[key];
-          // Return the value if it's not null/undefined/empty string
           if (value !== null && value !== undefined && String(value).trim() !== '') {
             return value;
           }
         }
       }
-      return undefined; // Return undefined if no matching header found or value is empty
+      return undefined;
     };
     
-    // Process rows into trader data objects
-    const tradersToProcess = parseResults.data.map((row: any, index: number) => {
-      const name = getRowValue(row, ["Name"])?.trim();
-      // 'Name' is essential, skip row if it's missing
-      if (!name) return null;
+    const tradersToProcess = (parseResults.data as any[])
+      .map((row: any): ParsedTraderData | null => {
+        const name = getRowValue(row, ["Name"])?.trim();
+        if (!name) return null;
 
-      const statusRaw = getRowValue(row, ["Status"])?.trim().toLowerCase();
-      let status: ParsedTraderData['status'] = 'New Lead'; // Default status
-      if (statusRaw === 'active') status = 'Active';
-      else if (statusRaw === 'inactive') status = 'Inactive';
-      else if (statusRaw === 'call-back') status = 'Call-Back';
-
-      // Use dynamic typing from Papaparse but provide fallbacks
-      const parsedTrader: ParsedTraderData = {
-        name,
-        status,
-        lastActivity: getRowValue(row, ["Last Activity"]),
-        description: getRowValue(row, ["Description"]),
-        reviews: getRowValue(row, ["Reviews"]),
-        rating: getRowValue(row, ["Rating"]),
-        website: getRowValue(row, ["Website"]),
-        phone: String(getRowValue(row, ["Phone"]) || ''), // Ensure phone is a string
-        ownerName: getRowValue(row, ["Owner Name", "Owner"]),
-        mainCategory: getRowValue(row, ["Main Category", "Category"]),
-        categories: getRowValue(row, ["Categories"]),
-        workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]),
-        address: getRowValue(row, ["Address"]),
-        ownerProfileLink: getRowValue(row, ["Link", "Owner Profile"]),
-        notes: getRowValue(row, ["Notes"]),
-        totalAssets: getRowValue(row, ["Total Assets"]),
-        estimatedAnnualRevenue: getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]),
-        estimatedCompanyValue: getRowValue(row, ["Estimated Company Value", "Est. Company Value"]),
-        employeeCount: getRowValue(row, ["Employee Count"]),
-      };
-
-      return parsedTrader;
-
-    }).filter((t): t is ParsedTraderData => t !== null);
+        return {
+          name,
+          status: getRowValue(row, ["Status"]),
+          lastActivity: getRowValue(row, ["Last Activity"]),
+          description: getRowValue(row, ["Description"]),
+          reviews: getRowValue(row, ["Reviews"]),
+          rating: getRowValue(row, ["Rating"]),
+          website: getRowValue(row, ["Website"]),
+          phone: String(getRowValue(row, ["Phone"]) || ''),
+          ownerName: getRowValue(row, ["Owner Name", "Owner"]),
+          mainCategory: getRowValue(row, ["Main Category", "Category"]),
+          categories: getRowValue(row, ["Categories"]),
+          workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]),
+          address: getRowValue(row, ["Address"]),
+          ownerProfileLink: getRowValue(row, ["Link", "Owner Profile"]),
+          notes: getRowValue(row, ["Notes"]),
+          totalAssets: getRowValue(row, ["Total Assets"]),
+          estimatedAnnualRevenue: getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]),
+          estimatedCompanyValue: getRowValue(row, ["Estimated Company Value", "Est. Company Value"]),
+          employeeCount: getRowValue(row, ["Employee Count"]),
+        };
+      })
+      .filter((t): t is ParsedTraderData => t !== null);
 
     const validTraders: ParsedTraderData[] = [];
     const processedPhoneNumbersInCsv = new Set<string>();
@@ -174,34 +158,28 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
   };
 
   const handleSubmit = async () => {
-    if (!selectedFile || !fileContent) {
+    if (!selectedFile) {
       toast({ variant: "destructive", title: "Error", description: "Please select a CSV file." });
       return;
     }
     setIsLoading(true);
 
-    let validTraders: ParsedTraderData[] = [];
-    let skippedCount = 0;
-    let duplicatePhonesInCsv = new Set<string>();
-    
+    let parseResult;
     try {
-        const result = parseAndValidateData();
-        validTraders = result.validTraders;
-        skippedCount = result.skippedCount;
-        duplicatePhonesInCsv = result.duplicatePhonesInCsv;
+        parseResult = parseAndValidateData();
     } catch (e: any) {
-        // Error toast is already shown inside parseAndValidateData, just stop execution.
         console.error("Halting handleSubmit due to parsing error:", e.message);
         setIsLoading(false);
         return;
     }
-
+    
+    const { validTraders, skippedCount, duplicatePhonesInCsv } = parseResult;
 
     if (validTraders.length === 0 && skippedCount === 0) {
       toast({
         variant: "destructive",
         title: "Bulk Upload Failed",
-        description: "Could not parse any traders from the file. Please check the file format and ensure 'Name' column is present.",
+        description: "Could not parse any traders from the file. Please check the file format and ensure the 'Name' header is present.",
         duration: 8000,
       });
       setIsLoading(false);
@@ -212,7 +190,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       toast({
         variant: "destructive",
         title: "Upload Limit Exceeded",
-        description: `Please split the file. The limit is ${MAX_UPLOAD_LIMIT} traders per upload.`,
+        description: `The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`,
         duration: 8000,
       });
       setIsLoading(false);
@@ -224,20 +202,11 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       try {
         const result = await onBulkAddTraders(validTraders);
         if (result.error) {
-            let toastDescription: React.ReactNode = result.error;
-            if (result.error.includes("authenticate") || result.error.includes("permission")) {
-                toastDescription = (
-                    <div>
-                        <p>The server could not authenticate with Google's services. This may be a temporary issue or a problem with server permissions.</p>
-                        <p className="mt-2 text-xs">Action: Please try again. If it persists, an administrator may need to check server IAM permissions.</p>
-                    </div>
-                );
-            }
           toast({
             variant: "destructive",
-            title: result.error.includes("authenticate") ? "Server Authentication Error" : "Bulk Upload Failed",
-            description: toastDescription,
-            duration: 15000,
+            title: "Bulk Upload Failed",
+            description: `A TRADER_SERVICE error has occurred. Please try again. ${result.error}`,
+            duration: 10000,
           });
           setIsLoading(false);
           return;
@@ -249,7 +218,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         toast({
           variant: "destructive",
           title: "Client Error",
-          description: `An unexpected client error occurred. Check the console for details.`,
+          description: `An unexpected client error occurred. Check console for details.`,
         });
         setIsLoading(false);
         return;
@@ -258,7 +227,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
     let summaryMessages = [];
     if (newTradersAddedCount > 0) summaryMessages.push(`${newTradersAddedCount} new trader(s) added.`);
-    if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) skipped as duplicates (phone already exists in DB or CSV).`);
+    if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) skipped as duplicates.`);
     if (duplicatePhonesInCsv.size > 0) summaryMessages.push(`Duplicate phones found within the CSV: ${Array.from(duplicatePhonesInCsv).slice(0, 3).join(', ')}${duplicatePhonesInCsv.size > 3 ? '...' : ''}.`);
     
     if (summaryMessages.length > 0) {
@@ -286,7 +255,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-             Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. The 'Name' header is MANDATORY.
+             Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. A 'Name' header is MANDATORY. Any traders with a duplicate phone number will be SKIPPED.
             </p>
              <p className="text-xs text-muted-foreground">
               Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
@@ -345,5 +314,3 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     </Dialog>
   );
 }
-
-    
