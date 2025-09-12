@@ -11,7 +11,12 @@ import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
  * This is a simple wrapper for getDb() to be used internally.
  */
 function ensureFirestore() {
-    return getDb();
+    try {
+        return getDb();
+    } catch(e) {
+        console.error("[Trader Service] Firestore could not be initialized.", e);
+        throw new Error("Failed to connect to the database service.");
+    }
 }
 
 /**
@@ -20,44 +25,45 @@ function ensureFirestore() {
  * @returns A promise that resolves with the array of seeded traders.
  */
 async function seedInitialData(branchId: BaseBranchId): Promise<Trader[]> {
-    const firestore = ensureFirestore();
-    const branchCollectionRef = firestore.collection('traders').doc(branchId).collection('branch_traders');
-    const batch = firestore.batch();
+    console.log(`[Seed Data] Attempting to seed initial data for branch: ${branchId}`);
+    try {
+        const firestore = ensureFirestore();
+        const branchCollectionRef = firestore.collection('traders').doc(branchId).collection('branch_traders');
+        const batch = firestore.batch();
 
-    console.log(`[Seed Data] Seeding initial data for branch: ${branchId}`);
+        const tradersToSeed: Trader[] = INITIAL_SEED_TRADERS_DATA.map(traderData => {
+        const docRef = branchCollectionRef.doc(); // Auto-generate ID
+        
+        const newTraderWithTimestamp = {
+            ...traderData,
+            lastActivity: traderData.lastActivity ? Timestamp.fromDate(new Date(traderData.lastActivity)) : FieldValue.serverTimestamp(),
+            callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null
+        };
 
-    const tradersToSeed: Trader[] = INITIAL_SEED_TRADERS_DATA.map(traderData => {
-      const docRef = branchCollectionRef.doc(); // Auto-generate ID
-      
-      // Convert date strings from seed data to Firestore Timestamps
-      const newTraderWithTimestamp: Omit<Trader, 'id'> & { id?: string, lastActivity: Timestamp, callBackDate: Timestamp | null } = {
-        ...traderData,
-        lastActivity: Timestamp.fromDate(new Date(traderData.lastActivity)),
-        callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null
-      };
+        const newTraderForValidation: Trader = {
+            ...traderData,
+            id: docRef.id,
+            lastActivity: new Date().toISOString(),
+            callBackDate: traderData.callBackDate ? new Date(traderData.callBackDate).toISOString() : null,
+        };
 
-      // Create a complete Trader object for validation, converting Timestamps back to ISO strings
-      const newTrader: Trader = {
-        ...newTraderWithTimestamp,
-        id: docRef.id,
-        lastActivity: newTraderWithTimestamp.lastActivity.toDate().toISOString(),
-        callBackDate: newTraderWithTimestamp.callBackDate ? newTraderWithTimestamp.callBackDate.toDate().toISOString() : null
-      };
+        const validation = TraderSchema.safeParse(newTraderForValidation);
+        if(validation.success) {
+            batch.set(docRef, newTraderWithTimestamp);
+            return validation.data;
+        } else {
+            console.warn(`[Seed Data] Skipping invalid seed trader object for branch ${branchId}:`, validation.error.flatten().fieldErrors);
+            return null;
+        }
+        }).filter((t): t is Trader => t !== null);
 
-      // Validate data against the schema before adding to batch
-      const validation = TraderSchema.safeParse(newTrader);
-      if(validation.success) {
-        batch.set(docRef, newTraderWithTimestamp);
-        return validation.data;
-      } else {
-        console.warn(`[Seed Data] Skipping invalid seed trader object for branch ${branchId}:`, validation.error.flatten().fieldErrors);
-        return null;
-      }
-    }).filter((t): t is Trader => t !== null);
-
-    await batch.commit();
-    console.log(`[Seed Data] Successfully seeded ${tradersToSeed.length} traders for branch: ${branchId}`);
-    return tradersToSeed;
+        await batch.commit();
+        console.log(`[Seed Data] Successfully seeded ${tradersToSeed.length} traders for branch: ${branchId}`);
+        return tradersToSeed;
+    } catch (error) {
+        console.error(`[Trader Service] Error during seedInitialData for branch ${branchId}:`, error);
+        throw new Error(`Failed to seed initial data. Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
 }
 
 /**
@@ -66,38 +72,40 @@ async function seedInitialData(branchId: BaseBranchId): Promise<Trader[]> {
  * @returns A promise that resolves with an array of Trader objects.
  */
 export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
-    const firestore = ensureFirestore();
-    const branchDocRef = firestore.collection('traders').doc(branchId);
-    const branchCollectionRef = branchDocRef.collection('branch_traders');
-    
-    const snapshot = await branchCollectionRef.orderBy('lastActivity', 'desc').get();
-    
-    // If the collection for the branch is empty, seed it with initial data.
-    if (snapshot.empty) {
-        console.log(`[Trader Service] No traders found for branch ${branchId}. Seeding initial data.`);
-        return await seedInitialData(branchId);
-    }
-    
-    // Map Firestore documents to Trader objects
-    return snapshot.docs.map(doc => {
-      const data = doc.data();
-      // Convert Firestore Timestamps to ISO 8601 strings for client-side compatibility
-      const dataWithISOString = {
-        ...data,
-        lastActivity: (data.lastActivity as Timestamp)?.toDate().toISOString(),
-        callBackDate: (data.callBackDate instanceof Timestamp) ? (data.callBackDate as Timestamp).toDate().toISOString() : null,
-      }
+    try {
+        const firestore = ensureFirestore();
+        const branchDocRef = firestore.collection('traders').doc(branchId);
+        const branchCollectionRef = branchDocRef.collection('branch_traders');
+        
+        const snapshot = await branchCollectionRef.orderBy('lastActivity', 'desc').get();
+        
+        // If the collection for the branch is empty, seed it with initial data.
+        if (snapshot.empty) {
+            console.log(`[Trader Service] No traders found for branch ${branchId}. Seeding initial data.`);
+            return await seedInitialData(branchId);
+        }
+        
+        // Map Firestore documents to Trader objects
+        return snapshot.docs.map(doc => {
+        const data = doc.data();
+        const dataWithISOString = {
+            ...data,
+            lastActivity: (data.lastActivity as Timestamp)?.toDate().toISOString(),
+            callBackDate: (data.callBackDate instanceof Timestamp) ? (data.callBackDate as Timestamp).toDate().toISOString() : null,
+        }
 
-      // Validate data against the schema
-      const validatedData = TraderSchema.safeParse({ ...dataWithISOString, id: doc.id });
-      if (validatedData.success) {
-        return validatedData.data;
-      } else {
-        // Log a warning if data in Firestore is invalid
-        console.warn(`[Trader Service] Invalid data in Firestore for trader ${doc.id} in branch ${branchId}:`, validatedData.error.flatten().fieldErrors);
-        return null;
-      }
-    }).filter((t): t is Trader => t !== null); // Filter out any null (invalid) entries
+        const validatedData = TraderSchema.safeParse({ ...dataWithISOString, id: doc.id });
+        if (validatedData.success) {
+            return validatedData.data;
+        } else {
+            console.warn(`[Trader Service] Invalid data in Firestore for trader ${doc.id} in branch ${branchId}:`, validatedData.error.flatten().fieldErrors);
+            return null;
+        }
+        }).filter((t): t is Trader => t !== null);
+    } catch (error) {
+        console.error(`[Trader Service] Error in getTraders for branch ${branchId}:`, error);
+        throw new Error(`Failed to get traders. Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
 }
 
 /**
@@ -111,21 +119,18 @@ export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader,
     const branchCollectionRef = firestore.collection('traders').doc(branchId).collection('branch_traders');
     const newDocRef = branchCollectionRef.doc(); // Auto-generate new document ID
     
-    // Prepare data for Firestore, converting date strings to Timestamps
     const newTraderForFirestore = {
         ...traderData,
         lastActivity: FieldValue.serverTimestamp(), // Use server timestamp for creation
         callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null
     };
     
-    // Create a mock object for validation before sending to DB
     const mockTraderForValidation: Trader = {
       ...traderData,
       id: newDocRef.id,
       lastActivity: new Date().toISOString(),
     };
 
-    // Validate the complete object
     const validation = TraderSchema.safeParse(mockTraderForValidation);
     if(!validation.success) {
         throw new Error(`Invalid trader data provided: ${JSON.stringify(validation.error.flatten().fieldErrors)}`);
@@ -133,11 +138,9 @@ export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader,
 
     await newDocRef.set(newTraderForFirestore);
 
-    // Fetch the newly created document to get server-generated timestamps
     const newDoc = await newDocRef.get();
     const newDocData = newDoc.data();
     
-    // Parse and return the final Trader object
     const finalTrader = TraderSchema.parse({
       ...newDocData,
       id: newDoc.id,
@@ -165,14 +168,12 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     }
     const existingData = doc.data() as Trader;
 
-    // Prepare data for update, converting date strings and setting server timestamp
     const dataForUpdate = {
       ...traderData,
       lastActivity: FieldValue.serverTimestamp(),
       callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null,
     };
 
-    // Validate the merged data before sending to DB
     const mockTraderForValidation: Trader = {
         ...existingData,
         ...traderData,
@@ -187,7 +188,6 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     
     await traderRef.update(dataForUpdate);
 
-    // Fetch and return the updated document
     const updatedDoc = await traderRef.get();
     const updatedDocData = updatedDoc.data();
     const finalTrader = TraderSchema.parse({
@@ -218,61 +218,58 @@ export async function deleteTrader(branchId: BaseBranchId, traderId: string): Pr
  * @returns A promise that resolves with an array of the newly created Trader objects.
  */
 export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTraderData[]): Promise<Trader[]> {
-    const firestore = ensureFirestore();
-    const branchCollectionRef = firestore.collection('traders').doc(branchId).collection('branch_traders');
-    const batch = firestore.batch();
-    const newTraders: Trader[] = [];
-
-    for (const parsedData of traders) {
-        const newDocRef = branchCollectionRef.doc();
-        // Prepare data for Firestore, handling optional fields and date conversions
-        const traderForFirestore = {
-            name: parsedData.name,
-            status: parsedData.status || 'New Lead',
-            lastActivity: parsedData.lastActivity ? Timestamp.fromDate(new Date(parsedData.lastActivity)) : FieldValue.serverTimestamp(),
-            description: parsedData.description || null,
-            reviews: parsedData.reviews || null,
-            rating: parsedData.rating || null,
-            website: parsedData.website || null,
-            phone: parsedData.phone || null,
-            ownerName: parsedData.ownerName || null,
-            mainCategory: parsedData.mainCategory || null,
-            categories: parsedData.categories || null,
-            workdayTiming: parsedData.workdayTiming || null,
-            address: parsedData.address || null,
-            ownerProfileLink: parsedData.ownerProfileLink || null,
-            notes: parsedData.notes || null,
-            callBackDate: parsedData.callBackDate ? Timestamp.fromDate(new Date(parsedData.callBackDate)) : null,
-            totalAssets: parsedData.totalAssets || null,
-            estimatedAnnualRevenue: parsedData.estimatedAnnualRevenue || null,
-            estimatedCompanyValue: parsedData.estimatedCompanyValue || null,
-            employeeCount: parsedData.employeeCount || null,
-        };
-        
-        // Validate before adding to batch
-        const mockTraderForValidation: Trader = {
-          ...traderForFirestore,
-          id: newDocRef.id,
-          lastActivity: new Date().toISOString(),
-          callBackDate: traderForFirestore.callBackDate ? traderForFirestore.callBackDate.toDate().toISOString() : null,
-        }
-
-        const validation = TraderSchema.safeParse(mockTraderForValidation);
-        if (validation.success) {
-            batch.set(newDocRef, traderForFirestore);
-            newTraders.push(validation.data);
-        } else {
-            console.warn(`[Trader Service] Skipping invalid trader object in bulk add for branch ${branchId}:`, validation.error.flatten().fieldErrors);
-        }
-    }
-    
     try {
+        const firestore = ensureFirestore();
+        const branchCollectionRef = firestore.collection('traders').doc(branchId).collection('branch_traders');
+        const batch = firestore.batch();
+        const newTraders: Trader[] = [];
+
+        for (const parsedData of traders) {
+            const newDocRef = branchCollectionRef.doc();
+            const traderForFirestore = {
+                name: parsedData.name,
+                status: parsedData.status || 'New Lead',
+                lastActivity: parsedData.lastActivity ? Timestamp.fromDate(new Date(parsedData.lastActivity)) : FieldValue.serverTimestamp(),
+                description: parsedData.description || null,
+                reviews: parsedData.reviews || null,
+                rating: parsedData.rating || null,
+                website: parsedData.website || null,
+                phone: parsedData.phone || null,
+                ownerName: parsedData.ownerName || null,
+                mainCategory: parsedData.mainCategory || null,
+                categories: parsedData.categories || null,
+                workdayTiming: parsedData.workdayTiming || null,
+                address: parsedData.address || null,
+                ownerProfileLink: parsedData.ownerProfileLink || null,
+                notes: parsedData.notes || null,
+                callBackDate: parsedData.callBackDate ? Timestamp.fromDate(new Date(parsedData.callBackDate)) : null,
+                totalAssets: parsedData.totalAssets || null,
+                estimatedAnnualRevenue: parsedData.estimatedAnnualRevenue || null,
+                estimatedCompanyValue: parsedData.estimatedCompanyValue || null,
+                employeeCount: parsedData.employeeCount || null,
+            };
+            
+            const mockTraderForValidation: Trader = {
+            ...traderForFirestore,
+            id: newDocRef.id,
+            lastActivity: new Date().toISOString(),
+            callBackDate: traderForFirestore.callBackDate ? traderForFirestore.callBackDate.toDate().toISOString() : null,
+            }
+
+            const validation = TraderSchema.safeParse(mockTraderForValidation);
+            if (validation.success) {
+                batch.set(newDocRef, traderForFirestore);
+                newTraders.push(validation.data);
+            } else {
+                console.warn(`[Trader Service] Skipping invalid trader object in bulk add for branch ${branchId}:`, validation.error.flatten().fieldErrors);
+            }
+        }
+        
         await batch.commit();
         return newTraders;
     } catch (error) {
-        console.error('[Trader Service] Error during bulkAddTraders batch commit:', error);
-        // This makes the error more specific for the action to catch
-        throw new Error('A database error occurred during the bulk upload process.');
+        console.error('[Trader Service] Error during bulkAddTraders:', error);
+        throw new Error(`A database error occurred during the bulk upload process. Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
 
@@ -297,7 +294,6 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
             const docRef = branchCollectionRef.doc(id);
             batch.delete(docRef);
         });
-        // Push the commit promise to an array to be awaited later
         batchPromises.push(batch.commit().then(() => {
             successCount += chunk.length;
         }).catch((err) => {

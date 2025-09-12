@@ -1,5 +1,5 @@
 
-import { initializeApp, getApps, App, getApp } from 'firebase-admin/app';
+import { initializeApp, getApps, App, getApp, type ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 
 // This is a singleton pattern to ensure we only initialize the DB once.
@@ -18,7 +18,16 @@ function initializeDb() {
     if (apps.length === 0) {
       // If no apps are initialized, initialize a new one.
       // This happens on the first call in a new server environment.
-      app = initializeApp();
+      
+      // When running in a Google Cloud environment (like App Hosting),
+      // the SDK can often find the credentials automatically.
+      // If not, it might require explicit configuration.
+      const serviceAccountKey = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON 
+        ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
+        : undefined;
+
+      app = initializeApp(serviceAccountKey ? { credential: { projectId: serviceAccountKey.project_id, clientEmail: serviceAccountKey.client_email, privateKey: serviceAccountKey.private_key } as ServiceAccount } : {});
+      
     } else {
       // If apps already exist, get the default app.
       // This prevents re-initializing, which would cause an error.
@@ -35,7 +44,7 @@ function initializeDb() {
     // In case of any error during initialization, we set db to null and throw
     // to prevent the application from proceeding with a broken database connection.
     db = null;
-    throw new Error("Server configuration error: Could not connect to the database.");
+    throw new Error("Server configuration error: Could not connect to the database. This might be due to missing or incorrect service account credentials.");
   }
 }
 
@@ -46,9 +55,16 @@ function initializeDb() {
  * @throws {Error} If Firestore is not initialized and cannot be connected.
  */
 export function getDb(): Firestore {
-    const firestore = initializeDb();
-    if (!firestore) {
-      throw new Error("Firestore not initialized. Cannot perform database operations.");
+    try {
+        const firestore = initializeDb();
+        if (!firestore) {
+            // This case should theoretically be covered by initializeDb throwing, but as a safeguard:
+            throw new Error("Firestore not initialized. Cannot perform database operations.");
+        }
+        return firestore;
+    } catch (error) {
+        console.error("[getDb] Error obtaining Firestore instance: ", error);
+        // Re-throw the error to ensure the calling function knows about the failure.
+        throw error;
     }
-    return firestore;
 }
