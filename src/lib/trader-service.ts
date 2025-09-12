@@ -5,6 +5,7 @@ import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus } from '@/typ
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 import type { z } from 'zod';
 import { normalizePhoneNumber } from './utils';
+import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -107,42 +108,57 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
   try {
     const tradersCollection = await getTradersCollection(branchId);
     const snapshot = await tradersCollection.get();
+
+    // If the collection is empty, seed it with initial data and refetch.
     if (snapshot.empty) {
-      return [];
+      console.log(`[getTraders] Branch ${branchId} is empty. Seeding initial data...`);
+      await bulkAddTraders(branchId, INITIAL_SEED_TRADERS_DATA);
+      // Re-fetch the data after seeding
+      const seededSnapshot = await tradersCollection.get();
+      console.log(`[getTraders] Re-fetching data for branch ${branchId} after seeding. Found ${seededSnapshot.size} documents.`);
+      return mapSnapshotToTraders(seededSnapshot);
     }
-    const traders = snapshot.docs.map(doc => {
-      const data = doc.data();
-      
-      return {
-        id: doc.id,
-        name: data.name || 'N/A',
-        status: data.status || 'Inactive',
-        lastActivity: safeToISOString(data.lastActivity) || new Date(0).toISOString(),
-        description: data.description ?? null,
-        reviews: data.reviews ?? null,
-        rating: data.rating ?? null,
-        website: data.website ?? null,
-        phone: data.phone ?? null,
-        ownerName: data.ownerName ?? null,
-        mainCategory: data.mainCategory ?? null,
-        categories: data.categories ?? null,
-        workdayTiming: data.workdayTiming ?? null,
-        address: data.address ?? null,
-        ownerProfileLink: data.ownerProfileLink ?? null,
-        notes: data.notes ?? null,
-        callBackDate: safeToISOString(data.callBackDate),
-        totalAssets: data.totalAssets ?? null,
-        estimatedAnnualRevenue: data.estimatedAnnualRevenue ?? null,
-        estimatedCompanyValue: data.estimatedCompanyValue ?? null,
-        employeeCount: data.employeeCount ?? null,
-      } as Trader;
-    });
-    return traders;
+    
+    console.log(`[getTraders] Found ${snapshot.size} documents for branch ${branchId}.`);
+    return mapSnapshotToTraders(snapshot);
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:getTraders]', error);
     throw new Error('Failed to get traders from database.');
   }
 }
+
+/**
+ * Helper function to map a Firestore query snapshot to an array of Trader objects.
+ */
+function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Trader[] {
+  return snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name || 'N/A',
+      status: data.status || 'Inactive',
+      lastActivity: safeToISOString(data.lastActivity) || new Date(0).toISOString(),
+      description: data.description ?? null,
+      reviews: data.reviews ?? null,
+      rating: data.rating ?? null,
+      website: data.website ?? null,
+      phone: data.phone ?? null,
+      ownerName: data.ownerName ?? null,
+      mainCategory: data.mainCategory ?? null,
+      categories: data.categories ?? null,
+      workdayTiming: data.workdayTiming ?? null,
+      address: data.address ?? null,
+      ownerProfileLink: data.ownerProfileLink ?? null,
+      notes: data.notes ?? null,
+      callBackDate: safeToISOString(data.callBackDate),
+      totalAssets: data.totalAssets ?? null,
+      estimatedAnnualRevenue: data.estimatedAnnualRevenue ?? null,
+      estimatedCompanyValue: data.estimatedCompanyValue ?? null,
+      employeeCount: data.employeeCount ?? null,
+    } as Trader;
+  });
+}
+
 
 export async function addTrader(branchId: BaseBranchId, traderData: TraderFormValues): Promise<Trader> {
   try {
@@ -296,11 +312,4 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
     console.error('[TRADER_SERVICE_ERROR:bulkDeleteTraders]', error);
     throw new Error(`Could not bulk delete traders. Reason: ${error.message}`);
   }
-}
-
-// Function to seed initial data if a branch has no traders
-async function seedInitialData(branchId: BaseBranchId) {
-    // This is a placeholder, actual implementation depends on seed data format
-    console.log(`Seeding initial data for branch ${branchId}...`);
-    // Example: await bulkAddTraders(branchId, INITIAL_SEED_DATA_FOR_PURLEY);
 }
