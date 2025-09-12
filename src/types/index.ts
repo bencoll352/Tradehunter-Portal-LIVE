@@ -103,7 +103,7 @@ export type Trader = z.infer<typeof TraderSchema>;
 // Represents the data parsed from a CSV file, before it's validated and converted to a full Trader object
 export const ParsedTraderDataSchema = z.object({
   name: z.string(),
-  status: TraderStatusSchema.optional().default('New Lead'),
+  status: TraderStatusSchema.optional(),
   lastActivity: z.string().optional(), // Date string from CSV
   description: z.string().optional(),
   reviews: z.coerce.number().optional(),

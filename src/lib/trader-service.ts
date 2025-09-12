@@ -90,8 +90,8 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
         return snapshot.docs.map(doc => {
         const data = doc.data();
         // Safely handle nullable timestamps
-        const lastActivityISO = (data.lastActivity as Timestamp)?.toDate()?.toISOString() ?? new Date(0).toISOString();
-        const callBackDateISO = (data.callBackDate instanceof Timestamp) ? (data.callBackDate as Timestamp).toDate().toISOString() : null;
+        const lastActivityISO = (data.lastActivity instanceof Timestamp) ? data.lastActivity.toDate().toISOString() : new Date(0).toISOString();
+        const callBackDateISO = (data.callBackDate instanceof Timestamp) ? data.callBackDate.toDate().toISOString() : null;
 
         const dataWithISOString = {
             ...data,
@@ -131,7 +131,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader,
             const querySnapshot = await branchCollectionRef.where('phone', '==', normalizedPhone).limit(1).get();
             if (!querySnapshot.empty) {
                 // A more specific error could be thrown here and caught in the action
-                throw new Error(`TRADER_DEUPLICATE_PHONE`);
+                throw new Error(`TRADER_DUPLICATE_PHONE`);
             }
         }
     }
