@@ -16,48 +16,29 @@ import type { z } from "zod";
 import { PlusCircle } from "lucide-react";
 import type { Trader } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { normalizePhoneNumber } from "@/lib/utils";
 
 interface AddTraderDialogProps {
   onAddTrader: (values: z.infer<typeof traderFormSchema>) => Promise<boolean>; // Changed from Promise<void>
   branchId: string;
-  existingTraders: Trader[];
 }
 
-export function AddTraderDialog({ onAddTrader, branchId, existingTraders }: AddTraderDialogProps) {
+export function AddTraderDialog({ onAddTrader, branchId }: AddTraderDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (values: z.infer<typeof traderFormSchema>) => {
     setIsLoading(true);
-    const newPhoneNumber = normalizePhoneNumber(values.phone);
-
-    if (newPhoneNumber) {
-      const isDuplicate = existingTraders.some(
-        (trader) => normalizePhoneNumber(trader.phone) === newPhoneNumber
-      );
-      if (isDuplicate) {
-        toast({
-          variant: "destructive",
-          title: "Duplicate Trader",
-          description: `A trader with phone number ${values.phone} already exists.`,
-        });
-        setIsLoading(false);
-        return;
-      }
-    }
-
     try {
       const success = await onAddTrader(values);
       if (success) {
-        // Success toast is handled by DashboardClientPageContent
+        // Success toast is handled by the calling page component
         setOpen(false); 
       } else {
-        // Error toast is handled by DashboardClientPageContent, dialog remains open
+        // Error toast is handled by the calling page component, dialog remains open
       }
     } catch (error) {
-      // This catch block might not be strictly necessary if DashboardClientPageContent handles all errors
+      // This catch block might not be strictly necessary if the page handles all errors
       // from onAddTrader, but kept for robustness.
       console.error("Unexpected error in AddTraderDialog submit:", error);
       toast({

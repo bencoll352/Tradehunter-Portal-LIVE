@@ -77,7 +77,18 @@ export default function TradeHunterDashboardPage() {
       return true; // Indicate success
     }
     // If there's an error, show it and indicate failure
-    toast({ variant: "destructive", title: "Error Adding Trader", description: result.error || "Failed to add trader." });
+    const errorMessage = result.error || "Failed to add trader.";
+    const toastProps = {
+        variant: "destructive" as const,
+        title: "Error Adding Trader",
+        description: errorMessage,
+    };
+    if (errorMessage.includes("phone number already exists")) {
+        toastProps.title = "Duplicate Trader";
+        toastProps.description = "A trader with this phone number already exists.";
+    }
+    toast(toastProps);
+
     return false;
   };
 
