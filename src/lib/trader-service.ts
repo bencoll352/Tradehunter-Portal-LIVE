@@ -339,7 +339,7 @@ export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'i
 
 export async function updateTask(
   branchId: BaseBranchId,
-  traderId: string, // traderId was missing
+  traderId: string,
   taskId: string,
   taskData: Partial<Omit<Task, 'id' | 'traderId'>>
 ): Promise<Task> {

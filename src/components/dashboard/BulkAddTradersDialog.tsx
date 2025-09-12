@@ -107,7 +107,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       .map((row: any): ParsedTraderData | null => {
         const rawName = getRowValue(row, ["Name"]);
         const name = rawName ? String(rawName).trim() : null;
-        if (!name) return null; // Skip rows without a name
+        if (!name) return null;
 
         return {
           name,
@@ -168,7 +168,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           return;
         }
         
-        // This now calls the page's handler which manages state and success toasts
         await onBulkAddTraders(validTraders);
         
         setOpen(false);

@@ -136,7 +136,7 @@ export async function createTaskAction(
  */
 export async function updateTaskAction(
   branchId: BaseBranchId,
-  traderId: string, // Added missing traderId
+  traderId: string,
   taskId: string,
   taskData: Partial<Task>
 ): Promise<{ data: Task | null; error: string | null }> {

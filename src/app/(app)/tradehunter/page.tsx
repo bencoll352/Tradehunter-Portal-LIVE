@@ -42,12 +42,11 @@ export default function TradeHunterDashboardPage() {
   const currentUserRole = useMemo(() => branchInfo?.role, [branchInfo]);
 
   const fetchTraders = useCallback(async () => {
-    if (!currentBaseBranchId) return; // Don't fetch if there's no branch ID
+    if (!currentBaseBranchId) return;
     setIsLoading(true);
     try {
       const result = await getTradersAction(currentBaseBranchId);
       if (result.data) {
-        // Sort data by lastActivity date, descending
         setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       } else {
         setTraders([]);
@@ -68,14 +67,12 @@ export default function TradeHunterDashboardPage() {
     }
   }, [toast, currentBaseBranchId]);
 
-  // Effect to initialize the dashboard on component mount
   useEffect(() => {
     const initializeDashboard = async () => {
       if (typeof window !== 'undefined') {
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
         const info = getBranchInfo(storedLoggedInId);
         setBranchInfo(info);
-        // The fetch will be triggered by the next effect, once branchInfo is set
         if (!info.baseBranchId && info.role !== 'manager') {
             setIsLoading(false);
         }
@@ -84,7 +81,6 @@ export default function TradeHunterDashboardPage() {
     initializeDashboard();
   }, []);
 
-  // Effect to fetch traders when the branch ID changes (including on initial load)
   useEffect(() => {
       if (currentBaseBranchId) {
           fetchTraders();
@@ -188,7 +184,6 @@ export default function TradeHunterDashboardPage() {
           description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
           duration: 10000,
       });
-      // Correctly refetch traders for the current branch
       await fetchTraders();
     } 
     return { data: result.data, error: null };
@@ -200,13 +195,11 @@ export default function TradeHunterDashboardPage() {
     }
     const result = await bulkDeleteTradersAction(currentBaseBranchId, traderIds);
     if (result.successCount > 0) {
-      // On success, update the local state to reflect the deletion
       setTraders(prev => prev.filter(t => !traderIds.includes(t.id)));
     }
     return result;
   };
 
-  // Show a loading skeleton while fetching initial user/branch info
   if (isLoading && !branchInfo) { 
     return (
       <div className="space-y-6">
@@ -221,7 +214,6 @@ export default function TradeHunterDashboardPage() {
       return <p>Error: Branch information not found. Please ensure you are logged in correctly.</p>;
   }
 
-  // Display a message for managers who haven't selected a branch
   if (currentUserRole === 'manager' && !currentBaseBranchId) {
       return (
           <div className="space-y-6">
