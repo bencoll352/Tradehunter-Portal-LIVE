@@ -168,31 +168,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           return;
         }
         
-        const result = await onBulkAddTraders(validTraders);
+        // This now calls the page's handler which manages state and success toasts
+        await onBulkAddTraders(validTraders);
         
-        if (result.error) {
-             toast({
-                variant: "destructive",
-                title: "Bulk Upload Failed",
-                description: `${result.error}`,
-                duration: 10000,
-            });
-        } else {
-             const newCount = result.data?.length || 0;
-             const skippedCount = validTraders.length - newCount;
-             let summaryMessages = [];
-             if (newCount > 0) summaryMessages.push(`${newCount} new trader(s) added successfully.`);
-             if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates (phone number already exists).`);
-             if (summaryMessages.length === 0) summaryMessages.push("No new traders were added. This may be because they all already exist.");
+        setOpen(false);
+        clearFile();
 
-             toast({
-                title: "Bulk Upload Processed",
-                description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
-                duration: 10000,
-            });
-            setOpen(false);
-            clearFile();
-        }
     } catch (error: any) {
         console.error("Client-side error during bulk upload:", error);
         toast({
@@ -286,3 +267,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    

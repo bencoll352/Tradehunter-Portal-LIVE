@@ -136,11 +136,12 @@ export async function createTaskAction(
  */
 export async function updateTaskAction(
   branchId: BaseBranchId,
+  traderId: string, // Added missing traderId
   taskId: string,
   taskData: Partial<Task>
 ): Promise<{ data: Task | null; error: string | null }> {
   try {
-    const updatedTask = await updateTask(branchId, taskId, taskData);
+    const updatedTask = await updateTask(branchId, traderId, taskId, taskData);
     return { data: updatedTask, error: null };
   } catch (error: any) {
     console.error(`[Action Error: updateTaskAction]`, error);

@@ -49,7 +49,7 @@ async function checkDuplicatePhone(branchId: BaseBranchId, phone: string | null 
  * Converts a date string from various formats into an ISO string.
  * Handles UK formats like dd/MM/yyyy and dd/MM/yy.
  */
-function parseActivityDate(dateString: string | undefined): string {
+function parseActivityDate(dateString: string | undefined | null): string {
     if (!dateString) {
         return new Date().toISOString();
     }
@@ -337,7 +337,12 @@ export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'i
   }
 }
 
-export async function updateTask(branchId: BaseBranchId, traderId: string, taskId: string, taskData: Partial<Omit<Task, 'id' | 'traderId'>>): Promise<Task> {
+export async function updateTask(
+  branchId: BaseBranchId,
+  traderId: string, // traderId was missing
+  taskId: string,
+  taskData: Partial<Omit<Task, 'id' | 'traderId'>>
+): Promise<Task> {
     try {
         if (!traderId) throw new Error('traderId is required to update a task.');
         const taskRef = getTasksCollection(branchId, traderId).doc(taskId);
@@ -365,3 +370,5 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
+
+    

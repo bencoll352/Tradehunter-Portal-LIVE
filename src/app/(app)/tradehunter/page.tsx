@@ -149,7 +149,7 @@ export default function TradeHunterDashboardPage() {
     return result.success;
   };
 
-  const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
+ const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
     if (!currentBaseBranchId || currentUserRole === 'unknown') {
       const error = "Invalid or missing Branch ID/Role.";
       toast({ variant: "destructive", title: "Bulk Add Failed", description: error });
@@ -169,9 +169,6 @@ export default function TradeHunterDashboardPage() {
     }
     
     if (result.data && currentBaseBranchId) { 
-      // Refetch all traders to get a consistent state, which also handles the success toast logic implicitly
-      await fetchTraders(currentBaseBranchId);
-      
       const newCount = result.data?.length || 0;
       const skippedCount = tradersToCreate.length - newCount;
       let summaryMessages = [];
@@ -184,6 +181,8 @@ export default function TradeHunterDashboardPage() {
           description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
           duration: 10000,
       });
+      // Correctly refetch traders for the current branch
+      await fetchTraders(currentBaseBranchId);
     } 
     return { data: result.data, error: null };
   };
@@ -282,3 +281,5 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
+
+    
