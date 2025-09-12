@@ -208,27 +208,29 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>To Bulk Add New Traders (CSV)</DialogTitle>
-          <DialogDescription className="space-y-4 pt-2 text-foreground/90">
-            <p>
-                For a successful upload, please ensure the spreadsheet adheres to the specified format. The only required column is 'Name'. The uploader will automatically skip any traders whose phone number is already present in the database or within the same CSV file.
-            </p>
-             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                <p className="text-xs font-medium">
-                    Rows without a 'Name' field will be skipped; this column is mandatory for a record to be valid.
+          <DialogDescription asChild>
+             <div className="space-y-4 pt-2 text-foreground/90">
+                <p>
+                    For a successful upload, please ensure the spreadsheet adheres to the specified format. The only required column is 'Name'. The uploader will automatically skip any traders whose phone number is already present in the database or within the same CSV file.
                 </p>
-            </div>
-             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                <p className="text-xs font-medium">
-                    For 'Owner Name', 'Main Category', and 'Workday Timing', ensure headers are exact for successful mapping.
-                </p>
-            </div>
-            <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                <p className="text-xs font-medium">
-                    Fields with commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes for correct parsing.
-                </p>
+                <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="text-xs font-medium">
+                        Rows without a 'Name' field will be skipped; this column is mandatory for a record to be valid.
+                    </p>
+                </div>
+                <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="text-xs font-medium">
+                        For 'Owner Name', 'Main Category', and 'Workday Timing', ensure headers are exact for successful mapping.
+                    </p>
+                </div>
+                <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="text-xs font-medium">
+                        Fields with commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes for correct parsing.
+                    </p>
+                </div>
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -266,7 +268,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" disabled={isLoading}>Cancel</Button>
-
           </DialogClose>
           <Button onClick={handleSubmit} disabled={isLoading || !selectedFile}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
