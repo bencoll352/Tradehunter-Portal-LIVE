@@ -1,3 +1,4 @@
+
 // src/app/api/traders/[branchId]/route.ts
 import { NextResponse } from 'next/server';
 import { getTraders } from '@/lib/trader-service';
