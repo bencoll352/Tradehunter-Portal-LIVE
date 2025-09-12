@@ -3,13 +3,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home, LayoutDashboard, HelpCircle, Building2, ShieldCheck } from "lucide-react";
+import { Database, UsersRound, Lightbulb, Calculator, GraduationCap, Home, LayoutDashboard, HelpCircle, Building2, ShieldCheck, DatabaseZap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/tradehunter", icon: Database, label: "Trader Database" },
   { href: "/estimator", icon: Calculator, label: "Estimator" },
+  { href: "/data-hub", icon: DatabaseZap, label: "Data Hub" },
   { href: "/buildwise", icon: Building2, label: "BuildWise" },
   { href: "/buildwise-intel", icon: Lightbulb, label: "Buildwise-Intel" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
