@@ -12,7 +12,7 @@ const headerNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tradehunter", label: "Trader DB", icon: Database },
   { href: "/estimator", label: "Estimator", icon: Calculator },
-  { href: "/data-hub", label: "Data Hub", icon: DatabaseZap },
+  { href: "/staff-training", label: "Staff Training", icon: GraduationCap },
   { href: "/buildwise", label: "BuildWise", icon: Building2 },
   { href: "/smart-team", label: "Smart Team", icon: UsersRound },
 ];
@@ -90,7 +90,7 @@ const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/tradehunter", icon: Database, label: "Trader Database" },
   { href: "/estimator", icon: Calculator, label: "Estimator" },
-  { href: "/data-hub", icon: DatabaseZap, label: "Data Hub" },
+  { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
   { href: "/buildwise", icon: Building2, label: "BuildWise" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
 ];
@@ -99,7 +99,7 @@ const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/tradehunter", icon: Database, label: "Trader Database" },
   { href: "/estimator", icon: Calculator, label: "Estimator" },
-  { href: "/data-hub", icon: DatabaseZap, label: "Data Hub" },
+  { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
   { href: "/buildwise", icon: Building2, label: "BuildWise" },
   { href: "/buildwise-intel", icon: Lightbulb, label: "Buildwise-Intel" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },

@@ -1,4 +1,3 @@
-
 'use server';
 
 import { salesTrainingAgent, type SalesTrainingInput, type SalesTrainingOutput } from '@/ai/flows/sales-training-flow';
