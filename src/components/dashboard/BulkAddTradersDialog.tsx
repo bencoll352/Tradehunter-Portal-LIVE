@@ -182,13 +182,32 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }
     setIsLoading(true);
 
-    const { validTraders, skippedCount, duplicatePhonesInCsv } = parseAndValidateData();
+    let validTraders: ParsedTraderData[] = [];
+    let skippedCount = 0;
+    let duplicatePhonesInCsv = new Set<string>();
+    
+    try {
+        const result = parseAndValidateData();
+        validTraders = result.validTraders;
+        skippedCount = result.skippedCount;
+        duplicatePhonesInCsv = result.duplicatePhonesInCsv;
+    } catch (e) {
+         toast({
+            variant: "destructive",
+            title: "Bulk Upload Failed",
+            description: "An unexpected error occurred during file parsing. Please check the file format and try again.",
+            duration: 10000,
+        });
+        setIsLoading(false);
+        return;
+    }
+
 
     if (validTraders.length === 0 && skippedCount === 0) {
       toast({
         variant: "destructive",
-        title: "No Valid Traders Found",
-        description: "Could not parse any traders from the file. Ensure it has a 'Name' header and is formatted correctly.",
+        title: "Bulk Upload Failed",
+        description: "Could not parse any traders from the file. Please check the file and try again.",
         duration: 8000,
       });
       setIsLoading(false);
