@@ -65,71 +65,69 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
   const parseAndValidateData = (): { validTraders: ParsedTraderData[], skippedCount: number, duplicatePhonesInCsv: Set<string> } => {
     if (!fileContent) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
 
+    // More robust Papaparse config
     const parseResults = Papa.parse(fileContent, {
-      header: true,
-      skipEmptyLines: 'greedy',
-      transformHeader: header => header.trim(),
+        header: true,
+        skipEmptyLines: 'greedy',
+        transformHeader: header => header.trim(),
+        quoteChar: '"',
+        escapeChar: '"',
+        dynamicTyping: true, // Automatically convert numbers, booleans
     });
 
     if (parseResults.errors.length) {
       console.error("CSV Parsing Errors:", parseResults.errors);
-      toast({
-        variant: "destructive",
-        title: "CSV Parsing Error",
-        description: `Problem on row ${parseResults.errors[0].row}: ${parseResults.errors[0].message}`,
-        duration: 10000,
-      });
+      // Find the first critical error
+      const firstError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter');
+      if (firstError) {
+         toast({
+            variant: "destructive",
+            title: "CSV Parsing Error",
+            description: `Problem on row ${firstError.row}: ${firstError.message}. Please check for unclosed quotes or formatting issues.`,
+            duration: 10000,
+        });
+        // Throw an error to stop execution
+        throw new Error(`Parsing error on row ${firstError.row}: ${firstError.message}`);
+      }
     }
     
-    const getRowValue = (row: any, headers: string[]) => {
-        const lowerCaseHeaders = headers.map(h => h.toLowerCase());
-        const rowKeys = Object.keys(row);
-        for (const key of rowKeys) {
-            if (lowerCaseHeaders.includes(key.toLowerCase())) {
-                const value = row[key];
-                if (value !== null && value !== undefined && value !== '') {
-                    return String(value);
-                }
-            }
+    // Flexible header matching function
+    const getRowValue = (row: any, potentialHeaders: string[]): any => {
+      const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
+      for (const key in row) {
+        if (lowerCaseHeaders.includes(key.toLowerCase())) {
+          const value = row[key];
+          // Return the value if it's not null/undefined/empty string
+          if (value !== null && value !== undefined && String(value).trim() !== '') {
+            return value;
+          }
         }
-        return undefined;
+      }
+      return undefined; // Return undefined if no matching header found or value is empty
     };
     
+    // Process rows into trader data objects
     const tradersToProcess = parseResults.data.map((row: any, index: number) => {
       const name = getRowValue(row, ["Name"])?.trim();
+      // 'Name' is essential, skip row if it's missing
       if (!name) return null;
 
-      const parseNumeric = (headers: string[]) => {
-        const val = getRowValue(row, headers);
-        if (!val) return undefined;
-        const cleaned = val.replace(/[^0-9.-]+/g, "");
-        const num = parseFloat(cleaned);
-        return isNaN(num) ? undefined : num;
-      };
-
-      const parseIntVal = (headers: string[]) => {
-         const val = getRowValue(row, headers);
-        if (!val) return undefined;
-        const cleaned = val.replace(/[^0-9-]+/g, "");
-        const num = parseInt(cleaned, 10);
-        return isNaN(num) ? undefined : num;
-      }
-      
       const statusRaw = getRowValue(row, ["Status"])?.trim().toLowerCase();
-      let status: ParsedTraderData['status'] = 'New Lead';
+      let status: ParsedTraderData['status'] = 'New Lead'; // Default status
       if (statusRaw === 'active') status = 'Active';
       else if (statusRaw === 'inactive') status = 'Inactive';
       else if (statusRaw === 'call-back') status = 'Call-Back';
 
-      return {
+      // Use dynamic typing from Papaparse but provide fallbacks
+      const parsedTrader: ParsedTraderData = {
         name,
         status,
         lastActivity: getRowValue(row, ["Last Activity"]),
         description: getRowValue(row, ["Description"]),
-        reviews: parseIntVal(["Reviews"]),
-        rating: parseNumeric(["Rating"]),
+        reviews: getRowValue(row, ["Reviews"]),
+        rating: getRowValue(row, ["Rating"]),
         website: getRowValue(row, ["Website"]),
-        phone: getRowValue(row, ["Phone"]),
+        phone: String(getRowValue(row, ["Phone"]) || ''), // Ensure phone is a string
         ownerName: getRowValue(row, ["Owner Name", "Owner"]),
         mainCategory: getRowValue(row, ["Main Category", "Category"]),
         categories: getRowValue(row, ["Categories"]),
@@ -137,11 +135,13 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         address: getRowValue(row, ["Address"]),
         ownerProfileLink: getRowValue(row, ["Link", "Owner Profile"]),
         notes: getRowValue(row, ["Notes"]),
-        totalAssets: parseNumeric(["Total Assets"]),
-        estimatedAnnualRevenue: parseNumeric(["Est. Annual Revenue", "Estimated Annual Revenue"]),
-        estimatedCompanyValue: parseNumeric(["Estimated Company Value", "Est. Company Value"]),
-        employeeCount: parseIntVal(["Employee Count"]),
-      } as ParsedTraderData;
+        totalAssets: getRowValue(row, ["Total Assets"]),
+        estimatedAnnualRevenue: getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]),
+        estimatedCompanyValue: getRowValue(row, ["Estimated Company Value", "Est. Company Value"]),
+        employeeCount: getRowValue(row, ["Employee Count"]),
+      };
+
+      return parsedTrader;
 
     }).filter((t): t is ParsedTraderData => t !== null);
 
@@ -189,13 +189,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         validTraders = result.validTraders;
         skippedCount = result.skippedCount;
         duplicatePhonesInCsv = result.duplicatePhonesInCsv;
-    } catch (e) {
-         toast({
-            variant: "destructive",
-            title: "Bulk Upload Failed",
-            description: "An unexpected error occurred during file parsing. Please check the file format and try again.",
-            duration: 10000,
-        });
+    } catch (e: any) {
+        // Error toast is already shown inside parseAndValidateData, just stop execution.
+        console.error("Halting handleSubmit due to parsing error:", e.message);
         setIsLoading(false);
         return;
     }
@@ -205,7 +201,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       toast({
         variant: "destructive",
         title: "Bulk Upload Failed",
-        description: "Could not parse any traders from the file. Please check the file format and try again.",
+        description: "Could not parse any traders from the file. Please check the file format and ensure 'Name' column is present.",
         duration: 8000,
       });
       setIsLoading(false);
