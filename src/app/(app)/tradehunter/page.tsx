@@ -124,13 +124,39 @@ export default function TradeHunterDashboardPage() {
 
   const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
     if (!currentBaseBranchId || currentUserRole === 'unknown') {
-      return { data: null, error: "Invalid or missing Branch ID/Role." };
+      const error = "Invalid or missing Branch ID/Role.";
+      toast({ variant: "destructive", title: "Bulk Add Failed", description: error });
+      return { data: null, error };
     }
-    // Call the server action for bulk adding
+    
     const result = await bulkAddTradersAction(currentBaseBranchId, tradersToCreate); 
-    // If successful and we have a valid branch, refetch all traders to get a consistent state
-    if (result.data && result.data.length > 0 && currentBaseBranchId) { 
+    
+    if (result.error) {
+       toast({
+        variant: "destructive",
+        title: "Bulk Upload Failed",
+        description: result.error,
+        duration: 10000,
+      });
+      return result;
+    }
+    
+    if (result.data && currentBaseBranchId) { 
+      // Refetch all traders to get a consistent state, which also handles the success toast logic implicitly
       await fetchTraders(currentBaseBranchId);
+      
+      const newCount = result.data?.length || 0;
+      const skippedCount = tradersToCreate.length - newCount;
+      let summaryMessages = [];
+      if (newCount > 0) summaryMessages.push(`${newCount} new trader(s) added successfully.`);
+      if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates.`);
+      if (summaryMessages.length === 0) summaryMessages.push("No new traders were added. They may already exist.");
+
+      toast({
+          title: "Bulk Upload Processed",
+          description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
+          duration: 10000,
+      });
     } 
     return result;
   };
