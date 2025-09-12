@@ -185,7 +185,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         console.error("Client-side error during bulk upload:", error);
         toast({
             variant: "destructive",
-            title: "Client Error",
+            title: "Bulk Upload Failed",
             description: `An unexpected error occurred during file processing: ${error.message}`,
             duration: 10000,
         });
@@ -274,5 +274,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
