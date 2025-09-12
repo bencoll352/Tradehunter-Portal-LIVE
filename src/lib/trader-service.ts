@@ -349,5 +349,3 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
     await Promise.all(batchPromises);
     return { successCount, failureCount };
 }
-
-    

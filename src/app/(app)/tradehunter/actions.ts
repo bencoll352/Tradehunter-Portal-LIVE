@@ -130,5 +130,3 @@ export async function bulkDeleteTradersAction(branchId: BaseBranchId, traderIds:
         return { successCount: 0, failureCount: traderIds.length, error: errorMessage };
     }
 }
-
-    
