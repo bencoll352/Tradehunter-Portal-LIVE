@@ -27,14 +27,14 @@ interface BulkAddTradersDialogProps {
 
 const MAX_UPLOAD_LIMIT = 1000;
 
-const safeParseFloat = (val: any) => {
-    if (val === null || val === undefined || val === '') return null;
+const safeParseFloat = (val: any): number | null => {
+    if (val === null || val === undefined || String(val).trim() === '') return null;
     const num = parseFloat(String(val).replace(/[£,]/g, ''));
     return isNaN(num) ? null : num;
 };
 
-const safeParseInt = (val: any) => {
-    if (val === null || val === undefined || val === '') return null;
+const safeParseInt = (val: any): number | null => {
+    if (val === null || val === undefined || String(val).trim() === '') return null;
     const num = parseInt(String(val).replace(/,/g, ''), 10);
     return isNaN(num) ? null : num;
 };
@@ -267,5 +267,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    

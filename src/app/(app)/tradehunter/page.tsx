@@ -38,10 +38,14 @@ export default function TradeHunterDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchTraders = useCallback(async (branchId: BaseBranchId) => {
+  const currentBaseBranchId = useMemo(() => branchInfo?.baseBranchId, [branchInfo]);
+  const currentUserRole = useMemo(() => branchInfo?.role, [branchInfo]);
+
+  const fetchTraders = useCallback(async () => {
+    if (!currentBaseBranchId) return; // Don't fetch if there's no branch ID
     setIsLoading(true);
     try {
-      const result = await getTradersAction(branchId);
+      const result = await getTradersAction(currentBaseBranchId);
       if (result.data) {
         // Sort data by lastActivity date, descending
         setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
@@ -62,7 +66,7 @@ export default function TradeHunterDashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, currentBaseBranchId]);
 
   // Effect to initialize the dashboard on component mount
   useEffect(() => {
@@ -71,15 +75,21 @@ export default function TradeHunterDashboardPage() {
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
         const info = getBranchInfo(storedLoggedInId);
         setBranchInfo(info);
-        if (info.baseBranchId && info.role !== 'unknown') {
-          await fetchTraders(info.baseBranchId);
-        } else {
-          setIsLoading(false);
+        // The fetch will be triggered by the next effect, once branchInfo is set
+        if (!info.baseBranchId && info.role !== 'manager') {
+            setIsLoading(false);
         }
       }
     };
     initializeDashboard();
-  }, [fetchTraders]);
+  }, []);
+
+  // Effect to fetch traders when the branch ID changes (including on initial load)
+  useEffect(() => {
+      if (currentBaseBranchId) {
+          fetchTraders();
+      }
+  }, [currentBaseBranchId, fetchTraders]);
   
   const stats = useMemo(() => {
     const activeTraders = traders.filter(t => t.status === 'Active').length;
@@ -88,9 +98,6 @@ export default function TradeHunterDashboardPage() {
     return { activeTraders, hotLeads, newLeads };
   }, [traders]);
 
-
-  const currentBaseBranchId = useMemo(() => branchInfo?.baseBranchId, [branchInfo]);
-  const currentUserRole = useMemo(() => branchInfo?.role, [branchInfo]);
 
   const handleAdd = async (values: TraderFormValues): Promise<boolean> => {
     if (!currentBaseBranchId || currentUserRole === 'unknown') {
@@ -168,7 +175,7 @@ export default function TradeHunterDashboardPage() {
       return { data: null, error: result.error };
     }
     
-    if (result.data && currentBaseBranchId) { 
+    if (result.data) { 
       const newCount = result.data?.length || 0;
       const skippedCount = tradersToCreate.length - newCount;
       let summaryMessages = [];
@@ -182,7 +189,7 @@ export default function TradeHunterDashboardPage() {
           duration: 10000,
       });
       // Correctly refetch traders for the current branch
-      await fetchTraders(currentBaseBranchId);
+      await fetchTraders();
     } 
     return { data: result.data, error: null };
   };
@@ -281,5 +288,3 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
-
-    
