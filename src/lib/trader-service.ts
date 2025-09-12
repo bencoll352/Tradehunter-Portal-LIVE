@@ -10,13 +10,13 @@ import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
 // --- Firestore Collection Reference ---
-const getTradersCollection = async (branchId: BaseBranchId) => {
-  const { firestore } = await getFirebaseAdmin();
+const getTradersCollection = (branchId: BaseBranchId) => {
+  const { firestore } = getFirebaseAdmin();
   return firestore.collection('traders').doc(branchId).collection('branchTraders');
 };
 
-const getTasksCollection = async (branchId: BaseBranchId, traderId: string) => {
-    const { firestore } = await getFirebaseAdmin();
+const getTasksCollection = (branchId: BaseBranchId, traderId: string) => {
+    const { firestore } = getFirebaseAdmin();
     return firestore.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
 }
 
@@ -33,7 +33,7 @@ async function checkDuplicatePhone(branchId: BaseBranchId, phone: string | null 
   const normalizedPhone = normalizePhoneNumber(phone);
   if (!normalizedPhone) return;
 
-  const tradersCollection = await getTradersCollection(branchId);
+  const tradersCollection = getTradersCollection(branchId);
   const querySnapshot = await tradersCollection.where('phone', '==', normalizedPhone).get();
 
   if (!querySnapshot.empty) {
@@ -116,7 +116,7 @@ const safeToISOString = (value: any): string | null => {
 
 export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
   try {
-    const tradersCollection = await getTradersCollection(branchId);
+    const tradersCollection = getTradersCollection(branchId);
     const snapshot = await tradersCollection.get();
 
     // If the collection is empty, seed it with initial data and refetch.
@@ -175,7 +175,7 @@ function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Trader[]
 export async function addTrader(branchId: BaseBranchId, traderData: TraderFormValues): Promise<Trader> {
   try {
     await checkDuplicatePhone(branchId, traderData.phone);
-    const tradersCollection = await getTradersCollection(branchId);
+    const tradersCollection = getTradersCollection(branchId);
 
     const newTraderData = {
       ...traderData,
@@ -192,10 +192,10 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
 
     return {
       id: docRef.id,
+      ...data,
       name: data.name,
       status: data.status,
       lastActivity: lastActivity.toDate().toISOString(),
-      ...data
     } as Trader;
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:addTrader]', error);
@@ -206,7 +206,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
 export async function updateTrader(branchId: BaseBranchId, traderId: string, traderData: TraderFormValues): Promise<Trader> {
   try {
     await checkDuplicatePhone(branchId, traderData.phone, traderId);
-    const tradersCollection = await getTradersCollection(branchId);
+    const tradersCollection = getTradersCollection(branchId);
     const traderRef = tradersCollection.doc(traderId);
 
     const updatedData = {
@@ -225,10 +225,10 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
 
     return {
       id: traderId,
+      ...data,
       name: data.name,
       status: data.status,
       lastActivity: lastActivity.toDate().toISOString(),
-      ...data
     } as Trader;
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:updateTrader]', error);
@@ -239,7 +239,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
 
 export async function deleteTrader(branchId: BaseBranchId, traderId: string): Promise<void> {
   try {
-    const tradersCollection = await getTradersCollection(branchId);
+    const tradersCollection = getTradersCollection(branchId);
     await tradersCollection.doc(traderId).delete();
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:deleteTrader]', error);
@@ -248,7 +248,7 @@ export async function deleteTrader(branchId: BaseBranchId, traderId: string): Pr
 }
 
 export async function bulkAddTraders(branchId: BaseBranchId, tradersData: ParsedTraderData[]): Promise<Trader[]> {
-  const { firestore } = await getFirebaseAdmin();
+  const { firestore } = getFirebaseAdmin();
   const tradersCollection = firestore.collection('traders').doc(branchId).collection('branchTraders');
   const batch = firestore.batch();
   const addedTraders: Trader[] = [];
@@ -309,7 +309,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
 
 export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: string[]): Promise<{ successCount: number; failureCount: number }> {
   try {
-    const { firestore } = await getFirebaseAdmin();
+    const { firestore } = getFirebaseAdmin();
     const tradersCollection = firestore.collection('traders').doc(branchId).collection('branchTraders');
     const batch = firestore.batch();
 
@@ -328,7 +328,7 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
 
 export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'id'>): Promise<Task> {
   try {
-    const tasksCollection = await getTasksCollection(branchId, taskData.traderId);
+    const tasksCollection = getTasksCollection(branchId, taskData.traderId);
     const docRef = await tasksCollection.add(taskData);
     return { id: docRef.id, ...taskData } as Task;
   } catch (error: any) {
@@ -340,7 +340,7 @@ export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'i
 export async function updateTask(branchId: BaseBranchId, taskId: string, taskData: Partial<Task>): Promise<Task> {
   try {
     if (!taskData.traderId) throw new Error('traderId is required to update a task.');
-    const tasksCollection = await getTasksCollection(branchId, taskData.traderId);
+    const tasksCollection = getTasksCollection(branchId, taskData.traderId);
     const taskRef = tasksCollection.doc(taskId);
     await taskRef.update(taskData);
     const updatedDoc = await taskRef.get();
@@ -353,7 +353,11 @@ export async function updateTask(branchId: BaseBranchId, taskId: string, taskDat
 
 export async function deleteTask(branchId: BaseBranchId, taskId: string): Promise<void> {
   try {
-    const { firestore } = await getFirebaseAdmin();
+    const { firestore } = getFirebaseAdmin();
+    // This assumes tasks are in a subcollection under a trader, which is complex to query directly.
+    // A better approach for deletion might require knowing the traderId.
+    // For now, this is a placeholder for a more robust implementation if needed.
+    // This will require a collectionGroup query which might need an index.
     const querySnapshot = await firestore.collectionGroup('tasks').where('id', '==', taskId).get();
     if (querySnapshot.empty) {
         throw new Error('Task not found');

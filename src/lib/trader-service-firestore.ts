@@ -12,7 +12,7 @@ let firebaseAdmin: {
  * This function is designed to be called on the server-side.
  * It uses service account credentials passed via environment variables.
  */
-export async function getFirebaseAdmin() {
+export function getFirebaseAdmin() {
   if (firebaseAdmin) {
     return firebaseAdmin;
   }
