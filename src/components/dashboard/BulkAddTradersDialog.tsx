@@ -101,9 +101,25 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     };
     
     const tradersToProcess = (parseResults.data as any[])
-      .map((row: any): ParsedTraderData | null => {
+      .map((row: any, index: number): ParsedTraderData | null => {
         const name = getRowValue(row, ["Name"])?.trim();
         if (!name) return null;
+        
+        // Detailed logging for problematic fields
+        const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
+        if(!ownerName) {
+            console.warn(`[CSV Debug] Row ${index + 2}: "Owner Name" not found. Detected headers:`, Object.keys(row));
+        }
+
+        const mainCategory = getRowValue(row, ["Main Category", "Category"]);
+        if(!mainCategory) {
+            console.warn(`[CSV Debug] Row ${index + 2}: "Main Category" not found. Detected headers:`, Object.keys(row));
+        }
+        
+        const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
+        if(!workdayTiming) {
+            console.warn(`[CSV Debug] Row ${index + 2}: "Workday Timing" not found. Detected headers:`, Object.keys(row));
+        }
 
         return {
           name,
@@ -114,10 +130,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
           rating: getRowValue(row, ["Rating"]),
           website: getRowValue(row, ["Website"]),
           phone: String(getRowValue(row, ["Phone"]) || ''),
-          ownerName: getRowValue(row, ["Owner Name", "Owner"]),
-          mainCategory: getRowValue(row, ["Main Category", "Category"]),
+          ownerName: ownerName,
+          mainCategory: mainCategory,
           categories: getRowValue(row, ["Categories"]),
-          workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]),
+          workdayTiming: workdayTiming,
           address: getRowValue(row, ["Address"]),
           ownerProfileLink: getRowValue(row, ["Link", "Owner Profile"]),
           notes: getRowValue(row, ["Notes"]),
@@ -258,7 +274,7 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
              Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. A 'Name' header is MANDATORY. Any traders with a duplicate phone number will be SKIPPED.
             </p>
              <p className="text-xs text-muted-foreground">
-              Recommended headers: Name, Phone, Address, Owner Name, Main Category, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count.
+              Your situation may require unique CSV column headers. The system will now attempt to match aliases for Owner Name, Main Category & Workday Timing if those columns are not detected.
             </p>
             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
