@@ -218,24 +218,24 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogTitle>To Bulk Add New Traders (CSV)</DialogTitle>
           <DialogDescription className="space-y-4 pt-2 text-foreground/90">
             <p>
-              For a successful upload, ensure the spreadsheet adheres to the specified format as outlined below. The only required column is 'Name'. The uploader will automatically skip any traders whose phone number is already present in the database.
+              For a successful upload, ensure the spreadsheet adheres to the specified format. The only required column is 'Name'. The uploader will automatically skip any traders whose phone number is already present in the database, or in the CSV file.
             </p>
              <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs font-medium">
-                    Rows with a 'Name' field are mandatory. Any rows without a name will be skipped.
+                    Rows with a 'Name' field are mandatory, any rows without a name will be skipped.
                 </p>
             </div>
              <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs font-medium">
-                    For 'Owner Name', 'Main Category' and 'Workday Timing' ensure headers are exact as specified.
+                    For 'Owner Name', 'Main Category', and 'Workday Timing' ensure headers are exact.
                 </p>
             </div>
             <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <p className="text-xs font-medium">
-                    Fields with commas (e.g., “123 Main St, Anytown”) MUST be enclosed in double quotes.
+                    Fields with commas, (e.g. "123 Main St, Anytown") MUST be enclosed in double quotes.
                 </p>
             </div>
           </DialogDescription>
