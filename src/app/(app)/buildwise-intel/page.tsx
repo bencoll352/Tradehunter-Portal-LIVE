@@ -1,27 +1,11 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Home, AlertTriangle } from "lucide-react"; 
-import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId } from '@/types';
-import { useToast } from '@/hooks/use-toast';
+import { Home, AlertTriangle } from "lucide-react"; 
 
 export default function BuildwiseIntelPage() {
   const intelAppUrl = "https://studio--buildwise-intel.us-central1.hosted.app/"; 
-  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const initializeData = async () => {
-      if (typeof window !== 'undefined') {
-        const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-        const info = getBranchInfo(storedLoggedInId);
-        setBranchInfo(info);
-      }
-    };
-    initializeData();
-  }, [toast]);
 
   return (
     <div className="space-y-6">
