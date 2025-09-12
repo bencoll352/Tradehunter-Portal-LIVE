@@ -46,7 +46,7 @@ export async function addTraderAction(branchId: BaseBranchId, values: TraderForm
     } catch (error) {
         console.error(`[Action] Failed to add trader to ${branchId}:`, error);
         const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred.";
-        if (errorMessage.startsWith('TRADER_DEUPLICATE_PHONE')) {
+        if (errorMessage.includes('TRADER_DEUPLICATE_PHONE')) {
              return { data: null, error: `Could not add trader. Reason: A trader with this phone number already exists.` };
         }
         return { data: null, error: `Could not add trader. Reason: ${errorMessage}` };
@@ -106,7 +106,7 @@ export async function bulkAddTradersAction(branchId: BaseBranchId, traders: Pars
     } catch (error) {
         console.error(`[Action] Failed to bulk add traders to ${branchId}:`, error);
         const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred during bulk add.";
-        return { data: null, error: `TRADER_SERVICE_ERROR: Could not save traders. Reason: ${errorMessage}` };
+        return { data: null, error: `${errorMessage}` };
     }
 }
 

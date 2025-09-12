@@ -46,7 +46,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         reader.readAsText(file);
       } else {
         toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a CSV file (.csv)." });
-        if (fileInputref.current) fileInputref.current.value = "";
+        if(fileInputRef.current) fileInputRef.current.value = "";
         setSelectedFile(null);
         setFileContent(null);
       }
@@ -61,8 +61,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
   };
 
-  const parseAndValidateData = (): { validTraders: ParsedTraderData[], skippedCount: number, duplicatePhonesInCsv: Set<string> } => {
-    if (!fileContent) return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set() };
+  const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
+    if (!fileContent) return { validTraders: [] };
 
     const parseResults = Papa.parse(fileContent, {
         header: true,
@@ -73,7 +73,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     });
 
     if (parseResults.errors.length) {
-      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields');
+      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields' && e.code !== 'TooFewFields');
       if (criticalError) {
         toast({
             variant: "destructive",
@@ -127,7 +127,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       })
       .filter((t): t is ParsedTraderData => t !== null);
 
-    return { validTraders: tradersToProcess, skippedCount: 0, duplicatePhonesInCsv: new Set() };
+    return { validTraders: tradersToProcess };
   };
 
   const handleSubmit = async () => {
@@ -186,7 +186,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
              let summaryMessages = [];
              if (newCount > 0) summaryMessages.push(`${newCount} new trader(s) added successfully.`);
              if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates (phone number already exists).`);
-             if (summaryMessages.length === 0) summaryMessages.push("No new traders were added.");
+             if (summaryMessages.length === 0) summaryMessages.push("No new traders were added. This may be because they all already exist.");
 
              toast({
                 title: "Bulk Upload Processed",
@@ -219,7 +219,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           <DialogTitle>Bulk Add New Traders via CSV</DialogTitle>
           <DialogDescription className="space-y-2 pt-2">
             <p>
-             Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. A 'Name' header is MANDATORY. Any traders with a duplicate phone number will be SKIPPED.
+             Upload a CSV file to add multiple traders at once. The system uses header names for data mapping, so column order doesn't matter. A 'Name' header is MANDATORY.
             </p>
              <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />

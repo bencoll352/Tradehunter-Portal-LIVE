@@ -105,7 +105,8 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
         }).filter((t): t is Trader => t !== null);
     } catch (error) {
         console.error(`[Trader Service] Error in getTraders for branch ${branchId}:`, error);
-        throw new Error(`Failed to get traders. Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const errorMessage = error instanceof Error ? error.message : "An unknown server error occurred.";
+        throw new Error(`Failed to get traders. Reason: ${errorMessage}`);
     }
 }
 
@@ -122,10 +123,12 @@ export async function addTrader(branchId: BaseBranchId, traderData: Omit<Trader,
     // Check for duplicate phone number before adding
     if (traderData.phone) {
         const normalizedPhone = normalizePhoneNumber(traderData.phone);
-        const querySnapshot = await branchCollectionRef.where('phone', '==', normalizedPhone).get();
-        if (!querySnapshot.empty) {
-            // A more specific error could be thrown here and caught in the action
-            throw new Error(`TRADER_DEUPLICATE_PHONE: A trader with this phone number already exists.`);
+        if (normalizedPhone) {
+            const querySnapshot = await branchCollectionRef.where('phone', '==', normalizedPhone).limit(1).get();
+            if (!querySnapshot.empty) {
+                // A more specific error could be thrown here and caught in the action
+                throw new Error(`TRADER_DEUPLICATE_PHONE`);
+            }
         }
     }
 
@@ -298,11 +301,14 @@ export async function bulkAddTraders(branchId: BaseBranchId, traders: ParsedTrad
             }
         }
         
-        await batch.commit();
+        if (newTraders.length > 0) {
+            await batch.commit();
+        }
         return newTraders;
     } catch (error) {
         console.error('[Trader Service] Error during bulkAddTraders:', error);
-        throw new Error(`A database error occurred during the bulk upload process. Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        throw new Error(`TRADER_SERVICE_ERROR: Could not save traders. Reason: ${errorMessage}`);
     }
 }
 
