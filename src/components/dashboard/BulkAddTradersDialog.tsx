@@ -15,16 +15,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import type { BaseBranchId, ParsedTraderData, Trader } from "@/types"; // Changed BranchId to BaseBranchId
+import type { BaseBranchId, ParsedTraderData, Trader } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Papa from "papaparse";
 import { normalizePhoneNumber } from "@/lib/utils";
 
 interface BulkAddTradersDialogProps {
-  branchId: BaseBranchId; // Changed BranchId to BaseBranchId
+  branchId: BaseBranchId;
   existingTraders: Trader[];
-  onBulkAddTraders: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>; // Changed BranchId to BaseBranchId
+  onBulkAddTraders: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
 }
 
 const MAX_UPLOAD_LIMIT = 1000;
@@ -72,12 +72,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }
     const cleanedValue = String(rawValue).replace(/[^0-9.-]+/g, "");
     if (cleanedValue === "" || cleanedValue === "." || cleanedValue === "-") {
-        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which is not a valid number. Field will be undefined.`);
         return undefined;
     }
     const parsed = parseFloat(cleanedValue);
     if (isNaN(parsed)) {
-        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which parsed to NaN. Field will be undefined.`);
         return undefined;
     }
     return parsed;
@@ -89,12 +87,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     }
     const cleanedValue = String(rawValue).replace(/[^0-9-]+/g, "");
     if (cleanedValue === "" || cleanedValue === "-") {
-        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${cleanedValue}" cleaned to "${cleanedValue}", which is not a valid integer. Field will be undefined.`);
         return undefined;
     }
     const parsed = parseInt(cleanedValue, 10);
     if (isNaN(parsed)) {
-        console.warn(`[CSV Parsing Debug] Trader "${traderNameForWarning}", field "${fieldName}": Original value "${rawValue}" cleaned to "${cleanedValue}", which parsed to NaN for integer. Field will be undefined.`);
         return undefined;
     }
     return isNaN(parsed) ? undefined : parsed;
@@ -121,10 +117,8 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
         if (year < 100) { // Handle yy format
           year += (year < 70 ? 2000 : 1900); // Arbitrary cutoff for 20th/21st century
         }
-        // Basic validation of date parts
         if (year >= 1900 && year <= 2100 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
           const tempDate = new Date(Date.UTC(year, month, day));
-          // Verify that creating the date didn't roll over (e.g., 31st Feb -> 3rd Mar)
           if (tempDate.getUTCFullYear() === year && tempDate.getUTCMonth() === month && tempDate.getUTCDate() === day) {
              date = tempDate;
              break;
@@ -133,12 +127,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       }
     }
 
-    // Fallback attempt if primary formats fail
     if (!date) {
         try {
-            const parsedFallback = new Date(val); // Attempt direct parsing
-            if (!isNaN(parsedFallback.getTime())) { // Check if it's a valid date object
-                // Add a sanity check for year, e.g., to avoid misinterpreting things like "1-2-3" as a valid date in 1903
+            const parsedFallback = new Date(val); 
+            if (!isNaN(parsedFallback.getTime())) { 
                 if (parsedFallback.getUTCFullYear() > 1900) {
                     date = parsedFallback;
                 }
@@ -149,7 +141,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     if (date && !isNaN(date.getTime())) {
       return date.toISOString();
     } else {
-      console.warn(`[CSV Parsing Debug] Invalid date format for Last Activity: "${val}" for trader "${traderNameForWarning}". System will default it or leave it undefined for the server to handle.`);
       return undefined; // Or handle as an error / default date if required
     }
   };
@@ -157,10 +148,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
   const getRowValue = (row: any, headerVariations: string[]): string | undefined => {
     for (const variation of headerVariations) {
       const keys = Object.keys(row);
-      // Find a key in the row that matches a variation (case-insensitive, space-trimmed)
       const foundKey = keys.find(key => key.trim().toLowerCase() === variation.trim().toLowerCase());
       if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null) {
-        return String(row[foundKey]); // Do not trim here, preserve original whitespace from cell
+        return String(row[foundKey]);
       }
     }
     return undefined;
@@ -172,15 +162,12 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     let tradersToProcess: ParsedTraderData[] = [];
 
     const parseResults = Papa.parse(csvString, {
-      header: true, // Automatically uses the first row as headers
-      skipEmptyLines: 'greedy', // Skips lines that are empty or only contain whitespace
-      transformHeader: header => header.trim(), // Trim whitespace from headers
+      header: true,
+      skipEmptyLines: 'greedy',
+      transformHeader: header => header.trim(),
     });
 
-    console.log("[CSV Parsing Debug] Detected headers by PapaParse:", parseResults.meta.fields);
-
     if (parseResults.errors.length > 0) {
-      parseResults.errors.forEach(err => console.warn("PapaParse Error:", err));
       toast({
         variant: "destructive",
         title: "CSV Parsing Error",
@@ -197,7 +184,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
 
     const actualHeaders = parseResults.meta.fields;
     if (!actualHeaders || actualHeaders.length === 0) {
-        console.warn("No headers found in CSV by PapaParse.");
         toast({
             variant: "destructive",
             title: "CSV Parsing Problem",
@@ -217,27 +203,10 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       });
       return { validTraders: [], skippedCount: 0, duplicatePhonesInCsv: new Set(), rawParseResults: parseResults };
     }
-
-    const commonExpectedHeadersForHeuristicCheck = ["phone", "address", "owner name", "main category", "rating", "website", "notes", "est. annual revenue", "estimated company value", "employee count"];
-    const foundCommonHeadersCount = actualHeaders.filter(h =>
-        commonExpectedHeadersForHeuristicCheck.includes(h.trim().toLowerCase())
-    ).length;
-
-    if (foundCommonHeadersCount < 2 && actualHeaders.length > 1 && actualHeaders.some(h => h.trim().toLowerCase() === "name")) { 
-        console.warn(`[CSV Parsing Debug] Few common headers found. Expected some of: ${commonExpectedHeadersForHeuristicCheck.join(', ')}. Detected headers: ${actualHeaders.join(', ')}`);
-        toast({
-            variant: "default", 
-            title: "Unusual CSV Headers Detected",
-            description: `The CSV has a 'Name' column, but is missing several other common headers (e.g., Phone, Address, Notes, Est. Annual Revenue, Estimated Company Value, Employee Count). Upload will proceed, but data might be incomplete. Detected headers: ${actualHeaders.slice(0,5).join(', ')}...`,
-            duration: 10000,
-        });
-    }
-
-
+    
     for (const row of parseResults.data as any[]) { 
       const name = getRowValue(row, ["Name"])?.trim();
       if (!name) {
-        console.warn("[CSV Parsing Debug] Skipping row due to missing 'Name'. Row data:", row);
         continue;
       }
 
@@ -250,33 +219,14 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
             else if (statusValueLower === 'inactive') parsedStatus = 'Inactive';
             else if (statusValueLower === 'call-back') parsedStatus = 'Call-Back';
             else if (statusValueLower === 'new lead') parsedStatus = 'New Lead';
-        } else {
-            console.warn(`[CSV Parsing Debug] Trader "${name}": Invalid status "${statusValueRaw}". Defaulting to 'New Lead'.`);
         }
       }
-
 
       const lastActivityValue = parseDateString(getRowValue(row, ["Last Activity"]), name);
       const phoneValue = getRowValue(row, ["📞 Phone", "Phone"]);
       const ownerNameValue = getRowValue(row, ["Owner Name", "Owner"]);
       const mainCategoryValue = getRowValue(row, ["Main Category", "Category"]);
       const workdayTimingValue = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]); 
-
-      if (!ownerNameValue && name || !mainCategoryValue && name || !workdayTimingValue && name) {
-        const missingFields = [];
-        if (!ownerNameValue) missingFields.push("Owner Name (expected 'Owner Name' or 'Owner')");
-        if (!mainCategoryValue) missingFields.push("Main Category (expected 'Main Category' or 'Category')");
-        if (!workdayTimingValue) missingFields.push("Workday Timing (expected 'Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', or 'WorkdayTiming')");
-
-        if (missingFields.length > 0) { 
-            console.warn(
-            `[CSV Parsing Debug] For trader "${name}": Could not find data for: [${missingFields.join('; ')}]. ` +
-            `This could be due to missing headers or empty cells for these fields in your CSV. ` +
-            `Ensure headers match expected variations (case-insensitive, space-trimmed) and that data is present in the cells. ` +
-            `Detected headers for this row by the system: ${Object.keys(row).join(', ')}` 
-            );
-        }
-      }
 
       const trader: ParsedTraderData = {
         name: name,
@@ -318,11 +268,9 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
       if (normalizedPhone) { 
         if (existingNormalizedPhones.has(normalizedPhone)) {
           isDuplicate = true;
-           console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" already exists in the database (based on existing traders passed to dialogue). Skipping.`);
         } else if (processedPhoneNumbersInCsv.has(normalizedPhone)) {
           isDuplicate = true;
           duplicatePhonesInCsv.add(trader.phone || 'N/A'); 
-          console.warn(`[CSV Parsing Debug] Trader "${trader.name}" with phone "${trader.phone}" is a duplicate within the CSV file itself. Skipping.`);
         }
       }
 
@@ -349,10 +297,6 @@ export function BulkAddTradersDialog({ branchId, existingTraders, onBulkAddTrade
     const { validTraders, skippedCount, duplicatePhonesInCsv, rawParseResults } = parseCsvData(fileContent);
 
     if (validTraders.length === 0 && skippedCount === 0 && fileContent.trim() !== "") {
-      console.warn(`[CSV Parsing Debug] No valid traders parsed from a non-empty file.
-        Raw parsed data length (PapaParse): ${rawParseResults?.data?.length ?? 'N/A'}.
-        This could mean rows were present but lacked a 'Name', or failed other validations.
-        First few raw data rows (if any):`, rawParseResults?.data?.slice(0,3) ?? "N/A"); 
       toast({
         variant: "destructive",
         title: "No Traders Parsed",
