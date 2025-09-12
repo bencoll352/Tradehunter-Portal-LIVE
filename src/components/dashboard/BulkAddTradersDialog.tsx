@@ -74,13 +74,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (parseResults.errors.length) {
       const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields' && e.code !== 'TooFewFields');
       if (criticalError) {
-        toast({
-            variant: "destructive",
-            title: "CSV Parsing Error",
-            description: `Problem on row ${criticalError.row + 2}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`,
-            duration: 10000,
-        });
-        throw new Error(`Parsing error on row ${criticalError.row + 2}`);
+        // This is a more robust way to throw an error that the handleSubmit can catch.
+        throw new Error(`Parsing error on row ${criticalError.row + 2}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`);
       }
     }
     
@@ -192,6 +187,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
             variant: "destructive",
             title: "Client Error",
             description: `An unexpected error occurred during file processing: ${error.message}`,
+            duration: 10000,
         });
     } finally {
         setIsLoading(false);
