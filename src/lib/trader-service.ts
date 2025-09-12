@@ -165,6 +165,7 @@ function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Trader[]
       estimatedAnnualRevenue: data.estimatedAnnualRevenue ?? null,
       estimatedCompanyValue: data.estimatedCompanyValue ?? null,
       employeeCount: data.employeeCount ?? null,
+      tasks: data.tasks ?? null,
     } as Trader;
   });
 }
@@ -194,6 +195,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
       name: data.name,
       status: data.status,
       lastActivity: lastActivity.toDate().toISOString(),
+      tasks: data.tasks ?? null,
     } as Trader;
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:addTrader]', error);
@@ -227,6 +229,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
       name: data.name,
       status: data.status,
       lastActivity: lastActivity.toDate().toISOString(),
+      tasks: data.tasks ?? null,
     } as Trader;
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:updateTrader]', error);
@@ -285,6 +288,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
       estimatedAnnualRevenue: rawTrader.estimatedAnnualRevenue ?? null,
       estimatedCompanyValue: rawTrader.estimatedCompanyValue ?? null,
       employeeCount: rawTrader.employeeCount ?? null,
+      tasks: [],
     };
     batch.set(docRef, newTrader);
 
@@ -347,18 +351,10 @@ await taskRef.update(taskData);
   }
 }
 
-export async function deleteTask(branchId: BaseBranchId, taskId: string): Promise<void> {
+export async function deleteTask(branchId: BaseBranchId, traderId: string, taskId: string): Promise<void> {
   try {
-    // This assumes tasks are in a subcollection under a trader, which is complex to query directly.
-    // A better approach for deletion might require knowing the traderId.
-    // For now, this is a placeholder for a more robust implementation if needed.
-    // This will require a collectionGroup query which might need an index.
-    const querySnapshot = await firestore.collectionGroup('tasks').where('id', '==', taskId).get();
-    if (querySnapshot.empty) {
-        throw new Error('Task not found');
-    }
-    const taskDoc = querySnapshot.docs[0];
-    await taskDoc.ref.delete();
+    const tasksCollection = getTasksCollection(branchId, traderId);
+    await tasksCollection.doc(taskId).delete();
 } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:deleteTask]', error);
     throw new Error(`Could not delete task. Reason: ${error.message}`);
