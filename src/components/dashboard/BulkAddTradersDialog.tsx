@@ -136,40 +136,31 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     setIsLoading(true);
 
-    let parseResult;
     try {
-        parseResult = parseAndValidateData();
-    } catch (e: any) {
-        console.error("Halting handleSubmit due to parsing error:", e.message);
-        setIsLoading(false);
-        return;
-    }
-    
-    const { validTraders } = parseResult;
+        const { validTraders } = parseAndValidateData();
 
-    if (validTraders.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Bulk Upload Failed",
-        description: "Could not parse any traders from the file. Please check the file format and ensure the 'Name' header is present and that rows are not empty.",
-        duration: 8000,
-      });
-      setIsLoading(false);
-      return;
-    }
+        if (validTraders.length === 0) {
+          toast({
+            variant: "destructive",
+            title: "Bulk Upload Failed",
+            description: "Could not parse any traders from the file. Please check the file format and ensure the 'Name' header is present and that rows are not empty.",
+            duration: 8000,
+          });
+          setIsLoading(false);
+          return;
+        }
 
-    if (validTraders.length > MAX_UPLOAD_LIMIT) {
-      toast({
-        variant: "destructive",
-        title: "Upload Limit Exceeded",
-        description: `The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`,
-        duration: 8000,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    try {
+        if (validTraders.length > MAX_UPLOAD_LIMIT) {
+          toast({
+            variant: "destructive",
+            title: "Upload Limit Exceeded",
+            description: `The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`,
+            duration: 8000,
+          });
+          setIsLoading(false);
+          return;
+        }
+        
         const result = await onBulkAddTraders(validTraders);
         
         if (result.error) {
@@ -195,11 +186,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
             setOpen(false);
             clearFile();
         }
-    } catch (error) {
+    } catch (error: any) {
+        console.error("Client-side error during bulk upload:", error);
         toast({
             variant: "destructive",
             title: "Client Error",
-            description: `An unexpected client error occurred during bulk upload. Check console for details.`,
+            description: `An unexpected error occurred during file processing: ${error.message}`,
         });
     } finally {
         setIsLoading(false);
@@ -285,3 +277,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
