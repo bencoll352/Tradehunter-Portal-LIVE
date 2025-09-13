@@ -104,7 +104,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   
   const parseAndValidateData = (csvText: string): ParsedTraderData[] => {
     const lines = csvText.trim().replace(/\r\n/g, '\n').split('\n');
-    const headerLine = parseCsvLine(lines[0]).map(h => (h || '').trim().toLowerCase());
+    // **DEFINITIVE FIX**: Filter out any null/undefined headers before mapping to prevent crash
+    const headerLine = parseCsvLine(lines[0]).filter(Boolean).map(h => h.trim().toLowerCase());
     
     // This mapping allows for flexible header names from the CSV file.
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
