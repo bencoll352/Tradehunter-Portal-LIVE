@@ -220,19 +220,19 @@ export default function TradeHunterDashboardPage() {
   }
 
   if (currentUserRole === 'manager' && !currentBaseBranchId) {
-      return (
-          <div className="space-y-6">
-              <Card>
-                  <CardHeader>
-                      <CardTitle>Manager View</CardTitle>
-                      <CardDescription>Select a branch from the login screen to view and manage its traders.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                      <p>As a manager, you can log in with any specific branch ID to see its data.</p>
-                  </CardContent>
-              </Card>
-          </div>
-      )
+    return (
+      <div className="space-y-6 p-4 sm:p-0">
+          <Card>
+              <CardHeader>
+                  <CardTitle>Manager View</CardTitle>
+                  <CardDescription>Select a branch from the login screen to view and manage its traders.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <p>As a manager, you can log in with any specific branch ID to see its data.</p>
+              </CardContent>
+          </Card>
+      </div>
+    )
   }
   
   return (
@@ -285,3 +285,5 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
+
+    
