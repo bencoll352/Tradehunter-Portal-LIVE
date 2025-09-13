@@ -68,16 +68,15 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     setSelectedFile(null);
     setFileContent(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputref.current.value = "";
     }
   };
 
   const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
     if (!fileContent) return { validTraders: [] };
     
-    // Robust header transformation to prevent crash on undefined/null headers.
-    const transformHeader = (header: string | undefined | null): string => {
-        return (header || "").trim().toLowerCase();
+    const transformHeader = (header: string): string => {
+        return header.trim().toLowerCase();
     };
 
     const parseResults = Papa.parse(fileContent, {
@@ -89,7 +88,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     });
 
     if (parseResults.errors.length) {
-      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields' && e.code !== 'TooFewFields');
+      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields' && e
+.code !== 'TooFewFields');
       if (criticalError) {
         throw new Error(`Parsing error on row ${criticalError.row + 2}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`);
       }
