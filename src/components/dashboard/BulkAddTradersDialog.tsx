@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -68,15 +67,16 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     setSelectedFile(null);
     setFileContent(null);
     if (fileInputRef.current) {
-      fileInputref.current.value = "";
+      fileInputRef.current.value = "";
     }
   };
 
   const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
     if (!fileContent) return { validTraders: [] };
     
+    // Definitive fix for the 'toLowerCase' error. This function will now safely handle any header.
     const transformHeader = (header: string): string => {
-        return header.trim().toLowerCase();
+        return (header || "").trim().toLowerCase();
     };
 
     const parseResults = Papa.parse(fileContent, {
@@ -96,9 +96,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
+        // Safety check: ensure row is a valid object.
+        if (!row || typeof row !== 'object') return undefined;
+        
         const lowerCasePotentialHeaders = potentialHeaders.map(h => (h || "").toLowerCase());
         for (const potentialHeader of lowerCasePotentialHeaders) {
-            if (row && typeof row === 'object' && Object.prototype.hasOwnProperty.call(row, potentialHeader)) {
+            if (Object.prototype.hasOwnProperty.call(row, potentialHeader)) {
                 const value = row[potentialHeader];
                  if (value !== null && value !== undefined && String(value).trim() !== '') {
                     return value;
@@ -110,11 +113,15 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     
     const tradersToProcess = (parseResults.data as any[])
       .map((row: any, index: number): ParsedTraderData | null => {
+        // Safety Check: If row is null or not an object, skip it.
+        if (!row || typeof row !== 'object') {
+            return null;
+        }
+
         const rawName = getRowValue(row, ["Name"]);
         const name = rawName ? String(rawName).trim() : null;
         if (!name) return null;
         
-        // For debugging: log headers if a specific field is not loading.
         const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
         if (!ownerName && (getRowValue(row, ["Owner Name"]) || getRowValue(row, ["Owner"]))) {
             console.warn(`Row ${index + 2}: 'Owner Name' not found. Detected headers:`, Object.keys(row));
@@ -288,5 +295,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
