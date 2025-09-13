@@ -67,8 +67,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const clearFile = () => {
     setSelectedFile(null);
     setFileContent(null);
-    if (fileInputref.current) {
-      fileInputref.current.value = "";
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -93,7 +93,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
         const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
         for (const key in row) {
-             // Ensure key is a string and not null/undefined before calling toLowerCase()
             if (typeof key === 'string' && lowerCaseHeaders.includes(key.toLowerCase())) {
                 const value = row[key];
                 if (value !== null && value !== undefined && String(value).trim() !== '') {
