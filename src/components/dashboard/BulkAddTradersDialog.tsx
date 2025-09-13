@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -17,7 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 import type { BaseBranchId, ParsedTraderData, Trader } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import Papa from "papaparse";
 
 interface BulkAddTradersDialogProps {
   branchId: BaseBranchId;
@@ -38,11 +38,39 @@ const safeParseInt = (val: any): number | null => {
     return isNaN(num) ? null : num;
 };
 
+// More robust CSV line parser that handles commas within quoted fields.
+const parseCsvLine = (line: string): string[] => {
+    const result: string[] = [];
+    let currentVal = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+            // If we're in quotes and the next char is also a quote, it's an escaped quote
+            if (inQuotes && i < line.length - 1 && line[i + 1] === '"') {
+                currentVal += '"';
+                i++; // Skip the next quote
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            result.push(currentVal.trim());
+            currentVal = '';
+        } else {
+            currentVal += char;
+        }
+    }
+    result.push(currentVal.trim());
+    
+    // Clean up surrounding quotes from non-quoted values
+    return result.map(val => (val.startsWith('"') && val.endsWith('"')) ? val.slice(1, -1) : val);
+};
+
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileContent, setFileContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -51,115 +79,103 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (file) {
       if (file.type === "text/csv" || file.name.endsWith(".csv")) {
         setSelectedFile(file);
-        const reader = new FileReader();
-        reader.onload = (e) => setFileContent(e.target?.result as string);
-        reader.readAsText(file);
       } else {
         toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a CSV file (.csv)." });
         if(fileInputRef.current) fileInputRef.current.value = "";
         setSelectedFile(null);
-        setFileContent(null);
       }
     }
   };
 
   const clearFile = () => {
     setSelectedFile(null);
-    setFileContent(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
-    if (!fileContent) return { validTraders: [] };
+  const parseAndValidateData = (csvText: string): { validTraders: ParsedTraderData[] } => {
+    const lines = csvText.trim().replace(/\r\n/g, '\n').split('\n');
+    const headerLine = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
     
-    // Definitive fix for the 'toLowerCase' error. This function will now safely handle any header.
-    const transformHeader = (header: string): string => {
-        return (header || "").trim().toLowerCase();
+    const headerMapping: { [key: string]: keyof ParsedTraderData } = {
+        'name': 'name',
+        'status': 'status',
+        'last activity': 'lastActivity',
+        'description': 'description',
+        'reviews (tradesmade)': 'reviews',
+        'reviews': 'reviews',
+        'rating': 'rating',
+        'website': 'website',
+        'phone': 'phone',
+        'owner name': 'ownerName',
+        'owner': 'ownerName',
+        'main category': 'mainCategory',
+        'category': 'mainCategory',
+        'categories': 'categories',
+        'workday timing': 'workdayTiming',
+        'workday hours': 'workdayTiming',
+        'working hours': 'workdayTiming',
+        'hours': 'workdayTiming',
+        'address': 'address',
+        'link (ownerprofilelink)': 'ownerProfileLink',
+        'link': 'ownerProfileLink',
+        'owner profile': 'ownerProfileLink',
+        'notes': 'notes',
+        'review keywords': 'notes',
+        'total assets': 'totalAssets',
+        'est. annual revenue': 'estimatedAnnualRevenue',
+        'estimated annual revenue': 'estimatedAnnualRevenue',
+        'estimated company value': 'estimatedCompanyValue',
+        'est. company value': 'estimatedCompanyValue',
+        'employee count': 'employeeCount',
+        'callbackdate': 'callBackDate'
     };
 
-    const parseResults = Papa.parse(fileContent, {
-        header: true,
-        skipEmptyLines: 'greedy',
-        transformHeader: transformHeader,
-        quoteChar: '"',
-        escapeChar: '"',
-    });
-
-    if (parseResults.errors.length) {
-      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields' && e
-.code !== 'TooFewFields');
-      if (criticalError) {
-        throw new Error(`Parsing error on row ${criticalError.row + 2}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`);
-      }
+    if (!headerLine.includes('name')) {
+        throw new Error(`CSV is missing the required "Name" header.`);
     }
-    
-    const getRowValue = (row: any, potentialHeaders: string[]): any => {
-        // Safety check: ensure row is a valid object.
-        if (!row || typeof row !== 'object') return undefined;
+
+    const tradersToProcess: ParsedTraderData[] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue; // Skip empty lines
+
+        const data = parseCsvLine(lines[i]);
+        const row: any = {};
         
-        const lowerCasePotentialHeaders = potentialHeaders.map(h => (h || "").toLowerCase());
-        for (const potentialHeader of lowerCasePotentialHeaders) {
-            if (Object.prototype.hasOwnProperty.call(row, potentialHeader)) {
-                const value = row[potentialHeader];
-                 if (value !== null && value !== undefined && String(value).trim() !== '') {
-                    return value;
-                }
+        headerLine.forEach((header, index) => {
+            const mappedKey = headerMapping[header];
+            if (mappedKey) {
+                row[mappedKey] = data[index] ?? '';
             }
-        }
-        return undefined;
-    };
-    
-    const tradersToProcess = (parseResults.data as any[])
-      .map((row: any, index: number): ParsedTraderData | null => {
-        // Safety Check: If row is null or not an object, skip it.
-        if (!row || typeof row !== 'object') {
-            return null;
-        }
+        });
 
-        const rawName = getRowValue(row, ["Name"]);
-        const name = rawName ? String(rawName).trim() : null;
-        if (!name) return null;
-        
-        const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
-        if (!ownerName && (getRowValue(row, ["Owner Name"]) || getRowValue(row, ["Owner"]))) {
-            console.warn(`Row ${index + 2}: 'Owner Name' not found. Detected headers:`, Object.keys(row));
-        }
+        if (!row.name) continue; // Skip rows without a name
 
-        const mainCategory = getRowValue(row, ["Main Category", "Category"]);
-         if (!mainCategory && (getRowValue(row, ["Main Category"]) || getRowValue(row, ["Category"]))) {
-            console.warn(`Row ${index + 2}: 'Main Category' not found. Detected headers:`, Object.keys(row));
-        }
-
-        const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
-        if (!workdayTiming && (getRowValue(row, ["Workday Timing"]) || getRowValue(row, ["Workday Hours"]) || getRowValue(row, ["Working Hours"]) || getRowValue(row, ["Hours"]) || getRowValue(row, ["WorkdayTiming"]))) {
-            console.warn(`Row ${index + 2}: 'Workday Timing' not found. Detected headers:`, Object.keys(row));
-        }
-        
-        return {
-          name,
-          status: getRowValue(row, ["Status"]),
-          lastActivity: getRowValue(row, ["Last Activity"]),
-          description: getRowValue(row, ["Description"]),
-          reviews: safeParseInt(getRowValue(row, ["Reviews (tradesMade)", "Reviews"])),
-          rating: safeParseFloat(getRowValue(row, ["Rating"])),
-          website: getRowValue(row, ["Website"]),
-          phone: String(getRowValue(row, ["Phone"]) || ''),
-          ownerName: ownerName,
-          mainCategory: mainCategory,
-          categories: getRowValue(row, ["Categories"]),
-          workdayTiming: workdayTiming,
-          address: getRowValue(row, ["Address"]),
-          ownerProfileLink: getRowValue(row, ["Link (ownerProfileLink)", "Link", "Owner Profile"]),
-          notes: getRowValue(row, ["Notes", "Review Keywords"]),
-          totalAssets: safeParseFloat(getRowValue(row, ["Total Assets"])),
-          estimatedAnnualRevenue: safeParseFloat(getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"])),
-          estimatedCompanyValue: safeParseFloat(getRowValue(row, ["Estimated Company Value", "Est. Company Value"])),
-          employeeCount: safeParseInt(getRowValue(row, ["Employee Count"])),
-        };
-      })
-      .filter((t): t is ParsedTraderData => t !== null);
+        tradersToProcess.push({
+          name: row.name,
+          status: row.status,
+          lastActivity: row.lastActivity,
+          description: row.description,
+          reviews: safeParseInt(row.reviews),
+          rating: safeParseFloat(row.rating),
+          website: row.website,
+          phone: String(row.phone || ''),
+          ownerName: row.ownerName,
+          mainCategory: row.mainCategory,
+          categories: row.categories,
+          workdayTiming: row.workdayTiming,
+          address: row.address,
+          ownerProfileLink: row.ownerProfileLink,
+          notes: row.notes,
+          totalAssets: safeParseFloat(row.totalAssets),
+          estimatedAnnualRevenue: safeParseFloat(row.estimatedAnnualRevenue),
+          estimatedCompanyValue: safeParseFloat(row.estimatedCompanyValue),
+          employeeCount: safeParseInt(row.employeeCount),
+          callBackDate: row.callBackDate,
+        });
+    }
 
     return { validTraders: tradersToProcess };
   };
@@ -171,47 +187,56 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     setIsLoading(true);
 
-    try {
-        const { validTraders } = parseAndValidateData();
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const csvText = e.target?.result as string;
+            const { validTraders } = parseAndValidateData(csvText);
 
-        if (validTraders.length === 0) {
-          toast({
-            variant: "destructive",
-            title: "Bulk Upload Failed",
-            description: "Could not parse any traders from the file. Please check the file format and ensure the 'Name' header is present and that rows are not empty.",
-            duration: 8000,
-          });
-          setIsLoading(false);
-          return;
+            if (validTraders.length === 0) {
+              toast({
+                variant: "destructive",
+                title: "Bulk Upload Failed",
+                description: "Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that rows are not empty.",
+                duration: 8000,
+              });
+              setIsLoading(false);
+              return;
+            }
+
+            if (validTraders.length > MAX_UPLOAD_LIMIT) {
+              toast({
+                variant: "destructive",
+                title: "Upload Limit Exceeded",
+                description: `The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`,
+                duration: 8000,
+              });
+              setIsLoading(false);
+              return;
+            }
+            
+            await onBulkAddTraders(validTraders);
+            
+            setOpen(false);
+            clearFile();
+
+        } catch (error: any) {
+            console.error("Client-side error during bulk upload:", error);
+            toast({
+                variant: "destructive",
+                title: "Bulk Upload Failed",
+                description: `An unexpected error occurred during file processing: ${error.message}`,
+                duration: 10000,
+            });
+        } finally {
+            setIsLoading(false);
         }
-
-        if (validTraders.length > MAX_UPLOAD_LIMIT) {
-          toast({
-            variant: "destructive",
-            title: "Upload Limit Exceeded",
-            description: `The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`,
-            duration: 8000,
-          });
-          setIsLoading(false);
-          return;
-        }
-        
-        await onBulkAddTraders(validTraders);
-        
-        setOpen(false);
-        clearFile();
-
-    } catch (error: any) {
-        console.error("Client-side error during bulk upload:", error);
-        toast({
-            variant: "destructive",
-            title: "Bulk Upload Failed",
-            description: `An unexpected error occurred during file processing: ${error.message}`,
-            duration: 10000,
-        });
-    } finally {
+    };
+    reader.onerror = () => {
+        toast({ variant: 'destructive', title: 'File Read Error', description: 'Failed to read the selected file.' });
         setIsLoading(false);
-    }
+    };
+    reader.readAsText(selectedFile);
   };
 
   return (
@@ -295,3 +320,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
