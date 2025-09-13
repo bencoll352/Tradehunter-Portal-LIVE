@@ -90,17 +90,20 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       }
     }
     
+    // Robust getRowValue function
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
-        const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
-        for (const key in row) {
-            if (typeof key === 'string' && lowerCaseHeaders.includes(key.toLowerCase())) {
-                const value = row[key];
-                if (value !== null && value !== undefined && String(value).trim() !== '') {
-                    return value;
-                }
-            }
+      const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
+      const rowKeys = Object.keys(row);
+      for (const key of rowKeys) {
+        // Safely check if key is a string and not null/undefined
+        if (typeof key === 'string' && lowerCaseHeaders.includes(key.toLowerCase())) {
+          const value = row[key];
+          if (value !== null && value !== undefined && String(value).trim() !== '') {
+            return value;
+          }
         }
-        return undefined;
+      }
+      return undefined;
     };
     
     const tradersToProcess = (parseResults.data as any[])
@@ -110,8 +113,19 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         if (!name) return null;
 
         const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
+        if (ownerName === undefined) {
+          console.log(`DEBUG: 'Owner Name' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
+        }
+        
         const mainCategory = getRowValue(row, ["Main Category", "Category"]);
+         if (mainCategory === undefined) {
+          console.log(`DEBUG: 'Main Category' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
+        }
+
         const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
+        if (workdayTiming === undefined) {
+          console.log(`DEBUG: 'Workday Timing' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
+        }
         
         return {
           name,
@@ -271,3 +285,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
