@@ -74,10 +74,12 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
 
   const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
     if (!fileContent) return { validTraders: [] };
-
-    // More robust header transformation to prevent `toLowerCase` on undefined.
-    const transformHeader = (header: string | null | undefined): string => {
-        return (header || '').trim().toLowerCase();
+    
+    const transformHeader = (header: string | undefined | null): string => {
+        if (header === null || header === undefined) {
+            return '';
+        }
+        return header.trim().toLowerCase();
     };
 
     const parseResults = Papa.parse(fileContent, {
@@ -95,13 +97,14 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       }
     }
     
-    // getRowValue now works with pre-transformed (lowercase) headers
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
         const lowerCasePotentialHeaders = potentialHeaders.map(h => h.toLowerCase());
         for (const potentialHeader of lowerCasePotentialHeaders) {
-            const value = row[potentialHeader];
-            if (value !== null && value !== undefined && String(value).trim() !== '') {
-                return value;
+            if (row && typeof row === 'object' && Object.prototype.hasOwnProperty.call(row, potentialHeader)) {
+                const value = row[potentialHeader];
+                 if (value !== null && value !== undefined && String(value).trim() !== '') {
+                    return value;
+                }
             }
         }
         return undefined;
@@ -275,5 +278,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
 
     
