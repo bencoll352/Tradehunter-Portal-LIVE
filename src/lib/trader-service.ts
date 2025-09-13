@@ -198,7 +198,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
       name: data.name,
       status: data.status,
       lastActivity: lastActivity,
-      tasks: data.tasks ?? null,
+      tasks: data.tasks ?? [],
     } as Trader;
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:addTrader]', error);
@@ -235,7 +235,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
       name: data.name,
       status: data.status,
       lastActivity: lastActivity,
-      tasks: data.tasks ?? null,
+      tasks: data.tasks ?? [],
     } as Trader;
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:updateTrader]', error);

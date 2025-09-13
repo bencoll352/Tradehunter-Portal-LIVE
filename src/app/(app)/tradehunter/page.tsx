@@ -102,7 +102,7 @@ export default function TradeHunterDashboardPage() {
     }
     const result = await addTraderAction(currentBaseBranchId, values);
     if (result.data) {
-      setTraders(prev => [result.data!, ...prev].sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+      await fetchTraders();
       toast({ title: "Success", description: `${result.data.name} added.`});
       return true; // Indicate success
     }
@@ -129,7 +129,7 @@ export default function TradeHunterDashboardPage() {
     }
     const result = await updateTraderAction(currentBaseBranchId, traderId, values);
     if (result.data) {
-      setTraders(prev => prev.map(t => t.id === traderId ? result.data! : t).sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+      await fetchTraders();
       toast({ title: "Success", description: `${result.data.name} updated.`});
       return true;
     }

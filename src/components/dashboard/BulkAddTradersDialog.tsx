@@ -114,17 +114,17 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
 
         const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
         if (ownerName === undefined) {
-          console.log(`DEBUG: 'Owner Name' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
+          console.warn(`DEBUG: 'Owner Name' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
         }
         
         const mainCategory = getRowValue(row, ["Main Category", "Category"]);
          if (mainCategory === undefined) {
-          console.log(`DEBUG: 'Main Category' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
+          console.warn(`DEBUG: 'Main Category' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
         }
 
         const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
         if (workdayTiming === undefined) {
-          console.log(`DEBUG: 'Workday Timing' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
+          console.warn(`DEBUG: 'Workday Timing' not found for row ${index + 2}. Detected headers:`, Object.keys(row));
         }
         
         return {
