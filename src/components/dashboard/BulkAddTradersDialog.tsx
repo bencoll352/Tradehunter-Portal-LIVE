@@ -26,19 +26,7 @@ interface BulkAddTradersDialogProps {
 
 const MAX_UPLOAD_LIMIT = 1000;
 
-const safeParseFloat = (val: any): number | null => {
-    if (val === null || val === undefined || String(val).trim() === '') return null;
-    const num = parseFloat(String(val).replace(/[£,]/g, ''));
-    return isNaN(num) ? null : num;
-};
-
-const safeParseInt = (val: any): number | null => {
-    if (val === null || val === undefined || String(val).trim() === '') return null;
-    const num = parseInt(String(val).replace(/,/g, ''), 10);
-    return isNaN(num) ? null : num;
-};
-
-// More robust CSV line parser that handles commas within quoted fields.
+// A more robust CSV line parser that handles commas within quoted fields.
 const parseCsvLine = (line: string): string[] => {
     const result: string[] = [];
     let currentVal = '';
@@ -63,9 +51,31 @@ const parseCsvLine = (line: string): string[] => {
     }
     result.push(currentVal.trim());
     
-    // Clean up surrounding quotes from non-quoted values
-    return result.map(val => (val.startsWith('"') && val.endsWith('"')) ? val.slice(1, -1) : val);
+    // Clean up surrounding quotes from non-quoted values that weren't part of a quoted field
+    return result.map(val => {
+        if (val.startsWith('"') && val.endsWith('"')) {
+            // This handles cases where the whole value is quoted, e.g., "123, Main St"
+            // We need to be careful not to remove quotes that are part of the value.
+            // The parser logic above should handle escaped quotes, so this is safer.
+            return val.slice(1, -1).replace(/""/g, '"');
+        }
+        return val;
+    });
 };
+
+
+const safeParseFloat = (val: any): number | null => {
+    if (val === null || val === undefined || String(val).trim() === '') return null;
+    const num = parseFloat(String(val).replace(/[£,]/g, ''));
+    return isNaN(num) ? null : num;
+};
+
+const safeParseInt = (val: any): number | null => {
+    if (val === null || val === undefined || String(val).trim() === '') return null;
+    const num = parseInt(String(val).replace(/,/g, ''), 10);
+    return isNaN(num) ? null : num;
+};
+
 
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
@@ -93,41 +103,41 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       fileInputRef.current.value = "";
     }
   };
-
-  const parseAndValidateData = (csvText: string): { validTraders: ParsedTraderData[] } => {
+  
+  const parseAndValidateData = (csvText: string): ParsedTraderData[] => {
     const lines = csvText.trim().replace(/\r\n/g, '\n').split('\n');
     const headerLine = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
     
+    // This mapping allows for flexible header names from the CSV file.
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
         'name': 'name',
         'status': 'status',
         'last activity': 'lastActivity',
         'description': 'description',
-        'reviews (tradesmade)': 'reviews',
         'reviews': 'reviews',
         'rating': 'rating',
         'website': 'website',
         'phone': 'phone',
         'owner name': 'ownerName',
-        'owner': 'ownerName',
+        'owner': 'ownerName', // Alias
         'main category': 'mainCategory',
-        'category': 'mainCategory',
+        'category': 'mainCategory', // Alias
         'categories': 'categories',
         'workday timing': 'workdayTiming',
         'workday hours': 'workdayTiming',
         'working hours': 'workdayTiming',
         'hours': 'workdayTiming',
         'address': 'address',
-        'link (ownerprofilelink)': 'ownerProfileLink',
-        'link': 'ownerProfileLink',
-        'owner profile': 'ownerProfileLink',
+        'owner profile link': 'ownerProfileLink',
+        'owner profile': 'ownerProfileLink', // Alias
+        'link': 'ownerProfileLink', // Alias
         'notes': 'notes',
-        'review keywords': 'notes',
+        'review keywords': 'notes', // Alias
         'total assets': 'totalAssets',
         'est. annual revenue': 'estimatedAnnualRevenue',
         'estimated annual revenue': 'estimatedAnnualRevenue',
-        'estimated company value': 'estimatedCompanyValue',
         'est. company value': 'estimatedCompanyValue',
+        'estimated company value': 'estimatedCompanyValue',
         'employee count': 'employeeCount',
         'callbackdate': 'callBackDate'
     };
@@ -136,49 +146,49 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         throw new Error(`CSV is missing the required "Name" header.`);
     }
 
-    const tradersToProcess: ParsedTraderData[] = [];
-
+    const traders: ParsedTraderData[] = [];
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue; // Skip empty lines
 
         const data = parseCsvLine(lines[i]);
-        const row: any = {};
+        const rowObject: any = {};
         
         headerLine.forEach((header, index) => {
             const mappedKey = headerMapping[header];
             if (mappedKey) {
-                row[mappedKey] = data[index] ?? '';
+                rowObject[mappedKey] = data[index] ?? '';
             }
         });
 
-        if (!row.name) continue; // Skip rows without a name
+        if (!rowObject.name) continue; // Skip rows without a name
 
-        tradersToProcess.push({
-          name: row.name,
-          status: row.status,
-          lastActivity: row.lastActivity,
-          description: row.description,
-          reviews: safeParseInt(row.reviews),
-          rating: safeParseFloat(row.rating),
-          website: row.website,
-          phone: String(row.phone || ''),
-          ownerName: row.ownerName,
-          mainCategory: row.mainCategory,
-          categories: row.categories,
-          workdayTiming: row.workdayTiming,
-          address: row.address,
-          ownerProfileLink: row.ownerProfileLink,
-          notes: row.notes,
-          totalAssets: safeParseFloat(row.totalAssets),
-          estimatedAnnualRevenue: safeParseFloat(row.estimatedAnnualRevenue),
-          estimatedCompanyValue: safeParseFloat(row.estimatedCompanyValue),
-          employeeCount: safeParseInt(row.employeeCount),
-          callBackDate: row.callBackDate,
+        traders.push({
+          name: rowObject.name,
+          status: rowObject.status,
+          lastActivity: rowObject.lastActivity,
+          description: rowObject.description,
+          reviews: safeParseInt(rowObject.reviews),
+          rating: safeParseFloat(rowObject.rating),
+          website: rowObject.website,
+          phone: String(rowObject.phone || ''),
+          ownerName: rowObject.ownerName,
+          mainCategory: rowObject.mainCategory,
+          categories: rowObject.categories,
+          workdayTiming: rowObject.workdayTiming,
+          address: rowObject.address,
+          ownerProfileLink: rowObject.ownerProfileLink,
+          notes: rowObject.notes,
+          totalAssets: safeParseFloat(rowObject.totalAssets),
+          estimatedAnnualRevenue: safeParseFloat(rowObject.estimatedAnnualRevenue),
+          estimatedCompanyValue: safeParseFloat(rowObject.estimatedCompanyValue),
+          employeeCount: safeParseInt(rowObject.employeeCount),
+          callBackDate: rowObject.callBackDate,
         });
     }
 
-    return { validTraders: tradersToProcess };
+    return traders;
   };
+
 
   const handleSubmit = async () => {
     if (!selectedFile) {
@@ -191,7 +201,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     reader.onload = async (e) => {
         try {
             const csvText = e.target?.result as string;
-            const { validTraders } = parseAndValidateData(csvText);
+            const validTraders = parseAndValidateData(csvText);
 
             if (validTraders.length === 0) {
               toast({
