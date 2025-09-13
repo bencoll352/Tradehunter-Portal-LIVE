@@ -1,5 +1,5 @@
 
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { firestore } from './firebase-admin'; // Correctly import from server-only file
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
@@ -90,6 +90,9 @@ const safeToISOString = (value: any): string | null => {
     if (value instanceof Timestamp) {
         return value.toDate().toISOString();
     }
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
     // Handle cases where it might be a plain object from Firestore SDK on the client
     if (typeof value === 'object' && value !== null && typeof (value as any).toDate === 'function') {
         return (value as any).toDate().toISOString();
@@ -179,7 +182,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
     const newTraderData = {
       ...traderData,
       phone: normalizePhoneNumber(traderData.phone),
-      lastActivity: FieldValue.serverTimestamp(), // Set on creation
+      lastActivity: new Date(), // Set on creation
     };
 
     const docRef = await tradersCollection.add(newTraderData);
@@ -217,7 +220,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
       ...existingData, // Start with existing data
       ...traderData,   // Overwrite with form values
       phone: normalizePhoneNumber(traderData.phone),
-      lastActivity: FieldValue.serverTimestamp(), // Update on every modification
+      lastActivity: new Date(), // Update on every modification
     };
 
     await traderRef.update(updatedData);
@@ -375,3 +378,5 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
+
+    
