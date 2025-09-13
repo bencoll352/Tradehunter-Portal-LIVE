@@ -78,7 +78,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const parseResults = Papa.parse(fileContent, {
         header: true,
         skipEmptyLines: 'greedy',
-        transformHeader: header => header.trim(),
+        transformHeader: header => header ? header.trim() : '',
         quoteChar: '"',
         escapeChar: '"',
     });
@@ -104,10 +104,25 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     };
     
     const tradersToProcess = (parseResults.data as any[])
-      .map((row: any): ParsedTraderData | null => {
+      .map((row: any, index: number): ParsedTraderData | null => {
         const rawName = getRowValue(row, ["Name"]);
         const name = rawName ? String(rawName).trim() : null;
         if (!name) return null;
+
+        const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
+        const mainCategory = getRowValue(row, ["Main Category", "Category"]);
+        const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
+
+        // Enhanced debugging
+        if (!ownerName && Object.keys(row).some(h => h.toLowerCase().includes('owner'))) {
+            console.warn(`Row ${index + 2}: 'Owner Name' is missing, but found other 'owner'-like headers:`, Object.keys(row));
+        }
+        if (!mainCategory && Object.keys(row).some(h => h.toLowerCase().includes('category'))) {
+            console.warn(`Row ${index + 2}: 'Main Category' is missing, but found other 'category'-like headers:`, Object.keys(row));
+        }
+        if (!workdayTiming && Object.keys(row).some(h => h.toLowerCase().includes('hour') || h.toLowerCase().includes('timing'))) {
+            console.warn(`Row ${index + 2}: 'Workday Timing' is missing, but found other similar headers:`, Object.keys(row));
+        }
 
         return {
           name,
@@ -118,10 +133,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           rating: safeParseFloat(getRowValue(row, ["Rating"])),
           website: getRowValue(row, ["Website"]),
           phone: String(getRowValue(row, ["Phone"]) || ''),
-          ownerName: getRowValue(row, ["Owner Name", "Owner"]),
-          mainCategory: getRowValue(row, ["Main Category", "Category"]),
+          ownerName: ownerName,
+          mainCategory: mainCategory,
           categories: getRowValue(row, ["Categories"]),
-          workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]),
+          workdayTiming: workdayTiming,
           address: getRowValue(row, ["Address"]),
           ownerProfileLink: getRowValue(row, ["Link (ownerProfileLink)", "Link", "Owner Profile"]),
           notes: getRowValue(row, ["Notes", "Review Keywords"]),
@@ -266,3 +281,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
