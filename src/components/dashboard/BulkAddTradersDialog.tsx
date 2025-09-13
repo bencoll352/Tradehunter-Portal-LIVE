@@ -76,7 +76,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (!fileContent) return { validTraders: [] };
     
     // Robust header transformation to prevent crash on undefined/null headers.
-    const transformHeader = (header: string): string => {
+    const transformHeader = (header: string | undefined | null): string => {
         return (header || "").trim().toLowerCase();
     };
 
