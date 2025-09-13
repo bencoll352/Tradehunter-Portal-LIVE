@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import type { BaseBranchId, ParsedTraderData, Trader } from "@/types";
+import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -55,8 +55,6 @@ const parseCsvLine = (line: string): string[] => {
     return result.map(val => {
         if (val.startsWith('"') && val.endsWith('"')) {
             // This handles cases where the whole value is quoted, e.g., "123, Main St"
-            // We need to be careful not to remove quotes that are part of the value.
-            // The parser logic above should handle escaped quotes, so this is safer.
             return val.slice(1, -1).replace(/""/g, '"');
         }
         return val;
@@ -106,7 +104,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   
   const parseAndValidateData = (csvText: string): ParsedTraderData[] => {
     const lines = csvText.trim().replace(/\r\n/g, '\n').split('\n');
-    const headerLine = parseCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+    const headerLine = parseCsvLine(lines[0]).map(h => (h || '').trim().toLowerCase());
     
     // This mapping allows for flexible header names from the CSV file.
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
@@ -129,17 +127,17 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         'hours': 'workdayTiming',
         'address': 'address',
         'owner profile link': 'ownerProfileLink',
-        'owner profile': 'ownerProfileLink', // Alias
-        'link': 'ownerProfileLink', // Alias
+        'owner profile': 'ownerProfileLink',
+        'link': 'ownerProfileLink',
         'notes': 'notes',
-        'review keywords': 'notes', // Alias
+        'review keywords': 'notes',
         'total assets': 'totalAssets',
         'est. annual revenue': 'estimatedAnnualRevenue',
         'estimated annual revenue': 'estimatedAnnualRevenue',
         'est. company value': 'estimatedCompanyValue',
         'estimated company value': 'estimatedCompanyValue',
         'employee count': 'employeeCount',
-        'callbackdate': 'callBackDate'
+        'callbackdate': 'callBackDate',
     };
 
     if (!headerLine.includes('name')) {
@@ -330,5 +328,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
