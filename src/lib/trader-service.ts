@@ -187,14 +187,15 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
 
     const docRef = await tradersCollection.add(newTraderData);
     const newTraderDoc = await docRef.get();
-    const data = newTraderDoc.data();
+    
+    // Crucial fix: Use the mapping function to correctly format the returned trader data
+    const serverCreatedTraders = mapSnapshotToTraders({ docs: [newTraderDoc] } as unknown as admin.firestore.QuerySnapshot);
 
-    if (!data) throw new Error("Could not retrieve new trader after creation.");
+    if (!serverCreatedTraders || serverCreatedTraders.length === 0) {
+      throw new Error("Could not retrieve new trader after creation.");
+    }
     
-    // Convert server timestamp to ISO string before returning to client
-    const serverCreatedTrader = mapSnapshotToTraders({ docs: [newTraderDoc] } as admin.firestore.QuerySnapshot)[0];
-    
-    return serverCreatedTrader;
+    return serverCreatedTraders[0];
 
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:addTrader]', error);
@@ -226,14 +227,15 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     await traderRef.update(updatedData);
     
     const updatedDoc = await traderRef.get();
-    const data = updatedDoc.data();
+    
+    // Crucial fix: Use the mapping function to correctly format the returned trader data
+    const serverUpdatedTraders = mapSnapshotToTraders({ docs: [updatedDoc] } as unknown as admin.firestore.QuerySnapshot);
 
-    if (!data) throw new Error("Could not retrieve updated trader.");
-
-    // Convert server timestamp to ISO string before returning to client
-    const serverUpdatedTrader = mapSnapshotToTraders({ docs: [updatedDoc] } as admin.firestore.QuerySnapshot)[0];
-
-    return serverUpdatedTrader;
+    if (!serverUpdatedTraders || serverUpdatedTraders.length === 0) {
+       throw new Error("Could not retrieve updated trader.");
+    }
+    
+    return serverUpdatedTraders[0];
 
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:updateTrader]', error);
