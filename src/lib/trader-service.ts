@@ -188,19 +188,10 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
 
     if (!data) throw new Error("Could not retrieve new trader after creation.");
     
-    // Convert server timestamp to ISO string before returning to client
-    const lastActivity = safeToISOString(data.lastActivity);
-    if (!lastActivity) throw new Error("Could not parse lastActivity timestamp after creation.");
+    const serverCreatedTrader = mapSnapshotToTraders({ docs: [newTraderDoc] } as admin.firestore.QuerySnapshot)[0];
+    
+    return serverCreatedTrader;
 
-    return {
-      id: docRef.id,
-      ...data,
-      name: data.name,
-      status: data.status,
-      lastActivity: lastActivity,
-      callBackDate: safeToISOString(data.callBackDate), // Also ensure callBackDate is safe
-      tasks: data.tasks ?? [],
-    } as Trader;
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:addTrader]', error);
     throw new Error(`Could not add trader. Reason: ${error.message}`);
@@ -213,8 +204,17 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     const tradersCollection = getTradersCollection(branchId);
     const traderRef = tradersCollection.doc(traderId);
 
+    // Fetch existing data to merge, preserving fields not in the form
+    const existingDoc = await traderRef.get();
+    if (!existingDoc.exists) {
+        throw new Error("Trader not found for update.");
+    }
+    const existingData = existingDoc.data() || {};
+
+
     const updatedData = {
-      ...traderData,
+      ...existingData, // Start with existing data
+      ...traderData,   // Overwrite with form values
       phone: normalizePhoneNumber(traderData.phone),
       lastActivity: FieldValue.serverTimestamp(), // Update on every modification
     };
@@ -226,19 +226,10 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
 
     if (!data) throw new Error("Could not retrieve updated trader.");
 
-    // Convert server timestamp to ISO string before returning to client
-    const lastActivity = safeToISOString(data.lastActivity);
-    if (!lastActivity) throw new Error("Could not parse lastActivity timestamp after update.");
+    const serverUpdatedTrader = mapSnapshotToTraders({ docs: [updatedDoc] } as admin.firestore.QuerySnapshot)[0];
 
-    return {
-      id: traderId,
-      ...data,
-      name: data.name,
-      status: data.status,
-      lastActivity: lastActivity,
-      callBackDate: safeToISOString(data.callBackDate), // Also ensure callBackDate is safe
-      tasks: data.tasks ?? [],
-    } as Trader;
+    return serverUpdatedTrader;
+
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:updateTrader]', error);
     throw new Error(`Could not update trader. Reason: ${error.message}`);
@@ -354,10 +345,13 @@ export async function updateTask(
     try {
         if (!traderId) throw new Error('traderId is required to update a task.');
         const taskRef = getTasksCollection(branchId, traderId).doc(taskId);
+        
         await taskRef.update(taskData);
+
         const updatedDoc = await taskRef.get();
         const updatedData = updatedDoc.data();
         if (!updatedData) throw new Error('Failed to retrieve updated task data.');
+        
         return { 
             id: taskId, 
             traderId: traderId,
@@ -379,3 +373,5 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
+
+    

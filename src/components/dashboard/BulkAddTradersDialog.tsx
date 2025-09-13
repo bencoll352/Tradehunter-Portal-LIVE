@@ -76,9 +76,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (!fileContent) return { validTraders: [] };
     
     // Most robust way to handle headers: ensure it's a string, then trim and lowercase.
-    // Handles null, undefined, numbers, etc., from papaparse.
-    const transformHeader = (header: any): string => {
-        return (String(header || '')).trim().toLowerCase();
+    const transformHeader = (header: string): string => {
+        // This is the critical fix. Ensure header is a string before calling methods on it.
+        return (header || '').trim().toLowerCase();
     };
 
     const parseResults = Papa.parse(fileContent, {
@@ -114,10 +114,22 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const rawName = getRowValue(row, ["Name"]);
         const name = rawName ? String(rawName).trim() : null;
         if (!name) return null;
-
+        
+        // For debugging: log headers if a specific field is not loading.
         const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
+        if (!ownerName && (getRowValue(row, ["Owner Name"]) || getRowValue(row, ["Owner"]))) {
+            console.warn(`Row ${index + 2}: 'Owner Name' not found. Detected headers:`, Object.keys(row));
+        }
+
         const mainCategory = getRowValue(row, ["Main Category", "Category"]);
+         if (!mainCategory && (getRowValue(row, ["Main Category"]) || getRowValue(row, ["Category"]))) {
+            console.warn(`Row ${index + 2}: 'Main Category' not found. Detected headers:`, Object.keys(row));
+        }
+
         const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
+        if (!workdayTiming && (getRowValue(row, ["Workday Timing"]) || getRowValue(row, ["Workday Hours"]) || getRowValue(row, ["Working Hours"]) || getRowValue(row, ["Hours"]) || getRowValue(row, ["WorkdayTiming"]))) {
+            console.warn(`Row ${index + 2}: 'Workday Timing' not found. Detected headers:`, Object.keys(row));
+        }
         
         return {
           name,
@@ -277,3 +289,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    

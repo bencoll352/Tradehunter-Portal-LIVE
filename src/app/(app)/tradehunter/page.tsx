@@ -42,10 +42,14 @@ export default function TradeHunterDashboardPage() {
   const currentUserRole = useMemo(() => branchInfo?.role, [branchInfo]);
 
   const fetchTraders = useCallback(async () => {
-    if (!currentBaseBranchId) return;
+    // Ensure currentBaseBranchId is available from state before fetching
+    if (!branchInfo?.baseBranchId) {
+      console.warn("fetchTraders called without a baseBranchId.");
+      return;
+    }
     setIsLoading(true);
     try {
-      const result = await getTradersAction(currentBaseBranchId);
+      const result = await getTradersAction(branchInfo.baseBranchId);
       if (result.data) {
         setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       } else {
@@ -65,14 +69,15 @@ export default function TradeHunterDashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, currentBaseBranchId]);
+  }, [toast, branchInfo?.baseBranchId]);
+
 
   useEffect(() => {
     const initializeDashboard = async () => {
       if (typeof window !== 'undefined') {
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
         const info = getBranchInfo(storedLoggedInId);
-        setBranchInfo(info);
+        setBranchInfo(info); // Set branch info first
         if (!info.baseBranchId && info.role !== 'manager') {
             setIsLoading(false);
         }
@@ -280,3 +285,5 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
+
+    
