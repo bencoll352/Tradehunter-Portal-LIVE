@@ -221,7 +221,7 @@ export default function TradeHunterDashboardPage() {
 
   if (currentUserRole === 'manager' && !currentBaseBranchId) {
     return (
-      <div className="space-y-6 p-4 sm:p-0">
+      <div className="space-y-6">
           <Card>
               <CardHeader>
                   <CardTitle>Manager View</CardTitle>
@@ -285,5 +285,7 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
+
+    
 
     
