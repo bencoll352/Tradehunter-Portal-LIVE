@@ -187,14 +187,17 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
     const data = newTraderDoc.data();
 
     if (!data) throw new Error("Could not retrieve new trader after creation.");
-     const lastActivity = data.lastActivity as Timestamp;
+    
+    // Convert server timestamp to ISO string before returning to client
+    const lastActivity = safeToISOString(data.lastActivity);
+    if (!lastActivity) throw new Error("Could not parse lastActivity timestamp after creation.");
 
     return {
       id: docRef.id,
       ...data,
       name: data.name,
       status: data.status,
-      lastActivity: lastActivity.toDate().toISOString(),
+      lastActivity: lastActivity,
       tasks: data.tasks ?? null,
     } as Trader;
   } catch (error: any) {
@@ -221,14 +224,17 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     const data = updatedDoc.data();
 
     if (!data) throw new Error("Could not retrieve updated trader.");
-     const lastActivity = data.lastActivity as Timestamp;
+
+    // Convert server timestamp to ISO string before returning to client
+    const lastActivity = safeToISOString(data.lastActivity);
+    if (!lastActivity) throw new Error("Could not parse lastActivity timestamp after update.");
 
     return {
       id: traderId,
       ...data,
       name: data.name,
       status: data.status,
-      lastActivity: lastActivity.toDate().toISOString(),
+      lastActivity: lastActivity,
       tasks: data.tasks ?? null,
     } as Trader;
   } catch (error: any) {
@@ -371,5 +377,3 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
-
-    
