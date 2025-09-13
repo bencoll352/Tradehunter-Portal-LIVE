@@ -184,7 +184,8 @@ export default function TradeHunterDashboardPage() {
           description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
           duration: 10000,
       });
-      await fetchTraders();
+      // Correctly call fetchTraders to refresh the data
+      await fetchTraders(); 
     } 
     return { data: result.data, error: null };
   };

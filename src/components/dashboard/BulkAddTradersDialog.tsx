@@ -67,8 +67,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const clearFile = () => {
     setSelectedFile(null);
     setFileContent(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    if (fileInputref.current) {
+      fileInputref.current.value = "";
     }
   };
 
@@ -93,6 +93,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
         const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
         for (const key in row) {
+             // Ensure key is a string and not null/undefined before calling toLowerCase()
             if (typeof key === 'string' && lowerCaseHeaders.includes(key.toLowerCase())) {
                 const value = row[key];
                 if (value !== null && value !== undefined && String(value).trim() !== '') {
@@ -112,18 +113,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const ownerName = getRowValue(row, ["Owner Name", "Owner"]);
         const mainCategory = getRowValue(row, ["Main Category", "Category"]);
         const workdayTiming = getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]);
-
-        // Enhanced debugging
-        if (!ownerName && Object.keys(row).some(h => h.toLowerCase().includes('owner'))) {
-            console.warn(`Row ${index + 2}: 'Owner Name' is missing, but found other 'owner'-like headers:`, Object.keys(row));
-        }
-        if (!mainCategory && Object.keys(row).some(h => h.toLowerCase().includes('category'))) {
-            console.warn(`Row ${index + 2}: 'Main Category' is missing, but found other 'category'-like headers:`, Object.keys(row));
-        }
-        if (!workdayTiming && Object.keys(row).some(h => h.toLowerCase().includes('hour') || h.toLowerCase().includes('timing'))) {
-            console.warn(`Row ${index + 2}: 'Workday Timing' is missing, but found other similar headers:`, Object.keys(row));
-        }
-
+        
         return {
           name,
           status: getRowValue(row, ["Status"]),

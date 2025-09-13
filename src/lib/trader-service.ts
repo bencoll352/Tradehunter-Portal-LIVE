@@ -363,9 +363,10 @@ export async function updateTask(
 
 export async function deleteTask(branchId: BaseBranchId, traderId: string, taskId: string): Promise<void> {
   try {
+    if (!traderId) throw new Error('traderId is required to delete a task.');
     const tasksCollection = getTasksCollection(branchId, traderId);
     await tasksCollection.doc(taskId).delete();
-} catch (error: any) {
+  } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:deleteTask]', error);
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
