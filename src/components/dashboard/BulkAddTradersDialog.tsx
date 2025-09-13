@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from "react";
@@ -92,7 +93,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
         const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
         for (const key in row) {
-            // Ensure key is a string and can be lowercased before comparison
             if (typeof key === 'string' && lowerCaseHeaders.includes(key.toLowerCase())) {
                 const value = row[key];
                 if (value !== null && value !== undefined && String(value).trim() !== '') {
@@ -210,7 +210,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs font-medium">
-                        For 'Owner Name', 'Main Category', and 'Workday Timing', ensure headers are exact for successful mapping.
+                        For 'Owner Name', 'Main Category', and 'Workday Timing', ensure headers are exact for successful mapping. Check the 'How To Use' page for a list of valid header aliases.
                     </p>
                 </div>
                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
