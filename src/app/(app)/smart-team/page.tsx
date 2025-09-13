@@ -41,8 +41,8 @@ interface RosterCardProps {
 
 const RosterCard = ({ title, role, description, href, icon: Icon, iconStyle }: RosterCardProps) => (
   <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full">
-    <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", iconStyle)}>
-      <Icon className="h-12 w-12" />
+    <div className={cn("flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24 rounded-full border-4 mb-4", iconStyle)}>
+      <Icon className="h-10 w-10 sm:h-12 sm:w-12" />
     </div>
     <CardTitle className="text-xl text-primary mb-1">{title}</CardTitle>
     <div className="flex items-center gap-1.5 mb-2">
@@ -124,18 +124,18 @@ export default function SmartTeamPage() {
     <div className="space-y-6"> 
       <Card className="shadow-lg w-full">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <UsersRound className="h-10 w-10 text-primary" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-2">
+            <UsersRound className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
             <div>
-              <CardTitle className="text-3xl font-bold text-primary">Smart Team Hub</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Smart Team Hub</CardTitle>
+              <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
                 Meet your Smart assistants, here to help you succeed.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {assistants.map((assistant) => (
                 <RosterCard key={assistant.title} {...assistant} />
             ))}

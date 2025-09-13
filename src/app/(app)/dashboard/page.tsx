@@ -132,14 +132,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
        <MiniDashboardStats 
         liveTradersCount={activeTradersCount}
         callBackTradersCount={callBackTradersCount}
         newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <BranchPerformanceChart data={chartData} />
         </div>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
           <DashboardStatsAndGoals newLeadsCount={newLeadTradersCount} hotLeadsCount={callBackTradersCount} />
         </div>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-1">
           <TaskManagement 
             traderId={traders[0]?.id || ''} 

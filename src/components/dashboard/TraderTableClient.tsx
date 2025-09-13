@@ -36,7 +36,7 @@ import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
 import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { ArrowUpDown, ChevronDown, Trash2, Flame } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Trash2, Flame, SlidersHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
@@ -288,15 +288,15 @@ export function TraderTableClient({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between py-4 gap-2">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
             <Input
             placeholder="Filter by name..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
                 table.getColumn("name")?.setFilterValue(event.target.value)
             }
-            className="max-w-xs"
+            className="w-full sm:max-w-xs"
             />
             <Select
               value={(table.getColumn('mainCategory')?.getFilterValue() as string) ?? 'all'}
@@ -308,7 +308,7 @@ export function TraderTableClient({
                 }
               }}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
@@ -319,11 +319,12 @@ export function TraderTableClient({
               </SelectContent>
             </Select>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end">
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
+                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                <span className="hidden md:inline">Columns</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

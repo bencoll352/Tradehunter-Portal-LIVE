@@ -137,19 +137,19 @@ function InternalTrainer() {
                 ) : (
                     <div className="flex flex-col h-full overflow-hidden gap-4">
                         <div className="p-4 rounded-lg border bg-muted/50">
-                             <div className="flex justify-between items-start">
+                             <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
                                 <div>
                                     <h3 className="font-semibold text-foreground">Current Scenario:</h3>
                                     <p className="text-sm text-muted-foreground italic">"{scenario}"</p>
                                 </div>
-                                <Button variant="outline" size="sm" onClick={handleResetScenario}>
+                                <Button variant="outline" size="sm" onClick={handleResetScenario} className="shrink-0">
                                     <RefreshCw className="mr-2 h-4 w-4"/>
                                     New Scenario
                                 </Button>
                             </div>
                         </div>
 
-                        <ScrollArea className="flex-grow h-0 border rounded-lg p-4" ref={scrollAreaRef}>
+                        <ScrollArea className="flex-grow h-0 border rounded-lg p-2 sm:p-4" ref={scrollAreaRef}>
                             <div className="space-y-4">
                                 {messages.map((message, index) => (
                                     <div
@@ -166,7 +166,7 @@ function InternalTrainer() {
                                         )}
                                         <div
                                             className={cn(
-                                                "max-w-md rounded-lg p-3 text-sm",
+                                                "max-w-sm md:max-w-md rounded-lg p-3 text-sm",
                                                 message.role === 'user'
                                                     ? "bg-primary text-primary-foreground"
                                                     : "bg-muted"
@@ -542,14 +542,14 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-                <DialogHeader className="p-6 pb-2 border-b shrink-0">
+                <DialogHeader className="p-4 sm:p-6 pb-2 border-b shrink-0">
                     <DialogTitle>{material.title}</DialogTitle>
                     {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
                 <div className="flex-grow overflow-auto">
                    {fileUrl ? (
                         isImage ? (
-                            <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-6" />
+                            <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />
                         ) : (
                             <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
                         )
@@ -597,52 +597,54 @@ function TrainingMaterialPortal() {
       <>
         <Card className="shadow-lg">
             <CardHeader>
-            <CardTitle className="text-2xl font-bold text-primary flex items-center gap-3">
-                <BookOpen className="h-8 w-8" />
+            <CardTitle className="text-xl sm:text-2xl font-bold text-primary flex items-center gap-3">
+                <BookOpen className="h-6 w-6 sm:h-8 sm:w-8" />
                 Training Material Portal
             </CardTitle>
-            <CardDescription className="text-lg text-muted-foreground">
+            <CardDescription className="text-base sm:text-lg text-muted-foreground">
                 Access training documents, playbooks, and other resources.
             </CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[40%]">Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Date Added</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {materials.map((material) => {
-                        const Icon = getFileIcon(material.type);
-                        return (
-                            <TableRow key={material.id}>
-                                <TableCell className="font-medium">
-                                    <div className="flex items-center gap-2">
-                                        <Icon className="h-4 w-4 text-muted-foreground" />
-                                        {material.title}
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="outline">{material.type}</Badge>
-                                </TableCell>
-                                <TableCell>{material.category}</TableCell>
-                                <TableCell>{material.dateAdded}</TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        View
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[40%]">Name</TableHead>
+                            <TableHead className="hidden sm:table-cell">Type</TableHead>
+                            <TableHead className="hidden md:table-cell">Category</TableHead>
+                            <TableHead className="hidden md:table-cell">Date Added</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {materials.map((material) => {
+                            const Icon = getFileIcon(material.type);
+                            return (
+                                <TableRow key={material.id}>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                                            <span className="truncate">{material.title}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="hidden sm:table-cell">
+                                        <Badge variant="outline">{material.type}</Badge>
+                                    </TableCell>
+                                    <TableCell className="hidden md:table-cell">{material.category}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{material.dateAdded}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
+                                            <Eye className="mr-0 sm:mr-2 h-4 w-4" />
+                                            <span className="hidden sm:inline">View</span>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         )}
-                    )}
-                    </TableBody>
-                </Table>
+                        </TableBody>
+                    </Table>
+                </div>
             </CardContent>
             <CardFooter className="flex justify-end border-t pt-6">
                 <AddContentDialog onAddContent={handleAddContent} />
@@ -659,11 +661,11 @@ export default function StaffTrainingPage() {
         <div className="space-y-8">
             <Card className="shadow-lg w-full flex flex-col h-full">
                 <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <GraduationCap className="h-10 w-10 text-primary" />
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
                         <div>
-                            <CardTitle className="text-3xl font-bold text-primary">Sales Training Centre</CardTitle>
-                            <CardDescription className="text-lg text-muted-foreground">
+                            <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Sales Training Centre</CardTitle>
+                            <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
                                 Hone your skills with our training tools. Choose your preferred method below.
                             </CardDescription>
                         </div>
@@ -673,10 +675,10 @@ export default function StaffTrainingPage() {
                     <Tabs defaultValue="internal-trainer" className="w-full flex-grow flex flex-col">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="internal-trainer">
-                                <User className="mr-2 h-4 w-4" /> Role-Play Trainer
+                                <User className="mr-2 h-4 w-4" /> Role-Play
                             </TabsTrigger>
                             <TabsTrigger value="speech-trainer">
-                                <Mic className="mr-2 h-4 w-4" /> Speech Trainer
+                                <Mic className="mr-2 h-4 w-4" /> Speech
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="internal-trainer" className="flex-grow mt-4">

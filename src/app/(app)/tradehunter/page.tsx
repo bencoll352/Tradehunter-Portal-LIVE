@@ -184,7 +184,6 @@ export default function TradeHunterDashboardPage() {
           description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
           duration: 10000,
       });
-      // Correctly call fetchTraders to refresh the data
       await fetchTraders(); 
     } 
     return { data: result.data, error: null };
@@ -232,7 +231,7 @@ export default function TradeHunterDashboardPage() {
   }
   
   return (
-    <div className="space-y-6"> 
+    <div className="space-y-4 md:space-y-6"> 
         <div className="grid gap-4 md:grid-cols-3">
             <StatCard 
                 title="Active Traders" 
@@ -262,7 +261,7 @@ export default function TradeHunterDashboardPage() {
           <CardTitle className="text-xl">Trader Database</CardTitle>
           <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-6">
           {isLoading ? (
               <Skeleton className="h-64 w-full" />
           ) : (
@@ -281,5 +280,3 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
-
-    

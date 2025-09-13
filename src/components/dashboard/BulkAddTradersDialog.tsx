@@ -194,7 +194,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     <Dialog open={open} onOpenChange={(isOpen) => { setOpen(isOpen); if (!isOpen) clearFile(); }}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <UploadCloud className="mr-2 h-4 w-4" /> Bulk Add New Traders
+          <UploadCloud className="mr-2 h-4 w-4" /> 
+          <span className="hidden sm:inline">Bulk Add</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
@@ -270,5 +271,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
