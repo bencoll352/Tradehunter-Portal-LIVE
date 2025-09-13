@@ -11,6 +11,7 @@ import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { getTradersAction, addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions';
 import { Users, Flame, UserPlus } from 'lucide-react';
+import { parseISO } from 'date-fns';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -42,7 +43,6 @@ export default function TradeHunterDashboardPage() {
   const currentUserRole = useMemo(() => branchInfo?.role, [branchInfo]);
 
   const fetchTraders = useCallback(async () => {
-    // Ensure currentBaseBranchId is available from state before fetching
     if (!currentBaseBranchId) {
       console.warn("fetchTraders called without a baseBranchId.");
       return;
@@ -51,7 +51,15 @@ export default function TradeHunterDashboardPage() {
     try {
       const result = await getTradersAction(currentBaseBranchId);
       if (result.data) {
-        setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+        const sortedTraders = result.data.sort((a, b) => {
+          // Robust date parsing to prevent crashes
+          const dateA = a.lastActivity ? parseISO(a.lastActivity) : new Date(0);
+          const dateB = b.lastActivity ? parseISO(b.lastActivity) : new Date(0);
+          const timeA = !isNaN(dateA.getTime()) ? dateA.getTime() : 0;
+          const timeB = !isNaN(dateB.getTime()) ? dateB.getTime() : 0;
+          return timeB - timeA;
+        });
+        setTraders(sortedTraders);
       } else {
         setTraders([]);
         toast({ 
@@ -285,7 +293,5 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
-
-    
 
     

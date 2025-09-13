@@ -284,7 +284,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
       address: rawTrader.address ?? null,
       ownerProfileLink: rawTrader.ownerProfileLink ?? null,
       notes: rawTrader.notes ?? null,
-      callBackDate: rawTrader.callBackDate ? new Date(rawTrader.callBackDate).toISOString() : null,
+      callBackDate: rawTrader.callBackDate ? parseActivityDate(rawTrader.callBackDate) : null,
       totalAssets: rawTrader.totalAssets ?? null,
       estimatedAnnualRevenue: rawTrader.estimatedAnnualRevenue ?? null,
       estimatedCompanyValue: rawTrader.estimatedCompanyValue ?? null,
