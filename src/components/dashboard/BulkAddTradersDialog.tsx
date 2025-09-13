@@ -75,11 +75,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
     if (!fileContent) return { validTraders: [] };
     
-    const transformHeader = (header: string | undefined | null): string => {
-        if (header === null || header === undefined) {
-            return '';
-        }
-        return header.trim().toLowerCase();
+    // Most robust way to handle headers: ensure it's a string, then trim and lowercase.
+    // Handles null, undefined, numbers, etc., from papaparse.
+    const transformHeader = (header: any): string => {
+        return (String(header || '')).trim().toLowerCase();
     };
 
     const parseResults = Papa.parse(fileContent, {
@@ -278,7 +277,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
-
-    

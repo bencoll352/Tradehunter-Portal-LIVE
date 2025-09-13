@@ -144,7 +144,7 @@ export default function TradeHunterDashboardPage() {
     }
     const result = await deleteTraderAction(currentBaseBranchId, traderId);
     if (result.success) {
-      setTraders(prev => prev.filter(t => t.id !== traderId));
+      await fetchTraders();
       toast({ title: "Success", description: "Trader deleted." });
     } else {
        toast({ variant: "destructive", title: "Error Deleting Trader", description: result.error || "Failed to delete trader." });
@@ -195,7 +195,7 @@ export default function TradeHunterDashboardPage() {
     }
     const result = await bulkDeleteTradersAction(currentBaseBranchId, traderIds);
     if (result.successCount > 0) {
-      setTraders(prev => prev.filter(t => !traderIds.includes(t.id)));
+      await fetchTraders();
     }
     return result;
   };
@@ -280,8 +280,3 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
-
-
-    
-
-    
