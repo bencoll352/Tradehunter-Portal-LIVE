@@ -76,11 +76,11 @@ export default function QualityControlPage() {
     <div className="space-y-8">
       <Card className="shadow-lg">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <ShieldCheck className="h-10 w-10 text-primary" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-2">
+            <ShieldCheck className="h-8 w-8 sm:h-10 sm:w-10 text-primary shrink-0" />
             <div>
-              <CardTitle className="text-3xl font-bold text-primary">Self-Correction & Quality Control</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Self-Correction & Quality Control</CardTitle>
+              <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
                 A checklist of prompts for reviewing AI-generated content and ensuring high-quality output.
               </CardDescription>
             </div>
