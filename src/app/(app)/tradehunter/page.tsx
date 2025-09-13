@@ -43,13 +43,13 @@ export default function TradeHunterDashboardPage() {
 
   const fetchTraders = useCallback(async () => {
     // Ensure currentBaseBranchId is available from state before fetching
-    if (!branchInfo?.baseBranchId) {
+    if (!currentBaseBranchId) {
       console.warn("fetchTraders called without a baseBranchId.");
       return;
     }
     setIsLoading(true);
     try {
-      const result = await getTradersAction(branchInfo.baseBranchId);
+      const result = await getTradersAction(currentBaseBranchId);
       if (result.data) {
         setTraders(result.data.sort((a,b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
       } else {
@@ -69,7 +69,7 @@ export default function TradeHunterDashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, branchInfo?.baseBranchId]);
+  }, [toast, currentBaseBranchId]);
 
 
   useEffect(() => {

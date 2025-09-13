@@ -75,10 +75,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
     if (!fileContent) return { validTraders: [] };
     
-    // Most robust way to handle headers: ensure it's a string, then trim and lowercase.
+    // Robust header transformation to prevent crash on undefined/null headers.
     const transformHeader = (header: string): string => {
-        // This is the critical fix. Ensure header is a string before calling methods on it.
-        return (header || '').trim().toLowerCase();
+        return (header || "").trim().toLowerCase();
     };
 
     const parseResults = Papa.parse(fileContent, {
@@ -97,7 +96,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     
     const getRowValue = (row: any, potentialHeaders: string[]): any => {
-        const lowerCasePotentialHeaders = potentialHeaders.map(h => h.toLowerCase());
+        const lowerCasePotentialHeaders = potentialHeaders.map(h => (h || "").toLowerCase());
         for (const potentialHeader of lowerCasePotentialHeaders) {
             if (row && typeof row === 'object' && Object.prototype.hasOwnProperty.call(row, potentialHeader)) {
                 const value = row[potentialHeader];

@@ -188,6 +188,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
 
     if (!data) throw new Error("Could not retrieve new trader after creation.");
     
+    // Convert server timestamp to ISO string before returning to client
     const serverCreatedTrader = mapSnapshotToTraders({ docs: [newTraderDoc] } as admin.firestore.QuerySnapshot)[0];
     
     return serverCreatedTrader;
@@ -226,6 +227,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
 
     if (!data) throw new Error("Could not retrieve updated trader.");
 
+    // Convert server timestamp to ISO string before returning to client
     const serverUpdatedTrader = mapSnapshotToTraders({ docs: [updatedDoc] } as admin.firestore.QuerySnapshot)[0];
 
     return serverUpdatedTrader;
