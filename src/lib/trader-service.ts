@@ -198,6 +198,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
       name: data.name,
       status: data.status,
       lastActivity: lastActivity,
+      callBackDate: safeToISOString(data.callBackDate), // Also ensure callBackDate is safe
       tasks: data.tasks ?? [],
     } as Trader;
   } catch (error: any) {
@@ -235,6 +236,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
       name: data.name,
       status: data.status,
       lastActivity: lastActivity,
+      callBackDate: safeToISOString(data.callBackDate), // Also ensure callBackDate is safe
       tasks: data.tasks ?? [],
     } as Trader;
   } catch (error: any) {
@@ -377,6 +379,5 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
-
 
     
