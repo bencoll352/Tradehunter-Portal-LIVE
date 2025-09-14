@@ -104,42 +104,36 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   
   const parseAndValidateData = (csvText: string): ParsedTraderData[] => {
     const lines = csvText.trim().replace(/\r\n/g, '\n').split('\n');
-    // **DEFINITIVE FIX**: Filter out any null/undefined headers before mapping to prevent crash
     const headerLine = parseCsvLine(lines[0]).filter(Boolean).map(h => h.trim().toLowerCase());
     
     // This mapping allows for flexible header names from the CSV file.
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
         'name': 'name',
-        'status': 'status',
-        'last activity': 'lastActivity',
         'description': 'description',
         'reviews': 'reviews',
         'rating': 'rating',
         'website': 'website',
         'phone': 'phone',
         'owner name': 'ownerName',
-        'owner': 'ownerName', // Alias
+        'owner nar': 'ownerName', // Alias for cropped header
+        'owner pro': 'ownerProfileLink', // Alias for cropped header
+        'owner profile': 'ownerProfileLink',
         'main category': 'mainCategory',
-        'category': 'mainCategory', // Alias
+        'main cate': 'mainCategory', // Alias for cropped header
         'categories': 'categories',
         'workday timing': 'workdayTiming',
-        'workday hours': 'workdayTiming',
-        'working hours': 'workdayTiming',
-        'hours': 'workdayTiming',
+        'workday t': 'workdayTiming', // Alias for cropped header
+        'temporarily closed on': 'temporarilyClosedOn',
+        'temporari': 'temporarilyClosedOn', // Alias for cropped header
         'address': 'address',
-        'owner profile link': 'ownerProfileLink',
-        'owner profile': 'ownerProfileLink',
-        'link': 'ownerProfileLink',
-        'notes': 'notes',
-        'review keywords': 'notes',
         'total assets': 'totalAssets',
-        'est. annual revenue': 'estimatedAnnualRevenue',
+        'total asse': 'totalAssets', // Alias for cropped header
         'estimated annual revenue': 'estimatedAnnualRevenue',
-        'est. company value': 'estimatedCompanyValue',
         'estimated company value': 'estimatedCompanyValue',
         'employee count': 'employeeCount',
-        'callbackdate': 'callBackDate',
+        // 'last activity' can be added here if needed
     };
+
 
     if (!headerLine.includes('name')) {
         throw new Error(`CSV is missing the required "Name" header.`);
@@ -174,6 +168,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           mainCategory: rowObject.mainCategory,
           categories: rowObject.categories,
           workdayTiming: rowObject.workdayTiming,
+          temporarilyClosedOn: rowObject.temporarilyClosedOn,
           address: rowObject.address,
           ownerProfileLink: rowObject.ownerProfileLink,
           notes: rowObject.notes,
@@ -181,7 +176,6 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           estimatedAnnualRevenue: safeParseFloat(rowObject.estimatedAnnualRevenue),
           estimatedCompanyValue: safeParseFloat(rowObject.estimatedCompanyValue),
           employeeCount: safeParseInt(rowObject.employeeCount),
-          callBackDate: rowObject.callBackDate,
         });
     }
 

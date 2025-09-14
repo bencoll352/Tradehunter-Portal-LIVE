@@ -109,6 +109,7 @@ export const TraderSchema = z.object({
     mainCategory: z.string().optional().nullable(),
     categories: z.string().optional().nullable(), // comma-separated
     workdayTiming: z.string().optional().nullable(),
+    temporarilyClosedOn: z.string().optional().nullable(),
     address: z.string().optional().nullable(),
     ownerProfileLink: z.string().optional().nullable(),
     notes: z.string().optional().nullable(),
@@ -137,6 +138,7 @@ export const ParsedTraderDataSchema = z.object({
   mainCategory: z.string().optional(),
   categories: z.string().optional(),
   workdayTiming: z.string().optional(),
+  temporarilyClosedOn: z.string().optional(),
   address: z.string().optional(),
   ownerProfileLink: z.string().optional(),
   notes: z.string().optional(),
