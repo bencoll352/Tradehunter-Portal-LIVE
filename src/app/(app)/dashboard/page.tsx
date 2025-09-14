@@ -40,7 +40,7 @@ export default function DashboardPage() {
           } catch (error) {
             console.error("Failed to fetch initial traders:", error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-            toast({ variant: "destructive", title: "NetworkError", description: `Could not connect to the server to load data. ${errorMessage}` });
+            toast({ variant: "destructive", title: "Network Error", description: `Could not connect to the server to load data. Please check your connection or server status. Details: ${errorMessage}` });
           }
           finally {
             setIsLoading(false);

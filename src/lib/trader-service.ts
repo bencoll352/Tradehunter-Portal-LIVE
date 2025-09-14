@@ -1,5 +1,5 @@
 
-import { Timestamp } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { firestore } from './firebase-admin'; // Correctly import from server-only file
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
@@ -11,10 +11,16 @@ type TraderFormValues = z.infer<typeof traderFormSchema>;
 
 // --- Firestore Collection Reference ---
 const getTradersCollection = (branchId: BaseBranchId) => {
+  if (!firestore) {
+    throw new Error("Firestore is not initialized. This is a server configuration issue.");
+  }
   return firestore.collection('traders').doc(branchId).collection('branchTraders');
 };
 
 const getTasksCollection = (branchId: BaseBranchId, traderId: string) => {
+    if (!firestore) {
+        throw new Error("Firestore is not initialized. This is a server configuration issue.");
+    }
     return firestore.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
 }
 
@@ -90,9 +96,6 @@ const safeToISOString = (value: any): string | null => {
     if (value instanceof Timestamp) {
         return value.toDate().toISOString();
     }
-    if (value instanceof Date) {
-        return value.toISOString();
-    }
     // Handle cases where it might be a plain object from Firestore SDK on the client
     if (typeof value === 'object' && value !== null && typeof (value as any).toDate === 'function') {
         return (value as any).toDate().toISOString();
@@ -120,34 +123,44 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
     const tradersCollection = getTradersCollection(branchId);
     const snapshot = await tradersCollection.get();
 
-    // If the collection is empty, seed it with initial data and refetch.
     if (snapshot.empty) {
       console.log(`[getTraders] Branch ${branchId} is empty. Seeding initial data...`);
       await bulkAddTraders(branchId, INITIAL_SEED_TRADERS_DATA);
-      // Re-fetch the data after seeding
       const seededSnapshot = await tradersCollection.get();
       console.log(`[getTraders] Re-fetching data for branch ${branchId} after seeding. Found ${seededSnapshot.size} documents.`);
-      return mapSnapshotToTraders(seededSnapshot);
+      return await mapSnapshotToTraders(seededSnapshot);
     }
     
     console.log(`[getTraders] Found ${snapshot.size} documents for branch ${branchId}.`);
-    return mapSnapshotToTraders(snapshot);
+    return await mapSnapshotToTraders(snapshot);
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:getTraders]', error);
     throw new Error('Failed to get traders from database.');
   }
 }
 
-/**
- * Helper function to map a Firestore query snapshot to an array of Trader objects.
- */
-function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Trader[] {
-  return snapshot.docs.map(doc => {
+async function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Promise<Trader[]> {
+  const traders: Trader[] = [];
+  for (const doc of snapshot.docs) {
     const data = doc.data();
-    // Provide a default for lastActivity to prevent crashes if it's missing
+    const traderId = doc.id;
+    const branchId = doc.ref.parent.parent!.id as BaseBranchId;
+
+    const tasksSnapshot = await getTasksCollection(branchId, traderId).get();
+    const tasks: Task[] = tasksSnapshot.docs.map(taskDoc => {
+        const taskData = taskDoc.data();
+        return {
+            id: taskDoc.id,
+            traderId: traderId,
+            title: taskData.title,
+            dueDate: safeToISOString(taskData.dueDate) || new Date().toISOString(),
+            completed: taskData.completed || false,
+        };
+    });
+
     const lastActivity = safeToISOString(data.lastActivity) || new Date(0).toISOString();
-    return {
-      id: doc.id,
+    traders.push({
+      id: traderId,
       name: data.name || 'N/A',
       status: data.status || 'Inactive',
       lastActivity: lastActivity,
@@ -168,9 +181,10 @@ function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Trader[]
       estimatedAnnualRevenue: data.estimatedAnnualRevenue ?? null,
       estimatedCompanyValue: data.estimatedCompanyValue ?? null,
       employeeCount: data.employeeCount ?? null,
-      tasks: data.tasks ?? null,
-    } as Trader;
-  });
+      tasks: tasks,
+    });
+  }
+  return traders;
 }
 
 
@@ -182,20 +196,24 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
     const newTraderData = {
       ...traderData,
       phone: normalizePhoneNumber(traderData.phone),
-      lastActivity: new Date(), // Set on creation
+      lastActivity: FieldValue.serverTimestamp(), 
+      tasks: [], // Initialize with an empty array of tasks
     };
 
     const docRef = await tradersCollection.add(newTraderData);
     const newTraderDoc = await docRef.get();
     
-    // Crucial fix: Use the mapping function to correctly format the returned trader data
-    const serverCreatedTraders = mapSnapshotToTraders({ docs: [newTraderDoc] } as unknown as admin.firestore.QuerySnapshot);
+    // We create a temporary snapshot-like object to pass to the mapper
+    const snapshot = {
+        docs: [newTraderDoc]
+    } as unknown as admin.firestore.QuerySnapshot;
 
-    if (!serverCreatedTraders || serverCreatedTraders.length === 0) {
-      throw new Error("Could not retrieve new trader after creation.");
+    const mappedTraders = await mapSnapshotToTraders(snapshot);
+    if (mappedTraders.length === 0) {
+        throw new Error("Failed to map newly created trader.");
     }
     
-    return serverCreatedTraders[0];
+    return mappedTraders[0];
 
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:addTrader]', error);
@@ -209,33 +227,26 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     const tradersCollection = getTradersCollection(branchId);
     const traderRef = tradersCollection.doc(traderId);
 
-    // Fetch existing data to merge, preserving fields not in the form
-    const existingDoc = await traderRef.get();
-    if (!existingDoc.exists) {
-        throw new Error("Trader not found for update.");
-    }
-    const existingData = existingDoc.data() || {};
-
-
     const updatedData = {
-      ...existingData, // Start with existing data
-      ...traderData,   // Overwrite with form values
+      ...traderData,
       phone: normalizePhoneNumber(traderData.phone),
-      lastActivity: new Date(), // Update on every modification
+      lastActivity: FieldValue.serverTimestamp(), 
     };
 
     await traderRef.update(updatedData);
     
     const updatedDoc = await traderRef.get();
-    
-    // Crucial fix: Use the mapping function to correctly format the returned trader data
-    const serverUpdatedTraders = mapSnapshotToTraders({ docs: [updatedDoc] } as unknown as admin.firestore.QuerySnapshot);
+     // We create a temporary snapshot-like object to pass to the mapper
+    const snapshot = {
+        docs: [updatedDoc]
+    } as unknown as admin.firestore.QuerySnapshot;
 
-    if (!serverUpdatedTraders || serverUpdatedTraders.length === 0) {
-       throw new Error("Could not retrieve updated trader.");
+    const mappedTraders = await mapSnapshotToTraders(snapshot);
+    if (mappedTraders.length === 0) {
+        throw new Error("Failed to map updated trader.");
     }
     
-    return serverUpdatedTraders[0];
+    return mappedTraders[0];
 
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:updateTrader]', error);
@@ -245,29 +256,37 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
 
 
 export async function deleteTrader(branchId: BaseBranchId, traderId: string): Promise<void> {
-  try {
-    const tradersCollection = getTradersCollection(branchId);
-    await tradersCollection.doc(traderId).delete();
-  } catch (error: any) {
-    console.error('[TRADER_SERVICE_ERROR:deleteTrader]', error);
-    throw new Error(`Could not delete trader. Reason: ${error.message}`);
-  }
+    const traderRef = getTradersCollection(branchId).doc(traderId);
+    const tasksSnapshot = await getTasksCollection(branchId, traderId).get();
+
+    const batch = firestore.batch();
+
+    tasksSnapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+    });
+
+    batch.delete(traderRef);
+
+    try {
+        await batch.commit();
+    } catch (error: any) {
+        console.error('[TRADER_SERVICE_ERROR:deleteTrader]', error);
+        throw new Error(`Could not delete trader and their tasks. Reason: ${error.message}`);
+    }
 }
 
 export async function bulkAddTraders(branchId: BaseBranchId, tradersData: ParsedTraderData[]): Promise<Trader[]> {
-  const tradersCollection = firestore.collection('traders').doc(branchId).collection('branchTraders');
+  const tradersCollection = getTradersCollection(branchId);
   const batch = firestore.batch();
   const addedTraders: Trader[] = [];
   const addedPhoneNumbers = new Set<string>();
 
-  // Get all existing phone numbers in the branch to check for duplicates
   const existingPhonesSnapshot = await tradersCollection.select('phone').get();
   const existingPhones = new Set(existingPhonesSnapshot.docs.map(doc => doc.data().phone).filter(Boolean));
 
   for (const rawTrader of tradersData) {
     const normalizedPhone = normalizePhoneNumber(rawTrader.phone);
 
-    // Skip if phone number is a duplicate (either in DB or in this batch)
     if (normalizedPhone && (existingPhones.has(normalizedPhone) || addedPhoneNumbers.has(normalizedPhone))) {
       continue;
     }
@@ -289,7 +308,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
       address: rawTrader.address ?? null,
       ownerProfileLink: rawTrader.ownerProfileLink ?? null,
       notes: rawTrader.notes ?? null,
-      callBackDate: rawTrader.callBackDate ? parseActivityDate(rawTrader.callBackDate) : null,
+      callBackDate: rawTrader.callBackDate ? new Date(rawTrader.callBackDate).toISOString() : null,
       totalAssets: rawTrader.totalAssets ?? null,
       estimatedAnnualRevenue: rawTrader.estimatedAnnualRevenue ?? null,
       estimatedCompanyValue: rawTrader.estimatedCompanyValue ?? null,
@@ -298,8 +317,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
     };
     batch.set(docRef, newTrader);
 
-    // This is an optimistic add for the UI return. The actual data will have a server timestamp.
-    addedTraders.push({ id: docRef.id, ...newTrader } as Trader);
+    addedTraders.push({ id: docRef.id, ...newTrader, lastActivity: new Date().toISOString() } as Trader);
     if (normalizedPhone) {
       addedPhoneNumbers.add(normalizedPhone);
     }
@@ -316,19 +334,21 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
 
 export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: string[]): Promise<{ successCount: number; failureCount: number }> {
   try {
-    const tradersCollection = firestore.collection('traders').doc(branchId).collection('branchTraders');
+    const tradersCollection = getTradersCollection(branchId);
     const batch = firestore.batch();
 
-    traderIds.forEach(id => {
-      const docRef = tradersCollection.doc(id);
-      batch.delete(docRef);
-    });
+    for (const traderId of traderIds) {
+        const traderRef = tradersCollection.doc(traderId);
+        const tasksSnapshot = await getTasksCollection(branchId, traderId).get();
+        tasksSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+        batch.delete(traderRef);
+    }
 
     await batch.commit();
     return { successCount: traderIds.length, failureCount: 0 };
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:bulkDeleteTraders]', error);
-    throw new Error(`Could not bulk delete traders. Reason: ${error.message}`);
+    return { successCount: 0, failureCount: traderIds.length };
   }
 }
 
@@ -345,20 +365,17 @@ export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'i
 
 export async function updateTask(
   branchId: BaseBranchId,
-  traderId: string,
+  traderId: string, 
   taskId: string,
   taskData: Partial<Omit<Task, 'id' | 'traderId'>>
 ): Promise<Task> {
     try {
         if (!traderId) throw new Error('traderId is required to update a task.');
         const taskRef = getTasksCollection(branchId, traderId).doc(taskId);
-        
         await taskRef.update(taskData);
-
         const updatedDoc = await taskRef.get();
         const updatedData = updatedDoc.data();
         if (!updatedData) throw new Error('Failed to retrieve updated task data.');
-        
         return { 
             id: taskId, 
             traderId: traderId,
@@ -372,13 +389,10 @@ export async function updateTask(
 
 export async function deleteTask(branchId: BaseBranchId, traderId: string, taskId: string): Promise<void> {
   try {
-    if (!traderId) throw new Error('traderId is required to delete a task.');
     const tasksCollection = getTasksCollection(branchId, traderId);
     await tasksCollection.doc(taskId).delete();
-  } catch (error: any) {
+} catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:deleteTask]', error);
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
-
-    
