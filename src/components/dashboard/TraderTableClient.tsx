@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -50,6 +51,7 @@ interface TraderTableClientProps {
   setCategoryFilter: (value: string) => void;
   mainCategories: string[];
   isLoading: boolean;
+  existingTraders: Trader[]; // Keep this for now if other components rely on it, even if upload doesn't
 }
 
 export function TraderTableClient({
@@ -66,6 +68,7 @@ export function TraderTableClient({
   setCategoryFilter,
   mainCategories,
   isLoading,
+  existingTraders,
 }: TraderTableClientProps) {
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: "lastActivity", direction: "descending" });
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -99,7 +102,7 @@ export function TraderTableClient({
             const dateB = new Date(bValue as string).getTime();
              if (isNaN(dateA)) return 1;
              if (isNaN(dateB)) return -1;
-            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - aValue;
         }
 
         if (typeof aValue === 'number' && typeof bValue === 'number') {
@@ -245,7 +248,7 @@ export function TraderTableClient({
             )}
             <BulkAddTradersDialog
                 branchId={branchId}
-                onBulkAddTraders={onBulkAdd}
+                onBulkAdd={onBulkAdd}
             />
             <AddTraderDialog 
                 onAddTrader={onAdd} 
@@ -351,3 +354,5 @@ export function TraderTableClient({
     </Card>
   );
 }
+
+    
