@@ -7,7 +7,6 @@ import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from 
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 import type { z } from 'zod';
 import { normalizePhoneNumber } from './utils';
-import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
 import * as admin from 'firebase-admin';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
@@ -97,11 +96,8 @@ export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
     const snapshot = await tradersCollection.get();
 
     if (snapshot.empty) {
-      console.log(`[getTraders] Branch ${branchId} is empty. Seeding initial data...`);
-      await bulkAddTraders(branchId, INITIAL_SEED_TRADERS_DATA);
-      const seededSnapshot = await tradersCollection.get();
-      console.log(`[getTraders] Re-fetching data for branch ${branchId} after seeding. Found ${seededSnapshot.size} documents.`);
-      return await mapSnapshotToTraders(seededSnapshot);
+      console.log(`[getTraders] Branch ${branchId} is empty. No data to return.`);
+      return [];
     }
     
     console.log(`[getTraders] Found ${snapshot.size} documents for branch ${branchId}.`);
@@ -391,3 +387,5 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
+
+    
