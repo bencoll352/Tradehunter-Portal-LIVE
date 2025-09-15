@@ -104,7 +104,11 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   
   const parseAndValidateData = (csvText: string): ParsedTraderData[] => {
     const lines = csvText.trim().replace(/\r\n/g, '\n').split('\n');
-    const headerLine = parseCsvLine(lines[0]).filter(Boolean).map(h => h.trim().toLowerCase());
+    if (lines.length < 1) {
+        throw new Error("CSV file is empty or invalid.");
+    }
+    const headerLine = parseCsvLine(lines[0]).map(h => h.trim());
+    const validHeaders = headerLine.filter(Boolean); // Filter out null/undefined/empty strings
     
     // This mapping allows for flexible header names from the CSV file.
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
@@ -115,27 +119,21 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         'website': 'website',
         'phone': 'phone',
         'owner name': 'ownerName',
-        'owner nar': 'ownerName', // Alias for cropped header
-        'owner pro': 'ownerProfileLink', // Alias for cropped header
         'owner profile': 'ownerProfileLink',
         'main category': 'mainCategory',
-        'main cate': 'mainCategory', // Alias for cropped header
         'categories': 'categories',
         'workday timing': 'workdayTiming',
-        'workday t': 'workdayTiming', // Alias for cropped header
         'temporarily closed on': 'temporarilyClosedOn',
-        'temporari': 'temporarilyClosedOn', // Alias for cropped header
         'address': 'address',
         'total assets': 'totalAssets',
-        'total asse': 'totalAssets', // Alias for cropped header
         'estimated annual revenue': 'estimatedAnnualRevenue',
         'estimated company value': 'estimatedCompanyValue',
         'employee count': 'employeeCount',
-        // 'last activity' can be added here if needed
     };
 
+    const lowerCaseValidHeaders = validHeaders.map(h => h.toLowerCase());
 
-    if (!headerLine.includes('name')) {
+    if (!lowerCaseValidHeaders.includes('name')) {
         throw new Error(`CSV is missing the required "Name" header.`);
     }
 
@@ -146,8 +144,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const data = parseCsvLine(lines[i]);
         const rowObject: any = {};
         
-        headerLine.forEach((header, index) => {
-            const mappedKey = headerMapping[header];
+        validHeaders.forEach((header, index) => {
+            const mappedKey = headerMapping[header.toLowerCase()];
             if (mappedKey) {
                 rowObject[mappedKey] = data[index] ?? '';
             }
@@ -323,3 +321,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
