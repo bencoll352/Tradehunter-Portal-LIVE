@@ -308,7 +308,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
         // 3. Only perform duplicate checks if the phone number is a non-empty string.
         if (normalizedPhone) {
             if (existingDbPhones.has(normalizedPhone) || batchPhoneNumbers.has(normalizedPhone)) {
-                console.log(`Skipping duplicate phone number: ${normalizedPhone}`);
+                console.log(`[bulkAddTraders] Skipping duplicate trader by phone: ${normalizedPhone}`);
                 continue; // Skip this trader
             }
             batchPhoneNumbers.add(normalizedPhone); // Add to the set for this batch
