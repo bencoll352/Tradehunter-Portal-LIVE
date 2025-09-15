@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { getTradersAction, addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions';
 import { Users, Flame, UserPlus } from 'lucide-react';
 import { parseISO } from 'date-fns';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -32,34 +34,26 @@ function StatCard({ title, value, icon: Icon, description, iconBgColor }: { titl
     );
 }
 
-
 export default function TradeHunterDashboardPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Filters
+  const [nameFilter, setNameFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+
   const currentBaseBranchId = useMemo(() => branchInfo?.baseBranchId, [branchInfo]);
   const currentUserRole = useMemo(() => branchInfo?.role, [branchInfo]);
 
   const fetchTraders = useCallback(async () => {
-    if (!currentBaseBranchId) {
-      console.warn("fetchTraders called without a baseBranchId.");
-      return;
-    }
+    if (!currentBaseBranchId) return;
     setIsLoading(true);
     try {
       const result = await getTradersAction(currentBaseBranchId);
       if (result.data) {
-        const sortedTraders = result.data.sort((a, b) => {
-          // Robust date parsing to prevent crashes
-          const dateA = a.lastActivity ? parseISO(a.lastActivity) : new Date(0);
-          const dateB = b.lastActivity ? parseISO(b.lastActivity) : new Date(0);
-          const timeA = !isNaN(dateA.getTime()) ? dateA.getTime() : 0;
-          const timeB = !isNaN(dateB.getTime()) ? dateB.getTime() : 0;
-          return timeB - timeA;
-        });
-        setTraders(sortedTraders);
+        setTraders(result.data);
       } else {
         setTraders([]);
         toast({ 
@@ -79,16 +73,13 @@ export default function TradeHunterDashboardPage() {
     }
   }, [toast, currentBaseBranchId]);
 
-
   useEffect(() => {
-    const initializeDashboard = async () => {
-      if (typeof window !== 'undefined') {
-        const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-        const info = getBranchInfo(storedLoggedInId);
-        setBranchInfo(info); // Set branch info first
-        if (!info.baseBranchId && info.role !== 'manager') {
-            setIsLoading(false);
-        }
+    const initializeDashboard = () => {
+      const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
+      const info = getBranchInfo(storedLoggedInId);
+      setBranchInfo(info);
+      if (!info.baseBranchId && info.role !== 'manager') {
+          setIsLoading(false);
       }
     };
     initializeDashboard();
@@ -100,6 +91,25 @@ export default function TradeHunterDashboardPage() {
       }
   }, [currentBaseBranchId, fetchTraders]);
   
+  const mainCategories = useMemo(() => {
+    const categories = new Set(traders.map(t => t.mainCategory).filter(Boolean));
+    return Array.from(categories) as string[];
+  }, [traders]);
+
+  const filteredTraders = useMemo(() => {
+    return traders
+      .filter(trader => {
+        const lowerCaseSearch = nameFilter.toLowerCase();
+        const nameMatch = trader.name.toLowerCase().includes(lowerCaseSearch);
+        const ownerMatch = trader.ownerName?.toLowerCase().includes(lowerCaseSearch) || false;
+        const descriptionMatch = trader.description?.toLowerCase().includes(lowerCaseSearch) || false;
+
+        const categoryMatch = categoryFilter === 'all' || trader.mainCategory === categoryFilter;
+
+        return (nameMatch || ownerMatch || descriptionMatch) && categoryMatch;
+      });
+  }, [traders, nameFilter, categoryFilter]);
+
   const stats = useMemo(() => {
     const activeTraders = traders.filter(t => t.status === 'Active').length;
     const hotLeads = traders.filter(t => t.status === 'Call-Back').length;
@@ -117,21 +127,9 @@ export default function TradeHunterDashboardPage() {
     if (result.data) {
       await fetchTraders();
       toast({ title: "Success", description: `${result.data.name} added.`});
-      return true; // Indicate success
+      return true;
     }
-    
-    const toastProps = {
-        variant: "destructive" as const,
-        title: "Error Adding Trader",
-        description: result.error || "Failed to add trader.",
-    };
-
-    if (result.error?.includes("phone number already exists")) {
-        toastProps.title = "Duplicate Trader";
-        toastProps.description = "A trader with this phone number already exists.";
-    }
-    toast(toastProps);
-
+    toast({ variant: "destructive", title: "Error Adding Trader", description: result.error || "Failed to add trader." });
     return false;
   };
 
@@ -275,23 +273,23 @@ export default function TradeHunterDashboardPage() {
           <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'}</CardDescription>
         </CardHeader>
         <CardContent className="p-2 sm:p-6">
-          {isLoading ? (
-              <Skeleton className="h-64 w-full" />
-          ) : (
-            <TraderTableClient 
-              initialTraders={traders} 
-              branchId={currentBaseBranchId!} 
-              onAdd={handleAdd}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-              onBulkAdd={handleBulkAdd}
-              onBulkDelete={handleBulkDelete}
+            <TraderTableClient
+                traders={filteredTraders}
+                branchId={currentBaseBranchId!}
+                onAdd={handleAdd}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
+                onBulkAdd={handleBulkAdd}
+                onBulkDelete={handleBulkDelete}
+                nameFilter={nameFilter}
+                setNameFilter={setNameFilter}
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                mainCategories={mainCategories}
+                isLoading={isLoading}
             />
-          )}
         </CardContent>
       </Card>
     </div>
   );
 }
-
-    

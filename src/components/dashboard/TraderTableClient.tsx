@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -24,44 +24,51 @@ import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
 import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult, TraderStatus } from "@/types";
-import { ArrowUpDown, Trash2, Flame, SlidersHorizontal, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, Trash2, SlidersHorizontal, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
 import type { traderFormSchema } from "./TraderForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
-
-type SortKey = keyof Trader;
+type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status';
 type SortDirection = 'ascending' | 'descending';
 
 interface TraderTableClientProps {
-  initialTraders: Trader[];
+  traders: Trader[];
   branchId: BaseBranchId;
   onAdd: (values: TraderFormValues) => Promise<boolean>;
   onUpdate: (traderId: string, values: TraderFormValues) => Promise<boolean>;
   onDelete: (traderId: string) => Promise<boolean>;
   onBulkAdd: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
   onBulkDelete: (traderIds: string[]) => Promise<BulkDeleteTradersResult>;
+  nameFilter: string;
+  setNameFilter: (value: string) => void;
+  categoryFilter: string;
+  setCategoryFilter: (value: string) => void;
+  mainCategories: string[];
+  isLoading: boolean;
 }
 
 export function TraderTableClient({
-  initialTraders,
+  traders,
   branchId,
   onAdd,
   onUpdate,
   onDelete,
   onBulkAdd,
   onBulkDelete,
+  nameFilter,
+  setNameFilter,
+  categoryFilter,
+  setCategoryFilter,
+  mainCategories,
+  isLoading
 }: TraderTableClientProps) {
-  const [traders, setTraders] = useState(initialTraders);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: "lastActivity", direction: "descending" });
-  const [nameFilter, setNameFilter] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
-
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({
     ownerProfileLink: false,
     workdayTiming: false,
@@ -77,30 +84,8 @@ export function TraderTableClient({
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    setTraders(initialTraders);
-  }, [initialTraders]);
-
-  const mainCategories = useMemo(() => {
-    const categories = new Set(traders.map(t => t.mainCategory).filter(Boolean));
-    return Array.from(categories) as string[];
-  }, [traders]);
-
-  const filteredAndSortedTraders = useMemo(() => {
+  const sortedTraders = useMemo(() => {
     let sortableItems = [...traders];
-
-    // Filter by name
-    if (nameFilter) {
-      sortableItems = sortableItems.filter(trader =>
-        trader.name.toLowerCase().includes(nameFilter.toLowerCase())
-      );
-    }
-    // Filter by category
-    if (categoryFilter !== 'all') {
-      sortableItems = sortableItems.filter(trader => trader.mainCategory === categoryFilter);
-    }
-
-    // Sort
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         const aValue = a[sortConfig.key];
@@ -113,7 +98,6 @@ export function TraderTableClient({
             return sortConfig.direction === 'ascending' ? aValue - bValue : bValue - aValue;
         }
         if (typeof aValue === 'string' && typeof bValue === 'string') {
-            // Special handling for date strings
             if (sortConfig.key === 'lastActivity' || sortConfig.key === 'callBackDate') {
                 const dateA = new Date(aValue).getTime();
                 const dateB = new Date(bValue).getTime();
@@ -125,8 +109,7 @@ export function TraderTableClient({
       });
     }
     return sortableItems;
-  }, [traders, sortConfig, nameFilter, categoryFilter]);
-
+  }, [traders, sortConfig]);
 
   const requestSort = (key: SortKey) => {
     let direction: SortDirection = 'ascending';
@@ -165,7 +148,7 @@ export function TraderTableClient({
   const toggleAllRowsSelected = (checked: boolean) => {
     const newSelection: Record<string, boolean> = {};
     if (checked) {
-      filteredAndSortedTraders.forEach(trader => {
+      sortedTraders.forEach(trader => {
         newSelection[trader.id] = true;
       });
     }
@@ -192,6 +175,10 @@ export function TraderTableClient({
       </TableHead>
     );
   };
+
+  if (isLoading) {
+    return <Skeleton className="h-64 w-full" />;
+  }
 
   return (
     <div className="w-full">
@@ -270,7 +257,7 @@ export function TraderTableClient({
                   type="checkbox"
                   className="rounded border-gray-300 text-primary focus:ring-primary"
                   onChange={(e) => toggleAllRowsSelected(e.target.checked)}
-                  checked={filteredAndSortedTraders.length > 0 && selectedRowCount === filteredAndSortedTraders.length}
+                  checked={sortedTraders.length > 0 && selectedRowCount === sortedTraders.length}
                 />
               </TableHead>
               <SortableHeader label="Name" sortKey="name" />
@@ -285,8 +272,8 @@ export function TraderTableClient({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAndSortedTraders.length > 0 ? (
-              filteredAndSortedTraders.map((trader) => (
+            {sortedTraders.length > 0 ? (
+              sortedTraders.map((trader) => (
                 <TableRow
                   key={trader.id}
                   data-state={rowSelection[trader.id] && "selected"}
@@ -336,10 +323,9 @@ export function TraderTableClient({
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {selectedRowCount} of {filteredAndSortedTraders.length} row(s) selected.
+          {selectedRowCount} of {sortedTraders.length} row(s) selected.
         </div>
       </div>
     </div>
   );
 }
-
