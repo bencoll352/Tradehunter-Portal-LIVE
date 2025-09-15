@@ -110,10 +110,11 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     
     const rawHeaders = parseCsvLine(lines[0]);
-    // This is the definitive fix: filter out any falsy values (null, undefined, "") BEFORE mapping.
+    // DEFINITIVE FIX: Filter out any falsy values (null, undefined, "") from the raw headers
+    // BEFORE attempting to call any methods like .trim() or .toLowerCase() on them.
     const lowerCaseValidHeaders = rawHeaders
-        .map(h => h?.trim().toLowerCase()) // Safely trim and convert to lower case
-        .filter(Boolean); // Remove any resulting falsy values
+        .filter(Boolean)
+        .map(h => h.trim().toLowerCase()); 
 
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
         'name': 'name',
@@ -146,9 +147,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const data = parseCsvLine(lines[i]);
         const rowObject: any = {};
         
-        // Use the original rawHeaders for indexing, but the cleaned lowerCaseValidHeaders for mapping
+        // Use the original rawHeaders for indexing, but check against the cleaned lower-cased headers
         rawHeaders.forEach((header, index) => {
-            if (!header) return; // Skip empty headers
+            if (!header) return; // Skip empty headers from the original line
             const lowerCaseHeader = header.trim().toLowerCase();
             const mappedKey = headerMapping[lowerCaseHeader];
             if (mappedKey) {
