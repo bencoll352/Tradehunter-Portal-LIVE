@@ -298,9 +298,9 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
   for (const rawTrader of tradersData) {
     const normalizedPhone = normalizePhoneNumber(rawTrader.phone);
 
-    // Skip if the phone number is already in the DB or has been added in this same batch.
-    // This correctly handles null/undefined phones, as they won't be in the sets.
+    // Skip if the phone number is a non-empty string and already exists in the DB or this batch.
     if (normalizedPhone && (existingDbPhones.has(normalizedPhone) || batchPhoneNumbers.has(normalizedPhone))) {
+      console.log(`Skipping duplicate phone number: ${normalizedPhone}`);
       continue;
     }
     
@@ -418,5 +418,3 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
-
-    
