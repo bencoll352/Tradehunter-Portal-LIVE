@@ -130,8 +130,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         'employee count': 'employeeCount',
     };
 
-    const validHeaders = headerLine.map(h => h.trim());
-    const lowerCaseValidHeaders = validHeaders.filter(Boolean).map(h => h.toLowerCase());
+    const validHeaders = headerLine.filter(Boolean).map(h => h.trim());
+    const lowerCaseValidHeaders = validHeaders.map(h => h.toLowerCase());
 
     if (!lowerCaseValidHeaders.includes('name')) {
         throw new Error(`CSV is missing the required "Name" header.`);
@@ -322,5 +322,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
 
     
