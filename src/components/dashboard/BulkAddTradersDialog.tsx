@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus } from "@/types";
+import type { BaseBranchId, ParsedTraderData, Trader } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -299,3 +299,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
