@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,9 +22,8 @@ import { Label } from "@/components/ui/label";
 interface BulkAddTradersDialogProps {
   branchId: BaseBranchId;
   onBulkAddTraders: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
+  existingTraders: Trader[]; // Needed for robust validation
 }
-
-const MAX_UPLOAD_LIMIT = 1000;
 
 const HEADER_MAP: Record<string, keyof Omit<Trader, 'id'>> = {
     'Name': 'name',
@@ -46,9 +45,10 @@ const HEADER_MAP: Record<string, keyof Omit<Trader, 'id'>> = {
     'Call Back Date': 'callBackDate',
     'Total Assets': 'totalAssets',
     'Estimated Annual Revenue': 'estimatedAnnualRevenue',
-    'Estimated Company Value': 'estimatedCompanyValue',
+    'Estimated CompanyValue': 'estimatedCompanyValue',
     'Employee Count': 'employeeCount',
 };
+
 
 const parseCsvRow = (row: string): string[] => {
     const result: string[] = [];
@@ -73,7 +73,7 @@ const parseCsvRow = (row: string): string[] => {
         }
     }
     result.push(currentField);
-    return result.map(f => f.trim());
+    return result;
 };
 
 
@@ -104,77 +104,112 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
   };
   
-    const parseAndValidateData = (file: File): Promise<ParsedTraderData[]> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const text = event.target?.result as string;
-                if (!text) {
-                    return reject(new Error("File is empty or could not be read."));
-                }
-                const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
+  const parseAndValidateData = (file: File): Promise<ParsedTraderData[]> => {
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+              try {
+                  const text = event.target?.result as string;
+                  if (!text) {
+                      throw new Error("File is empty or could not be read.");
+                  }
+                  const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
 
-                if (lines.length < 2) {
-                    return reject(new Error('CSV file must have a header row and at least one data row.'));
-                }
-                
-                const headerRow = parseCsvRow(lines[0]);
-                
-                const lowerCaseHeaderMap: Record<string, keyof Omit<Trader, 'id'>> = {};
-                Object.keys(HEADER_MAP).forEach(key => {
-                    lowerCaseHeaderMap[key.toLowerCase()] = HEADER_MAP[key as keyof typeof HEADER_MAP];
-                });
-                
-                const mappedHeaderIndices: { index: number; key: keyof ParsedTraderData }[] = [];
-                let nameColumnFound = false;
+                  if (lines.length < 2) {
+                      throw new Error('CSV file must have a header row and at least one data row.');
+                  }
+                  
+                  const headerRow = parseCsvRow(lines[0]);
+                  
+                  const headerAliasMap: Record<string, keyof ParsedTraderData> = {
+                      'name': 'name',
+                      'status': 'status',
+                      'last activity': 'lastActivity',
+                      'description': 'description', 'descriptio': 'description',
+                      'reviews': 'reviews',
+                      'rating': 'rating',
+                      'website': 'website',
+                      'phone': 'phone',
+                      'owner name': 'ownerName', 'owner': 'ownerName', 'owner nar': 'ownerName',
+                      'main category': 'mainCategory', 'category': 'mainCategory',
+                      'categories': 'categories',
+                      'workday timing': 'workdayTiming', 'workday hours': 'workdayTiming', 'working hours': 'workdayTiming', 'hours': 'workdayTiming',
+                      'temporarily closed on': 'temporarilyClosedOn',
+                      'address': 'address',
+                      'owner profile link': 'ownerProfileLink', 'link': 'ownerProfileLink',
+                      'notes': 'notes',
+                      'call back date': 'callBackDate',
+                      'total assets': 'totalAssets',
+                      'estimated annual revenue': 'estimatedAnnualRevenue', 'est. annual revenue': 'estimatedAnnualRevenue',
+                      'estimated company value': 'estimatedCompanyValue', 'est. company value': 'estimatedCompanyValue',
+                      'employee count': 'employeeCount',
+                      'estimated': 'estimatedAnnualRevenue' // Fallback for ambiguous "Estimated"
+                  };
+                  
+                  const mappedHeaderIndices: { index: number; key: keyof ParsedTraderData }[] = [];
+                  const foundHeaders = new Set<string>();
 
-                headerRow.forEach((header, index) => {
-                    const trimmedHeader = header.trim().toLowerCase();
-                    const matchedKey = Object.keys(lowerCaseHeaderMap).find(mapKey => mapKey.startsWith(trimmedHeader));
-                    if (matchedKey) {
-                        const traderKey = lowerCaseHeaderMap[matchedKey];
-                        mappedHeaderIndices.push({ index: index, key: traderKey });
-                        if (traderKey === 'name') {
-                            nameColumnFound = true;
-                        }
-                    }
-                });
+                  headerRow.forEach((header, index) => {
+                      const trimmedHeader = header.trim().toLowerCase();
+                      if(!trimmedHeader) return;
+                      
+                      let matchedKey: keyof ParsedTraderData | undefined;
+                      // Find the alias that the current header starts with
+                      for (const alias in headerAliasMap) {
+                          if (trimmedHeader.startsWith(alias)) {
+                              matchedKey = headerAliasMap[alias];
+                              break;
+                          }
+                      }
 
-                if (!nameColumnFound) {
-                    return reject(new Error('CSV is missing the required "Name" header column.'));
-                }
+                      if (matchedKey) {
+                           // Special handling for ambiguous 'Estimated'
+                          if (matchedKey === 'estimatedAnnualRevenue' && (trimmedHeader.includes('value') || trimmedHeader.includes('company'))) {
+                               matchedKey = 'estimatedCompanyValue';
+                          }
 
-                if (lines.length -1 > MAX_UPLOAD_LIMIT) {
-                    return reject(new Error(`The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`));
-                }
+                          if (!foundHeaders.has(matchedKey)) {
+                            mappedHeaderIndices.push({ index: index, key: matchedKey });
+                            foundHeaders.add(matchedKey);
+                          }
+                      }
+                  });
 
-                const validTraders: ParsedTraderData[] = [];
 
-                for (let i = 1; i < lines.length; i++) {
-                    const values = parseCsvRow(lines[i]);
-                    const rowData: Partial<ParsedTraderData> = {};
+                  if (!foundHeaders.has('name')) {
+                      throw new Error('CSV is missing the required "Name" header column.');
+                  }
 
-                    mappedHeaderIndices.forEach(({ index, key }) => {
-                        const value = values[index] ?? '';
-                        (rowData as any)[key] = value;
-                    });
-                    
-                    if (rowData.name) {
-                        validTraders.push(rowData as ParsedTraderData);
-                    }
-                }
-                
-                if (validTraders.length === 0) {
-                  return reject(new Error("Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that data rows are not empty."));
-                }
-                
-                resolve(validTraders);
-            };
-            reader.onerror = () => {
-                reject(new Error("Failed to read the selected file."));
-            };
-            reader.readAsText(file);
-        });
+                  const validTraders: ParsedTraderData[] = [];
+
+                  for (let i = 1; i < lines.length; i++) {
+                      const values = parseCsvRow(lines[i]);
+                      const rowData: Partial<ParsedTraderData> = {};
+
+                      mappedHeaderIndices.forEach(({ index, key }) => {
+                          const value = values[index] ?? '';
+                          (rowData as any)[key] = value;
+                      });
+                      
+                      if (rowData.name && String(rowData.name).trim()) {
+                          validTraders.push(rowData as ParsedTraderData);
+                      }
+                  }
+                  
+                  if (validTraders.length === 0) {
+                    throw new Error("Could not parse any valid traders. Check if 'Name' column has values and file is correctly formatted.");
+                  }
+                  
+                  resolve(validTraders);
+              } catch (e: any) {
+                  reject(e);
+              }
+          };
+          reader.onerror = () => {
+              reject(new Error("Failed to read the selected file."));
+          };
+          reader.readAsText(file);
+      });
   };
 
 
@@ -188,6 +223,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     try {
       const tradersToCreate = await parseAndValidateData(selectedFile);
       await onBulkAddTraders(tradersToCreate);
+      // Success toast is handled by the parent component
       setOpen(false);
       clearFile();
     } catch (error: any) {
@@ -213,25 +249,19 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>To Bulk Add New Traders (CSV)</DialogTitle>
+          <DialogTitle>Bulk Add New Traders (CSV)</DialogTitle>
           <DialogDescription asChild>
              <div className="space-y-4 pt-2 text-foreground/90">
                 <p>
-                    For a successful upload, please ensure the spreadsheet adheres to the specified format. The only required column is 'Name'. The uploader will automatically skip any traders whose phone number is already present in the database or within the same CSV file.
+                    For a successful upload, ensure your CSV file has a header row. The only required column is 'Name'. The uploader will automatically skip any traders whose phone number already exists.
                 </p>
                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs font-medium">
-                        Rows without a 'Name' field will be skipped; this column is mandatory for a record to be valid.
+                        Header names can be truncated (e.g., 'Descriptio' for 'Description'). The system will attempt to map them automatically.
                     </p>
                 </div>
                  <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
-                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                    <p className="text-xs font-medium">
-                        Header names are flexible and can be truncated (e.g., 'Descriptio' for 'Description'). The system will attempt to map them automatically.
-                    </p>
-                </div>
-                <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs font-medium">
                         Fields with commas (e.g., "123 Main St, Anytown") MUST be enclosed in double quotes for correct parsing.

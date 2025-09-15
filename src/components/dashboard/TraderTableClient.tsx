@@ -51,6 +51,7 @@ interface TraderTableClientProps {
   setCategoryFilter: (value: string) => void;
   mainCategories: string[];
   isLoading: boolean;
+  existingTraders: Trader[];
 }
 
 export function TraderTableClient({
@@ -66,7 +67,8 @@ export function TraderTableClient({
   categoryFilter,
   setCategoryFilter,
   mainCategories,
-  isLoading
+  isLoading,
+  existingTraders,
 }: TraderTableClientProps) {
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: "lastActivity", direction: "descending" });
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -247,6 +249,7 @@ export function TraderTableClient({
             <BulkAddTradersDialog
                 branchId={branchId}
                 onBulkAddTraders={onBulkAdd}
+                existingTraders={existingTraders}
             />
             <AddTraderDialog 
                 onAddTrader={onAdd} 
@@ -352,5 +355,7 @@ export function TraderTableClient({
     </Card>
   );
 }
+
+    
 
     

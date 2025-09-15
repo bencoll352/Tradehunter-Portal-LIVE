@@ -277,9 +277,12 @@ export default function TradeHunterDashboardPage() {
             setCategoryFilter={setCategoryFilter}
             mainCategories={mainCategories}
             isLoading={isLoading}
+            existingTraders={traders}
         />
     </div>
   );
 }
+
+    
 
     
