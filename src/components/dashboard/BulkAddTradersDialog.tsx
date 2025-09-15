@@ -71,7 +71,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
-        transformHeader: header => header.trim(),
+        transformHeader: header => header ? header.trim() : header,
         complete: (results: ParseResult<any>) => {
           if (results.errors.length) {
             const firstError = results.errors[0];
