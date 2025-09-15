@@ -28,6 +28,7 @@ const MAX_UPLOAD_LIMIT = 1000;
 
 // A more robust CSV line parser that handles commas within quoted fields.
 const parseCsvLine = (line: string): string[] => {
+    if (typeof line !== 'string') return [];
     const result: string[] = [];
     let currentVal = '';
     let inQuotes = false;
@@ -109,7 +110,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     
     const rawHeaders = parseCsvLine(lines[0]);
-    const lowerCaseValidHeaders = rawHeaders.filter(Boolean).map(h => h.trim().toLowerCase());
+    // This is the definitive fix: filter out any falsy values (null, undefined, "") BEFORE mapping.
+    const lowerCaseValidHeaders = rawHeaders
+        .map(h => h?.trim().toLowerCase()) // Safely trim and convert to lower case
+        .filter(Boolean); // Remove any resulting falsy values
 
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
         'name': 'name',
@@ -142,8 +146,11 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const data = parseCsvLine(lines[i]);
         const rowObject: any = {};
         
-        lowerCaseValidHeaders.forEach((header, index) => {
-            const mappedKey = headerMapping[header];
+        // Use the original rawHeaders for indexing, but the cleaned lowerCaseValidHeaders for mapping
+        rawHeaders.forEach((header, index) => {
+            if (!header) return; // Skip empty headers
+            const lowerCaseHeader = header.trim().toLowerCase();
+            const mappedKey = headerMapping[lowerCaseHeader];
             if (mappedKey) {
                 rowObject[mappedKey] = data[index] ?? '';
             }
