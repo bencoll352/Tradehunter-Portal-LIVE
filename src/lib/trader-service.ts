@@ -1,4 +1,5 @@
 
+
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { firestore } from './firebase-admin'; // Correctly import from server-only file
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from '@/types';
@@ -319,7 +320,14 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
     };
     batch.set(docRef, newTrader);
 
-    addedTraders.push({ id: docRef.id, ...newTrader, lastActivity: new Date().toISOString() } as Trader);
+    const traderForClient: Trader = {
+      id: docRef.id,
+      ...newTrader,
+      lastActivity: new Date(newTrader.lastActivity).toISOString(),
+      tasks: [],
+    };
+
+    addedTraders.push(traderForClient);
     if (normalizedPhone) {
       addedPhoneNumbers.add(normalizedPhone);
     }
@@ -398,3 +406,5 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
+
+    
