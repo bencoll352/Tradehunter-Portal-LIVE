@@ -110,9 +110,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     
     const rawHeaders = parseCsvLine(lines[0]);
-    const lowerCaseValidHeaders = rawHeaders
-        .filter(Boolean) 
-        .map(h => h.trim().toLowerCase()); 
+    const lowerCaseHeaders = rawHeaders.map(h => (h || '').trim().toLowerCase());
 
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
         'name': 'name',
@@ -134,7 +132,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         'employee count': 'employeeCount',
     };
 
-    if (!lowerCaseValidHeaders.includes('name')) {
+    const nameHeaderIndex = lowerCaseHeaders.indexOf('name');
+    if (nameHeaderIndex === -1) {
         throw new Error(`CSV is missing the required "Name" header.`);
     }
 
@@ -145,10 +144,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const data = parseCsvLine(lines[i]);
         const rowObject: any = {};
         
-        rawHeaders.forEach((header, index) => {
+        lowerCaseHeaders.forEach((header, index) => {
             if (!header) return; 
-            const lowerCaseHeader = header.trim().toLowerCase();
-            const mappedKey = headerMapping[lowerCaseHeader];
+            const mappedKey = headerMapping[header];
             if (mappedKey) {
                 rowObject[mappedKey] = data[index] ?? '';
             }
