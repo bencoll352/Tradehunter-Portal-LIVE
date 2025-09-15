@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import Papa from "papaparse";
+import Papa, { type ParseResult } from "papaparse";
 
 interface BulkAddTradersDialogProps {
   branchId: BaseBranchId;
@@ -66,6 +66,89 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
   };
 
+  const parseAndValidateData = (file: File): Promise<ParsedTraderData[]> => {
+    return new Promise((resolve, reject) => {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: header => header.trim(),
+        complete: (results: ParseResult<any>) => {
+          if (results.errors.length) {
+            const firstError = results.errors[0];
+            return reject(new Error(`CSV Parsing Error on row ${firstError.row}: ${firstError.message}`));
+          }
+          
+          const safeHeaders = results.meta.fields?.filter(Boolean) || [];
+          if (!safeHeaders.some(h => h.toLowerCase() === 'name')) {
+            return reject(new Error('CSV is missing the required "Name" header.'));
+          }
+
+          if (results.data.length > MAX_UPLOAD_LIMIT) {
+            return reject(new Error(`The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`));
+          }
+
+          const validTraders = (results.data as any[]).map((row, index) => {
+              if (!row.Name || !row.Name.trim()) {
+                  console.warn(`[Bulk Upload] Skipping row ${index + 2} because 'Name' is missing or empty.`);
+                  return null;
+              }
+
+              const getVal = (aliases: string[]) => {
+                  for (const alias of aliases) {
+                      const lowerCaseHeaders = Object.keys(row).reduce((acc, key) => {
+                          acc[key.toLowerCase()] = row[key];
+                          return acc;
+                      }, {} as Record<string, any>);
+
+                      const lowerCaseAlias = alias.toLowerCase();
+
+                      if (lowerCaseHeaders[lowerCaseAlias] !== undefined) {
+                          return lowerCaseHeaders[lowerCaseAlias];
+                      }
+                  }
+                  return undefined;
+              };
+              
+              return {
+                name: row.Name,
+                status: getVal(['Status']) as TraderStatus || undefined,
+                lastActivity: getVal(['Last Activity', 'lastActivity']),
+                description: getVal(['Description']),
+                reviews: safeParseInt(getVal(['Reviews'])),
+                rating: safeParseFloat(getVal(['Rating'])),
+                website: getVal(['Website']),
+                phone: String(getVal(['Phone']) || ''),
+                ownerName: getVal(['Owner Name', 'Owner']),
+                mainCategory: getVal(['Main Category', 'Category']),
+                categories: getVal(['Categories']),
+                workdayTiming: getVal(['Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', 'WorkdayTiming']),
+                temporarilyClosedOn: getVal(['Temporarily Closed On', 'Closed On']),
+                address: getVal(['Address']),
+                ownerProfileLink: getVal(['Owner Profile Link', 'Owner Profile']),
+                notes: getVal(['Notes']),
+                totalAssets: safeParseFloat(getVal(['Total Assets'])),
+                estimatedAnnualRevenue: safeParseFloat(getVal(['Estimated Annual Revenue', 'Est. Annual Revenue'])),
+                estimatedCompanyValue: safeParseFloat(getVal(['Estimated Company Value', 'Est. Company Value'])),
+                employeeCount: safeParseInt(getVal(['Employee Count', 'Employees'])),
+                callBackDate: getVal(['Call Back Date', 'callBackDate']),
+              };
+          }).filter(Boolean) as ParsedTraderData[];
+
+
+          if (validTraders.length === 0) {
+            return reject(new Error("Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that data rows are not empty."));
+          }
+          
+          resolve(validTraders);
+        },
+        error: (error: Error) => {
+          reject(new Error(`Failed to read the selected file: ${error.message}`));
+        }
+      });
+    });
+  };
+
+
   const handleSubmit = async () => {
     if (!selectedFile) {
       toast({ variant: "destructive", title: "Error", description: "Please select a CSV file." });
@@ -73,96 +156,22 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     setIsLoading(true);
 
-    Papa.parse(selectedFile, {
-        header: true,
-        skipEmptyLines: true,
-        // This is the critical fix: only trim headers that are actual strings.
-        transformHeader: header => (header ? header.trim() : header),
-        complete: async (results) => {
-            try {
-                if (results.errors.length) {
-                    console.error("CSV Parsing Errors:", results.errors);
-                    const firstError = results.errors[0];
-                    throw new Error(`Error on row ${firstError.row}: ${firstError.message}`);
-                }
-                
-                // This is the second critical fix: filter out any null/undefined headers before checking them.
-                const safeHeaders = results.meta.fields?.filter(Boolean) || [];
-                if (!safeHeaders.some(h => h.toLowerCase() === 'name')) {
-                    throw new Error(`CSV is missing the required "Name" header.`);
-                }
-
-                if (results.data.length > MAX_UPLOAD_LIMIT) {
-                    throw new Error(`The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`);
-                }
-
-                const validTraders = (results.data as any[]).map((row, index) => {
-                    if (!row.Name || !row.Name.trim()) {
-                        console.warn(`[Bulk Upload] Skipping row ${index + 2} because 'Name' is missing or empty.`);
-                        return null;
-                    }
-
-                    // Flexible header matching
-                    const getVal = (aliases: string[]) => {
-                        for (const alias of aliases) {
-                            if (row[alias] !== undefined) return row[alias];
-                        }
-                        return undefined;
-                    };
-                    
-                    return {
-                      name: row.Name,
-                      status: getVal(['Status']) as TraderStatus || undefined,
-                      lastActivity: getVal(['Last Activity', 'lastActivity']),
-                      description: getVal(['Description']),
-                      reviews: safeParseInt(getVal(['Reviews'])),
-                      rating: safeParseFloat(getVal(['Rating'])),
-                      website: getVal(['Website']),
-                      phone: String(getVal(['Phone']) || ''),
-                      ownerName: getVal(['Owner Name', 'Owner']),
-                      mainCategory: getVal(['Main Category', 'Category']),
-                      categories: getVal(['Categories']),
-                      workdayTiming: getVal(['Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', 'WorkdayTiming']),
-                      temporarilyClosedOn: getVal(['Temporarily Closed On', 'Closed On']),
-                      address: getVal(['Address']),
-                      ownerProfileLink: getVal(['Owner Profile Link', 'Owner Profile']),
-                      notes: getVal(['Notes']),
-                      totalAssets: safeParseFloat(getVal(['Total Assets'])),
-                      estimatedAnnualRevenue: safeParseFloat(getVal(['Estimated Annual Revenue', 'Est. Annual Revenue'])),
-                      estimatedCompanyValue: safeParseFloat(getVal(['Estimated Company Value', 'Est. Company Value'])),
-                      employeeCount: safeParseInt(getVal(['Employee Count', 'Employees'])),
-                      callBackDate: getVal(['Call Back Date', 'callBackDate']),
-                    };
-                }).filter(Boolean) as ParsedTraderData[];
-
-
-                if (validTraders.length === 0) {
-                  throw new Error("Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that data rows are not empty.");
-                }
-
-                await onBulkAddTraders(validTraders);
-                
-                setOpen(false);
-                clearFile();
-
-            } catch (error: any) {
-                console.error("Client-side error during bulk upload:", error);
-                toast({
-                    variant: "destructive",
-                    title: "Bulk Upload Failed",
-                    description: `An unexpected error occurred during file processing: ${error.message}`,
-                    duration: 10000,
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        },
-        error: (error: any) => {
-            console.error("PapaParse file read error:", error);
-            toast({ variant: 'destructive', title: 'File Read Error', description: `Failed to read the selected file: ${error.message}` });
-            setIsLoading(false);
-        }
-    });
+    try {
+      const tradersToCreate = await parseAndValidateData(selectedFile);
+      await onBulkAddTraders(tradersToCreate);
+      setOpen(false);
+      clearFile();
+    } catch (error: any) {
+      console.error("Client-side error during bulk upload processing:", error);
+      toast({
+          variant: "destructive",
+          title: "Bulk Upload Failed",
+          description: `An unexpected error occurred during file processing: ${error.message}`,
+          duration: 10000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -246,3 +255,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
