@@ -76,7 +76,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     Papa.parse(selectedFile, {
         header: true,
         skipEmptyLines: true,
-        transformHeader: header => header.trim(),
+        // This is the critical fix: only trim headers that are actual strings.
+        transformHeader: header => (header ? header.trim() : header),
         complete: async (results) => {
             try {
                 if (results.errors.length) {
@@ -84,8 +85,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
                     const firstError = results.errors[0];
                     throw new Error(`Error on row ${firstError.row}: ${firstError.message}`);
                 }
-
-                if (!results.meta.fields || !results.meta.fields.some(h => h.toLowerCase() === 'name')) {
+                
+                // This is the second critical fix: filter out any null/undefined headers before checking them.
+                const safeHeaders = results.meta.fields?.filter(Boolean) || [];
+                if (!safeHeaders.some(h => h.toLowerCase() === 'name')) {
                     throw new Error(`CSV is missing the required "Name" header.`);
                 }
 
