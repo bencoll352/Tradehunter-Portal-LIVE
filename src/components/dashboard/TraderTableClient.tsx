@@ -34,7 +34,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
-type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status' | 'callBackDate';
+type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status' | 'callBackDate' | 'reviews';
 
 type SortDirection = 'ascending' | 'descending';
 
@@ -73,7 +73,28 @@ export function TraderTableClient({
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: "lastActivity", direction: "descending" });
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   
-  // Re-ordered and completed to match the screenshot, with all visible by default.
+  const allColumns = [
+    { id: 'name', label: 'Name' },
+    { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
+    { id: 'estimatedCompanyValue', label: 'Est. Company Value' },
+    { id: 'employeeCount', label: 'Employees' },
+    { id: 'status', label: 'Status' },
+    { id: 'lastActivity', label: 'Last Activity' },
+    { id: 'callBackDate', label: 'Call-Back' },
+    { id: 'description', label: 'Description' },
+    { id: 'notes', label: 'Notes' },
+    { id: 'rating', label: 'Google Rating' },
+    { id: 'reviews', label: 'Google number of reviews' },
+    { id: 'website', label: 'Website' },
+    { id: 'phone', label: 'Phone' },
+    { id: 'ownerName', label: 'Owner Name' },
+    { id: 'mainCategory', label: 'Main Category' },
+    { id: 'categories', label: 'Categories' },
+    { id: 'workdayTiming', label: 'Workday Timing' },
+    { id: 'address', label: 'Address' },
+    { id: 'ownerProfileLink', label: 'Link' },
+  ];
+
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({
     name: true,
     estimatedAnnualRevenue: true,
@@ -85,6 +106,7 @@ export function TraderTableClient({
     description: true,
     notes: true,
     rating: true,
+    reviews: true,
     website: true,
     phone: true,
     ownerName: true,
@@ -192,28 +214,6 @@ export function TraderTableClient({
       </TableHead>
     );
   };
-
-  // Re-ordered and completed to match the screenshot
-  const allColumns = [
-    { id: 'name', label: 'Name' },
-    { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
-    { id: 'estimatedCompanyValue', label: 'Est. Company Value' },
-    { id: 'employeeCount', label: 'Employees' },
-    { id: 'status', label: 'Status' },
-    { id: 'lastActivity', label: 'Last Activity' },
-    { id: 'callBackDate', label: 'Call-Back' },
-    { id: 'description', label: 'Description' },
-    { id: 'notes', label: 'Notes' },
-    { id: 'rating', label: 'Rating' },
-    { id: 'website', label: 'Website' },
-    { id: 'phone', label: 'Phone' },
-    { id: 'ownerName', label: 'Owner Name' },
-    { id: 'mainCategory', label: 'Main Category' },
-    { id: 'categories', label: 'Categories' },
-    { id: 'workdayTiming', label: 'Workday Timing' },
-    { id: 'address', label: 'Address' },
-    { id: 'ownerProfileLink', label: 'Link' },
-  ];
 
   return (
     <Card className="shadow-md">
@@ -331,7 +331,6 @@ export function TraderTableClient({
                         />
                     </TableCell>
                     
-                    {/* Data cells re-ordered to match the header order from the screenshot */}
                     {columnVisibility.name && <TableCell className="font-medium truncate max-w-40">{trader.name}</TableCell>}
                     {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
                     {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
@@ -341,7 +340,8 @@ export function TraderTableClient({
                     {columnVisibility.callBackDate && <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), "dd/MM/yyyy") : '-'}</TableCell>}
                     {columnVisibility.description && <TableCell className="truncate max-w-48">{trader.description ?? '-'}</TableCell>}
                     {columnVisibility.notes && <TableCell className="truncate max-w-48">{trader.notes ?? '-'}</TableCell>}
-                    {columnVisibility.rating && <TableCell className="text-center">{typeof trader.rating === 'number' ? trader.rating.toFixed(1) : trader.rating ?? '-'}</TableCell>}
+                    {columnVisibility.rating && <TableCell className="text-center">{typeof trader.rating === 'number' ? trader.rating.toFixed(1) : (typeof trader.rating === 'string' ? parseFloat(trader.rating).toFixed(1) : '-')}</TableCell>}
+                    {columnVisibility.reviews && <TableCell className="text-center">{trader.reviews ?? '-'}</TableCell>}
                     {columnVisibility.website && <TableCell>{trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><Globe className="h-4 w-4"/>Visit</a> : '-'}</TableCell>}
                     {columnVisibility.phone && <TableCell className="whitespace-nowrap">{trader.phone ?? '-'}</TableCell>}
                     {columnVisibility.ownerName && <TableCell className="truncate max-w-40">{trader.ownerName ?? '-'}</TableCell>}
@@ -381,3 +381,5 @@ export function TraderTableClient({
     </Card>
   );
 }
+
+    
