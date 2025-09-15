@@ -284,74 +284,81 @@ export async function deleteTrader(branchId: BaseBranchId, traderId: string): Pr
 }
 
 export async function bulkAddTraders(branchId: BaseBranchId, tradersData: ParsedTraderData[]): Promise<Trader[]> {
-  const db = ensureFirestore();
-  const tradersCollection = getTradersCollection(branchId);
-  const batch = db.batch();
-  const addedTraders: Trader[] = [];
-  
-  // Use a Set to track phone numbers processed *within this batch* to prevent self-duplication.
-  const batchPhoneNumbers = new Set<string>();
+    const db = ensureFirestore();
+    const tradersCollection = getTradersCollection(branchId);
+    const batch = db.batch();
+    const addedTraders: Trader[] = [];
 
-  const existingPhonesSnapshot = await tradersCollection.select('phone').get();
-  const existingDbPhones = new Set(existingPhonesSnapshot.docs.map(doc => doc.data().phone).filter(Boolean));
+    // 1. Fetch all existing phone numbers from the database for this branch.
+    const existingPhonesSnapshot = await tradersCollection.select('phone').get();
+    const existingDbPhones = new Set<string>();
+    existingPhonesSnapshot.forEach(doc => {
+        const phone = doc.data().phone;
+        if (phone) { // Only add non-empty phone numbers
+            existingDbPhones.add(phone);
+        }
+    });
 
-  for (const rawTrader of tradersData) {
-    const normalizedPhone = normalizePhoneNumber(rawTrader.phone);
+    // 2. Use a Set to track phone numbers processed *within this batch* to prevent self-duplication.
+    const batchPhoneNumbers = new Set<string>();
 
-    // Skip if the phone number is a non-empty string and already exists in the DB or this batch.
-    if (normalizedPhone && (existingDbPhones.has(normalizedPhone) || batchPhoneNumbers.has(normalizedPhone))) {
-      console.log(`Skipping duplicate phone number: ${normalizedPhone}`);
-      continue;
+    for (const rawTrader of tradersData) {
+        const normalizedPhone = normalizePhoneNumber(rawTrader.phone);
+
+        // 3. Only perform duplicate checks if the phone number is a non-empty string.
+        if (normalizedPhone) {
+            if (existingDbPhones.has(normalizedPhone) || batchPhoneNumbers.has(normalizedPhone)) {
+                console.log(`Skipping duplicate phone number: ${normalizedPhone}`);
+                continue; // Skip this trader
+            }
+            batchPhoneNumbers.add(normalizedPhone); // Add to the set for this batch
+        }
+
+        const docRef = tradersCollection.doc();
+        const newTrader = {
+          name: rawTrader.name || "Unnamed Trader",
+          status: rawTrader.status || "New Lead" as TraderStatus,
+          lastActivity: parseActivityDate(rawTrader.lastActivity),
+          description: rawTrader.description ?? null,
+          reviews: rawTrader.reviews ?? null,
+          rating: rawTrader.rating ?? null,
+          website: rawTrader.website ?? null,
+          phone: normalizedPhone, // Use the normalized phone number
+          ownerName: rawTrader.ownerName ?? null,
+          mainCategory: rawTrader.mainCategory ?? null,
+          categories: rawTrader.categories ?? null,
+          workdayTiming: rawTrader.workdayTiming ?? null,
+          temporarilyClosedOn: rawTrader.temporarilyClosedOn ?? null,
+          address: rawTrader.address ?? null,
+          ownerProfileLink: rawTrader.ownerProfileLink ?? null,
+          notes: rawTrader.notes ?? null,
+          callBackDate: rawTrader.callBackDate ? new Date(rawTrader.callBackDate).toISOString() : null,
+          totalAssets: rawTrader.totalAssets ?? null,
+          estimatedAnnualRevenue: rawTrader.estimatedAnnualRevenue ?? null,
+          estimatedCompanyValue: rawTrader.estimatedCompanyValue ?? null,
+          employeeCount: rawTrader.employeeCount ?? null,
+          tasks: [],
+        };
+        batch.set(docRef, newTrader);
+
+        const traderForClient: Trader = {
+          id: docRef.id,
+          ...newTrader,
+          lastActivity: new Date(newTrader.lastActivity).toISOString(),
+          tasks: [],
+        };
+        addedTraders.push(traderForClient);
     }
-    
-    const docRef = tradersCollection.doc();
-    const newTrader = {
-      name: rawTrader.name || "Unnamed Trader",
-      status: rawTrader.status || "New Lead" as TraderStatus,
-      lastActivity: parseActivityDate(rawTrader.lastActivity),
-      description: rawTrader.description ?? null,
-      reviews: rawTrader.reviews ?? null,
-      rating: rawTrader.rating ?? null,
-      website: rawTrader.website ?? null,
-      phone: normalizedPhone,
-      ownerName: rawTrader.ownerName ?? null,
-      mainCategory: rawTrader.mainCategory ?? null,
-      categories: rawTrader.categories ?? null,
-      workdayTiming: rawTrader.workdayTiming ?? null,
-      temporarilyClosedOn: rawTrader.temporarilyClosedOn ?? null,
-      address: rawTrader.address ?? null,
-      ownerProfileLink: rawTrader.ownerProfileLink ?? null,
-      notes: rawTrader.notes ?? null,
-      callBackDate: rawTrader.callBackDate ? new Date(rawTrader.callBackDate).toISOString() : null,
-      totalAssets: rawTrader.totalAssets ?? null,
-      estimatedAnnualRevenue: rawTrader.estimatedAnnualRevenue ?? null,
-      estimatedCompanyValue: rawTrader.estimatedCompanyValue ?? null,
-      employeeCount: rawTrader.employeeCount ?? null,
-      tasks: [],
-    };
-    batch.set(docRef, newTrader);
 
-    const traderForClient: Trader = {
-      id: docRef.id,
-      ...newTrader,
-      lastActivity: new Date(newTrader.lastActivity).toISOString(),
-      tasks: [],
-    };
-
-    addedTraders.push(traderForClient);
-    if (normalizedPhone) {
-      batchPhoneNumbers.add(normalizedPhone);
+    try {
+        await batch.commit();
+        return addedTraders;
+    } catch (error: any) {
+        console.error('[TRADER_SERVICE_ERROR:bulkAddTraders]', error);
+        throw new Error(`Database batch write failed: ${error.message}`);
     }
-  }
-
-  try {
-    await batch.commit();
-    return addedTraders;
-  } catch (error: any) {
-    console.error('[TRADER_SERVICE_ERROR:bulkAddTraders]', error);
-    throw new Error(`Database batch write failed: ${error.message}`);
-  }
 }
+
 
 export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: string[]): Promise<{ successCount: number; failureCount: number }> {
   try {
