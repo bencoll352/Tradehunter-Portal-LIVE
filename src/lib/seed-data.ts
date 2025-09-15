@@ -336,3 +336,5 @@ export const INITIAL_SEED_TRADERS_DATA: SeedTraderData[] = [
     employeeCount: 12,
   }
 ];
+
+    
