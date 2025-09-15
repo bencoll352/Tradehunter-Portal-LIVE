@@ -11,9 +11,6 @@ import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { getTradersAction, addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions';
 import { Users, Flame, UserPlus } from 'lucide-react';
-import { parseISO } from 'date-fns';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -40,7 +37,6 @@ export default function TradeHunterDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Filters
   const [nameFilter, setNameFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
@@ -100,10 +96,10 @@ export default function TradeHunterDashboardPage() {
     return traders
       .filter(trader => {
         const lowerCaseSearch = nameFilter.toLowerCase();
-        const nameMatch = trader.name.toLowerCase().includes(lowerCaseSearch);
+        
+        const nameMatch = trader.name?.toLowerCase().includes(lowerCaseSearch) || false;
         const ownerMatch = trader.ownerName?.toLowerCase().includes(lowerCaseSearch) || false;
         const descriptionMatch = trader.description?.toLowerCase().includes(lowerCaseSearch) || false;
-
         const categoryMatch = categoryFilter === 'all' || trader.mainCategory === categoryFilter;
 
         return (nameMatch || ownerMatch || descriptionMatch) && categoryMatch;
@@ -267,29 +263,23 @@ export default function TradeHunterDashboardPage() {
             />
         </div>
 
-      <Card className="shadow-md">
-        <CardHeader>
-          <CardTitle className="text-xl">Trader Database</CardTitle>
-          <CardDescription>Manage traders for branch: {branchInfo?.displayLoginId || 'Loading...'}</CardDescription>
-        </CardHeader>
-        <CardContent className="p-2 sm:p-6">
-            <TraderTableClient
-                traders={filteredTraders}
-                branchId={currentBaseBranchId!}
-                onAdd={handleAdd}
-                onUpdate={handleUpdate}
-                onDelete={handleDelete}
-                onBulkAdd={handleBulkAdd}
-                onBulkDelete={handleBulkDelete}
-                nameFilter={nameFilter}
-                setNameFilter={setNameFilter}
-                categoryFilter={categoryFilter}
-                setCategoryFilter={setCategoryFilter}
-                mainCategories={mainCategories}
-                isLoading={isLoading}
-            />
-        </CardContent>
-      </Card>
+        <TraderTableClient
+            traders={filteredTraders}
+            branchId={currentBaseBranchId!}
+            onAdd={handleAdd}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
+            onBulkAdd={handleBulkAdd}
+            onBulkDelete={handleBulkDelete}
+            nameFilter={nameFilter}
+            setNameFilter={setNameFilter}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            mainCategories={mainCategories}
+            isLoading={isLoading}
+        />
     </div>
   );
 }
+
+    

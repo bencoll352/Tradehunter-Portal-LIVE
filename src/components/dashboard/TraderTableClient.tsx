@@ -23,7 +23,7 @@ import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
-import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult, TraderStatus } from "@/types";
+import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
 import { ArrowUpDown, Trash2, SlidersHorizontal, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
@@ -31,6 +31,7 @@ import type { z } from "zod";
 import type { traderFormSchema } from "./TraderForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status';
@@ -88,21 +89,25 @@ export function TraderTableClient({
     let sortableItems = [...traders];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+        const aValue = a[sortConfig.key as keyof Trader];
+        const bValue = b[sortConfig.key as keyof Trader];
 
         if (aValue === null || aValue === undefined) return 1;
         if (bValue === null || bValue === undefined) return -1;
         
+        if (sortConfig.key === 'lastActivity' || sortConfig.key === 'callBackDate') {
+            const dateA = new Date(aValue as string).getTime();
+            const dateB = new Date(bValue as string).getTime();
+             if (isNaN(dateA)) return 1;
+             if (isNaN(dateB)) return -1;
+            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+        }
+
         if (typeof aValue === 'number' && typeof bValue === 'number') {
             return sortConfig.direction === 'ascending' ? aValue - bValue : bValue - aValue;
         }
+
         if (typeof aValue === 'string' && typeof bValue === 'string') {
-            if (sortConfig.key === 'lastActivity' || sortConfig.key === 'callBackDate') {
-                const dateA = new Date(aValue).getTime();
-                const dateB = new Date(bValue).getTime();
-                return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
-            }
             return sortConfig.direction === 'ascending' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
         }
         return 0;
@@ -176,156 +181,176 @@ export function TraderTableClient({
     );
   };
 
-  if (isLoading) {
-    return <Skeleton className="h-64 w-full" />;
-  }
-
   return (
-    <div className="w-full">
-      <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-2">
-        <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
-            <Input
-              placeholder="Filter by name..."
-              value={nameFilter}
-              onChange={(event) => setNameFilter(event.target.value)}
-              className="w-full sm:max-w-xs"
-            />
-            <Select
-              value={categoryFilter}
-              onValueChange={setCategoryFilter}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {mainCategories.map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-        </div>
-        <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end">
-           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                <SlidersHorizontal className="mr-2 h-4 w-4" />
-                <span className="hidden md:inline">Columns</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {Object.keys(columnVisibility).map((columnId) => (
-                <DropdownMenuCheckboxItem
-                  key={columnId}
-                  className="capitalize"
-                  checked={columnVisibility[columnId]}
-                  onCheckedChange={(value) =>
-                    setColumnVisibility(prev => ({...prev, [columnId]: !!value}))
-                  }
-                >
-                  {columnId.replace(/([A-Z])/g, ' $1')}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {selectedRowCount > 0 && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleBulkDelete}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete ({selectedRowCount})
-            </Button>
-          )}
-          <BulkAddTradersDialog
-            branchId={branchId}
-            onBulkAddTraders={onBulkAdd}
-          />
-          <AddTraderDialog 
-            onAddTrader={onAdd} 
-            branchId={branchId}
-          />
-        </div>
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead padding="checkbox">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-primary focus:ring-primary"
-                  onChange={(e) => toggleAllRowsSelected(e.target.checked)}
-                  checked={sortedTraders.length > 0 && selectedRowCount === sortedTraders.length}
+    <Card className="shadow-md">
+      <CardHeader>
+        <CardTitle className="text-xl">Trader Database</CardTitle>
+        <CardDescription>Manage traders for branch: {branchId || 'Loading...'}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-2">
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
+                <Input
+                placeholder="Filter by name..."
+                value={nameFilter}
+                onChange={(event) => setNameFilter(event.target.value)}
+                className="w-full sm:max-w-xs"
                 />
-              </TableHead>
-              <SortableHeader label="Name" sortKey="name" />
-              <SortableHeader label="Est. Annual Revenue" sortKey="estimatedAnnualRevenue" />
-              {columnVisibility.estimatedCompanyValue && <SortableHeader label="Est. Company Value" sortKey="estimatedCompanyValue" />}
-              {columnVisibility.employeeCount && <SortableHeader label="Employees" sortKey="employeeCount" />}
-              <SortableHeader label="Status" sortKey="status" />
-              <SortableHeader label="Last Activity" sortKey="lastActivity" />
-              <TableHead>Website</TableHead>
-              <TableHead>Owner</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedTraders.length > 0 ? (
-              sortedTraders.map((trader) => (
-                <TableRow
-                  key={trader.id}
-                  data-state={rowSelection[trader.id] && "selected"}
+                <Select
+                value={categoryFilter}
+                onValueChange={setCategoryFilter}
                 >
-                  <TableCell>
-                     <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                        checked={rowSelection[trader.id] || false}
-                        onChange={(e) => setRowSelection(prev => ({...prev, [trader.id]: e.target.checked}))}
-                      />
-                  </TableCell>
-                  <TableCell className="font-medium">{trader.name}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>
-                  {columnVisibility.estimatedCompanyValue && <TableCell className="text-right">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
-                  {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
-                  <TableCell>
-                    <Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a> : '-'}
-                  </TableCell>
-                  <TableCell>{trader.ownerName ?? '-'}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end">
-                      <EditTraderDialog trader={trader} onUpdateTrader={onUpdate} />
-                      <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => onDelete(trader.id)} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={10}
-                  className="h-24 text-center"
+                <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {mainCategories.map(category => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                </SelectContent>
+                </Select>
+            </div>
+            <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end">
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                    <span className="hidden md:inline">Columns</span>
+                </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                {Object.keys(columnVisibility).map((columnId) => (
+                    <DropdownMenuCheckboxItem
+                    key={columnId}
+                    className="capitalize"
+                    checked={columnVisibility[columnId]}
+                    onCheckedChange={(value) =>
+                        setColumnVisibility(prev => ({...prev, [columnId]: !!value}))
+                    }
+                    >
+                    {columnId.replace(/([A-Z])/g, ' $1')}
+                    </DropdownMenuCheckboxItem>
+                ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+            {selectedRowCount > 0 && (
+                <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDelete}
                 >
-                  No results.
-                </TableCell>
-              </TableRow>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete ({selectedRowCount})
+                </Button>
             )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {selectedRowCount} of {sortedTraders.length} row(s) selected.
+            <BulkAddTradersDialog
+                branchId={branchId}
+                onBulkAddTraders={onBulkAdd}
+            />
+            <AddTraderDialog 
+                onAddTrader={onAdd} 
+                branchId={branchId}
+            />
+            </div>
         </div>
-      </div>
-    </div>
+        <div className="rounded-md border">
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead padding="checkbox">
+                    <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    onChange={(e) => toggleAllRowsSelected(e.target.checked)}
+                    checked={!isLoading && sortedTraders.length > 0 && selectedRowCount === sortedTraders.length}
+                    disabled={isLoading || sortedTraders.length === 0}
+                    />
+                </TableHead>
+                <SortableHeader label="Name" sortKey="name" />
+                <SortableHeader label="Est. Annual Revenue" sortKey="estimatedAnnualRevenue" />
+                {columnVisibility.estimatedCompanyValue && <SortableHeader label="Est. Company Value" sortKey="estimatedCompanyValue" />}
+                {columnVisibility.employeeCount && <SortableHeader label="Employees" sortKey="employeeCount" />}
+                <SortableHeader label="Status" sortKey="status" />
+                <SortableHeader label="Last Activity" sortKey="lastActivity" />
+                <TableHead>Website</TableHead>
+                <TableHead>Owner</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={`skeleton-${i}`}>
+                            <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                            {columnVisibility.estimatedCompanyValue && <TableCell><Skeleton className="h-4 w-20" /></TableCell>}
+                            {columnVisibility.employeeCount && <TableCell><Skeleton className="h-4 w-12" /></TableCell>}
+                            <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                            <TableCell><Skeleton className="h-8 w-16" /></TableCell>
+                        </TableRow>
+                    ))
+                ) : sortedTraders.length > 0 ? (
+                sortedTraders.map((trader) => (
+                    <TableRow
+                    key={trader.id}
+                    data-state={rowSelection[trader.id] && "selected"}
+                    >
+                    <TableCell>
+                        <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-primary focus:ring-primary"
+                            checked={rowSelection[trader.id] || false}
+                            onChange={(e) => setRowSelection(prev => ({...prev, [trader.id]: e.target.checked}))}
+                        />
+                    </TableCell>
+                    <TableCell className="font-medium">{trader.name}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>
+                    {columnVisibility.estimatedCompanyValue && <TableCell className="text-right">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
+                    {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
+                    <TableCell>
+                        <Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge>
+                    </TableCell>
+                    <TableCell>
+                        {trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}
+                    </TableCell>
+                    <TableCell>
+                        {trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a> : '-'}
+                    </TableCell>
+                    <TableCell>{trader.ownerName ?? '-'}</TableCell>
+                    <TableCell className="text-right">
+                        <div className="flex items-center justify-end">
+                        <EditTraderDialog trader={trader} onUpdateTrader={onUpdate} />
+                        <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => onDelete(trader.id)} />
+                        </div>
+                    </TableCell>
+                    </TableRow>
+                ))
+                ) : (
+                <TableRow>
+                    <TableCell
+                    colSpan={Object.values(columnVisibility).filter(v => v).length + 6}
+                    className="h-24 text-center"
+                    >
+                    No results found.
+                    </TableCell>
+                </TableRow>
+                )}
+            </TableBody>
+            </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex-1 text-sm text-muted-foreground">
+            {selectedRowCount} of {sortedTraders.length} row(s) selected.
+            </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
+
+    
