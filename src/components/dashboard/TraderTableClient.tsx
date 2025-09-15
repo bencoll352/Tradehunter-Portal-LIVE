@@ -77,46 +77,46 @@ export function TraderTableClient({
   
   const allColumns = [
     { id: 'name', label: 'Name' },
-    { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
-    { id: 'estimatedCompanyValue', label: 'Est. Company Value' },
-    { id: 'employeeCount', label: 'Employees' },
     { id: 'status', label: 'Status' },
     { id: 'lastActivity', label: 'Last Activity' },
-    { id: 'callBackDate', label: 'Call-Back' },
+    { id: 'callBackDate', label: 'Call-Back Date' },
     { id: 'description', label: 'Description' },
-    { id: 'notes', label: 'Notes' },
     { id: 'rating', label: 'Google Rating' },
     { id: 'reviews', label: 'Google number of reviews' },
     { id: 'website', label: 'Website' },
     { id: 'phone', label: 'Phone' },
     { id: 'ownerName', label: 'Owner Name' },
+    { id: 'ownerProfileLink', label: 'Link' },
     { id: 'mainCategory', label: 'Main Category' },
     { id: 'categories', label: 'Categories' },
     { id: 'workdayTiming', label: 'Workday Timing' },
     { id: 'address', label: 'Address' },
-    { id: 'ownerProfileLink', label: 'Link' },
+    { id: 'notes', label: 'Notes' },
+    { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
+    { id: 'estimatedCompanyValue', label: 'Est. Company Value' },
+    { id: 'employeeCount', label: 'Employees' },
   ];
 
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({
     name: true,
-    estimatedAnnualRevenue: true,
-    estimatedCompanyValue: true,
-    employeeCount: true,
     status: true,
     lastActivity: true,
     callBackDate: true,
     description: true,
-    notes: true,
     rating: true,
     reviews: true,
     website: true,
     phone: true,
     ownerName: true,
+    ownerProfileLink: true,
     mainCategory: true,
     categories: true,
     workdayTiming: true,
     address: true,
-    ownerProfileLink: true,
+    notes: true,
+    estimatedAnnualRevenue: true,
+    estimatedCompanyValue: true,
+    employeeCount: true,
   });
 
   const { toast } = useToast();
@@ -334,24 +334,24 @@ export function TraderTableClient({
                     </TableCell>
                     
                     {columnVisibility.name && <TableCell className="font-medium truncate max-w-40">{trader.name}</TableCell>}
-                    {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
-                    {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
-                    {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
                     {columnVisibility.status && <TableCell><Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge></TableCell>}
                     {columnVisibility.lastActivity && <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}</TableCell>}
                     {columnVisibility.callBackDate && <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), "dd/MM/yyyy") : '-'}</TableCell>}
                     {columnVisibility.description && <TableCell className="truncate max-w-48">{trader.description ?? '-'}</TableCell>}
-                    {columnVisibility.notes && <TableCell className="truncate max-w-48">{trader.notes ?? '-'}</TableCell>}
                     {columnVisibility.rating && <TableCell className="text-center">{typeof trader.rating === 'number' ? trader.rating.toFixed(1) : (typeof trader.rating === 'string' ? parseFloat(trader.rating).toFixed(1) : '-')}</TableCell>}
                     {columnVisibility.reviews && <TableCell className="text-center">{trader.reviews ?? '-'}</TableCell>}
                     {columnVisibility.website && <TableCell>{trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><Globe className="h-4 w-4"/>Visit</a> : '-'}</TableCell>}
                     {columnVisibility.phone && <TableCell className="whitespace-nowrap">{trader.phone ?? '-'}</TableCell>}
                     {columnVisibility.ownerName && <TableCell className="truncate max-w-40">{trader.ownerName ?? '-'}</TableCell>}
+                    {columnVisibility.ownerProfileLink && <TableCell>{trader.ownerProfileLink ? <a href={trader.ownerProfileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><ExternalLink className="h-4 w-4"/>Profile</a> : '-'}</TableCell>}
                     {columnVisibility.mainCategory && <TableCell className="truncate max-w-40">{trader.mainCategory ?? '-'}</TableCell>}
                     {columnVisibility.categories && <TableCell className="truncate max-w-48">{trader.categories ?? '-'}</TableCell>}
                     {columnVisibility.workdayTiming && <TableCell className="truncate max-w-40">{trader.workdayTiming ?? '-'}</TableCell>}
                     {columnVisibility.address && <TableCell className="truncate max-w-48">{trader.address ?? '-'}</TableCell>}
-                    {columnVisibility.ownerProfileLink && <TableCell>{trader.ownerProfileLink ? <a href={trader.ownerProfileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><ExternalLink className="h-4 w-4"/>Profile</a> : '-'}</TableCell>}
+                    {columnVisibility.notes && <TableCell className="truncate max-w-48">{trader.notes ?? '-'}</TableCell>}
+                    {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
+                    {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
+                    {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
 
                     <TableCell className="text-right">
                         <div className="flex items-center justify-end">
@@ -384,7 +384,3 @@ export function TraderTableClient({
     </Card>
   );
 }
-
-    
-
-    
