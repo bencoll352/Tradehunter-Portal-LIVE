@@ -18,7 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import Papa, { type ParseResult } from "papaparse";
 
 interface BulkAddTradersDialogProps {
   branchId: BaseBranchId;
@@ -27,17 +26,56 @@ interface BulkAddTradersDialogProps {
 
 const MAX_UPLOAD_LIMIT = 1000;
 
-const safeParseFloat = (val: any): number | null => {
-    if (val === null || val === undefined || String(val).trim() === '') return null;
-    const num = parseFloat(String(val).replace(/[£,]/g, ''));
-    return isNaN(num) ? null : num;
+const HEADER_MAP: Record<string, keyof Omit<Trader, 'id'>> = {
+    'Name': 'name',
+    'Status': 'status',
+    'Last Activity': 'lastActivity',
+    'Description': 'description',
+    'Reviews': 'reviews',
+    'Rating': 'rating',
+    'Website': 'website',
+    'Phone': 'phone',
+    'Owner Name': 'ownerName',
+    'Main Category': 'mainCategory',
+    'Categories': 'categories',
+    'Workday Timing': 'workdayTiming',
+    'Temporarily Closed On': 'temporarilyClosedOn',
+    'Address': 'address',
+    'Owner Profile Link': 'ownerProfileLink',
+    'Notes': 'notes',
+    'Call Back Date': 'callBackDate',
+    'Total Assets': 'totalAssets',
+    'Estimated Annual Revenue': 'estimatedAnnualRevenue',
+    'Estimated Company Value': 'estimatedCompanyValue',
+    'Employee Count': 'employeeCount',
 };
 
-const safeParseInt = (val: any): number | null => {
-    if (val === null || val === undefined || String(val).trim() === '') return null;
-    const num = parseInt(String(val).replace(/,/g, ''), 10);
-    return isNaN(num) ? null : num;
+const parseCsvRow = (row: string): string[] => {
+    const result: string[] = [];
+    let currentField = '';
+    let inQuotedField = false;
+
+    for (let i = 0; i < row.length; i++) {
+        const char = row[i];
+
+        if (char === '"') {
+            if (inQuotedField && row[i + 1] === '"') {
+                currentField += '"';
+                i++;
+            } else {
+                inQuotedField = !inQuotedField;
+            }
+        } else if (char === ',' && !inQuotedField) {
+            result.push(currentField);
+            currentField = '';
+        } else {
+            currentField += char;
+        }
+    }
+    result.push(currentField);
+    return result.map(f => f.trim());
 };
+
 
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
@@ -65,89 +103,78 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
       fileInputRef.current.value = "";
     }
   };
+  
+    const parseAndValidateData = (file: File): Promise<ParsedTraderData[]> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = event.target?.result as string;
+                if (!text) {
+                    return reject(new Error("File is empty or could not be read."));
+                }
+                const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
 
-  const parseAndValidateData = (file: File): Promise<ParsedTraderData[]> => {
-    return new Promise((resolve, reject) => {
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: header => header ? header.trim() : header,
-        complete: (results: ParseResult<any>) => {
-          if (results.errors.length) {
-            const firstError = results.errors[0];
-            return reject(new Error(`CSV Parsing Error on row ${firstError.row}: ${firstError.message}`));
-          }
-          
-          const safeHeaders = results.meta.fields?.filter(Boolean) || [];
-          const lowerCaseHeaders = safeHeaders.map(h => h.toLowerCase());
+                if (lines.length < 2) {
+                    return reject(new Error('CSV file must have a header row and at least one data row.'));
+                }
+                
+                const headerRow = parseCsvRow(lines[0]);
+                
+                const lowerCaseHeaderMap: Record<string, keyof Omit<Trader, 'id'>> = {};
+                Object.keys(HEADER_MAP).forEach(key => {
+                    lowerCaseHeaderMap[key.toLowerCase()] = HEADER_MAP[key as keyof typeof HEADER_MAP];
+                });
+                
+                const mappedHeaderIndices: { index: number; key: keyof ParsedTraderData }[] = [];
+                let nameColumnFound = false;
 
-          if (!lowerCaseHeaders.includes('name')) {
-            return reject(new Error('CSV is missing the required "Name" header.'));
-          }
+                headerRow.forEach((header, index) => {
+                    const trimmedHeader = header.trim().toLowerCase();
+                    const matchedKey = Object.keys(lowerCaseHeaderMap).find(mapKey => mapKey.startsWith(trimmedHeader));
+                    if (matchedKey) {
+                        const traderKey = lowerCaseHeaderMap[matchedKey];
+                        mappedHeaderIndices.push({ index: index, key: traderKey });
+                        if (traderKey === 'name') {
+                            nameColumnFound = true;
+                        }
+                    }
+                });
 
-          if (results.data.length > MAX_UPLOAD_LIMIT) {
-            return reject(new Error(`The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`));
-          }
+                if (!nameColumnFound) {
+                    return reject(new Error('CSV is missing the required "Name" header column.'));
+                }
 
-          const validTraders = (results.data as any[]).map((row, index) => {
-              const rowData: { [key: string]: any } = {};
-              for (const key in row) {
-                  rowData[key.trim().toLowerCase()] = row[key];
-              }
+                if (lines.length -1 > MAX_UPLOAD_LIMIT) {
+                    return reject(new Error(`The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`));
+                }
 
-              const getVal = (aliases: string[]) => {
-                  for (const alias of aliases) {
-                      if (rowData[alias.toLowerCase()] !== undefined) {
-                          return rowData[alias.toLowerCase()];
-                      }
-                  }
-                  return undefined;
-              };
+                const validTraders: ParsedTraderData[] = [];
 
-              const name = getVal(['Name']);
-              if (!name || String(name).trim() === '') {
-                  console.warn(`[Bulk Upload] Skipping row ${index + 2} because 'Name' is missing or empty.`);
-                  return null;
-              }
-              
-              return {
-                name: name,
-                status: getVal(['Status']) as TraderStatus || undefined,
-                lastActivity: getVal(['Last Activity', 'lastActivity']),
-                description: getVal(['Description', 'Descriptio']),
-                reviews: safeParseInt(getVal(['Reviews'])),
-                rating: safeParseFloat(getVal(['Rating'])),
-                website: getVal(['Website']),
-                phone: String(getVal(['Phone']) || ''),
-                ownerName: getVal(['Owner Name', 'Owner', 'Owner Nar']),
-                mainCategory: getVal(['Main Category', 'Category', 'Main Cate']),
-                categories: getVal(['Categories']),
-                workdayTiming: getVal(['Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', 'WorkdayTiming', 'Workday T']),
-                temporarilyClosedOn: getVal(['Temporarily Closed On', 'Closed On', 'Temporarily Closed', 'Temporari']),
-                address: getVal(['Address']),
-                ownerProfileLink: getVal(['Owner Profile Link', 'Owner Profile', 'Owner Pro']),
-                notes: getVal(['Notes']),
-                totalAssets: safeParseFloat(getVal(['Total Assets', 'Total Asse'])),
-                // Handle potentially duplicated 'Estimated' headers by being more specific
-                estimatedAnnualRevenue: safeParseFloat(getVal(['Estimated Annual Revenue', 'Est. Annual Revenue', 'Estimated'])),
-                estimatedCompanyValue: safeParseFloat(getVal(['Estimated Company Value', 'Est. Company Value', 'Estimated Value'])),
-                employeeCount: safeParseInt(getVal(['Employee Count', 'Employees'])),
-                callBackDate: getVal(['Call Back Date', 'callBackDate']),
-              };
-          }).filter(Boolean) as ParsedTraderData[];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = parseCsvRow(lines[i]);
+                    const rowData: Partial<ParsedTraderData> = {};
 
-
-          if (validTraders.length === 0) {
-            return reject(new Error("Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that data rows are not empty."));
-          }
-          
-          resolve(validTraders);
-        },
-        error: (error: Error) => {
-          reject(new Error(`Failed to read the selected file: ${error.message}`));
-        }
-      });
-    });
+                    mappedHeaderIndices.forEach(({ index, key }) => {
+                        const value = values[index] ?? '';
+                        (rowData as any)[key] = value;
+                    });
+                    
+                    if (rowData.name) {
+                        validTraders.push(rowData as ParsedTraderData);
+                    }
+                }
+                
+                if (validTraders.length === 0) {
+                  return reject(new Error("Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that data rows are not empty."));
+                }
+                
+                resolve(validTraders);
+            };
+            reader.onerror = () => {
+                reject(new Error("Failed to read the selected file."));
+            };
+            reader.readAsText(file);
+        });
   };
 
 
@@ -198,10 +225,10 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
                         Rows without a 'Name' field will be skipped; this column is mandatory for a record to be valid.
                     </p>
                 </div>
-                <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
+                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs font-medium">
-                        Header names can be flexible (e.g., 'Owner Name', 'Owner', or 'Owner Nar' are all acceptable). The system will attempt to map them automatically.
+                        Header names are flexible and can be truncated (e.g., 'Descriptio' for 'Description'). The system will attempt to map them automatically.
                     </p>
                 </div>
                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
@@ -257,6 +284,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
 
     
