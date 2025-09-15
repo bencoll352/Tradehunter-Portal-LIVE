@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -18,163 +17,20 @@ import { useToast } from "@/hooks/use-toast";
 import type { BaseBranchId, ParsedTraderData, Trader } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import Papa from "papaparse";
 
 interface BulkAddTradersDialogProps {
   branchId: BaseBranchId;
   onBulkAddTraders: (traders: ParsedTraderData[]) => Promise<{ data: Trader[] | null; error: string | null; }>;
-  existingTraders: Trader[];
 }
 
-const parseCsvRow = (row: string): string[] => {
-    const result: string[] = [];
-    let currentField = '';
-    let inQuotedField = false;
-
-    for (let i = 0; i < row.length; i++) {
-        const char = row[i];
-
-        if (char === '"') {
-            if (inQuotedField && row[i + 1] === '"') {
-                currentField += '"';
-                i++;
-            } else {
-                inQuotedField = !inQuotedField;
-            }
-        } else if (char === ',' && !inQuotedField) {
-            result.push(currentField);
-            currentField = '';
-        } else {
-            currentField += char;
-        }
-    }
-    result.push(currentField);
-    return result;
-};
-
-
-const parseAndValidateData = (file: File): Promise<ParsedTraderData[]> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = (event) => {
-            try {
-                const text = event.target?.result as string;
-                if (!text) {
-                    throw new Error("File is empty or could not be read.");
-                }
-
-                const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
-                if (lines.length < 2) {
-                    throw new Error('CSV file must have a header row and at least one data row.');
-                }
-
-                const headerRow = parseCsvRow(lines[0]);
-                
-                const headerAliasMap: Record<string, keyof ParsedTraderData> = {
-                    'name': 'name',
-                    'status': 'status',
-                    'last activity': 'lastActivity',
-                    'description': 'description',
-                    'descriptio': 'description',
-                    'reviews': 'reviews',
-                    'rating': 'rating',
-                    'website': 'website',
-                    'phone': 'phone',
-                    'owner name': 'ownerName',
-                    'owner': 'ownerName',
-                    'owner nar': 'ownerName',
-                    'main category': 'mainCategory',
-                    'category': 'mainCategory',
-                    'categories': 'categories',
-                    'workday timing': 'workdayTiming',
-                    'workday hours': 'workdayTiming',
-                    'working hours': 'workdayTiming',
-                    'hours': 'workdayTiming',
-                    'temporarily closed on': 'temporarilyClosedOn',
-                    'address': 'address',
-                    'owner profile link': 'ownerProfileLink',
-                    'link': 'ownerProfileLink',
-                    'notes': 'notes',
-                    'call back date': 'callBackDate',
-                    'total assets': 'totalAssets',
-                    'estimated annual revenue': 'estimatedAnnualRevenue',
-                    'est. annual revenue': 'estimatedAnnualRevenue',
-                    'estimated company value': 'estimatedCompanyValue',
-                    'est. company value': 'estimatedCompanyValue',
-                    'employee count': 'employeeCount',
-                    'estimated': 'estimatedAnnualRevenue' // Fallback for ambiguous "Estimated"
-                };
-
-                const mappedHeaderIndices: { index: number; key: keyof ParsedTraderData }[] = [];
-                const foundHeaders = new Set<string>();
-
-                headerRow.forEach((header, index) => {
-                    const trimmedHeader = header?.trim().toLowerCase() ?? '';
-                    if(!trimmedHeader) return;
-                    
-                    let matchedKey: keyof ParsedTraderData | undefined;
-                    for (const alias in headerAliasMap) {
-                        if (trimmedHeader.startsWith(alias)) {
-                            matchedKey = headerAliasMap[alias];
-                            break;
-                        }
-                    }
-
-                    if (matchedKey) {
-                        if (matchedKey === 'estimatedAnnualRevenue' && (trimmedHeader.includes('value') || trimmedHeader.includes('company'))) {
-                            matchedKey = 'estimatedCompanyValue';
-                        }
-                        if (!foundHeaders.has(matchedKey)) {
-                            mappedHeaderIndices.push({ index: index, key: matchedKey });
-                            foundHeaders.add(matchedKey);
-                        }
-                    }
-                });
-                
-                if (!foundHeaders.has('name')) {
-                    throw new Error('CSV file is missing the required "Name" header column.');
-                }
-                
-                const validTraders: ParsedTraderData[] = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const values = parseCsvRow(lines[i]);
-                    if (values.every(v => v.trim() === '')) continue; // Skip empty rows
-
-                    const rowData: Partial<ParsedTraderData> = {};
-                    mappedHeaderIndices.forEach(({ index, key }) => {
-                        const value = values[index] ?? '';
-                        (rowData as any)[key] = value.trim();
-                    });
-
-                    if (rowData.name && String(rowData.name).trim()) {
-                        validTraders.push(rowData as ParsedTraderData);
-                    }
-                }
-                
-                if (validTraders.length === 0) {
-                    throw new Error("Could not parse any valid traders. Check if the 'Name' column has values and the file is correctly formatted.");
-                }
-
-                resolve(validTraders);
-            } catch (e) {
-                reject(e); // Propagate any error from the try block
-            }
-        };
-
-        reader.onerror = () => {
-            reader.abort();
-            reject(new Error("Failed to read the selected file."));
-        };
-
-        reader.readAsText(file);
-    });
-};
-
+const MAX_UPLOAD_LIMIT = 1000;
 
 export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTradersDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -183,21 +39,90 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     if (file) {
       if (file.type === "text/csv" || file.name.endsWith(".csv")) {
         setSelectedFile(file);
+        const reader = new FileReader();
+        reader.onload = (e) => setFileContent(e.target?.result as string);
+        reader.readAsText(file);
       } else {
         toast({ variant: "destructive", title: "Invalid File Type", description: "Please upload a CSV file (.csv)." });
         if(fileInputRef.current) fileInputRef.current.value = "";
         setSelectedFile(null);
+        setFileContent(null);
       }
     }
   };
 
   const clearFile = () => {
     setSelectedFile(null);
+    setFileContent(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
-  
+
+  const parseAndValidateData = (): { validTraders: ParsedTraderData[] } => {
+    if (!fileContent) return { validTraders: [] };
+
+    const parseResults = Papa.parse(fileContent, {
+        header: true,
+        skipEmptyLines: 'greedy',
+        transformHeader: header => header.trim(),
+        quoteChar: '"',
+        escapeChar: '"',
+    });
+
+    if (parseResults.errors.length) {
+      const criticalError = parseResults.errors.find(e => e.code !== 'UndetectableDelimiter' && e.code !== 'TooManyFields' && e.code !== 'TooFewFields');
+      if (criticalError) {
+        throw new Error(`Parsing error on row ${criticalError.row + 2}: ${criticalError.message}. Please check your file for formatting issues like unclosed quotes.`);
+      }
+    }
+    
+    const getRowValue = (row: any, potentialHeaders: string[]): any => {
+        const lowerCaseHeaders = potentialHeaders.map(h => h.toLowerCase());
+        for (const key in row) {
+            if (lowerCaseHeaders.includes(key.toLowerCase())) {
+            const value = row[key];
+            if (value !== null && value !== undefined && String(value).trim() !== '') {
+                return value;
+            }
+            }
+        }
+        return undefined;
+    };
+    
+    const tradersToProcess = (parseResults.data as any[])
+      .map((row: any): ParsedTraderData | null => {
+        const rawName = getRowValue(row, ["Name"]);
+        const name = rawName ? String(rawName).trim() : null;
+        if (!name) return null; // Skip rows without a name
+
+        return {
+          name,
+          status: getRowValue(row, ["Status"]),
+          lastActivity: getRowValue(row, ["Last Activity"]),
+          description: getRowValue(row, ["Description"]),
+          reviews: getRowValue(row, ["Reviews (tradesMade)", "Reviews"]),
+          rating: getRowValue(row, ["Rating"]),
+          website: getRowValue(row, ["Website"]),
+          phone: String(getRowValue(row, ["Phone"]) || ''),
+          ownerName: getRowValue(row, ["Owner Name", "Owner"]),
+          mainCategory: getRowValue(row, ["Main Category", "Category"]),
+          categories: getRowValue(row, ["Categories"]),
+          workdayTiming: getRowValue(row, ["Workday Timing", "Workday Hours", "Working Hours", "Hours", "WorkdayTiming"]),
+          address: getRowValue(row, ["Address"]),
+          ownerProfileLink: getRowValue(row, ["Link (ownerProfileLink)", "Link", "Owner Profile"]),
+          notes: getRowValue(row, ["Notes", "Review Keywords"]),
+          totalAssets: getRowValue(row, ["Total Assets"]),
+          estimatedAnnualRevenue: getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]),
+          estimatedCompanyValue: getRowValue(row, ["Estimated Company Value", "Est. Company Value"]),
+          employeeCount: getRowValue(row, ["Employee Count"]),
+        };
+      })
+      .filter((t): t is ParsedTraderData => t !== null);
+
+    return { validTraders: tradersToProcess };
+  };
+
   const handleSubmit = async () => {
     if (!selectedFile) {
       toast({ variant: "destructive", title: "Error", description: "Please select a CSV file." });
@@ -206,21 +131,65 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     setIsLoading(true);
 
     try {
-      const tradersToCreate = await parseAndValidateData(selectedFile);
-      await onBulkAddTraders(tradersToCreate);
-      // Success toast is handled by the parent component
-      setOpen(false);
-      clearFile();
+        const { validTraders } = parseAndValidateData();
+
+        if (validTraders.length === 0) {
+          toast({
+            variant: "destructive",
+            title: "Bulk Upload Failed",
+            description: "Could not parse any traders from the file. Please check the file format and ensure the 'Name' header is present and that rows are not empty.",
+            duration: 8000,
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (validTraders.length > MAX_UPLOAD_LIMIT) {
+          toast({
+            variant: "destructive",
+            title: "Upload Limit Exceeded",
+            description: `The limit is ${MAX_UPLOAD_LIMIT} traders per upload. Please split the file.`,
+            duration: 8000,
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        const result = await onBulkAddTraders(validTraders);
+        
+        if (result.error) {
+            toast({
+                variant: "destructive",
+                title: "Bulk Upload Failed",
+                description: `${result.error}`,
+                duration: 10000,
+            });
+        } else {
+             const newCount = result.data?.length || 0;
+             const skippedCount = validTraders.length - newCount;
+             let summaryMessages = [];
+             if (newCount > 0) summaryMessages.push(`${newCount} new trader(s) added successfully.`);
+             if (skippedCount > 0) summaryMessages.push(`${skippedCount} trader(s) were skipped as duplicates (phone number already exists).`);
+             if (summaryMessages.length === 0) summaryMessages.push("No new traders were added. This may be because they all already exist.");
+
+             toast({
+                title: "Bulk Upload Processed",
+                description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
+                duration: 10000,
+            });
+            setOpen(false);
+            clearFile();
+        }
     } catch (error: any) {
-      console.error("Client-side error during bulk upload processing:", error);
-      toast({
-          variant: "destructive",
-          title: "Bulk Upload Failed",
-          description: `An unexpected error occurred during file processing: ${String(error)}`,
-          duration: 10000,
-      });
+        console.error("Client-side error during bulk upload:", error);
+        toast({
+            variant: "destructive",
+            title: "Bulk Upload Failed",
+            description: `An unexpected error occurred during file processing: ${error.message}`,
+            duration: 10000,
+        });
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
 
@@ -299,5 +268,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
