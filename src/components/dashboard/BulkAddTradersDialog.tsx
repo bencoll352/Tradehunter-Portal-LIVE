@@ -110,10 +110,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     }
     
     const rawHeaders = parseCsvLine(lines[0]);
-    // DEFINITIVE FIX: Filter out any falsy values (null, undefined, "") from the raw headers
-    // BEFORE attempting to call any methods like .trim() or .toLowerCase() on them.
     const lowerCaseValidHeaders = rawHeaders
-        .filter(Boolean) // This removes null, undefined, and empty strings
+        .filter(Boolean) 
         .map(h => h.trim().toLowerCase()); 
 
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
@@ -147,9 +145,8 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         const data = parseCsvLine(lines[i]);
         const rowObject: any = {};
         
-        // Use the original rawHeaders for indexing, but check against the cleaned lower-cased headers
         rawHeaders.forEach((header, index) => {
-            if (!header) return; // Skip empty headers from the original line
+            if (!header) return; 
             const lowerCaseHeader = header.trim().toLowerCase();
             const mappedKey = headerMapping[lowerCaseHeader];
             if (mappedKey) {
@@ -327,5 +324,3 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
-
-    
