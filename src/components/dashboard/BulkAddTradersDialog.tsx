@@ -113,7 +113,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     // DEFINITIVE FIX: Filter out any falsy values (null, undefined, "") from the raw headers
     // BEFORE attempting to call any methods like .trim() or .toLowerCase() on them.
     const lowerCaseValidHeaders = rawHeaders
-        .filter(Boolean)
+        .filter(Boolean) // This removes null, undefined, and empty strings
         .map(h => h.trim().toLowerCase()); 
 
     const headerMapping: { [key: string]: keyof ParsedTraderData } = {
@@ -327,3 +327,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
     </Dialog>
   );
 }
+
+    
