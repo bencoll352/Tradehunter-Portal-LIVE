@@ -105,35 +105,59 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   
   const parseAndValidateData = (csvText: string): ParsedTraderData[] => {
     const lines = csvText.trim().replace(/\r\n/g, '\n').split('\n');
-    if (lines.length < 1) {
-        throw new Error("CSV file is empty or invalid.");
+    if (lines.length <= 1) {
+        throw new Error("CSV file is empty or has no data rows.");
     }
     
+    // Robustly parse headers, filtering out any empty/undefined values
     const rawHeaders = parseCsvLine(lines[0]);
-    const lowerCaseHeaders = rawHeaders.map(h => (h || '').trim().toLowerCase());
+    const headers = rawHeaders.map(h => (h || '').trim());
 
-    const headerMapping: { [key: string]: keyof ParsedTraderData } = {
-        'name': 'name',
-        'description': 'description',
-        'reviews': 'reviews',
-        'rating': 'rating',
-        'website': 'website',
-        'phone': 'phone',
-        'owner name': 'ownerName',
-        'owner profile': 'ownerProfileLink',
-        'main category': 'mainCategory',
-        'categories': 'categories',
-        'workday timing': 'workdayTiming',
-        'temporarily closed on': 'temporarilyClosedOn',
-        'address': 'address',
-        'total assets': 'totalAssets',
-        'estimated annual revenue': 'estimatedAnnualRevenue',
-        'estimated company value': 'estimatedCompanyValue',
-        'employee count': 'employeeCount',
+    // Define all possible aliases for each target field
+    const fieldAliases: { [key in keyof ParsedTraderData]: string[] } = {
+        'name': ['name'],
+        'status': ['status'],
+        'lastActivity': ['last activity'],
+        'description': ['description'],
+        'reviews': ['reviews'],
+        'rating': ['rating'],
+        'website': ['website'],
+        'phone': ['phone'],
+        'ownerName': ['owner name', 'owner'],
+        'ownerProfileLink': ['owner profile', 'owner profile link'],
+        'mainCategory': ['main category', 'category'],
+        'categories': ['categories'],
+        'workdayTiming': ['workday timing', 'workday hours', 'working hours', 'hours'],
+        'temporarilyClosedOn': ['temporarily closed on', 'closed on'],
+        'address': ['address'],
+        'notes': ['notes'],
+        'totalAssets': ['total assets'],
+        'estimatedAnnualRevenue': ['estimated annual revenue', 'est. annual revenue'],
+        'estimatedCompanyValue': ['estimated company value', 'est. company value'],
+        'employeeCount': ['employee count', 'employees'],
+        'callBackDate': ['call back date'],
     };
 
-    const nameHeaderIndex = lowerCaseHeaders.indexOf('name');
-    if (nameHeaderIndex === -1) {
+    // Create a map from the actual header index to the target field key
+    const indexToFieldMap = new Map<number, keyof ParsedTraderData>();
+    let nameHeaderFound = false;
+
+    headers.forEach((header, index) => {
+        if (!header) return;
+        const lowerHeader = header.toLowerCase();
+        for (const field in fieldAliases) {
+            const key = field as keyof ParsedTraderData;
+            if (fieldAliases[key].includes(lowerHeader)) {
+                indexToFieldMap.set(index, key);
+                if (key === 'name') {
+                    nameHeaderFound = true;
+                }
+                break; // Move to the next header
+            }
+        }
+    });
+
+    if (!nameHeaderFound) {
         throw new Error(`CSV is missing the required "Name" header.`);
     }
 
@@ -142,22 +166,24 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
         if (!lines[i].trim()) continue; // Skip empty lines
 
         const data = parseCsvLine(lines[i]);
-        const rowObject: any = {};
+        const rowObject: Partial<ParsedTraderData> = {};
         
-        lowerCaseHeaders.forEach((header, index) => {
-            if (!header) return; 
-            const mappedKey = headerMapping[header];
-            if (mappedKey) {
-                rowObject[mappedKey] = data[index] ?? '';
+        indexToFieldMap.forEach((fieldKey, index) => {
+             if (data[index] !== undefined) {
+                (rowObject as any)[fieldKey] = data[index];
             }
         });
 
-        if (!rowObject.name) continue; // Skip rows without a name
+        // Ensure name is present, otherwise skip the row.
+        if (!rowObject.name) {
+          console.warn(`[Bulk Upload] Skipping row ${i + 1} because 'Name' is missing.`);
+          continue;
+        }
 
         traders.push({
           name: rowObject.name,
-          status: rowObject.status,
-          lastActivity: rowObject.lastActivity,
+          status: (rowObject.status as TraderStatus) || undefined,
+          lastActivity: rowObject.lastActivity || undefined,
           description: rowObject.description,
           reviews: safeParseInt(rowObject.reviews),
           rating: safeParseFloat(rowObject.rating),
@@ -175,6 +201,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           estimatedAnnualRevenue: safeParseFloat(rowObject.estimatedAnnualRevenue),
           estimatedCompanyValue: safeParseFloat(rowObject.estimatedCompanyValue),
           employeeCount: safeParseInt(rowObject.employeeCount),
+          callBackDate: rowObject.callBackDate || undefined,
         });
     }
 
@@ -199,7 +226,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
               toast({
                 variant: "destructive",
                 title: "Bulk Upload Failed",
-                description: "Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that rows are not empty.",
+                description: "Could not parse any valid traders from the file. Please check the file format and ensure the 'Name' header is present and that data rows are not empty.",
                 duration: 8000,
               });
               setIsLoading(false);
