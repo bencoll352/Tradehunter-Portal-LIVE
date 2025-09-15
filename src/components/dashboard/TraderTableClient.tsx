@@ -136,7 +136,7 @@ export function TraderTableClient({
             const dateB = bValue ? new Date(bValue as string).getTime() : 0;
              if (isNaN(dateA)) return 1;
              if (isNaN(dateB)) return -1;
-            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - aA;
         }
 
         if (typeof aValue === 'number' && typeof bValue === 'number') {
@@ -291,88 +291,90 @@ export function TraderTableClient({
             </div>
         </div>
         <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+          <div className="overflow-x-auto">
             <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead padding="checkbox">
-                        <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                        onChange={(e) => toggleAllRowsSelected(e.target.checked)}
-                        checked={!isLoading && sortedTraders.length > 0 && selectedRowCount === sortedTraders.length}
-                        disabled={isLoading || sortedTraders.length === 0}
-                        />
-                    </TableHead>
-                    {allColumns.map(col => (
-                        columnVisibility[col.id] && <SortableHeader key={col.id} label={col.label} sortKey={col.id as SortKey} />
-                    ))}
-                    <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {isLoading ? (
-                    Array.from({ length: 5 }).map((_, i) => (
-                        <TableRow key={`skeleton-${i}`}>
-                            <TableCell><Skeleton className="h-4 w-4" /></TableCell>
-                            {allColumns.map(col => columnVisibility[col.id] && <TableCell key={`${col.id}-skel`}><Skeleton className="h-4 w-20" /></TableCell>)}
-                            <TableCell><Skeleton className="h-8 w-16" /></TableCell>
-                        </TableRow>
-                    ))
-                ) : sortedTraders.length > 0 ? (
-                sortedTraders.map((trader) => (
-                    <TableRow
-                    key={trader.id}
-                    data-state={rowSelection[trader.id] && "selected"}
-                    >
-                    <TableCell>
-                        <input
-                            type="checkbox"
-                            className="rounded border-gray-300 text-primary focus:ring-primary"
-                            checked={rowSelection[trader.id] || false}
-                            onChange={(e) => setRowSelection(prev => ({...prev, [trader.id]: e.target.checked}))}
-                        />
-                    </TableCell>
-                    
-                    {columnVisibility.name && <TableCell className="font-medium truncate max-w-40">{trader.name}</TableCell>}
-                    {columnVisibility.status && <TableCell><Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge></TableCell>}
-                    {columnVisibility.lastActivity && <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}</TableCell>}
-                    {columnVisibility.callBackDate && <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), "dd/MM/yyyy") : '-'}</TableCell>}
-                    {columnVisibility.description && <TableCell className="truncate max-w-48">{trader.description ?? '-'}</TableCell>}
-                    {columnVisibility.rating && <TableCell className="text-center">{typeof trader.rating === 'number' ? trader.rating.toFixed(1) : (typeof trader.rating === 'string' ? parseFloat(trader.rating).toFixed(1) : '-')}</TableCell>}
-                    {columnVisibility.reviews && <TableCell className="text-center">{trader.reviews ?? '-'}</TableCell>}
-                    {columnVisibility.website && <TableCell>{trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><Globe className="h-4 w-4"/>Visit</a> : '-'}</TableCell>}
-                    {columnVisibility.phone && <TableCell className="whitespace-nowrap">{trader.phone ?? '-'}</TableCell>}
-                    {columnVisibility.ownerName && <TableCell className="truncate max-w-40">{trader.ownerName ?? '-'}</TableCell>}
-                    {columnVisibility.ownerProfileLink && <TableCell>{trader.ownerProfileLink ? <a href={trader.ownerProfileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><ExternalLink className="h-4 w-4"/>Profile</a> : '-'}</TableCell>}
-                    {columnVisibility.mainCategory && <TableCell className="truncate max-w-40">{trader.mainCategory ?? '-'}</TableCell>}
-                    {columnVisibility.categories && <TableCell className="truncate max-w-48">{trader.categories ?? '-'}</TableCell>}
-                    {columnVisibility.workdayTiming && <TableCell className="truncate max-w-40">{trader.workdayTiming ?? '-'}</TableCell>}
-                    {columnVisibility.address && <TableCell className="truncate max-w-48">{trader.address ?? '-'}</TableCell>}
-                    {columnVisibility.notes && <TableCell className="truncate max-w-48">{trader.notes ?? '-'}</TableCell>}
-                    {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
-                    {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
-                    {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
+              <TableHeader>
+                  <TableRow>
+                      <TableHead padding="checkbox">
+                          <input
+                          type="checkbox"
+                          className="rounded border-gray-300 text-primary focus:ring-primary"
+                          onChange={(e) => toggleAllRowsSelected(e.target.checked)}
+                          checked={!isLoading && sortedTraders.length > 0 && selectedRowCount === sortedTraders.length}
+                          disabled={isLoading || sortedTraders.length === 0}
+                          />
+                      </TableHead>
+                      {allColumns.map(col => (
+                          columnVisibility[col.id] && <SortableHeader key={col.id} label={col.label} sortKey={col.id as SortKey} />
+                      ))}
+                      <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+              </TableHeader>
+              <TableBody>
+                  {isLoading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                          <TableRow key={`skeleton-${i}`}>
+                              <TableCell><Skeleton className="h-4 w-4" /></TableCell>
+                              {allColumns.map(col => columnVisibility[col.id] && <TableCell key={`${col.id}-skel`}><Skeleton className="h-4 w-20" /></TableCell>)}
+                              <TableCell><Skeleton className="h-8 w-16" /></TableCell>
+                          </TableRow>
+                      ))
+                  ) : sortedTraders.length > 0 ? (
+                  sortedTraders.map((trader) => (
+                      <TableRow
+                      key={trader.id}
+                      data-state={rowSelection[trader.id] && "selected"}
+                      >
+                      <TableCell>
+                          <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              checked={rowSelection[trader.id] || false}
+                              onChange={(e) => setRowSelection(prev => ({...prev, [trader.id]: e.target.checked}))}
+                          />
+                      </TableCell>
+                      
+                      {columnVisibility.name && <TableCell className="font-medium truncate max-w-40">{trader.name}</TableCell>}
+                      {columnVisibility.status && <TableCell><Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge></TableCell>}
+                      {columnVisibility.lastActivity && <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}</TableCell>}
+                      {columnVisibility.callBackDate && <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), "dd/MM/yyyy") : '-'}</TableCell>}
+                      {columnVisibility.description && <TableCell className="truncate max-w-48">{trader.description ?? '-'}</TableCell>}
+                      {columnVisibility.rating && <TableCell className="text-center">{typeof trader.rating === 'number' ? trader.rating.toFixed(1) : (typeof trader.rating === 'string' ? parseFloat(trader.rating).toFixed(1) : '-')}</TableCell>}
+                      {columnVisibility.reviews && <TableCell className="text-center">{trader.reviews ?? '-'}</TableCell>}
+                      {columnVisibility.website && <TableCell>{trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><Globe className="h-4 w-4"/>Visit</a> : '-'}</TableCell>}
+                      {columnVisibility.phone && <TableCell className="whitespace-nowrap">{trader.phone ?? '-'}</TableCell>}
+                      {columnVisibility.ownerName && <TableCell className="truncate max-w-40">{trader.ownerName ?? '-'}</TableCell>}
+                      {columnVisibility.ownerProfileLink && <TableCell>{trader.ownerProfileLink ? <a href={trader.ownerProfileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><ExternalLink className="h-4 w-4"/>Profile</a> : '-'}</TableCell>}
+                      {columnVisibility.mainCategory && <TableCell className="truncate max-w-40">{trader.mainCategory ?? '-'}</TableCell>}
+                      {columnVisibility.categories && <TableCell className="truncate max-w-48">{trader.categories ?? '-'}</TableCell>}
+                      {columnVisibility.workdayTiming && <TableCell className="truncate max-w-40">{trader.workdayTiming ?? '-'}</TableCell>}
+                      {columnVisibility.address && <TableCell className="truncate max-w-48">{trader.address ?? '-'}</TableCell>}
+                      {columnVisibility.notes && <TableCell className="truncate max-w-48">{trader.notes ?? '-'}</TableCell>}
+                      {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
+                      {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
+                      {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
 
-                    <TableCell className="text-right">
-                        <div className="flex items-center justify-end">
-                        <EditTraderDialog trader={trader} onUpdateTrader={onUpdate} />
-                        <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => onDelete(trader.id)} />
-                        </div>
-                    </TableCell>
-                    </TableRow>
-                ))
-                ) : (
-                <TableRow>
-                    <TableCell
-                    colSpan={Object.values(columnVisibility).filter(v => v).length + 2}
-                    className="h-24 text-center"
-                    >
-                    No results found.
-                    </TableCell>
-                </TableRow>
-                )}
-            </TableBody>
+                      <TableCell className="text-right">
+                          <div className="flex items-center justify-end">
+                          <EditTraderDialog trader={trader} onUpdateTrader={onUpdate} />
+                          <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => onDelete(trader.id)} />
+                          </div>
+                      </TableCell>
+                      </TableRow>
+                  ))
+                  ) : (
+                  <TableRow>
+                      <TableCell
+                      colSpan={Object.values(columnVisibility).filter(v => v).length + 2}
+                      className="h-24 text-center"
+                      >
+                      No results found.
+                      </TableCell>
+                  </TableRow>
+                  )}
+              </TableBody>
             </Table>
+          </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
         <div className="flex items-center justify-end space-x-2 py-4">
