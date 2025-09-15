@@ -52,7 +52,7 @@ interface TraderTableClientProps {
   setCategoryFilter: (value: string) => void;
   mainCategories: string[];
   isLoading: boolean;
-  existingTraders: Trader[]; // Keep this for now if other components rely on it, even if upload doesn't
+  existingTraders: Trader[];
 }
 
 export function TraderTableClient({
@@ -69,10 +69,11 @@ export function TraderTableClient({
   setCategoryFilter,
   mainCategories,
   isLoading,
-  existingTraders,
 }: TraderTableClientProps) {
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: "lastActivity", direction: "descending" });
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+  
+  // Re-ordered and completed to match the screenshot, with all visible by default.
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({
     name: true,
     estimatedAnnualRevenue: true,
@@ -81,16 +82,16 @@ export function TraderTableClient({
     status: true,
     lastActivity: true,
     callBackDate: true,
-    description: false,
-    notes: false,
+    description: true,
+    notes: true,
     rating: true,
     website: true,
     phone: true,
     ownerName: true,
     mainCategory: true,
-    categories: false,
-    workdayTiming: false,
-    address: false,
+    categories: true,
+    workdayTiming: true,
+    address: true,
     ownerProfileLink: true,
   });
 
@@ -192,6 +193,7 @@ export function TraderTableClient({
     );
   };
 
+  // Re-ordered and completed to match the screenshot
   const allColumns = [
     { id: 'name', label: 'Name' },
     { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
@@ -329,6 +331,7 @@ export function TraderTableClient({
                         />
                     </TableCell>
                     
+                    {/* Data cells re-ordered to match the header order from the screenshot */}
                     {columnVisibility.name && <TableCell className="font-medium truncate max-w-40">{trader.name}</TableCell>}
                     {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
                     {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
@@ -378,4 +381,3 @@ export function TraderTableClient({
     </Card>
   );
 }
-
