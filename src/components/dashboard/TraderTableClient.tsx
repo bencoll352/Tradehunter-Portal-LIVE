@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -24,7 +23,7 @@ import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
 import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { ArrowUpDown, Trash2, SlidersHorizontal, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, Trash2, SlidersHorizontal, ArrowUp, ArrowDown, Phone, Globe, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
@@ -34,7 +33,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
-type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status';
+type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status' | 'callBackDate';
+
 type SortDirection = 'ascending' | 'descending';
 
 interface TraderTableClientProps {
@@ -73,16 +73,24 @@ export function TraderTableClient({
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: "lastActivity", direction: "descending" });
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({
-    ownerProfileLink: false,
-    workdayTiming: false,
-    address: false,
-    description: false,
-    notes: false,
-    categories: false,
-    reviews: false,
-    callBackDate: false,
+    name: true,
+    estimatedAnnualRevenue: true,
     estimatedCompanyValue: true,
     employeeCount: true,
+    status: true,
+    lastActivity: true,
+    callBackDate: true,
+    description: false,
+    notes: false,
+    rating: true,
+    website: true,
+    phone: true,
+    ownerName: true,
+    mainCategory: true,
+    categories: false,
+    workdayTiming: false,
+    address: false,
+    ownerProfileLink: true,
   });
 
   const { toast } = useToast();
@@ -98,11 +106,11 @@ export function TraderTableClient({
         if (bValue === null || bValue === undefined) return -1;
         
         if (sortConfig.key === 'lastActivity' || sortConfig.key === 'callBackDate') {
-            const dateA = new Date(aValue as string).getTime();
-            const dateB = new Date(bValue as string).getTime();
+            const dateA = aValue ? new Date(aValue as string).getTime() : 0;
+            const dateB = bValue ? new Date(bValue as string).getTime() : 0;
              if (isNaN(dateA)) return 1;
              if (isNaN(dateB)) return -1;
-            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - aValue;
+            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
         }
 
         if (typeof aValue === 'number' && typeof bValue === 'number') {
@@ -170,7 +178,7 @@ export function TraderTableClient({
   const SortableHeader = ({ label, sortKey }: { label: string; sortKey: SortKey }) => {
     const isSorted = sortConfig?.key === sortKey;
     return (
-      <TableHead className="cursor-pointer" onClick={() => requestSort(sortKey)}>
+      <TableHead className="cursor-pointer whitespace-nowrap" onClick={() => requestSort(sortKey)}>
         <div className="flex items-center gap-2">
           {label}
           {isSorted ? (
@@ -182,6 +190,27 @@ export function TraderTableClient({
       </TableHead>
     );
   };
+
+  const allColumns = [
+    { id: 'name', label: 'Name' },
+    { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
+    { id: 'estimatedCompanyValue', label: 'Est. Company Value' },
+    { id: 'employeeCount', label: 'Employees' },
+    { id: 'status', label: 'Status' },
+    { id: 'lastActivity', label: 'Last Activity' },
+    { id: 'callBackDate', label: 'Call-Back' },
+    { id: 'description', label: 'Description' },
+    { id: 'notes', label: 'Notes' },
+    { id: 'rating', label: 'Rating' },
+    { id: 'website', label: 'Website' },
+    { id: 'phone', label: 'Phone' },
+    { id: 'ownerName', label: 'Owner Name' },
+    { id: 'mainCategory', label: 'Main Category' },
+    { id: 'categories', label: 'Categories' },
+    { id: 'workdayTiming', label: 'Workday Timing' },
+    { id: 'address', label: 'Address' },
+    { id: 'ownerProfileLink', label: 'Link' },
+  ];
 
   return (
     <Card className="shadow-md">
@@ -222,16 +251,16 @@ export function TraderTableClient({
                 </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                {Object.keys(columnVisibility).map((columnId) => (
+                {allColumns.map((column) => (
                     <DropdownMenuCheckboxItem
-                    key={columnId}
+                    key={column.id}
                     className="capitalize"
-                    checked={columnVisibility[columnId]}
+                    checked={columnVisibility[column.id]}
                     onCheckedChange={(value) =>
-                        setColumnVisibility(prev => ({...prev, [columnId]: !!value}))
+                        setColumnVisibility(prev => ({...prev, [column.id]: !!value}))
                     }
                     >
-                    {columnId.replace(/([A-Z])/g, ' $1')}
+                    {column.label}
                     </DropdownMenuCheckboxItem>
                 ))}
                 </DropdownMenuContent>
@@ -260,24 +289,19 @@ export function TraderTableClient({
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead padding="checkbox">
-                    <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
-                    onChange={(e) => toggleAllRowsSelected(e.target.checked)}
-                    checked={!isLoading && sortedTraders.length > 0 && selectedRowCount === sortedTraders.length}
-                    disabled={isLoading || sortedTraders.length === 0}
-                    />
-                </TableHead>
-                <SortableHeader label="Name" sortKey="name" />
-                <SortableHeader label="Est. Annual Revenue" sortKey="estimatedAnnualRevenue" />
-                {columnVisibility.estimatedCompanyValue && <SortableHeader label="Est. Company Value" sortKey="estimatedCompanyValue" />}
-                {columnVisibility.employeeCount && <SortableHeader label="Employees" sortKey="employeeCount" />}
-                <SortableHeader label="Status" sortKey="status" />
-                <SortableHeader label="Last Activity" sortKey="lastActivity" />
-                <TableHead>Website</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                    <TableHead padding="checkbox">
+                        <input
+                        type="checkbox"
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                        onChange={(e) => toggleAllRowsSelected(e.target.checked)}
+                        checked={!isLoading && sortedTraders.length > 0 && selectedRowCount === sortedTraders.length}
+                        disabled={isLoading || sortedTraders.length === 0}
+                        />
+                    </TableHead>
+                    {allColumns.map(col => (
+                        columnVisibility[col.id] && <SortableHeader key={col.id} label={col.label} sortKey={col.id as SortKey} />
+                    ))}
+                    <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -285,14 +309,7 @@ export function TraderTableClient({
                     Array.from({ length: 5 }).map((_, i) => (
                         <TableRow key={`skeleton-${i}`}>
                             <TableCell><Skeleton className="h-4 w-4" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                            {columnVisibility.estimatedCompanyValue && <TableCell><Skeleton className="h-4 w-20" /></TableCell>}
-                            {columnVisibility.employeeCount && <TableCell><Skeleton className="h-4 w-12" /></TableCell>}
-                            <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                            {allColumns.map(col => columnVisibility[col.id] && <TableCell key={`${col.id}-skel`}><Skeleton className="h-4 w-20" /></TableCell>)}
                             <TableCell><Skeleton className="h-8 w-16" /></TableCell>
                         </TableRow>
                     ))
@@ -310,20 +327,26 @@ export function TraderTableClient({
                             onChange={(e) => setRowSelection(prev => ({...prev, [trader.id]: e.target.checked}))}
                         />
                     </TableCell>
-                    <TableCell className="font-medium">{trader.name}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>
-                    {columnVisibility.estimatedCompanyValue && <TableCell className="text-right">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
+                    
+                    {columnVisibility.name && <TableCell className="font-medium truncate max-w-40">{trader.name}</TableCell>}
+                    {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
+                    {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
                     {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
-                    <TableCell>
-                        <Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                        {trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}
-                    </TableCell>
-                    <TableCell>
-                        {trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a> : '-'}
-                    </TableCell>
-                    <TableCell>{trader.ownerName ?? '-'}</TableCell>
+                    {columnVisibility.status && <TableCell><Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge></TableCell>}
+                    {columnVisibility.lastActivity && <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}</TableCell>}
+                    {columnVisibility.callBackDate && <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), "dd/MM/yyyy") : '-'}</TableCell>}
+                    {columnVisibility.description && <TableCell className="truncate max-w-48">{trader.description ?? '-'}</TableCell>}
+                    {columnVisibility.notes && <TableCell className="truncate max-w-48">{trader.notes ?? '-'}</TableCell>}
+                    {columnVisibility.rating && <TableCell className="text-center">{trader.rating?.toFixed(1) ?? '-'}</TableCell>}
+                    {columnVisibility.website && <TableCell>{trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><Globe className="h-4 w-4"/>Visit</a> : '-'}</TableCell>}
+                    {columnVisibility.phone && <TableCell className="whitespace-nowrap">{trader.phone ?? '-'}</TableCell>}
+                    {columnVisibility.ownerName && <TableCell className="truncate max-w-40">{trader.ownerName ?? '-'}</TableCell>}
+                    {columnVisibility.mainCategory && <TableCell className="truncate max-w-40">{trader.mainCategory ?? '-'}</TableCell>}
+                    {columnVisibility.categories && <TableCell className="truncate max-w-48">{trader.categories ?? '-'}</TableCell>}
+                    {columnVisibility.workdayTiming && <TableCell className="truncate max-w-40">{trader.workdayTiming ?? '-'}</TableCell>}
+                    {columnVisibility.address && <TableCell className="truncate max-w-48">{trader.address ?? '-'}</TableCell>}
+                    {columnVisibility.ownerProfileLink && <TableCell>{trader.ownerProfileLink ? <a href={trader.ownerProfileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><ExternalLink className="h-4 w-4"/>Profile</a> : '-'}</TableCell>}
+
                     <TableCell className="text-right">
                         <div className="flex items-center justify-end">
                         <EditTraderDialog trader={trader} onUpdateTrader={onUpdate} />
@@ -335,7 +358,7 @@ export function TraderTableClient({
                 ) : (
                 <TableRow>
                     <TableCell
-                    colSpan={Object.values(columnVisibility).filter(v => v).length + 6}
+                    colSpan={Object.values(columnVisibility).filter(v => v).length + 2}
                     className="h-24 text-center"
                     >
                     No results found.
@@ -354,5 +377,3 @@ export function TraderTableClient({
     </Card>
   );
 }
-
-    
