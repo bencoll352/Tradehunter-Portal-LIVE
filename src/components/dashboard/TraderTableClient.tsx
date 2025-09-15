@@ -3,18 +3,6 @@
 
 import { useState, useMemo, useEffect } from "react";
 import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
-  type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
-} from "@tanstack/react-table";
-import {
   Table,
   TableBody,
   TableCell,
@@ -35,8 +23,8 @@ import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
 import { Badge } from "@/components/ui/badge";
-import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { ArrowUpDown, ChevronDown, Trash2, Flame, SlidersHorizontal } from "lucide-react";
+import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult, TraderStatus } from "@/types";
+import { ArrowUpDown, Trash2, Flame, SlidersHorizontal, ArrowUp, ArrowDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
@@ -44,8 +32,10 @@ import type { traderFormSchema } from "./TraderForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-
 type TraderFormValues = z.infer<typeof traderFormSchema>;
+
+type SortKey = keyof Trader;
+type SortDirection = 'ascending' | 'descending';
 
 interface TraderTableClientProps {
   initialTraders: Trader[];
@@ -67,12 +57,12 @@ export function TraderTableClient({
   onBulkDelete,
 }: TraderTableClientProps) {
   const [traders, setTraders] = useState(initialTraders);
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "lastActivity", desc: true },
-  ]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    // Hide less important columns by default
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: "lastActivity", direction: "descending" });
+  const [nameFilter, setNameFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({
     ownerProfileLink: false,
     workdayTiming: false,
     address: false,
@@ -81,16 +71,73 @@ export function TraderTableClient({
     categories: false,
     reviews: false,
     callBackDate: false,
+    estimatedCompanyValue: true,
+    employeeCount: true,
   });
-  const [rowSelection, setRowSelection] = useState({});
+
   const { toast } = useToast();
 
   useEffect(() => {
     setTraders(initialTraders);
   }, [initialTraders]);
+
+  const mainCategories = useMemo(() => {
+    const categories = new Set(traders.map(t => t.mainCategory).filter(Boolean));
+    return Array.from(categories) as string[];
+  }, [traders]);
+
+  const filteredAndSortedTraders = useMemo(() => {
+    let sortableItems = [...traders];
+
+    // Filter by name
+    if (nameFilter) {
+      sortableItems = sortableItems.filter(trader =>
+        trader.name.toLowerCase().includes(nameFilter.toLowerCase())
+      );
+    }
+    // Filter by category
+    if (categoryFilter !== 'all') {
+      sortableItems = sortableItems.filter(trader => trader.mainCategory === categoryFilter);
+    }
+
+    // Sort
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return sortConfig.direction === 'ascending' ? aValue - bValue : bValue - aValue;
+        }
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+            // Special handling for date strings
+            if (sortConfig.key === 'lastActivity' || sortConfig.key === 'callBackDate') {
+                const dateA = new Date(aValue).getTime();
+                const dateB = new Date(bValue).getTime();
+                return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
+            }
+            return sortConfig.direction === 'ascending' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [traders, sortConfig, nameFilter, categoryFilter]);
+
+
+  const requestSort = (key: SortKey) => {
+    let direction: SortDirection = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
   
   const handleBulkDelete = async () => {
-    const selectedIds = Object.keys(rowSelection);
+    const selectedIds = Object.keys(rowSelection).filter(id => rowSelection[id]);
     if (selectedIds.length === 0) {
       toast({ variant: "destructive", title: "No traders selected", description: "Please select traders to delete." });
       return;
@@ -113,200 +160,52 @@ export function TraderTableClient({
     setRowSelection({});
   };
 
-  const mainCategories = useMemo(() => {
-    const categories = new Set(traders.map(t => t.mainCategory).filter(Boolean));
-    return Array.from(categories) as string[];
-  }, [traders]);
-  
-  const columns: ColumnDef<Trader>[] = useMemo(
-    () => [
-      {
-        id: "select",
-        header: ({ table }) => (
-          <input
-            type="checkbox"
-            className="rounded border-gray-300 text-primary focus:ring-primary"
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={(value) => table.toggleAllPageRowsSelected(!!value.target.checked)}
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-           <input
-            type="checkbox"
-            className="rounded border-gray-300 text-primary focus:ring-primary"
-            checked={row.getIsSelected()}
-            onChange={(value) => row.toggleSelected(!!value.target.checked)}
-            aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-      },
-      {
-        accessorKey: "name",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
-      },
-      {
-        accessorKey: "estimatedAnnualRevenue",
-        header: ({ column }) => (
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Est. Annual Revenue
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => {
-          const amount = parseFloat(row.getValue("estimatedAnnualRevenue"));
-          if (isNaN(amount)) return <span className="text-muted-foreground">-</span>;
-          const formatted = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
-          return <div className="text-right font-medium">{formatted}</div>;
-        },
-      },
-      {
-        accessorKey: "estimatedCompanyValue",
-        header: ({ column }) => (
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Est. Company Value
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => {
-          const amount = parseFloat(row.getValue("estimatedCompanyValue"));
-          if (isNaN(amount)) return <span className="text-muted-foreground">-</span>;
-          const formatted = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
-          return <div className="text-right font-medium">{formatted}</div>;
-        },
-      },
-      {
-        accessorKey: "employeeCount",
-        header: ({ column }) => (
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Employees
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => <div className="text-center">{row.getValue("employeeCount") ?? <span className="text-muted-foreground">-</span>}</div>,
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-          const status = row.getValue("status") as string;
-          if (status === "Call-Back") return <Badge className="bg-orange-500 hover:bg-orange-500/80 text-white"><Flame className="mr-1 h-3 w-3" />Hot Lead</Badge>
-          if (status === 'New Lead') return <Badge className="bg-blue-500 hover:bg-blue-500/80 text-white">New Lead</Badge>
-          if (status === "Active") return <Badge variant="default">Active</Badge>;
-          return <Badge variant="secondary">{status}</Badge>;
-        },
-      },
-       {
-        accessorKey: "lastActivity",
-        header: ({ column }) => (
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Last Activity
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-        cell: ({ row }) => {
-          const dateValue = row.getValue("lastActivity");
-          if (typeof dateValue !== 'string') return <span className="text-destructive text-xs">Invalid Date</span>;
-          try {
-            const date = parseISO(dateValue);
-            // Check for a very old or invalid date, which might indicate a problem.
-            if (date.getFullYear() < 1971) {
-                return <span className="text-muted-foreground text-xs">No activity</span>;
-            }
-            return format(date, "dd/MM/yyyy");
-          } catch(e) {
-            return <span className="text-destructive text-xs">Invalid Date</span>
-          }
-        },
-      },
-      { accessorKey: "description", header: "Description" },
-      { accessorKey: "notes", header: "Notes" },
-      { accessorKey: "rating", header: "Rating" },
-      {
-        accessorKey: "website",
-        header: "Website",
-        cell: ({ row }) => {
-            const website = row.getValue("website") as string | undefined;
-            if (!website) return <span className="text-muted-foreground">-</span>;
-            return <a href={website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a>
-        }
-      },
-      { accessorKey: "phone", header: "Phone" },
-      { accessorKey: "ownerName", header: "Owner Name" },
-      { accessorKey: "mainCategory", header: "Main Category" },
-      { accessorKey: "categories", header: "Categories" },
-      {
-        id: "actions",
-        cell: ({ row }) => {
-          const trader = row.original;
-          return (
-            <div className="flex items-center justify-end">
-              <EditTraderDialog trader={trader} onUpdateTrader={(id, values) => onUpdate(id, values)} />
-              <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => onDelete(trader.id)} />
-            </div>
-          );
-        },
-      },
-    ],
-    [onDelete, onUpdate]
-  );
+  const selectedRowCount = Object.values(rowSelection).filter(Boolean).length;
 
-  const table = useReactTable({
-    data: traders,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    initialState: {
-        pagination: {
-            pageSize: 20,
-        },
-    },
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+  const toggleAllRowsSelected = (checked: boolean) => {
+    const newSelection: Record<string, boolean> = {};
+    if (checked) {
+      filteredAndSortedTraders.forEach(trader => {
+        newSelection[trader.id] = true;
+      });
+    }
+    setRowSelection(newSelection);
+  };
+  
+  const formatCurrency = (value: number | null | undefined) => {
+      if (value === null || value === undefined) return <span className="text-muted-foreground">-</span>;
+      return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+  }
+
+  const SortableHeader = ({ label, sortKey }: { label: string; sortKey: SortKey }) => {
+    const isSorted = sortConfig?.key === sortKey;
+    return (
+      <TableHead className="cursor-pointer" onClick={() => requestSort(sortKey)}>
+        <div className="flex items-center gap-2">
+          {label}
+          {isSorted ? (
+            sortConfig?.direction === 'ascending' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+          ) : (
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+      </TableHead>
+    );
+  };
 
   return (
     <div className="w-full">
       <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-2">
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
             <Input
-            placeholder="Filter by name..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-                table.getColumn("name")?.setFilterValue(event.target.value)
-            }
-            className="w-full sm:max-w-xs"
+              placeholder="Filter by name..."
+              value={nameFilter}
+              onChange={(event) => setNameFilter(event.target.value)}
+              className="w-full sm:max-w-xs"
             />
             <Select
-              value={(table.getColumn('mainCategory')?.getFilterValue() as string) ?? 'all'}
-              onValueChange={(value) => {
-                if (value === 'all') {
-                  table.getColumn('mainCategory')?.setFilterValue(undefined);
-                } else {
-                  table.getColumn('mainCategory')?.setFilterValue(value);
-                }
-              }}
+              value={categoryFilter}
+              onValueChange={setCategoryFilter}
             >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by category" />
@@ -328,42 +227,34 @@ export function TraderTableClient({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
+              {Object.keys(columnVisibility).map((columnId) => (
+                <DropdownMenuCheckboxItem
+                  key={columnId}
+                  className="capitalize"
+                  checked={columnVisibility[columnId]}
+                  onCheckedChange={(value) =>
+                    setColumnVisibility(prev => ({...prev, [columnId]: !!value}))
+                  }
+                >
+                  {columnId.replace(/([A-Z])/g, ' $1')}
+                </DropdownMenuCheckboxItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
-
-           {Object.keys(rowSelection).length > 0 && (
+          {selectedRowCount > 0 && (
             <Button
               variant="destructive"
               size="sm"
               onClick={handleBulkDelete}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete ({Object.keys(rowSelection).length})
+              Delete ({selectedRowCount})
             </Button>
           )}
-
           <BulkAddTradersDialog
             branchId={branchId}
             onBulkAddTraders={onBulkAdd}
           />
-
           <AddTraderDialog 
             onAddTrader={onAdd} 
             branchId={branchId}
@@ -373,42 +264,67 @@ export function TraderTableClient({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
+            <TableRow>
+              <TableHead padding="checkbox">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                  onChange={(e) => toggleAllRowsSelected(e.target.checked)}
+                  checked={filteredAndSortedTraders.length > 0 && selectedRowCount === filteredAndSortedTraders.length}
+                />
+              </TableHead>
+              <SortableHeader label="Name" sortKey="name" />
+              <SortableHeader label="Est. Annual Revenue" sortKey="estimatedAnnualRevenue" />
+              {columnVisibility.estimatedCompanyValue && <SortableHeader label="Est. Company Value" sortKey="estimatedCompanyValue" />}
+              {columnVisibility.employeeCount && <SortableHeader label="Employees" sortKey="employeeCount" />}
+              <SortableHeader label="Status" sortKey="status" />
+              <SortableHeader label="Last Activity" sortKey="lastActivity" />
+              <TableHead>Website</TableHead>
+              <TableHead>Owner</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            {filteredAndSortedTraders.length > 0 ? (
+              filteredAndSortedTraders.map((trader) => (
                 <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  key={trader.id}
+                  data-state={rowSelection[trader.id] && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  <TableCell>
+                     <input
+                        type="checkbox"
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                        checked={rowSelection[trader.id] || false}
+                        onChange={(e) => setRowSelection(prev => ({...prev, [trader.id]: e.target.checked}))}
+                      />
+                  </TableCell>
+                  <TableCell className="font-medium">{trader.name}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>
+                  {columnVisibility.estimatedCompanyValue && <TableCell className="text-right">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
+                  {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
+                  <TableCell>
+                    <Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {trader.website ? <a href={trader.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a> : '-'}
+                  </TableCell>
+                  <TableCell>{trader.ownerName ?? '-'}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end">
+                      <EditTraderDialog trader={trader} onUpdateTrader={onUpdate} />
+                      <DeleteTraderDialog traderName={trader.name} onDeleteTrader={() => onDelete(trader.id)} />
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={10}
                   className="h-24 text-center"
                 >
                   No results.
@@ -420,26 +336,7 @@ export function TraderTableClient({
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+          {selectedRowCount} of {filteredAndSortedTraders.length} row(s) selected.
         </div>
       </div>
     </div>
