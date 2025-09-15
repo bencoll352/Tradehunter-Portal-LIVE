@@ -1,4 +1,5 @@
 
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import type { Trader } from '@/types';
@@ -9,12 +10,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function normalizePhoneNumber(phoneNumber: string | undefined | null): string {
+export function normalizePhoneNumber(phoneNumber: string | undefined | null): string | null {
   if (!phoneNumber) {
-    return "";
+    return null;
   }
   // Removes common separators, keeps digits and +
-  return phoneNumber.replace(/[\s()-]/g, "");
+  const normalized = phoneNumber.replace(/[\s()-]/g, "");
+  return normalized.length > 0 ? normalized : null;
 }
 
 export const formatTraderDataForAnalysis = (traders: Trader[]): string => {

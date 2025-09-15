@@ -10,19 +10,24 @@ import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
+// --- Firestore Helper ---
+function ensureFirestore() {
+    if (!firestore) {
+        throw new Error("Firestore is not initialized. This is a server configuration issue. Please check your Firebase Admin SDK setup.");
+    }
+    return firestore;
+}
+
+
 // --- Firestore Collection Reference ---
 const getTradersCollection = (branchId: BaseBranchId) => {
-  if (!firestore) {
-    throw new Error("Firestore is not initialized. This is a server configuration issue.");
-  }
-  return firestore.collection('traders').doc(branchId).collection('branchTraders');
+  const db = ensureFirestore();
+  return db.collection('traders').doc(branchId).collection('branchTraders');
 };
 
 const getTasksCollection = (branchId: BaseBranchId, traderId: string) => {
-    if (!firestore) {
-        throw new Error("Firestore is not initialized. This is a server configuration issue.");
-    }
-    return firestore.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
+    const db = ensureFirestore();
+    return db.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
 }
 
 
@@ -258,10 +263,11 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
 
 
 export async function deleteTrader(branchId: BaseBranchId, traderId: string): Promise<void> {
+    const db = ensureFirestore();
     const traderRef = getTradersCollection(branchId).doc(traderId);
     const tasksSnapshot = await getTasksCollection(branchId, traderId).get();
 
-    const batch = firestore.batch();
+    const batch = db.batch();
 
     tasksSnapshot.docs.forEach(doc => {
         batch.delete(doc.ref);
@@ -278,18 +284,23 @@ export async function deleteTrader(branchId: BaseBranchId, traderId: string): Pr
 }
 
 export async function bulkAddTraders(branchId: BaseBranchId, tradersData: ParsedTraderData[]): Promise<Trader[]> {
+  const db = ensureFirestore();
   const tradersCollection = getTradersCollection(branchId);
-  const batch = firestore.batch();
+  const batch = db.batch();
   const addedTraders: Trader[] = [];
-  const addedPhoneNumbers = new Set<string>();
+  
+  // Use a Set to track phone numbers processed *within this batch* to prevent self-duplication.
+  const batchPhoneNumbers = new Set<string>();
 
   const existingPhonesSnapshot = await tradersCollection.select('phone').get();
-  const existingPhones = new Set(existingPhonesSnapshot.docs.map(doc => doc.data().phone).filter(Boolean));
+  const existingDbPhones = new Set(existingPhonesSnapshot.docs.map(doc => doc.data().phone).filter(Boolean));
 
   for (const rawTrader of tradersData) {
     const normalizedPhone = normalizePhoneNumber(rawTrader.phone);
 
-    if (normalizedPhone && (existingPhones.has(normalizedPhone) || addedPhoneNumbers.has(normalizedPhone))) {
+    // Skip if the phone number is already in the DB or has been added in this same batch.
+    // This correctly handles null/undefined phones, as they won't be in the sets.
+    if (normalizedPhone && (existingDbPhones.has(normalizedPhone) || batchPhoneNumbers.has(normalizedPhone))) {
       continue;
     }
     
@@ -329,7 +340,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
 
     addedTraders.push(traderForClient);
     if (normalizedPhone) {
-      addedPhoneNumbers.add(normalizedPhone);
+      batchPhoneNumbers.add(normalizedPhone);
     }
   }
 
@@ -344,8 +355,9 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
 
 export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: string[]): Promise<{ successCount: number; failureCount: number }> {
   try {
+    const db = ensureFirestore();
     const tradersCollection = getTradersCollection(branchId);
-    const batch = firestore.batch();
+    const batch = db.batch();
 
     for (const traderId of traderIds) {
         const traderRef = tradersCollection.doc(traderId);
