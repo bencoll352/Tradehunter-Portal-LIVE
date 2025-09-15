@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -32,6 +33,7 @@ import type { traderFormSchema } from "./TraderForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status' | 'callBackDate' | 'reviews';
@@ -288,7 +290,7 @@ export function TraderTableClient({
             />
             </div>
         </div>
-        <div className="rounded-md border">
+        <ScrollArea className="w-full whitespace-nowrap rounded-md border">
             <Table>
             <TableHeader>
                 <TableRow>
@@ -371,7 +373,8 @@ export function TraderTableClient({
                 )}
             </TableBody>
             </Table>
-        </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
         <div className="flex items-center justify-end space-x-2 py-4">
             <div className="flex-1 text-sm text-muted-foreground">
             {selectedRowCount} of {sortedTraders.length} row(s) selected.
@@ -381,5 +384,7 @@ export function TraderTableClient({
     </Card>
   );
 }
+
+    
 
     
