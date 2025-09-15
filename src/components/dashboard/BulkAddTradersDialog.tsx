@@ -79,7 +79,9 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           }
           
           const safeHeaders = results.meta.fields?.filter(Boolean) || [];
-          if (!safeHeaders.some(h => h.toLowerCase() === 'name')) {
+          const lowerCaseHeaders = safeHeaders.map(h => h.toLowerCase());
+
+          if (!lowerCaseHeaders.includes('name')) {
             return reject(new Error('CSV is missing the required "Name" header.'));
           }
 
@@ -88,47 +90,47 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
           }
 
           const validTraders = (results.data as any[]).map((row, index) => {
-              if (!row.Name || !row.Name.trim()) {
-                  console.warn(`[Bulk Upload] Skipping row ${index + 2} because 'Name' is missing or empty.`);
-                  return null;
+              const rowData: { [key: string]: any } = {};
+              for (const key in row) {
+                  rowData[key.trim().toLowerCase()] = row[key];
               }
 
               const getVal = (aliases: string[]) => {
                   for (const alias of aliases) {
-                      const lowerCaseHeaders = Object.keys(row).reduce((acc, key) => {
-                          acc[key.toLowerCase()] = row[key];
-                          return acc;
-                      }, {} as Record<string, any>);
-
-                      const lowerCaseAlias = alias.toLowerCase();
-
-                      if (lowerCaseHeaders[lowerCaseAlias] !== undefined) {
-                          return lowerCaseHeaders[lowerCaseAlias];
+                      if (rowData[alias.toLowerCase()] !== undefined) {
+                          return rowData[alias.toLowerCase()];
                       }
                   }
                   return undefined;
               };
+
+              const name = getVal(['Name']);
+              if (!name || String(name).trim() === '') {
+                  console.warn(`[Bulk Upload] Skipping row ${index + 2} because 'Name' is missing or empty.`);
+                  return null;
+              }
               
               return {
-                name: row.Name,
+                name: name,
                 status: getVal(['Status']) as TraderStatus || undefined,
                 lastActivity: getVal(['Last Activity', 'lastActivity']),
-                description: getVal(['Description']),
+                description: getVal(['Description', 'Descriptio']),
                 reviews: safeParseInt(getVal(['Reviews'])),
                 rating: safeParseFloat(getVal(['Rating'])),
                 website: getVal(['Website']),
                 phone: String(getVal(['Phone']) || ''),
-                ownerName: getVal(['Owner Name', 'Owner']),
-                mainCategory: getVal(['Main Category', 'Category']),
+                ownerName: getVal(['Owner Name', 'Owner', 'Owner Nar']),
+                mainCategory: getVal(['Main Category', 'Category', 'Main Cate']),
                 categories: getVal(['Categories']),
-                workdayTiming: getVal(['Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', 'WorkdayTiming']),
-                temporarilyClosedOn: getVal(['Temporarily Closed On', 'Closed On']),
+                workdayTiming: getVal(['Workday Timing', 'Workday Hours', 'Working Hours', 'Hours', 'WorkdayTiming', 'Workday T']),
+                temporarilyClosedOn: getVal(['Temporarily Closed On', 'Closed On', 'Temporarily Closed', 'Temporari']),
                 address: getVal(['Address']),
-                ownerProfileLink: getVal(['Owner Profile Link', 'Owner Profile']),
+                ownerProfileLink: getVal(['Owner Profile Link', 'Owner Profile', 'Owner Pro']),
                 notes: getVal(['Notes']),
-                totalAssets: safeParseFloat(getVal(['Total Assets'])),
-                estimatedAnnualRevenue: safeParseFloat(getVal(['Estimated Annual Revenue', 'Est. Annual Revenue'])),
-                estimatedCompanyValue: safeParseFloat(getVal(['Estimated Company Value', 'Est. Company Value'])),
+                totalAssets: safeParseFloat(getVal(['Total Assets', 'Total Asse'])),
+                // Handle potentially duplicated 'Estimated' headers by being more specific
+                estimatedAnnualRevenue: safeParseFloat(getVal(['Estimated Annual Revenue', 'Est. Annual Revenue', 'Estimated'])),
+                estimatedCompanyValue: safeParseFloat(getVal(['Estimated Company Value', 'Est. Company Value', 'Estimated Value'])),
                 employeeCount: safeParseInt(getVal(['Employee Count', 'Employees'])),
                 callBackDate: getVal(['Call Back Date', 'callBackDate']),
               };
@@ -199,7 +201,7 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs font-medium">
-                        For 'Owner Name', 'Main Category', and 'Workday Timing', ensure headers are exact for successful mapping. Check the 'How To Use' page for a list of valid header aliases.
+                        Header names can be flexible (e.g., 'Owner Name', 'Owner', or 'Owner Nar' are all acceptable). The system will attempt to map them automatically.
                     </p>
                 </div>
                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
@@ -256,3 +258,5 @@ export function BulkAddTradersDialog({ branchId, onBulkAddTraders }: BulkAddTrad
   );
 }
 
+
+    
