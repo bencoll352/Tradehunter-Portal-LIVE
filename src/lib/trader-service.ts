@@ -200,14 +200,14 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
     await checkDuplicatePhone(branchId, traderData.phone);
     const tradersCollection = getTradersCollection(branchId);
 
-    const newTraderData = {
+    const dataToSave = {
       ...traderData,
       phone: normalizePhoneNumber(traderData.phone),
-      lastActivity: FieldValue.serverTimestamp(), 
-      tasks: [], // Initialize with an empty array of tasks
+      lastActivity: FieldValue.serverTimestamp(),
+      callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null,
     };
 
-    const docRef = await tradersCollection.add(newTraderData);
+    const docRef = await tradersCollection.add(dataToSave);
     const newTraderDoc = await docRef.get();
     
     // We create a temporary snapshot-like object to pass to the mapper
@@ -238,6 +238,7 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
       ...traderData,
       phone: normalizePhoneNumber(traderData.phone),
       lastActivity: FieldValue.serverTimestamp(), 
+      callBackDate: traderData.callBackDate ? Timestamp.fromDate(new Date(traderData.callBackDate)) : null,
     };
 
     await traderRef.update(updatedData);
