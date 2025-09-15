@@ -1,16 +1,16 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId, Task } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { getTradersAction } from '@/app/(app)/tradehunter/actions';
+import { getTradersAction, createTaskAction, updateTaskAction, deleteTaskAction } from '@/app/(app)/tradehunter/actions';
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
 import { BranchPerformanceChart } from '@/components/dashboard/BranchPerformanceChart';
 import { MiniDashboardStats } from '@/components/dashboard/MiniDashboardStats';
-import { parseISO }from 'date-fns';
+import { parseISO } from 'date-fns';
 import { TaskManagement } from '@/components/dashboard/TaskManagement';
 import { CalendarIntegration } from '@/components/dashboard/CalendarIntegration';
 import { ReportingAndExporting } from '@/components/dashboard/ReportingAndExporting';
@@ -21,66 +21,89 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  const fetchTraders = useCallback(async (baseBranchId: BranchLoginId) => {
+    setIsLoading(true);
+    try {
+      const result = await getTradersAction(baseBranchId);
+      if (result.data) {
+        setTraders(result.data);
+      } else {
+        toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data." });
+      }
+    } catch (error) {
+      console.error("Failed to fetch initial traders:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast({ variant: "destructive", title: "Network Error", description: `Could not connect to the server to load data. Please check your connection or server status. Details: ${errorMessage}` });
+    }
+    setIsLoading(false);
+  }, [toast]);
+
   useEffect(() => {
-    const initializeData = async () => {
+    const initializeData = () => {
       if (typeof window !== 'undefined') {
-        setIsLoading(true);
         const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
         const info = getBranchInfo(storedLoggedInId);
         setBranchInfo(info);
 
         if (info.baseBranchId && info.role !== 'unknown') {
-          try {
-            const result = await getTradersAction(info.baseBranchId);
-            if (result.data) {
-              setTraders(result.data);
-            } else {
-              toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data." });
-            }
-          } catch (error) {
-            console.error("Failed to fetch initial traders:", error);
-            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-            toast({ variant: "destructive", title: "Network Error", description: `Could not connect to the server to load data. Please check your connection or server status. Details: ${errorMessage}` });
-          }
-          finally {
-            setIsLoading(false);
-          }
+          fetchTraders(info.baseBranchId);
         } else {
           setIsLoading(false);
         }
       }
     };
     initializeData();
-  }, [toast]);
+  }, [fetchTraders]);
   
   const allTasks = traders.flatMap(t => t.tasks || []);
 
-  const handleTaskCreate = (task: Task) => {
-    setTraders(prevTraders => 
-      prevTraders.map(t => 
-        t.id === task.traderId 
-          ? { ...t, tasks: [...(t.tasks || []), task] } 
-          : t
-      )
-    );
+  const handleTaskCreate = async (task: Omit<Task, 'id'>) => {
+    if (!branchInfo?.baseBranchId) return;
+    const result = await createTaskAction(branchInfo.baseBranchId, task);
+    if (result.data) {
+      setTraders(prevTraders => 
+        prevTraders.map(t => 
+          t.id === task.traderId 
+            ? { ...t, tasks: [...(t.tasks || []), result.data!] } 
+            : t
+        )
+      );
+    } else {
+      toast({ variant: "destructive", title: "Error Creating Task", description: result.error });
+    }
   };
 
-  const handleTaskUpdate = (updatedTask: Task) => {
-    setTraders(prevTraders =>
-      prevTraders.map(t =>
-        t.id === updatedTask.traderId
-          ? { ...t, tasks: (t.tasks || []).map(task => task.id === updatedTask.id ? updatedTask : task) }
-          : t
-      )
-    );
+  const handleTaskUpdate = async (updatedTask: Task) => {
+    if (!branchInfo?.baseBranchId) return;
+    const { id, traderId, ...taskData } = updatedTask;
+    const result = await updateTaskAction(branchInfo.baseBranchId, traderId, id, taskData);
+    if (result.data) {
+      setTraders(prevTraders =>
+        prevTraders.map(t =>
+          t.id === traderId
+            ? { ...t, tasks: (t.tasks || []).map(task => task.id === id ? result.data! : task) }
+            : t
+        )
+      );
+    } else {
+      toast({ variant: "destructive", title: "Error Updating Task", description: result.error });
+    }
   };
 
-  const handleTaskDelete = (taskId: string) => {
-    setTraders(prevTraders =>
-      prevTraders.map(t => 
-        ({ ...t, tasks: (t.tasks || []).filter(task => task.id !== taskId) })
-      )
-    );
+  const handleTaskDelete = async (traderId: string, taskId: string) => {
+    if (!branchInfo?.baseBranchId) return;
+    const result = await deleteTaskAction(branchInfo.baseBranchId, traderId, taskId);
+    if (result.success) {
+      setTraders(prevTraders =>
+        prevTraders.map(t => 
+          t.id === traderId
+            ? ({ ...t, tasks: (t.tasks || []).filter(task => task.id !== taskId) })
+            : t
+        )
+      );
+    } else {
+      toast({ variant: "destructive", title: "Error Deleting Task", description: result.error });
+    }
   };
 
   const activeTradersCount = traders.filter(t => t.status === 'Active').length;
@@ -150,7 +173,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:gap-6 md:grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-1">
           <TaskManagement 
-            traderId={traders[0]?.id || ''} 
+            traders={traders}
             tasks={allTasks} 
             onTaskCreate={handleTaskCreate} 
             onTaskUpdate={handleTaskUpdate} 

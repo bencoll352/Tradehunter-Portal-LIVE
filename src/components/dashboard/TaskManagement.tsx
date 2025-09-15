@@ -4,19 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Task } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Task, Trader } from '@/types';
 
 interface TaskManagementProps {
-  traderId: string;
+  traders: Trader[];
   tasks: Task[];
-  onTaskCreate: (task: Task) => void;
+  onTaskCreate: (task: Omit<Task, 'id'>) => void;
   onTaskUpdate: (task: Task) => void;
-  onTaskDelete: (taskId: string) => void;
+  onTaskDelete: (traderId: string, taskId: string) => void;
 }
 
 export const TaskManagement: React.FC<TaskManagementProps> = ({
-  traderId,
+  traders,
   tasks,
   onTaskCreate,
   onTaskUpdate,
@@ -24,17 +24,16 @@ export const TaskManagement: React.FC<TaskManagementProps> = ({
 }) => {
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDueDate, setTaskDueDate] = useState('');
+  const [selectedTrader, setSelectedTrader] = useState<string | null>(null);
 
   const handleAddTask = () => {
-    if (taskTitle && taskDueDate) {
-      const newTask: Task = {
-        id: uuidv4(),
-        traderId,
+    if (taskTitle && taskDueDate && selectedTrader) {
+      onTaskCreate({
+        traderId: selectedTrader,
         title: taskTitle,
         dueDate: new Date(taskDueDate).toISOString(),
         completed: false,
-      };
-      onTaskCreate(newTask);
+      });
       setTaskTitle('');
       setTaskDueDate('');
     }
@@ -46,7 +45,17 @@ export const TaskManagement: React.FC<TaskManagementProps> = ({
         <CardTitle>Task Management</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-col gap-2 mb-4">
+        <Select onValueChange={setSelectedTrader} value={selectedTrader || ''}>
+            <SelectTrigger>
+                <SelectValue placeholder="Select a Trader..." />
+            </SelectTrigger>
+            <SelectContent>
+                {traders.map(trader => (
+                    <SelectItem key={trader.id} value={trader.id}>{trader.name}</SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
           <Input
             placeholder="Task Title"
             value={taskTitle}
@@ -57,7 +66,7 @@ export const TaskManagement: React.FC<TaskManagementProps> = ({
             value={taskDueDate}
             onChange={(e) => setTaskDueDate(e.target.value)}
           />
-          <Button onClick={handleAddTask}>Add Task</Button>
+          <Button onClick={handleAddTask} disabled={!selectedTrader || !taskTitle || !taskDueDate}>Add Task</Button>
         </div>
         <div>
           {tasks.map((task) => (
@@ -74,7 +83,7 @@ export const TaskManagement: React.FC<TaskManagementProps> = ({
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => onTaskDelete(task.id)}
+                onClick={() => onTaskDelete(task.traderId, task.id)}
               >
                 Delete
               </Button>

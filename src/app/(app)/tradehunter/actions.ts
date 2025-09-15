@@ -15,7 +15,6 @@ import {
 } from '@/lib/trader-service';
 import type { BaseBranchId, ParsedTraderData, Trader, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
-import { TaskSchema } from '@/types';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -138,7 +137,7 @@ export async function updateTaskAction(
   branchId: BaseBranchId,
   traderId: string,
   taskId: string,
-  taskData: Partial<Task>
+  taskData: Partial<Omit<Task, 'id' | 'traderId'>>
 ): Promise<{ data: Task | null; error: string | null }> {
   try {
     const updatedTask = await updateTask(branchId, traderId, taskId, taskData);
@@ -155,7 +154,7 @@ export async function updateTaskAction(
 export async function deleteTaskAction(
   branchId: BaseBranchId,
   traderId: string,
-  taskId: string
+  taskId: string,
 ): Promise<{ success: boolean; error: string | null }> {
   try {
     await deleteTask(branchId, traderId, taskId);
