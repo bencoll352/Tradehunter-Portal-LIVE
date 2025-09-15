@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -136,7 +135,7 @@ export function TraderTableClient({
             const dateB = bValue ? new Date(bValue as string).getTime() : 0;
              if (isNaN(dateA)) return 1;
              if (isNaN(dateB)) return -1;
-            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - aA;
+            return sortConfig.direction === 'ascending' ? dateA - dateB : dateB - dateA;
         }
 
         if (typeof aValue === 'number' && typeof bValue === 'number') {
@@ -386,3 +385,5 @@ export function TraderTableClient({
     </Card>
   );
 }
+
+    
