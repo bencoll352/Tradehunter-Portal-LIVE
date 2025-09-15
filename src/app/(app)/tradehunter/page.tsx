@@ -10,7 +10,7 @@ import type { z } from 'zod';
 import type { traderFormSchema } from '@/components/dashboard/TraderForm';
 import { useToast } from "@/hooks/use-toast";
 import { getTradersAction, addTraderAction, updateTraderAction, deleteTraderAction, bulkAddTradersAction, bulkDeleteTradersAction } from './actions';
-import { Users, Flame, UserPlus } from 'lucide-react';
+import { Users, Flame, UserPlus, Loader2 } from 'lucide-react';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
@@ -74,7 +74,13 @@ export default function TradeHunterDashboardPage() {
       const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
       const info = getBranchInfo(storedLoggedInId);
       setBranchInfo(info);
-      if (!info.baseBranchId && info.role !== 'manager') {
+      
+      // This is the critical check.
+      // If a valid baseBranchId exists, proceed to fetch data.
+      // Otherwise (e.g., for a 'MANAGER' login), stop loading.
+      if (info.baseBranchId) {
+          // fetchTraders will be called by the next useEffect
+      } else {
           setIsLoading(false);
       }
     };
@@ -207,34 +213,41 @@ export default function TradeHunterDashboardPage() {
     return result;
   };
 
-  if (isLoading && !branchInfo) { 
+  if (isLoading) { 
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="flex h-[80vh] w-full items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
   
-  if (!currentBaseBranchId && currentUserRole === 'user' && !isLoading) { 
-      return <p>Error: Branch information not found. Please ensure you are logged in correctly.</p>;
-  }
-
+  // This is the new logic to handle the manager view.
   if (currentUserRole === 'manager' && !currentBaseBranchId) {
     return (
       <div className="space-y-6">
           <Card>
               <CardHeader>
                   <CardTitle>Manager View</CardTitle>
-                  <CardDescription>Select a branch from the login screen to view and manage its traders.</CardDescription>
+                  <CardDescription>To view and manage a branch's traders, please log out and sign in with a specific branch ID.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <p>As a manager, you can log in with any specific branch ID to see its data.</p>
+                  <p>As a manager, you have access rights, but you must select a branch context to see its data.</p>
               </CardContent>
           </Card>
       </div>
     )
+  }
+  
+  // Fallback for any other unauthenticated or error state.
+  if (!currentBaseBranchId && !isLoading) { 
+      return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Access Error</CardTitle>
+                <CardDescription>Could not determine your branch. Please try logging out and signing in again.</CardDescription>
+            </CardHeader>
+        </Card>
+      );
   }
   
   return (

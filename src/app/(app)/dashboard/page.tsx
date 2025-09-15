@@ -45,7 +45,10 @@ export default function DashboardPage() {
         const info = getBranchInfo(storedLoggedInId);
         setBranchInfo(info);
 
-        if (info.baseBranchId && info.role !== 'unknown') {
+        // This is the critical check.
+        // If a valid baseBranchId exists, fetch the data.
+        // Otherwise (e.g., for a 'MANAGER' login without a branch), stop loading.
+        if (info.baseBranchId) {
           fetchTraders(info.baseBranchId);
         } else {
           setIsLoading(false);
@@ -140,19 +143,33 @@ export default function DashboardPage() {
       );
   }
 
-  if (!branchInfo || (branchInfo.role === 'manager' && !branchInfo.baseBranchId)) {
+  // This is the new logic to handle the manager view.
+  if (branchInfo?.role === 'manager' && !branchInfo.baseBranchId) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Welcome, Manager</CardTitle>
-                <CardDescription>This is your central dashboard overview. Please select a branch from the login screen to view specific trader data.</CardDescription>
+                <CardTitle>Manager View</CardTitle>
+                <CardDescription>This is your central dashboard overview. To view a specific branch's data, please log out and sign in with that branch's ID.</CardDescription>
             </CardHeader>
             <CardContent>
-              <p>Global dashboard analytics are coming soon.</p>
+              <p>Global dashboard analytics across all branches are coming soon.</p>
             </CardContent>
         </Card>
     );
   }
+
+  // Fallback for any other unauthenticated or error state.
+  if (!branchInfo || !branchInfo.baseBranchId) {
+      return (
+          <Card>
+              <CardHeader>
+                  <CardTitle>Access Error</CardTitle>
+                  <CardDescription>Could not determine your branch. Please try logging out and signing in again.</CardDescription>
+              </CardHeader>
+          </Card>
+      );
+  }
+
 
   return (
     <div className="space-y-4 md:space-y-6">

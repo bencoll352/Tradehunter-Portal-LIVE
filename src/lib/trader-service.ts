@@ -1,53 +1,40 @@
 
+'use server';
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { firestore } from './firebase-admin'; // Correctly import from server-only file
+import { getFirebaseAdmin } from './firebase-admin'; 
 import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 import type { z } from 'zod';
 import { normalizePhoneNumber } from './utils';
 import { INITIAL_SEED_TRADERS_DATA } from './seed-data';
+import * as admin from 'firebase-admin';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 
-// --- Firestore Helper ---
-function ensureFirestore() {
-    if (!firestore) {
-        throw new Error("Firestore is not initialized. This is a server configuration issue. Please check your Firebase Admin SDK setup.");
-    }
-    return firestore;
-}
-
-
-// --- Firestore Collection Reference ---
-const getTradersCollection = (branchId: BaseBranchId) => {
-  const db = ensureFirestore();
-  return db.collection('traders').doc(branchId).collection('branchTraders');
+// --- Firestore Collection References ---
+const getTradersCollection = async (branchId: BaseBranchId) => {
+  const { firestore } = await getFirebaseAdmin();
+  return firestore.collection('traders').doc(branchId).collection('branchTraders');
 };
 
-const getTasksCollection = (branchId: BaseBranchId, traderId: string) => {
-    const db = ensureFirestore();
-    return db.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
+const getTasksCollection = async (branchId: BaseBranchId, traderId: string) => {
+  const { firestore } = await getFirebaseAdmin();
+  return firestore.collection('traders').doc(branchId).collection('branchTraders').doc(traderId).collection('tasks');
 }
-
 
 // --- Helper Functions ---
 
-/**
- * Checks if a trader with the given phone number already exists in the branch.
- * Throws an error if a duplicate is found.
- */
 async function checkDuplicatePhone(branchId: BaseBranchId, phone: string | null | undefined, currentTraderId?: string) {
-  if (!phone) return; // Cannot check for duplicates if phone is not provided
+  if (!phone) return;
 
   const normalizedPhone = normalizePhoneNumber(phone);
   if (!normalizedPhone) return;
 
-  const tradersCollection = getTradersCollection(branchId);
+  const tradersCollection = await getTradersCollection(branchId);
   const querySnapshot = await tradersCollection.where('phone', '==', normalizedPhone).get();
 
   if (!querySnapshot.empty) {
-    // If we're updating a trader, we need to make sure the found duplicate isn't the trader itself.
     for (const doc of querySnapshot.docs) {
       if (doc.id !== currentTraderId) {
         throw new Error('A trader with this phone number already exists.');
@@ -56,57 +43,39 @@ async function checkDuplicatePhone(branchId: BaseBranchId, phone: string | null 
   }
 }
 
-
-/**
- * Converts a date string from various formats into an ISO string.
- * Handles UK formats like dd/MM/yyyy and dd/MM/yy.
- */
 function parseActivityDate(dateString: string | undefined | null): string {
     if (!dateString) {
         return new Date().toISOString();
     }
     try {
-        // Attempt to parse as ISO 8601 directly
         const isoDate = new Date(dateString);
         if (!isNaN(isoDate.getTime())) {
             return isoDate.toISOString();
         }
-    } catch (e) {
-        // Ignore if direct parsing fails
-    }
+    } catch (e) {}
 
-    // Handle UK date format dd/MM/yyyy or dd/MM/yy
     const parts = dateString.split('/');
     if (parts.length === 3) {
         const [day, month, year] = parts;
         const fullYear = year.length === 2 ? `20${year}` : year;
-        // Month is 0-indexed in JS Date
         const parsedDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
         if (!isNaN(parsedDate.getTime())) {
             return parsedDate.toISOString();
         }
     }
 
-    // Fallback for other potential formats, or return now if all else fails
     const fallbackDate = new Date(dateString);
     return !isNaN(fallbackDate.getTime()) ? fallbackDate.toISOString() : new Date().toISOString();
 }
 
-/**
- * Safely converts a Firestore Timestamp or a string to an ISO string.
- * Returns null if the input is invalid or cannot be converted.
- */
 const safeToISOString = (value: any): string | null => {
     if (!value) return null;
-
     if (value instanceof Timestamp) {
         return value.toDate().toISOString();
     }
-    // Handle cases where it might be a plain object from Firestore SDK on the client
     if (typeof value === 'object' && value !== null && typeof (value as any).toDate === 'function') {
         return (value as any).toDate().toISOString();
     }
-    // Handle if it's already a string
     if (typeof value === 'string') {
         try {
             const date = new Date(value);
@@ -114,11 +83,9 @@ const safeToISOString = (value: any): string | null => {
                 return date.toISOString();
             }
         } catch(e) {
-            // Invalid date string format
             return null;
         }
     }
-    // Return null for any other invalid type
     return null;
 }
 
@@ -126,7 +93,7 @@ const safeToISOString = (value: any): string | null => {
 
 export async function getTraders(branchId: BaseBranchId): Promise<Trader[]> {
   try {
-    const tradersCollection = getTradersCollection(branchId);
+    const tradersCollection = await getTradersCollection(branchId);
     const snapshot = await tradersCollection.get();
 
     if (snapshot.empty) {
@@ -152,7 +119,8 @@ async function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Pr
     const traderId = doc.id;
     const branchId = doc.ref.parent.parent!.id as BaseBranchId;
 
-    const tasksSnapshot = await getTasksCollection(branchId, traderId).get();
+    const tasksCollection = await getTasksCollection(branchId, traderId);
+    const tasksSnapshot = await tasksCollection.get();
     const tasks: Task[] = tasksSnapshot.docs.map(taskDoc => {
         const taskData = taskDoc.data();
         return {
@@ -198,7 +166,7 @@ async function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Pr
 export async function addTrader(branchId: BaseBranchId, traderData: TraderFormValues): Promise<Trader> {
   try {
     await checkDuplicatePhone(branchId, traderData.phone);
-    const tradersCollection = getTradersCollection(branchId);
+    const tradersCollection = await getTradersCollection(branchId);
 
     const dataToSave = {
       ...traderData,
@@ -210,7 +178,6 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
     const docRef = await tradersCollection.add(dataToSave);
     const newTraderDoc = await docRef.get();
     
-    // We create a temporary snapshot-like object to pass to the mapper
     const snapshot = {
         docs: [newTraderDoc]
     } as unknown as admin.firestore.QuerySnapshot;
@@ -231,7 +198,7 @@ export async function addTrader(branchId: BaseBranchId, traderData: TraderFormVa
 export async function updateTrader(branchId: BaseBranchId, traderId: string, traderData: TraderFormValues): Promise<Trader> {
   try {
     await checkDuplicatePhone(branchId, traderData.phone, traderId);
-    const tradersCollection = getTradersCollection(branchId);
+    const tradersCollection = await getTradersCollection(branchId);
     const traderRef = tradersCollection.doc(traderId);
 
     const updatedData = {
@@ -244,7 +211,6 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
     await traderRef.update(updatedData);
     
     const updatedDoc = await traderRef.get();
-     // We create a temporary snapshot-like object to pass to the mapper
     const snapshot = {
         docs: [updatedDoc]
     } as unknown as admin.firestore.QuerySnapshot;
@@ -264,11 +230,12 @@ export async function updateTrader(branchId: BaseBranchId, traderId: string, tra
 
 
 export async function deleteTrader(branchId: BaseBranchId, traderId: string): Promise<void> {
-    const db = ensureFirestore();
-    const traderRef = getTradersCollection(branchId).doc(traderId);
-    const tasksSnapshot = await getTasksCollection(branchId, traderId).get();
+    const { firestore } = await getFirebaseAdmin();
+    const traderRef = (await getTradersCollection(branchId)).doc(traderId);
+    const tasksCollection = await getTasksCollection(branchId, traderId);
+    const tasksSnapshot = await tasksCollection.get();
 
-    const batch = db.batch();
+    const batch = firestore.batch();
 
     tasksSnapshot.docs.forEach(doc => {
         batch.delete(doc.ref);
@@ -285,34 +252,31 @@ export async function deleteTrader(branchId: BaseBranchId, traderId: string): Pr
 }
 
 export async function bulkAddTraders(branchId: BaseBranchId, tradersData: ParsedTraderData[]): Promise<Trader[]> {
-    const db = ensureFirestore();
-    const tradersCollection = getTradersCollection(branchId);
-    const batch = db.batch();
+    const { firestore } = await getFirebaseAdmin();
+    const tradersCollection = await getTradersCollection(branchId);
+    const batch = firestore.batch();
     const addedTraders: Trader[] = [];
 
-    // 1. Fetch all existing phone numbers from the database for this branch.
     const existingPhonesSnapshot = await tradersCollection.select('phone').get();
     const existingDbPhones = new Set<string>();
     existingPhonesSnapshot.forEach(doc => {
         const phone = doc.data().phone;
-        if (phone) { // Only add non-empty phone numbers
+        if (phone) { 
             existingDbPhones.add(phone);
         }
     });
 
-    // 2. Use a Set to track phone numbers processed *within this batch* to prevent self-duplication.
     const batchPhoneNumbers = new Set<string>();
 
     for (const rawTrader of tradersData) {
         const normalizedPhone = normalizePhoneNumber(rawTrader.phone);
 
-        // 3. Only perform duplicate checks if the phone number is a non-empty string.
         if (normalizedPhone) {
             if (existingDbPhones.has(normalizedPhone) || batchPhoneNumbers.has(normalizedPhone)) {
                 console.log(`[bulkAddTraders] Skipping duplicate trader by phone: ${normalizedPhone}`);
-                continue; // Skip this trader
+                continue; 
             }
-            batchPhoneNumbers.add(normalizedPhone); // Add to the set for this batch
+            batchPhoneNumbers.add(normalizedPhone); 
         }
 
         const docRef = tradersCollection.doc();
@@ -324,7 +288,7 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
           reviews: rawTrader.reviews ?? null,
           rating: rawTrader.rating ?? null,
           website: rawTrader.website ?? null,
-          phone: normalizedPhone, // Use the normalized phone number
+          phone: normalizedPhone,
           ownerName: rawTrader.ownerName ?? null,
           mainCategory: rawTrader.mainCategory ?? null,
           categories: rawTrader.categories ?? null,
@@ -363,13 +327,14 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
 
 export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: string[]): Promise<{ successCount: number; failureCount: number }> {
   try {
-    const db = ensureFirestore();
-    const tradersCollection = getTradersCollection(branchId);
-    const batch = db.batch();
+    const { firestore } = await getFirebaseAdmin();
+    const tradersCollection = await getTradersCollection(branchId);
+    const batch = firestore.batch();
 
     for (const traderId of traderIds) {
         const traderRef = tradersCollection.doc(traderId);
-        const tasksSnapshot = await getTasksCollection(branchId, traderId).get();
+        const tasksCollection = await getTasksCollection(branchId, traderId);
+        const tasksSnapshot = await tasksCollection.get();
         tasksSnapshot.docs.forEach(doc => batch.delete(doc.ref));
         batch.delete(traderRef);
     }
@@ -384,7 +349,7 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
 
 export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'id'>): Promise<Task> {
   try {
-    const tasksCollection = getTasksCollection(branchId, taskData.traderId);
+    const tasksCollection = await getTasksCollection(branchId, taskData.traderId);
     const docRef = await tasksCollection.add(taskData);
     return { id: docRef.id, ...taskData } as Task;
   } catch (error: any) {
@@ -401,7 +366,7 @@ export async function updateTask(
 ): Promise<Task> {
     try {
         if (!traderId) throw new Error('traderId is required to update a task.');
-        const taskRef = getTasksCollection(branchId, traderId).doc(taskId);
+        const taskRef = (await getTasksCollection(branchId, traderId)).doc(taskId);
         await taskRef.update(taskData);
         const updatedDoc = await taskRef.get();
         const updatedData = updatedDoc.data();
@@ -419,7 +384,7 @@ export async function updateTask(
 
 export async function deleteTask(branchId: BaseBranchId, traderId: string, taskId: string): Promise<void> {
   try {
-    const tasksCollection = getTasksCollection(branchId, traderId);
+    const tasksCollection = await getTasksCollection(branchId, traderId);
     await tasksCollection.doc(taskId).delete();
 } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:deleteTask]', error);
