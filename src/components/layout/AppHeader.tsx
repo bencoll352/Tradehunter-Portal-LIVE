@@ -12,6 +12,7 @@ import { Logo } from "@/components/icons/Logo";
 const headerNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tradehunter", label: "Trader DB", icon: Database },
+  { href: "/buildwise-intel", label: "Buildwise", icon: Lightbulb },
   { href: "/estimator", label: "Estimator", icon: Calculator },
   { href: "/staff-training", label: "Staff Training", icon: GraduationCap },
   { href: "/smart-team", label: "Smart Team", icon: UsersRound },
