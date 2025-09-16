@@ -344,7 +344,7 @@ const initialTrainingMaterials: TrainingMaterial[] = [
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold text-accent">4. Liking</h3>
-                    <p className="mt-1 text-muted-foreground">People are more likely to be persuaded by those they like. Build genuine rapport by finding common ground, offering sincere compliments, and demonstrating that you are working together towards a common goal.</p>
+                    <p className="mt-1 text-muted-foreground">People are more likely to be persuaded by those they like. Build genuine rapport by findin_g common ground, offering sincere compliments, and demonstrating that you are working together towards a common goal.</p>
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold text-accent">5. Authority</h3>
@@ -521,13 +521,16 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
 
     useEffect(() => {
         let objectUrl: string | null = null;
+        // Only create a URL if the dialog is open and there's a file to display
         if (open && material?.file) {
             objectUrl = URL.createObjectURL(material.file);
             setFileUrl(objectUrl);
         } else {
+            // Clear the URL when the dialog is closed or there's no file
             setFileUrl(null);
         }
 
+        // Cleanup function to revoke the object URL when the component unmounts or dependencies change
         return () => {
             if (objectUrl) {
                 URL.revokeObjectURL(objectUrl);
@@ -536,9 +539,6 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
     }, [open, material]);
 
     if (!material) return null;
-
-    const isImage = material.file?.type.startsWith('image/');
-    const isPdf = material.file?.type === 'application/pdf';
 
     const renderContent = () => {
         // Priority 1: Render pre-defined JSX content if it exists
@@ -550,16 +550,31 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
             );
         }
 
-        // Priority 2: Render file URL if it exists
-        if (fileUrl) {
+        // Priority 2: Render file if it exists and a URL has been created
+        if (material.file && fileUrl) {
+            const isImage = material.file.type.startsWith('image/');
+            const isPdf = material.file.type === 'application/pdf';
+
             if (isImage) {
                 return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
             }
-            // For PDFs and other embeddable types
-            return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
+            if (isPdf) {
+                return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
+            }
+            // Fallback for other file types that might not be directly viewable
+            return (
+                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
+                    <p className="font-semibold">Cannot preview this file type.</p>
+                    <p className="text-sm mt-1">File: {material.file.name}</p>
+                    <p className="text-sm">Type: {material.file.type}</p>
+                    <Button asChild variant="link" className="mt-4">
+                        <a href={fileUrl} download={material.file.name}>Download File</a>
+                    </Button>
+                </div>
+            );
         }
         
-        // Fallback if no content is renderable
+        // Fallback if no content is renderable at all
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground p-6">
                 <p>No viewable content available for this item.</p>
@@ -709,5 +724,7 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
 
     
