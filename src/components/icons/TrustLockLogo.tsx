@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import type React from 'react';
 
@@ -25,7 +24,7 @@ export function TrustLockLogo({ className, ...props }: TrustLockLogoProps) {
             stroke="url(#blueGrad)" strokeWidth="6" fill="none" />
       <path d="M18 42 L25 50 L33 38" 
             stroke="#fff" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-      <text x="50" y="55" fontFamily="Arial, Helvetica, sans-serif" fontSize="32" fontWeight="bold" fill="#000">
+      <text x="50" y="55" fontFamily="Arial, Helvetica, sans-serif" fontSize="32" fontWeight="bold" fill="currentColor">
         TrustLock
       </text>
     </svg>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle, ShieldCheck, DatabaseZap } from "lucide-react";
 import { AppSidebarNav } from "./AppSidebarNav";
 import { usePathname } from 'next/navigation';
+import { Logo } from "@/components/icons/Logo";
 
 const headerNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -54,7 +55,7 @@ export function AppHeader() {
         <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground border-r-0 p-0">
            <div className="flex h-16 items-center border-b border-sidebar-border px-4 shrink-0">
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
-                <Logo variant="transparent" className="h-10 w-auto" />
+                  <Logo className="h-auto w-full" />
                 </Link>
             </div>
            <nav className="grid gap-2 text-sm font-medium p-4">
@@ -103,4 +104,3 @@ const navItems = [
   { href: "/quality-control", icon: ShieldCheck, label: "Quality Control" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use" },
 ];
-import { Logo } from "../icons/Logo";

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -53,11 +52,9 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md shadow-2xl">
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-4">
-           <Logo className="h-20 w-auto" />
-        </div>
+    <Card className="w-full max-w-lg shadow-2xl">
+      <CardHeader className="text-center items-center">
+        <Logo className="h-auto w-full max-w-xs text-foreground mb-4" />
         <CardTitle className="text-2xl">Welcome to TradeHunter Pro</CardTitle>
         <CardDescription>Select your Branch ID to access your portal.</CardDescription>
       </CardHeader>
@@ -96,8 +93,8 @@ export function LoginForm() {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex-col justify-center gap-4">
-            <div className="flex justify-center gap-2">
+      <CardFooter className="flex-col justify-center items-center gap-4 pt-6 border-t">
+            <div className="flex justify-center items-center gap-2 flex-wrap">
                 <Badge variant="secondary" className="gap-1.5 py-1 px-2">
                     <BrainCircuit className="h-3.5 w-3.5 text-primary" />
                     Sales Intelligence
@@ -111,8 +108,8 @@ export function LoginForm() {
                     CRM
                 </Badge>
             </div>
-            <div>
-                <TrustLockLogo />
+            <div className="mt-2">
+                <TrustLockLogo className="text-foreground" />
             </div>
       </CardFooter>
     </Card>
