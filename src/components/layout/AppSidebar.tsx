@@ -41,11 +41,11 @@ export function AppSidebar() {
       title: "Insight & Assistance Features", 
       icon: Lightbulb,
       content: [
-        "Access market intelligence.",
-        "Analyse competitor strategies.",
-        "Receive sales coaching.",
-        "Generate outreach messages."
-      ].map((text, i) => <span key={i}>{text}</span>),
+        <span key="ia-1">Access market intelligence.</span>,
+        <span key="ia-2">Analyse competitor strategies.</span>,
+        <span key="ia-3">Receive sales coaching.</span>,
+        <span key="ia-4">Generate outreach messages.</span>
+      ],
       defaultOpen: false 
     },
     { 
@@ -53,11 +53,11 @@ export function AppSidebar() {
       title: "Data Management", 
       icon: DatabaseZap,
       content: [
-        "Bulk import/export traders.",
-        "Automated data cleaning.",
-        "Connect external data sources.",
-        "Custom reporting dashboards."
-      ].map((text, i) => <span key={i}>{text}</span>),
+        <span key="dm-1">Bulk import/export traders.</span>,
+        <span key="dm-2">Automated data cleaning.</span>,
+        <span key="dm-3">Connect external data sources.</span>,
+        <span key="dm-4">Custom reporting dashboards.</span>
+      ],
       defaultOpen: false 
     }
   ];
@@ -83,5 +83,6 @@ export function AppSidebar() {
     </aside>
   );
 }
+
 
 
