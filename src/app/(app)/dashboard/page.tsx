@@ -183,11 +183,9 @@ export default function DashboardPage() {
         newLeadTradersCount={newLeadTradersCount}
         recentlyActiveTradersCount={recentlyActiveTradersCount}
       />
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-5">
-        <div className="lg:col-span-3">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-3 grid gap-4 md:gap-6">
           <BranchPerformanceChart data={chartData} />
-        </div>
-        <div className="lg:col-span-2">
           <DashboardStatsAndGoals 
             branchId={branchInfo.baseBranchId}
             newLeadsCount={newLeadTradersCount} 
@@ -196,18 +194,14 @@ export default function DashboardPage() {
             onGoalsUpdated={setGoals}
           />
         </div>
-      </div>
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
-        <div className="col-span-1 md:col-span-1">
-          <TaskManagement 
+        <div className="lg:col-span-2 grid gap-4 md:gap-6 content-start">
+           <TaskManagement 
             traders={traders}
             tasks={allTasks} 
             onTaskCreate={handleTaskCreate} 
             onTaskUpdate={handleTaskUpdate} 
             onTaskDelete={handleTaskDelete} 
           />
-        </div>
-        <div className="col-span-1 md:col-span-1">
           <CalendarIntegration tasks={allTasks} />
         </div>
       </div>

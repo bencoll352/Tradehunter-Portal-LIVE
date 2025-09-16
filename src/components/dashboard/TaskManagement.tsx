@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Task, Trader } from '@/types';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface TaskManagementProps {
   traders: Trader[];
@@ -44,7 +45,7 @@ export const TaskManagement: React.FC<TaskManagementProps> = ({
       <CardHeader>
         <CardTitle>Task Management</CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent className="flex flex-col flex-grow">
         <div className="flex flex-col gap-2 mb-4">
         <Select onValueChange={setSelectedTrader} value={selectedTrader || ''}>
             <SelectTrigger>
@@ -68,28 +69,33 @@ export const TaskManagement: React.FC<TaskManagementProps> = ({
           />
           <Button onClick={handleAddTask} disabled={!selectedTrader || !taskTitle || !taskDueDate}>Add Task</Button>
         </div>
-        <div>
-          {tasks.map((task) => (
-            <div key={task.id} className="flex items-center gap-2 mb-2">
-              <Checkbox
-                checked={task.completed}
-                onCheckedChange={(checked) =>
-                  onTaskUpdate({ ...task, completed: !!checked })
-                }
-              />
-              <span className={task.completed ? 'line-through' : ''}>
-                {task.title} - {new Date(task.dueDate).toLocaleDateString()}
-              </span>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onTaskDelete(task.traderId, task.id)}
-              >
-                Delete
-              </Button>
-            </div>
-          ))}
-        </div>
+        <ScrollArea className="flex-grow">
+          <div className='pr-4'>
+            {tasks.map((task) => (
+              <div key={task.id} className="flex items-center gap-2 mb-2">
+                <Checkbox
+                  id={`task-${task.id}`}
+                  checked={task.completed}
+                  onCheckedChange={(checked) =>
+                    onTaskUpdate({ ...task, completed: !!checked })
+                  }
+                />
+                <label 
+                  htmlFor={`task-${task.id}`}
+                  className={`flex-grow text-sm ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                  {task.title} - {new Date(task.dueDate).toLocaleDateString()}
+                </label>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onTaskDelete(task.traderId, task.id)}
+                >
+                  Delete
+                </Button>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

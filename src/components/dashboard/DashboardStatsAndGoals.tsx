@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -76,7 +75,7 @@ export function DashboardStatsAndGoals({
   };
 
   return (
-    <Card className="shadow-sm h-full">
+    <Card className="shadow-sm">
       <CardHeader>
         <div className="flex items-center gap-3">
             <Target className="h-6 w-6 text-primary" />
@@ -84,8 +83,8 @@ export function DashboardStatsAndGoals({
         </div>
         <CardDescription>Define your weekly and monthly targets to track progress.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+      <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div className="space-y-2">
               <Label htmlFor="weeklyNewLeadsGoal" className="flex items-center gap-1.5 text-sm font-medium">
                 <CalendarDays className="h-4 w-4 text-muted-foreground"/>
