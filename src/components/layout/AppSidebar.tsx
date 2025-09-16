@@ -41,7 +41,7 @@ export function AppSidebar() {
       title: "Insight & Assistance Features", 
       icon: Lightbulb,
       content: [
-        <span key="ia-1">Access market intelligence.</span>,
+        <span key="ia-1">Analyse market intelligence.</span>,
         <span key="ia-2">Analyse competitor strategies.</span>,
         <span key="ia-3">Receive sales coaching.</span>,
         <span key="ia-4">Generate outreach messages.</span>

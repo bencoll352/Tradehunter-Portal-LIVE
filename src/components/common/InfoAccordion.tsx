@@ -40,7 +40,7 @@ export function InfoAccordion({ sections, className }: InfoAccordionProps) {
                 <span className="font-semibold text-foreground text-left">{section.title}</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-2 text-sm bg-card text-muted-foreground">
+            <AccordionContent className="px-3 pb-3 pt-2 text-sm text-muted-foreground">
               <div className="space-y-2">
                 {section.content.map((point, pIndex) => (
                   <div key={pIndex} className="flex items-start">
