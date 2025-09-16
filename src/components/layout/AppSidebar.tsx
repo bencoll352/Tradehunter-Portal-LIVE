@@ -10,6 +10,7 @@ import { UserNav } from './UserNav';
 import { InfoAccordion } from '../common/InfoAccordion';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { VerifiedBadge } from '../icons/VerifiedBadge';
 
 interface FeatureCardProps {
   icon: React.ElementType;
@@ -98,6 +99,9 @@ export function AppSidebar() {
                 title="Competitive Advantage"
                 description="Leverage market intelligence to stay ahead of the competition."
             />
+        </div>
+        <div className="flex-grow flex items-center justify-center">
+            <VerifiedBadge className="h-24 w-24 opacity-20" />
         </div>
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">
