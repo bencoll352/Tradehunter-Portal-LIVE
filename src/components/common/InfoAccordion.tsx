@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -39,12 +40,12 @@ export function InfoAccordion({ sections, className }: InfoAccordionProps) {
                 <span className="font-semibold text-foreground text-left">{section.title}</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-2 text-xs bg-card">
-              <div className="space-y-1.5 text-muted-foreground">
+            <AccordionContent className="px-3 pb-3 pt-2 text-sm bg-card text-muted-foreground">
+              <div className="space-y-2">
                 {section.content.map((point, pIndex) => (
                   <div key={pIndex} className="flex items-start">
-                    <span className="mr-2 mt-0.5 text-primary">&#8227;</span> {/* Bullet point */}
-                    <div className="flex-1">{point}</div>
+                    {/* The content itself is now a React node which may or may not have an icon */}
+                    {point}
                   </div>
                 ))}
               </div>
