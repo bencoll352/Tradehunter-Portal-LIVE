@@ -3,6 +3,7 @@
 
 import { Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { LoginForm } from './LoginForm';
 
 // This component will encapsulate the dynamic import
 const ActualDynamicLoginForm = dynamic(

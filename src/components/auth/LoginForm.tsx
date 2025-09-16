@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from '@/components/icons/Logo';
 import { VALID_LOGIN_IDS, type BranchLoginId } from '@/types';
@@ -19,12 +19,14 @@ import { TrustLockLogo } from '@/components/icons/TrustLockLogo';
 import { VerifiedBadge } from '../icons/VerifiedBadge';
 
 const formSchema = z.object({
-  loginId: z.custom<BranchLoginId>((val) => VALID_LOGIN_IDS.includes(val as BranchLoginId), {
-    message: "Please select a valid branch or manager ID.",
+  loginId: z.string().toUpperCase().refine((val) => VALID_LOGIN_IDS.includes(val as BranchLoginId), {
+    message: "Invalid Branch or Manager ID. Please enter a valid ID (e.g., PURLEY, MANAGER).",
   }),
 });
 
-type LoginFormValues = z.infer<typeof formSchema>;
+type LoginFormValues = {
+  loginId: string;
+};
 
 export function LoginForm() {
   const router = useRouter();
@@ -34,7 +36,7 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      loginId: undefined,
+      loginId: "",
     },
   });
 
@@ -42,11 +44,12 @@ export function LoginForm() {
     setIsLoading(true);
     // Simulate API call
     setTimeout(() => {
-      localStorage.setItem('loggedInId', values.loginId);
+      const upperCaseId = values.loginId.toUpperCase() as BranchLoginId;
+      localStorage.setItem('loggedInId', upperCaseId);
 
       toast({
         title: "Login Successful",
-        description: `Welcome! Redirecting you to the dashboard for ${values.loginId}.`,
+        description: `Welcome! Redirecting you to the dashboard for ${upperCaseId}.`,
       });
 
       router.replace('/dashboard');
@@ -58,7 +61,7 @@ export function LoginForm() {
       <CardHeader className="text-center items-center">
         <Logo className="h-auto w-full max-w-xs text-foreground mb-4" />
         <CardTitle className="text-2xl">Welcome to TradeHunter Pro</CardTitle>
-        <CardDescription>Select your Branch ID to access your portal.</CardDescription>
+        <CardDescription>Enter your Branch ID to access your portal.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -69,20 +72,11 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Branch / Login ID</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your branch ID" />
-                      </SelectTrigger>
+                   <FormControl>
+                      <Input placeholder="Enter your branch ID (e.g., PURLEY)" {...field} />
                     </FormControl>
-                    <SelectContent>
-                       {VALID_LOGIN_IDS.map(id => (
-                        <SelectItem key={id} value={id}>{id}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <FormDescription>
-                    Select your assigned branch or 'MANAGER' if applicable.
+                    Enter your assigned branch or 'MANAGER' if applicable.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
