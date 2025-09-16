@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -24,7 +25,7 @@ export function AppSidebarNav({ onLinkClick }: AppSidebarNavProps) {
   const pathname = usePathname();
 
   return (
-    <>
+    <div className="space-y-1">
       {navItems.map(({ href, icon: Icon, label }) => {
         const isActive = pathname.startsWith(href);
         return (
@@ -33,17 +34,17 @@ export function AppSidebarNav({ onLinkClick }: AppSidebarNavProps) {
             href={href}
             onClick={onLinkClick}
             className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-base transition-all", // Increased py and text-base
                 isActive 
                 ? "bg-sidebar-accent text-sidebar-accent-foreground" 
                 : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
             )}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-5 w-5" />
             {label}
           </Link>
         );
       })}
-    </>
+    </div>
   );
 }

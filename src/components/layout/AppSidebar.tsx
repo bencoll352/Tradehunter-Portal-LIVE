@@ -48,13 +48,13 @@ export function AppSidebar() {
         </Link>
       </div>
       <div className="flex flex-col flex-1 overflow-y-auto">
-        <div className="flex-1 p-4 space-y-4">
-            <nav className="grid items-start text-sm font-medium">
+        <div className="p-4 space-y-4">
+            <nav className="grid items-start font-medium">
                 <AppSidebarNav />
             </nav>
             <InfoAccordion sections={sidebarSections} />
         </div>
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="mt-auto p-4 border-t border-sidebar-border">
             <UserNav />
         </div>
       </div>
