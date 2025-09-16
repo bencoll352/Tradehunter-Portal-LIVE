@@ -47,15 +47,16 @@ export function AppSidebar() {
           <Logo className="h-auto w-full" />
         </Link>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <nav className="grid items-start text-sm font-medium">
-          <AppSidebarNav />
-        </nav>
-        
-        <InfoAccordion sections={sidebarSections} />
-      </div>
-      <div className="mt-auto p-4 border-t border-sidebar-border">
-        <UserNav />
+      <div className="flex-1 flex flex-col justify-between overflow-y-auto">
+        <div className="p-4 space-y-4">
+            <nav className="grid items-start text-sm font-medium">
+                <AppSidebarNav />
+            </nav>
+            <InfoAccordion sections={sidebarSections} />
+        </div>
+        <div className="p-4 border-t border-sidebar-border">
+            <UserNav />
+        </div>
       </div>
     </aside>
   );
