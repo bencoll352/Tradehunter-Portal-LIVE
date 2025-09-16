@@ -538,6 +538,34 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
     if (!material) return null;
 
     const isImage = material.file?.type.startsWith('image/');
+    const isPdf = material.file?.type === 'application/pdf';
+
+    const renderContent = () => {
+        // Priority 1: Render pre-defined JSX content if it exists
+        if (material.content) {
+            return (
+                <ScrollArea className="h-full">
+                    <div className="p-2">{material.content}</div>
+                </ScrollArea>
+            );
+        }
+
+        // Priority 2: Render file URL if it exists
+        if (fileUrl) {
+            if (isImage) {
+                return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
+            }
+            // For PDFs and other embeddable types
+            return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
+        }
+        
+        // Fallback if no content is renderable
+        return (
+            <div className="flex items-center justify-center h-full text-muted-foreground p-6">
+                <p>No viewable content available for this item.</p>
+            </div>
+        );
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -547,21 +575,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                     {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
                 <div className="flex-grow overflow-auto">
-                   {fileUrl ? (
-                        isImage ? (
-                            <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />
-                        ) : (
-                            <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>
-                        )
-                   ) : material.content ? (
-                       <ScrollArea className="h-full">
-                           <div className="p-2">{material.content}</div>
-                       </ScrollArea>
-                   ) : (
-                       <div className="flex items-center justify-center h-full text-muted-foreground p-6">
-                           <p>No viewable content available for this item.</p>
-                       </div>
-                   )}
+                   {renderContent()}
                 </div>
                 <DialogFooter className="p-4 border-t bg-background shrink-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
@@ -695,3 +709,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
