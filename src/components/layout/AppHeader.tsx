@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -84,7 +85,7 @@ export function AppHeader() {
 
 // Re-declaring nav items here to avoid circular dependency if imported,
 // and to ensure getPageTitle has access to all possible pages.
-// In a larger app, this might be centralized in a separate file.
+// In a larger app, this might be centralised in a separate file.
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/tradehunter", icon: Database, label: "Trader Database" },

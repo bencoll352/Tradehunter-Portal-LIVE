@@ -1,3 +1,4 @@
+
 'use server';
 
 import * as admin from 'firebase-admin';
@@ -31,7 +32,7 @@ export async function getFirebaseAdmin(): Promise<FirebaseAdminServices> {
     return globalThis.__firebaseAdminInstance__;
   }
 
-  console.log('[Firebase Admin] Getting or Initializing Firebase Admin app...');
+  console.log('[Firebase Admin] Getting or Initialising Firebase Admin app...');
 
   const serviceAccountJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 
@@ -52,7 +53,7 @@ export async function getFirebaseAdmin(): Promise<FirebaseAdminServices> {
 
   let app: App;
   if (admin.apps.length === 0) {
-    console.log('[Firebase Admin] Initializing new Firebase Admin app...');
+    console.log('[Firebase Admin] Initialising new Firebase Admin app...');
     app = admin.initializeApp({
       credential: cert(serviceAccount),
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,

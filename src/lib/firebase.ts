@@ -1,3 +1,4 @@
+
 // src/lib/firebase.ts
 import { initializeApp, getApps, getApp, type FirebaseApp, type FirebaseOptions } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
@@ -25,10 +26,10 @@ function getFirebaseApp(): FirebaseApp | undefined {
     if (firebaseConfig.apiKey && firebaseConfig.projectId) {
         try {
             const newApp = initializeApp(firebaseConfig);
-            console.log("[Firebase Setup] Firebase app initialized successfully.");
+            console.log("[Firebase Setup] Firebase app initialised successfully.");
             return newApp;
         } catch (error) {
-            console.error("[Firebase Setup] Error initializing Firebase app:", error);
+            console.error("[Firebase Setup] Error initialising Firebase app:", error);
             return undefined;
         }
     } else {
@@ -53,7 +54,7 @@ if (app) {
         auth = null;
     }
 } else {
-    console.error("[Firebase Setup] Firebase app initialization failed. Firestore and Auth services will not be available.");
+    console.error("[Firebase Setup] Firebase app initialisation failed. Firestore and Auth services will not be available.");
 }
 
 

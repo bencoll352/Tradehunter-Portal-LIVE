@@ -13,13 +13,13 @@ const prompts = [
   {
     value: "item-1",
     question: "Self-Review for Completeness and Accuracy",
-    answer: "Review the previous response I provided about Firebase bug reporting prompts. Check that all 10 prompts are distinct, properly formatted, and include specific technical details. Verify that each prompt contains information about the Firebase service, platform, expected vs. actual behavior, and relevant context. Identify any prompt that might be too vague or missing key information needed for effective bug reporting.",
+    answer: "Review the previous response I provided about Firebase bug reporting prompts. Check that all 10 prompts are distinct, properly formatted, and include specific technical details. Verify that each prompt contains information about the Firebase service, platform, expected vs. actual behaviour, and relevant context. Identify any prompt that might be too vague or missing key information needed for effective bug reporting.",
     icon: <CheckCircle className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-2",
     question: "Fact-Checking and Technical Validity Assessment",
-    answer: "Analyze the technical accuracy of each Firebase bug reporting prompt I generated. Verify that the described issues are plausible problems developers might encounter with Firebase services (Crashlytics, Firestore, Auth, etc.). Check if the mentioned components (like 'Persistence.LOCAL' for web auth or getDownloadURL() for Storage) are real Firebase features and used correctly in the context provided.",
+    answer: "Analyse the technical accuracy of each Firebase bug reporting prompt I generated. Verify that the described issues are plausible problems developers might encounter with Firebase services (Crashlytics, Firestore, Auth, etc.). Check if the mentioned components (like 'Persistence.LOCAL' for web auth or getDownloadURL() for Storage) are real Firebase features and used correctly in the context provided.",
     icon: <Search className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -31,7 +31,7 @@ const prompts = [
   {
     value: "item-4",
     question: "Consistency and Formatting Verification",
-    answer: "Check that all 10 prompts follow a consistent structure and formatting style. Each should mention the Firebase service, describe expected vs. actual behavior, include relevant technical details (SDK versions, platforms), and provide context. Verify that punctuation, capitalization, and grammar are correct throughout all prompts. Highlight any prompt that deviates from the established pattern.",
+    answer: "Check that all 10 prompts follow a consistent structure and formatting style. Each should mention the Firebase service, describe expected vs. actual behaviour, include relevant technical details (SDK versions, platforms), and provide context. Verify that punctuation, capitalisation, and grammar are correct throughout all prompts. Highlight any prompt that deviates from the established pattern.",
     icon: <List className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -48,20 +48,20 @@ const prompts = [
   },
   {
     value: "item-7",
-    question: "Logical Flow and Organization Check",
-    answer: "Examine the logical flow and organization of information within each individual prompt. Does each prompt present the problem clearly at the beginning, followed by relevant technical details and context? Check if the information builds logically from the general issue to specific circumstances. Identify any prompt where the information seems randomly ordered or hard to follow.",
+    question: "Logical Flow and Organisation Check",
+    answer: "Examine the logical flow and organisation of information within each individual prompt. Does each prompt present the problem clearly at the beginning, followed by relevant technical details and context? Check if the information builds logically from the general issue to specific circumstances. Identify any prompt where the information seems randomly ordered or hard to follow.",
     icon: <UserCheck className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-8",
     question: "Bias and Assumption Identification",
-    answer: "Identify any assumptions or potential biases in the prompts. Do any prompts assume specific development environments, third-party integrations, or coding practices that might not be universal? Check if any prompt inadvertently favors one platform over others without justification. Ensure the prompts remain neutral and applicable to a wide range of Firebase users.",
+    answer: "Identify any assumptions or potential biases in the prompts. Do any prompts assume specific development environments, third-party integrations, or coding practices that might not be universal? Check if any prompt inadvertently favours one platform over others without justification. Ensure the prompts remain neutral and applicable to a wide range of Firebase users.",
     icon: <UserCheck className="h-5 w-5 text-primary mr-2" />
   },
   {
     value: "item-9",
     question: "Edge Case and Exception Consideration",
-    answer: "Consider potential edge cases or exceptions that might make any of these prompts less effective. Are there scenarios where the described issues might actually be expected behavior rather than bugs? Do the prompts account for common troubleshooting steps that should be verified before reporting (like checking SDK versions or internet connectivity)? Identify any prompt that might lead to reporting of non-issues.",
+    answer: "Consider potential edge cases or exceptions that might make any of these prompts less effective. Are there scenarios where the described issues might actually be expected behaviour rather than bugs? Do the prompts account for common troubleshooting steps that should be verified before reporting (like checking SDK versions or internet connectivity)? Identify any prompt that might lead to reporting of non-issues.",
     icon: <TestTube2 className="h-5 w-5 text-primary mr-2" />
   },
   {

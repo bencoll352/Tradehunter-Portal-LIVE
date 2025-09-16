@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview Centralized Genkit configuration and AI model exports.
+ * @fileOverview Centralised Genkit configuration and AI model exports.
  */
 
 import { genkit } from 'genkit';

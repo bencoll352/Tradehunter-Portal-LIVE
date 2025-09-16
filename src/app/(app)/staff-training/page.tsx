@@ -316,7 +316,7 @@ const initialTrainingMaterials: TrainingMaterial[] = [
     {
       id: "persuasion-mastery",
       title: "Persuasion Mastery Programme",
-      description: "A 10-week comprehensive training program in psychological influence tailored for UK sales contexts.",
+      description: "A 10-week comprehensive training programme in psychological influence tailored for UK sales contexts.",
       type: "PDF",
       category: "Sales Playbook",
       tags: "persuasion, sales, techniques, Cialdini",
@@ -340,7 +340,7 @@ const initialTrainingMaterials: TrainingMaterial[] = [
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold text-accent">3. Social Proof</h3>
-                    <p className="mt-1 text-muted-foreground">When people are uncertain, they look to the actions and behaviors of others to determine their own. Use testimonials, case studies, and mention popular products ("our best-selling cladding") to show that others are making similar choices.</p>
+                    <p className="mt-1 text-muted-foreground">When people are uncertain, they look to the actions and behaviours of others to determine their own. Use testimonials, case studies, and mention popular products ("our best-selling cladding") to show that others are making similar choices.</p>
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold text-accent">4. Liking</h3>
