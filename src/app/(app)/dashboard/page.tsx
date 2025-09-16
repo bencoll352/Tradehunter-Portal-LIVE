@@ -12,6 +12,7 @@ import { MiniDashboardStats } from '@/components/dashboard/MiniDashboardStats';
 import { parseISO } from 'date-fns';
 import { TaskManagement } from '@/components/dashboard/TaskManagement';
 import { CalendarIntegration } from '@/components/dashboard/CalendarIntegration';
+import { FeatureCards } from '@/components/dashboard/FeatureCards';
 
 export default function DashboardPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
@@ -210,6 +211,7 @@ export default function DashboardPage() {
           <CalendarIntegration tasks={allTasks} />
         </div>
       </div>
+      <FeatureCards />
     </div>
   );
 }
