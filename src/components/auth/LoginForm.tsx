@@ -56,7 +56,7 @@ export function LoginForm() {
       <CardHeader className="text-center">
         <div className="mx-auto mb-4">
            {/* The text colors of the logo are now controlled by foreground/accent colors from globals.css */}
-           <Logo className="h-16 w-auto text-foreground" />
+           <Logo className="h-20 w-auto text-foreground" />
         </div>
         <CardTitle className="text-2xl">Welcome to TradeHunter Pro</CardTitle>
         <CardDescription>Select your Branch ID to access your portal.</CardDescription>
