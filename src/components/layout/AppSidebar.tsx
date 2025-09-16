@@ -100,8 +100,9 @@ export function AppSidebar() {
                 description="Leverage market intelligence to stay ahead of the competition."
             />
         </div>
-        <div className="flex-grow flex items-center justify-center">
-            <VerifiedBadge className="h-24 w-24 opacity-20" />
+        <div className="flex-grow flex flex-col items-center justify-center text-center opacity-40">
+            <VerifiedBadge className="h-20 w-20" />
+            <p className="text-xs font-semibold mt-2">Verified GDPR Compliant</p>
         </div>
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">
