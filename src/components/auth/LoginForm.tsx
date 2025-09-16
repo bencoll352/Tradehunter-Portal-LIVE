@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -14,6 +15,7 @@ import { Logo } from '@/components/icons/Logo';
 import { VALID_LOGIN_IDS, type BranchLoginId } from '@/types';
 import { Loader2, BrainCircuit, LineChart, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { TrustLockLogo } from '@/components/icons/TrustLockLogo';
 
 const formSchema = z.object({
   loginId: z.custom<BranchLoginId>((val) => VALID_LOGIN_IDS.includes(val as BranchLoginId), {
@@ -94,19 +96,24 @@ export function LoginForm() {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-center gap-2">
-            <Badge variant="secondary" className="gap-1.5 py-1 px-2">
-                <BrainCircuit className="h-3.5 w-3.5 text-primary" />
-                Sales Intelligence
-            </Badge>
-            <Badge variant="secondary" className="gap-1.5 py-1 px-2">
-                <LineChart className="h-3.5 w-3.5 text-primary" />
-                Data Analysis
-            </Badge>
-            <Badge variant="secondary" className="gap-1.5 py-1 px-2">
-                <Target className="h-3.5 w-3.5 text-primary" />
-                CRM
-            </Badge>
+      <CardFooter className="flex-col justify-center gap-4">
+            <div className="flex justify-center gap-2">
+                <Badge variant="secondary" className="gap-1.5 py-1 px-2">
+                    <BrainCircuit className="h-3.5 w-3.5 text-primary" />
+                    Sales Intelligence
+                </Badge>
+                <Badge variant="secondary" className="gap-1.5 py-1 px-2">
+                    <LineChart className="h-3.5 w-3.5 text-primary" />
+                    Data Analysis
+                </Badge>
+                <Badge variant="secondary" className="gap-1.5 py-1 px-2">
+                    <Target className="h-3.5 w-3.5 text-primary" />
+                    CRM
+                </Badge>
+            </div>
+            <div>
+                <TrustLockLogo />
+            </div>
       </CardFooter>
     </Card>
   );
