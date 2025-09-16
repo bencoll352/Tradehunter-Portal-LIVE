@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -55,8 +54,7 @@ export function LoginForm() {
     <Card className="w-full max-w-md shadow-2xl">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4">
-           {/* The text colors of the logo are now controlled by foreground/accent colors from globals.css */}
-           <Logo className="h-20 w-auto text-foreground" />
+           <Logo className="h-20 w-auto" />
         </div>
         <CardTitle className="text-2xl">Welcome to TradeHunter Pro</CardTitle>
         <CardDescription>Select your Branch ID to access your portal.</CardDescription>

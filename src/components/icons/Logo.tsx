@@ -1,36 +1,23 @@
-
-import type { SVGProps } from 'react';
+import Image from 'next/image';
 import { cn } from "@/lib/utils";
+import type React from 'react';
 
-interface LogoProps extends SVGProps<SVGSVGElement> {
-  variant?: 'default' | 'transparent';
-}
+// Using React.HTMLAttributes<HTMLDivElement> because we are rendering a div
+interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function Logo({ variant = 'default', ...props }: LogoProps) {
-  const foregroundColor = variant === 'transparent' ? 'hsl(var(--sidebar-foreground))' : 'currentColor';
-  const subtitleColor = variant === 'transparent' ? 'hsla(var(--sidebar-foreground), 0.7)' : 'currentColor';
-
+export function Logo({ className, ...props }: LogoProps) {
   return (
-    <svg 
-      width="170" 
-      height="40" 
-      viewBox="0 0 170 40" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg" 
-      aria-label="TradeHunter Pro Logo"
+    <div
+      className={cn("relative w-[170px] h-[40px]", className)}
       {...props}
-      className={cn("font-sans", props.className)}
     >
-      {/* Text Group */}
-      <g transform="translate(0, 10)">
-        <text x="0" y="15" fontFamily="'Arial Black', 'Helvetica Bold', sans-serif" fontSize="18" fontWeight="900">
-            <tspan fill={foregroundColor}>TradeHunter</tspan>
-            <tspan fill="hsl(var(--accent))" fontWeight="900">Pro</tspan>
-        </text>
-        <text x="0" y="32" fontFamily="Arial, sans-serif" fontSize="11" fontWeight="bold" fill={subtitleColor} opacity="0.7" letterSpacing="0.05em">
-            DOMINATE YOUR TERRITORY
-        </text>
-      </g>
-    </svg>
+      <Image
+        src="https://storage.googleapis.com/tradehunter-pro-assets/tradehunter-pro-logo.png"
+        alt="TradeHunter Pro Logo"
+        fill
+        style={{ objectFit: 'contain' }}
+        priority // The logo is important, so we prioritize its loading
+      />
+    </div>
   );
 }
