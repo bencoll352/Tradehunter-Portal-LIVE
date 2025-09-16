@@ -12,11 +12,11 @@ export const CalendarIntegration: React.FC<CalendarIntegrationProps> = ({ tasks 
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Calendar</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <Calendar
           mode="single"
           selected={date}

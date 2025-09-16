@@ -40,11 +40,11 @@ export const TaskManagement: React.FC<TaskManagementProps> = ({
   };
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Task Management</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <div className="flex flex-col gap-2 mb-4">
         <Select onValueChange={setSelectedTrader} value={selectedTrader || ''}>
             <SelectTrigger>
