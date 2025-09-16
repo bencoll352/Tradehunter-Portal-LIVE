@@ -34,7 +34,7 @@ export function AppSidebarNav({ onLinkClick }: AppSidebarNavProps) {
             href={href}
             onClick={onLinkClick}
             className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-base transition-all", // Increased py and text-base
+                "flex items-center gap-3 rounded-lg px-3 py-3 text-lg transition-all",
                 isActive 
                 ? "bg-sidebar-accent text-sidebar-accent-foreground" 
                 : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
