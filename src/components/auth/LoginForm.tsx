@@ -16,6 +16,7 @@ import { VALID_LOGIN_IDS, type BranchLoginId } from '@/types';
 import { Loader2, BrainCircuit, LineChart, Target, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { TrustLockLogo } from '@/components/icons/TrustLockLogo';
+import { VerifiedBadge } from '../icons/VerifiedBadge';
 
 const formSchema = z.object({
   loginId: z.custom<BranchLoginId>((val) => VALID_LOGIN_IDS.includes(val as BranchLoginId), {
@@ -94,7 +95,7 @@ export function LoginForm() {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex-col justify-center items-center gap-4 pt-6 border-t">
+      <CardFooter className="flex-col justify-center items-center gap-6 pt-6 border-t">
             <div className="flex justify-center items-center gap-2 flex-wrap">
                 <Badge variant="secondary" className="gap-1.5 py-1 px-2">
                     <BrainCircuit className="h-3.5 w-3.5 text-primary" />
@@ -109,14 +110,23 @@ export function LoginForm() {
                     CRM
                 </Badge>
             </div>
-            <div className="mt-4 flex flex-col items-center gap-2">
-                <TrustLockLogo className="text-foreground" />
-                <div className="flex items-center">
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+            <div className="flex items-center justify-center gap-8 w-full">
+                <div className="flex flex-col items-center gap-1">
+                    <TrustLockLogo className="text-foreground" />
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                     <div className="flex items-center">
+                        <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                        <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                        <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                        <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                        <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-semibold">5-Star Rated</span>
+                </div>
+                 <div className="flex flex-col items-center gap-1">
+                    <VerifiedBadge className="h-10 w-10" />
+                    <span className="text-xs text-muted-foreground font-semibold">Verified</span>
                 </div>
             </div>
       </CardFooter>
