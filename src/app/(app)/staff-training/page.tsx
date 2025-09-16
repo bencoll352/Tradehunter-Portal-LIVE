@@ -515,7 +515,23 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
     );
 }
 
-const MaterialViewer = ({ material, fileUrl }: { material: TrainingMaterial, fileUrl: string | null }) => {
+const MaterialViewer = ({ material }: { material: TrainingMaterial }) => {
+    const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        let objectUrl: string | null = null;
+        if (material.file) {
+            objectUrl = URL.createObjectURL(material.file);
+            setFileUrl(objectUrl);
+        }
+
+        return () => {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+            }
+        };
+    }, [material]);
+    
     if (material.content) {
         return (
             <ScrollArea className="h-full">
@@ -524,20 +540,20 @@ const MaterialViewer = ({ material, fileUrl }: { material: TrainingMaterial, fil
         );
     }
 
-    if (material.file && fileUrl) {
-        if (material.file.type.startsWith('image/')) {
-            return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
-        }
-        if (material.file.type === 'application/pdf') {
+    if (fileUrl) {
+        if (material.type.toLowerCase().includes('pdf')) {
             return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
+        }
+        if (['png', 'jpg', 'jpeg', 'gif', 'svg'].some(ext => material.type.toLowerCase().includes(ext))) {
+            return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
         }
         return (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
                 <p className="font-semibold">Cannot preview this file type.</p>
-                <p className="text-sm mt-1">File: {material.file.name}</p>
-                <p className="text-sm">Type: {material.file.type}</p>
+                <p className="text-sm mt-1">File: {material.title}</p>
+                <p className="text-sm">Type: {material.type}</p>
                 <Button asChild variant="link" className="mt-4">
-                    <a href={fileUrl} download={material.file.name}>Download File</a>
+                    <a href={fileUrl} download={material.title}>Download File</a>
                 </Button>
             </div>
         );
@@ -552,23 +568,6 @@ const MaterialViewer = ({ material, fileUrl }: { material: TrainingMaterial, fil
 
 
 function ViewMaterialDialog({ material, open, onOpenChange }: { material: TrainingMaterial | null, open: boolean, onOpenChange: (open: boolean) => void }) {
-    const [fileUrl, setFileUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        let objectUrl: string | null = null;
-        if (open && material?.file) {
-            objectUrl = URL.createObjectURL(material.file);
-            setFileUrl(objectUrl);
-        }
-
-        return () => {
-            if (objectUrl) {
-                URL.revokeObjectURL(objectUrl);
-                setFileUrl(null);
-            }
-        };
-    }, [open, material]);
-
     if (!material) return null;
 
     return (
@@ -579,7 +578,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                     {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
                 <div className="flex-grow overflow-auto">
-                   {open && <MaterialViewer material={material} fileUrl={fileUrl} />}
+                   {open && <MaterialViewer material={material} />}
                 </div>
                 <DialogFooter className="p-4 border-t bg-background shrink-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
