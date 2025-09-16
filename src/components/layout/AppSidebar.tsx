@@ -53,10 +53,6 @@ export function AppSidebar() {
         </nav>
         
         <InfoAccordion sections={sidebarSections} />
-
-        <div className="flex-grow">
-            {/* This space is intentionally left blank as requested */}
-        </div>
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">
         <UserNav />
