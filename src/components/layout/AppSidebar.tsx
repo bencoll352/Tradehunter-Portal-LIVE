@@ -74,6 +74,8 @@ export function AppSidebar() {
           <AppSidebarNav />
         </nav>
         
+        <InfoAccordion sections={sidebarSections} />
+
         {/* New Feature Card Section */}
         <div className="space-y-3 pt-4">
             <FeatureCard 
@@ -97,8 +99,6 @@ export function AppSidebar() {
                 description="Leverage market intelligence to stay ahead of the competition."
             />
         </div>
-
-        <InfoAccordion sections={sidebarSections} />
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">
         <UserNav />
