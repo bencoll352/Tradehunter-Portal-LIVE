@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from '@/components/icons/Logo';
 import { VALID_LOGIN_IDS, type BranchLoginId } from '@/types';
-import { Loader2, BrainCircuit, LineChart, Target } from 'lucide-react';
+import { Loader2, BrainCircuit, LineChart, Target, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { TrustLockLogo } from '@/components/icons/TrustLockLogo';
 
@@ -108,8 +109,15 @@ export function LoginForm() {
                     CRM
                 </Badge>
             </div>
-            <div className="mt-2">
+            <div className="mt-4 flex flex-col items-center gap-2">
                 <TrustLockLogo className="text-foreground" />
+                <div className="flex items-center">
+                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                </div>
             </div>
       </CardFooter>
     </Card>
