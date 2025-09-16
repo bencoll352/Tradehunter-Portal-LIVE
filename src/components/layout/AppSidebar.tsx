@@ -5,17 +5,54 @@ import React from 'react';
 import Link from "next/link";
 import { Logo } from "@/components/icons/Logo";
 import { AppSidebarNav } from "./AppSidebarNav";
-import { Sparkles, Eye, TrendingUp, Award, Zap } from 'lucide-react';
+import { Sparkles, Eye, TrendingUp, Award, Zap, Lightbulb, DatabaseZap } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { InfoAccordion } from '../common/InfoAccordion';
 
 export function AppSidebar() {
   
-  const keyCapabilities = [
-    { icon: Eye, text: "Complete Territory Visibility" },
-    { icon: TrendingUp, text: "Scalable Growth" },
-    { icon: Award, text: "Competitive Advantage" },
-    { icon: Zap, text: "Sales Efficiency" }
+  const sidebarSections = [
+    { 
+      id: "capabilities", 
+      title: "Key Capabilities", 
+      icon: Sparkles, 
+      content: [
+        { icon: Eye, text: "Complete Territory Visibility" },
+        { icon: TrendingUp, text: "Scalable Growth" },
+        { icon: Award, text: "Competitive Advantage" },
+        { icon: Zap, text: "Sales Efficiency" }
+      ].map((item, index) => (
+        <div key={index} className="flex items-center gap-2.5">
+          <item.icon className="h-4 w-4 text-sidebar-accent-foreground/80" />
+          <span className="font-medium text-sidebar-accent-foreground/90">{item.text}</span>
+        </div>
+      )),
+      defaultOpen: true 
+    },
+    { 
+      id: "insight-assistance", 
+      title: "Insight & Assistance Features", 
+      icon: Lightbulb,
+      content: [
+        "Access market intelligence.",
+        "Analyse competitor strategies.",
+        "Receive sales coaching.",
+        "Generate outreach messages."
+      ],
+      defaultOpen: false 
+    },
+    { 
+      id: "data-management", 
+      title: "Data Management", 
+      icon: DatabaseZap,
+      content: [
+        "Bulk import/export traders.",
+        "Automated data cleaning.",
+        "Connect external data sources.",
+        "Custom reporting dashboards."
+      ],
+      defaultOpen: false 
+    }
   ];
 
   return (
@@ -30,20 +67,15 @@ export function AppSidebar() {
           <AppSidebarNav />
         </nav>
         <div className="px-4 mt-4">
-          <InfoAccordion sections={[
-            { 
-              id: "capabilities", 
-              title: "Key Capabilities", 
-              icon: Sparkles, 
-              content: keyCapabilities.map((item, index) => (
-                <div key={index} className="flex items-center gap-2.5">
-                  <item.icon className="h-4 w-4 text-sidebar-accent-foreground/80" />
-                  <span className="font-medium text-sidebar-accent-foreground/90">{item.text}</span>
-                </div>
-              )),
-              defaultOpen: true 
-            }
-          ]} />
+          <InfoAccordion sections={sidebarSections.map(section => ({
+            ...section,
+            content: Array.isArray(section.content) ? section.content.map((item, index) => {
+              if (React.isValidElement(item)) {
+                return item;
+              }
+              return <span key={index}>{item}</span>
+            }) : [],
+          }))} />
         </div>
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">
