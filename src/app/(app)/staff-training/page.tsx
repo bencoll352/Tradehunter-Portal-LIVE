@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -515,6 +515,42 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
     );
 }
 
+const MaterialViewer = ({ material, fileUrl }: { material: TrainingMaterial, fileUrl: string | null }) => {
+    if (material.content) {
+        return (
+            <ScrollArea className="h-full">
+                <div className="p-2">{material.content}</div>
+            </ScrollArea>
+        );
+    }
+
+    if (material.file && fileUrl) {
+        if (material.file.type.startsWith('image/')) {
+            return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
+        }
+        if (material.file.type === 'application/pdf') {
+            return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
+        }
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
+                <p className="font-semibold">Cannot preview this file type.</p>
+                <p className="text-sm mt-1">File: {material.file.name}</p>
+                <p className="text-sm">Type: {material.file.type}</p>
+                <Button asChild variant="link" className="mt-4">
+                    <a href={fileUrl} download={material.file.name}>Download File</a>
+                </Button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex items-center justify-center h-full text-muted-foreground p-6">
+            <p>No viewable content available for this item.</p>
+        </div>
+    );
+};
+
+
 function ViewMaterialDialog({ material, open, onOpenChange }: { material: TrainingMaterial | null, open: boolean, onOpenChange: (open: boolean) => void }) {
     const [fileUrl, setFileUrl] = useState<string | null>(null);
 
@@ -535,41 +571,6 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
 
     if (!material) return null;
 
-    const renderContent = () => {
-        if (material.content) {
-            return (
-                <ScrollArea className="h-full">
-                    <div className="p-2">{material.content}</div>
-                </ScrollArea>
-            );
-        }
-
-        if (material.file && fileUrl) {
-            if (material.file.type.startsWith('image/')) {
-                return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
-            }
-            if (material.file.type === 'application/pdf') {
-                return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
-            }
-            return (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
-                    <p className="font-semibold">Cannot preview this file type.</p>
-                    <p className="text-sm mt-1">File: {material.file.name}</p>
-                    <p className="text-sm">Type: {material.file.type}</p>
-                    <Button asChild variant="link" className="mt-4">
-                        <a href={fileUrl} download={material.file.name}>Download File</a>
-                    </Button>
-                </div>
-            );
-        }
-
-        return (
-            <div className="flex items-center justify-center h-full text-muted-foreground p-6">
-                <p>No viewable content available for this item.</p>
-            </div>
-        );
-    };
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
@@ -578,7 +579,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                     {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
                 <div className="flex-grow overflow-auto">
-                   {renderContent()}
+                   {open && <MaterialViewer material={material} fileUrl={fileUrl} />}
                 </div>
                 <DialogFooter className="p-4 border-t bg-background shrink-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
@@ -712,9 +713,3 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
-
-    
-
-    
-
-    
