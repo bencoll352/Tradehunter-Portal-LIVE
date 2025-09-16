@@ -198,7 +198,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <div className="grid gap-4 md:gap-6 md:grid-cols-2">
-        <div className="lg:col-span-1">
+        <div className="col-span-1 md:col-span-1">
           <TaskManagement 
             traders={traders}
             tasks={allTasks} 
@@ -207,7 +207,7 @@ export default function DashboardPage() {
             onTaskDelete={handleTaskDelete} 
           />
         </div>
-        <div className="lg:col-span-1">
+        <div className="col-span-1 md:col-span-1">
           <CalendarIntegration tasks={allTasks} />
         </div>
       </div>
