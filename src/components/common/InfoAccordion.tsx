@@ -34,13 +34,13 @@ export function InfoAccordion({ sections, className }: InfoAccordionProps) {
         const IconComponent = section.icon;
         return (
           <AccordionItem value={section.id} key={section.id} className="border-0">
-            <AccordionTrigger className="px-3 py-2.5 text-sm hover:no-underline rounded-md bg-muted/50 hover:bg-muted text-foreground">
+            <AccordionTrigger className="px-3 py-2.5 text-sm hover:no-underline rounded-md bg-sidebar-accent/70 hover:bg-sidebar-accent text-sidebar-accent-foreground">
               <div className="flex items-center gap-2.5">
-                <IconComponent className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-foreground text-left">{section.title}</span>
+                <IconComponent className="h-4 w-4 text-sidebar-accent-foreground" />
+                <span className="font-semibold text-sidebar-accent-foreground text-left">{section.title}</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-2 text-sm text-muted-foreground">
+            <AccordionContent className="px-3 pb-3 pt-2 text-sm text-sidebar-foreground/80">
               <div className="space-y-2">
                 {section.content.map((point, pIndex) => (
                   <div key={pIndex} className="flex items-start">
