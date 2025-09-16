@@ -17,16 +17,23 @@ export function AppSidebar() {
       title: "Key Capabilities", 
       icon: Sparkles, 
       content: [
-        { icon: Eye, text: "Complete Territory Visibility" },
-        { icon: TrendingUp, text: "Scalable Growth" },
-        { icon: Award, text: "Competitive Advantage" },
-        { icon: Zap, text: "Sales Efficiency" }
-      ].map((item, index) => (
-        <div key={index} className="flex items-center gap-2.5">
-          <item.icon className="h-4 w-4 text-sidebar-accent-foreground/80" />
-          <span className="font-medium text-sidebar-accent-foreground/90">{item.text}</span>
+        <div key="vis" className="flex items-center gap-2.5">
+          <Eye className="h-4 w-4 text-sidebar-accent-foreground/80" />
+          <span className="font-medium text-sidebar-accent-foreground/90">Complete Territory Visibility</span>
+        </div>,
+        <div key="growth" className="flex items-center gap-2.5">
+          <TrendingUp className="h-4 w-4 text-sidebar-accent-foreground/80" />
+          <span className="font-medium text-sidebar-accent-foreground/90">Scalable Growth</span>
+        </div>,
+        <div key="advantage" className="flex items-center gap-2.5">
+          <Award className="h-4 w-4 text-sidebar-accent-foreground/80" />
+          <span className="font-medium text-sidebar-accent-foreground/90">Competitive Advantage</span>
+        </div>,
+        <div key="efficiency" className="flex items-center gap-2.5">
+          <Zap className="h-4 w-4 text-sidebar-accent-foreground/80" />
+          <span className="font-medium text-sidebar-accent-foreground/90">Sales Efficiency</span>
         </div>
-      )),
+      ],
       defaultOpen: true 
     },
     { 
@@ -38,7 +45,7 @@ export function AppSidebar() {
         "Analyse competitor strategies.",
         "Receive sales coaching.",
         "Generate outreach messages."
-      ],
+      ].map((text, i) => <span key={i}>{text}</span>),
       defaultOpen: false 
     },
     { 
@@ -50,7 +57,7 @@ export function AppSidebar() {
         "Automated data cleaning.",
         "Connect external data sources.",
         "Custom reporting dashboards."
-      ],
+      ].map((text, i) => <span key={i}>{text}</span>),
       defaultOpen: false 
     }
   ];
@@ -67,15 +74,7 @@ export function AppSidebar() {
           <AppSidebarNav />
         </nav>
         <div className="px-4 mt-4">
-          <InfoAccordion sections={sidebarSections.map(section => ({
-            ...section,
-            content: Array.isArray(section.content) ? section.content.map((item, index) => {
-              if (React.isValidElement(item)) {
-                return item;
-              }
-              return <span key={index}>{item}</span>
-            }) : [],
-          }))} />
+          <InfoAccordion sections={sidebarSections} />
         </div>
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">
