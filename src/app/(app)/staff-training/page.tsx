@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
@@ -515,60 +516,58 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
     );
 }
 
-const MaterialViewer = ({ material }: { material: TrainingMaterial }) => {
-    const [fileUrl, setFileUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        let objectUrl: string | null = null;
-        if (material.file) {
-            objectUrl = URL.createObjectURL(material.file);
-            setFileUrl(objectUrl);
-        }
-
-        return () => {
-            if (objectUrl) {
-                URL.revokeObjectURL(objectUrl);
-            }
-        };
-    }, [material]);
-    
-    if (material.content) {
-        return (
-            <ScrollArea className="h-full">
-                <div className="p-2">{material.content}</div>
-            </ScrollArea>
-        );
-    }
-
-    if (fileUrl) {
-        if (material.type.toLowerCase().includes('pdf')) {
-            return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
-        }
-        if (['png', 'jpg', 'jpeg', 'gif', 'svg'].some(ext => material.type.toLowerCase().includes(ext))) {
-            return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
-        }
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
-                <p className="font-semibold">Cannot preview this file type.</p>
-                <p className="text-sm mt-1">File: {material.title}</p>
-                <p className="text-sm">Type: {material.type}</p>
-                <Button asChild variant="link" className="mt-4">
-                    <a href={fileUrl} download={material.title}>Download File</a>
-                </Button>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex items-center justify-center h-full text-muted-foreground p-6">
-            <p>No viewable content available for this item.</p>
-        </div>
-    );
-};
-
-
 function ViewMaterialDialog({ material, open, onOpenChange }: { material: TrainingMaterial | null, open: boolean, onOpenChange: (open: boolean) => void }) {
     if (!material) return null;
+
+    const MaterialContent = () => {
+        const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+        useEffect(() => {
+            let objectUrl: string | null = null;
+            if (material.file) {
+                objectUrl = URL.createObjectURL(material.file);
+                setFileUrl(objectUrl);
+            }
+
+            return () => {
+                if (objectUrl) {
+                    URL.revokeObjectURL(objectUrl);
+                }
+            };
+        }, [material.file]);
+
+        if (material.content) {
+            return <ScrollArea className="h-full"><div className="p-2">{material.content}</div></ScrollArea>;
+        }
+
+        if (fileUrl) {
+            const isPdf = material.type.toLowerCase().includes('pdf') || material.file?.type === 'application/pdf';
+            const isImage = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].some(ext => material.type.toLowerCase().includes(ext) || material.file?.type.includes(ext));
+
+            if (isPdf) {
+                return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
+            }
+            if (isImage) {
+                return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto object-contain p-4" />;
+            }
+            return (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
+                    <p className="font-semibold">Cannot preview this file type.</p>
+                    <p className="text-sm mt-1">File: {material.title}</p>
+                    <p className="text-sm">Type: {material.type}</p>
+                    <Button asChild variant="link" className="mt-4">
+                        <a href={fileUrl} download={material.title}>Download File</a>
+                    </Button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex items-center justify-center h-full text-muted-foreground p-6">
+                 {material.file ? <Loader2 className="h-6 w-6 animate-spin" /> : <p>No viewable content available for this item.</p>}
+            </div>
+        );
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -578,7 +577,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                     {material.description && <DialogDescription>{material.description}</DialogDescription>}
                 </DialogHeader>
                 <div className="flex-grow overflow-auto">
-                   {open && <MaterialViewer material={material} />}
+                   {open && <MaterialContent />}
                 </div>
                 <DialogFooter className="p-4 border-t bg-background shrink-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
