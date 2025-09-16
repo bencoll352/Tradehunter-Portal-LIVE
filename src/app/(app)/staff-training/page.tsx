@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -521,19 +520,15 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
 
     useEffect(() => {
         let objectUrl: string | null = null;
-        // Only create a URL if the dialog is open and there's a file to display
         if (open && material?.file) {
             objectUrl = URL.createObjectURL(material.file);
             setFileUrl(objectUrl);
-        } else {
-            // Clear the URL when the dialog is closed or there's no file
-            setFileUrl(null);
         }
 
-        // Cleanup function to revoke the object URL when the component unmounts or dependencies change
         return () => {
             if (objectUrl) {
                 URL.revokeObjectURL(objectUrl);
+                setFileUrl(null);
             }
         };
     }, [open, material]);
@@ -541,7 +536,6 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
     if (!material) return null;
 
     const renderContent = () => {
-        // Priority 1: Render pre-defined JSX content if it exists
         if (material.content) {
             return (
                 <ScrollArea className="h-full">
@@ -550,20 +544,15 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
             );
         }
 
-        // Priority 2: Render file if it exists and a URL has been created
         if (material.file && fileUrl) {
-            const isImage = material.file.type.startsWith('image/');
-            const isPdf = material.file.type === 'application/pdf';
-
-            if (isImage) {
+            if (material.file.type.startsWith('image/')) {
                 return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto p-4 sm:p-6" />;
             }
-            if (isPdf) {
+            if (material.file.type === 'application/pdf') {
                 return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
             }
-            // Fallback for other file types that might not be directly viewable
             return (
-                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
                     <p className="font-semibold">Cannot preview this file type.</p>
                     <p className="text-sm mt-1">File: {material.file.name}</p>
                     <p className="text-sm">Type: {material.file.type}</p>
@@ -573,8 +562,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
                 </div>
             );
         }
-        
-        // Fallback if no content is renderable at all
+
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground p-6">
                 <p>No viewable content available for this item.</p>
@@ -724,6 +712,8 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
 
     
 
