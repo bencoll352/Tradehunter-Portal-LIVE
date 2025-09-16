@@ -7,13 +7,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from '@/components/icons/Logo';
 import { VALID_LOGIN_IDS, type BranchLoginId } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, BrainCircuit, LineChart, Target } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   loginId: z.custom<BranchLoginId>((val) => VALID_LOGIN_IDS.includes(val as BranchLoginId), {
@@ -53,8 +54,9 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-2xl">
       <CardHeader className="text-center">
-        <div className="mx-auto mb-4 p-4">
-          <Logo className="h-16 w-auto" />
+        <div className="mx-auto mb-4">
+           {/* The text colors of the logo are now controlled by foreground/accent colors from globals.css */}
+           <Logo className="h-16 w-auto text-foreground" />
         </div>
         <CardTitle className="text-2xl">Welcome to TradeHunter Pro</CardTitle>
         <CardDescription>Select your Branch ID to access your portal.</CardDescription>
@@ -94,6 +96,20 @@ export function LoginForm() {
           </form>
         </Form>
       </CardContent>
+      <CardFooter className="flex justify-center gap-2">
+            <Badge variant="secondary" className="gap-1.5 py-1 px-2">
+                <BrainCircuit className="h-3.5 w-3.5 text-primary" />
+                Sales Intelligence
+            </Badge>
+            <Badge variant="secondary" className="gap-1.5 py-1 px-2">
+                <LineChart className="h-3.5 w-3.5 text-primary" />
+                Data Analysis
+            </Badge>
+            <Badge variant="secondary" className="gap-1.5 py-1 px-2">
+                <Target className="h-3.5 w-3.5 text-primary" />
+                CRM
+            </Badge>
+      </CardFooter>
     </Card>
   );
 }
