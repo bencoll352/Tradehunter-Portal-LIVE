@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck, CheckCircle, Search, ThumbsUp, List, Sparkles, SlidersHorizontal, UserCheck, TestTube2, Star } from "lucide-react"; 
+import { VerifiedBadge } from "@/components/icons/VerifiedBadge";
 
 const prompts = [
   {
@@ -24,7 +25,7 @@ const prompts = [
   {
     value: "item-3",
     question: "Clarity and Communication Effectiveness Test",
-    answer: "Evaluate the clarity and communication effectiveness of each bug reporting prompt. Would a Firebase engineer immediately understand what the issue is and what information they have to work with? Are the prompts written in a professional tone appropriate for a bug report? Identify any prompt that uses ambiguous language or lacks sufficient detail for reproduction.",
+    answer: "Evaluate the clarity and communication effectiveness of each bug reporting prompt I generated. Would a Firebase engineer immediately understand what the issue is and what information they have to work with? Are the prompts written in a professional tone appropriate for a bug report? Identify any prompt that uses ambiguous language or lacks sufficient detail for reproduction.",
     icon: <ThumbsUp className="h-5 w-5 text-primary mr-2" />
   },
   {
@@ -76,8 +77,8 @@ export default function QualityControlPage() {
     <div className="space-y-8">
       <Card className="shadow-lg">
         <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-2">
-            <ShieldCheck className="h-8 w-8 sm:h-10 sm:w-10 text-primary shrink-0" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
+            <VerifiedBadge className="h-10 w-10 sm:h-12 sm:w-12 shrink-0" />
             <div>
               <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Self-Correction & Quality Control</CardTitle>
               <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
