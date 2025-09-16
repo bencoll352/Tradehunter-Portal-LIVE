@@ -5,21 +5,17 @@ import React from 'react';
 import Link from "next/link";
 import { Logo } from "@/components/icons/Logo";
 import { AppSidebarNav } from "./AppSidebarNav";
-import { Sparkles, Database as DataManagementIcon } from 'lucide-react';
+import { Sparkles, Eye, TrendingUp, Award, Zap } from 'lucide-react';
 import { UserNav } from './UserNav';
 import { InfoAccordion } from '../common/InfoAccordion';
 
 export function AppSidebar() {
-  const insightFeatures = [
-    "Generate material estimates for projects.",
-    "Access specialised data via BuildWise Intel.",
-    "For managers: utilise the Smart Team Hub for advanced analytics and lead generation."
-  ];
-
-  const dataManagementFeatures = [
-    "View and manage traders in the Trader Database.",
-    "Perform bulk uploads and deletions.",
-    "Data is securely stored and backed up."
+  
+  const keyCapabilities = [
+    { icon: Eye, text: "Complete Territory Visibility" },
+    { icon: TrendingUp, text: "Scalable Growth" },
+    { icon: Award, text: "Competitive Advantage" },
+    { icon: Zap, text: "Sales Efficiency" }
   ];
 
   return (
@@ -35,8 +31,18 @@ export function AppSidebar() {
         </nav>
         <div className="px-4 mt-4">
           <InfoAccordion sections={[
-            { id: "insights", title: "Insight & Assistance Features", icon: Sparkles, content: insightFeatures, defaultOpen: true },
-            { id: "data", title: "Data Management", icon: DataManagementIcon, content: dataManagementFeatures }
+            { 
+              id: "capabilities", 
+              title: "Key Capabilities", 
+              icon: Sparkles, 
+              content: keyCapabilities.map((item, index) => (
+                <div key={index} className="flex items-center gap-2.5">
+                  <item.icon className="h-4 w-4 text-sidebar-accent-foreground/80" />
+                  <span className="font-medium text-sidebar-accent-foreground/90">{item.text}</span>
+                </div>
+              )),
+              defaultOpen: true 
+            }
           ]} />
         </div>
       </div>
