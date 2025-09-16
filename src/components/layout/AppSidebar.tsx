@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -53,9 +54,8 @@ export function AppSidebar() {
         
         <InfoAccordion sections={sidebarSections} />
 
-        <div className="flex-grow flex flex-col items-center justify-center text-center opacity-40">
-            <VerifiedBadge className="h-20 w-20" />
-            <p className="text-xs font-semibold mt-2">Verified GDPR Compliant</p>
+        <div className="flex-grow">
+            {/* This space is intentionally left blank as requested */}
         </div>
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">

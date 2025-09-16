@@ -118,9 +118,9 @@ export function LoginForm() {
                     </div>
                     <span className="text-xs text-muted-foreground font-semibold">5-Star Rated</span>
                 </div>
-                 <div className="flex flex-col items-center gap-1">
+                 <div className="flex flex-col items-center gap-2">
                     <VerifiedBadge className="h-10 w-10" />
-                    <span className="text-xs text-muted-foreground font-semibold">Verified</span>
+                    <span className="text-xs text-muted-foreground font-semibold">Verified GDPR Compliant</span>
                 </div>
             </div>
       </CardFooter>
