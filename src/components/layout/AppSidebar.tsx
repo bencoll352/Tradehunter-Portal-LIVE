@@ -47,8 +47,8 @@ export function AppSidebar() {
           <Logo className="h-auto w-full" />
         </Link>
       </div>
-      <div className="flex-1 flex flex-col justify-between overflow-y-auto">
-        <div className="p-4 space-y-4">
+      <div className="flex flex-col flex-1 overflow-y-auto">
+        <div className="flex-1 p-4 space-y-4">
             <nav className="grid items-start text-sm font-medium">
                 <AppSidebarNav />
             </nav>
