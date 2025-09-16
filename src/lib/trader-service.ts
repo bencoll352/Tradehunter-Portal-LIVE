@@ -10,6 +10,44 @@ import { normalizePhoneNumber } from './utils';
 import * as admin from 'firebase-admin';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
+type Goals = { weeklyNewLeadsGoal?: number; monthlyActiveTradersGoal?: number };
+
+
+const getBranchDoc = async (branchId: BaseBranchId) => {
+  const { firestore } = await getFirebaseAdmin();
+  return firestore.collection('traders').doc(branchId);
+};
+
+export async function getGoals(branchId: BaseBranchId): Promise<Goals> {
+  try {
+    const branchDoc = await getBranchDoc(branchId);
+    const doc = await branchDoc.get();
+    if (!doc.exists) {
+      return {};
+    }
+    const data = doc.data();
+    return {
+      weeklyNewLeadsGoal: data?.weeklyNewLeadsGoal,
+      monthlyActiveTradersGoal: data?.monthlyActiveTradersGoal,
+    };
+  } catch (error: any) {
+    console.error('[TRADER_SERVICE_ERROR:getGoals]', error);
+    throw new Error('Failed to get goals from database.');
+  }
+}
+
+export async function updateGoals(branchId: BaseBranchId, goals: Goals): Promise<Goals> {
+  try {
+    const branchDoc = await getBranchDoc(branchId);
+    // Use merge: true to create the doc if it doesn't exist or update it if it does
+    await branchDoc.set(goals, { merge: true });
+    return goals;
+  } catch (error: any) {
+    console.error('[TRADER_SERVICE_ERROR:updateGoals]', error);
+    throw new Error(`Could not update goals. Reason: ${error.message}`);
+  }
+}
+
 
 // --- Firestore Collection References ---
 const getTradersCollection = async (branchId: BaseBranchId) => {

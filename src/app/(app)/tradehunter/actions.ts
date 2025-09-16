@@ -12,11 +12,40 @@ import {
   createTask,
   updateTask,
   deleteTask,
+  updateGoals,
+  getGoals,
 } from '@/lib/trader-service';
 import type { BaseBranchId, ParsedTraderData, Trader, Task } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
+type Goals = { weeklyNewLeadsGoal?: number; monthlyActiveTradersGoal?: number };
+
+
+export async function getGoalsAction(
+  branchId: BaseBranchId
+): Promise<{ data: Goals | null; error: string | null }> {
+  try {
+    const goals = await getGoals(branchId);
+    return { data: goals, error: null };
+  } catch (error: any) {
+    console.error(`[Action Error: getGoalsAction]`, error);
+    return { data: null, error: error.message };
+  }
+}
+
+export async function updateGoalsAction(
+  branchId: BaseBranchId,
+  goals: Goals
+): Promise<{ data: Goals | null; success: boolean; error: string | null }> {
+  try {
+    const updatedGoals = await updateGoals(branchId, goals);
+    return { data: updatedGoals, success: true, error: null };
+  } catch (error: any) {
+    console.error(`[Action Error: updateGoalsAction]`, error);
+    return { data: null, success: false, error: error.message };
+  }
+}
 
 /**
  * Gets all traders for a given branch.

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useCallback } from 'react';
@@ -6,32 +5,41 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react"; 
 import { getBranchInfo, type BranchInfo, type Trader, type BranchLoginId, Task } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { getTradersAction, createTaskAction, updateTaskAction, deleteTaskAction } from '@/app/(app)/tradehunter/actions';
+import { getTradersAction, createTaskAction, updateTaskAction, deleteTaskAction, getGoalsAction } from '@/app/(app)/tradehunter/actions';
 import { DashboardStatsAndGoals } from '@/components/dashboard/DashboardStatsAndGoals';
 import { BranchPerformanceChart } from '@/components/dashboard/BranchPerformanceChart';
 import { MiniDashboardStats } from '@/components/dashboard/MiniDashboardStats';
 import { parseISO } from 'date-fns';
 import { TaskManagement } from '@/components/dashboard/TaskManagement';
 import { CalendarIntegration } from '@/components/dashboard/CalendarIntegration';
-import { ReportingAndExporting } from '@/components/dashboard/ReportingAndExporting';
 
 export default function DashboardPage() {
   const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
   const [traders, setTraders] = useState<Trader[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const [goals, setGoals] = useState<{ weeklyNewLeadsGoal?: number; monthlyActiveTradersGoal?: number; }>({});
 
-  const fetchTraders = useCallback(async (baseBranchId: BranchLoginId) => {
+  const fetchTradersAndGoals = useCallback(async (baseBranchId: BranchLoginId) => {
     setIsLoading(true);
     try {
-      const result = await getTradersAction(baseBranchId);
-      if (result.data) {
-        setTraders(result.data);
+      const [tradersResult, goalsResult] = await Promise.all([
+        getTradersAction(baseBranchId),
+        getGoalsAction(baseBranchId),
+      ]);
+
+      if (tradersResult.data) {
+        setTraders(tradersResult.data);
       } else {
-        toast({ variant: "destructive", title: "Error Loading Data", description: result.error || "Could not load trader data." });
+        toast({ variant: "destructive", title: "Error Loading Data", description: tradersResult.error || "Could not load trader data." });
       }
+
+      if (goalsResult.data) {
+        setGoals(goalsResult.data);
+      } // We don't need a toast if goals fail, it's not critical.
+
     } catch (error) {
-      console.error("Failed to fetch initial traders:", error);
+      console.error("Failed to fetch initial data:", error);
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({ variant: "destructive", title: "Network Error", description: `Could not connect to the server to load data. Please check your connection or server status. Details: ${errorMessage}` });
     }
@@ -45,18 +53,15 @@ export default function DashboardPage() {
         const info = getBranchInfo(storedLoggedInId);
         setBranchInfo(info);
 
-        // This is the critical check.
-        // If a valid baseBranchId exists, fetch the data.
-        // Otherwise (e.g., for a 'MANAGER' login without a branch), stop loading.
         if (info.baseBranchId) {
-          fetchTraders(info.baseBranchId);
+          fetchTradersAndGoals(info.baseBranchId);
         } else {
           setIsLoading(false);
         }
       }
     };
     initializeData();
-  }, [fetchTraders]);
+  }, [fetchTradersAndGoals]);
   
   const allTasks = traders.flatMap(t => t.tasks || []);
 
@@ -143,7 +148,6 @@ export default function DashboardPage() {
       );
   }
 
-  // This is the new logic to handle the manager view.
   if (branchInfo?.role === 'manager' && !branchInfo.baseBranchId) {
     return (
         <Card>
@@ -158,7 +162,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Fallback for any other unauthenticated or error state.
   if (!branchInfo || !branchInfo.baseBranchId) {
       return (
           <Card>
@@ -184,10 +187,16 @@ export default function DashboardPage() {
           <BranchPerformanceChart data={chartData} />
         </div>
         <div className="lg:col-span-2">
-          <DashboardStatsAndGoals newLeadsCount={newLeadTradersCount} hotLeadsCount={callBackTradersCount} />
+          <DashboardStatsAndGoals 
+            branchId={branchInfo.baseBranchId}
+            newLeadsCount={newLeadTradersCount} 
+            hotLeadsCount={callBackTradersCount}
+            initialGoals={goals}
+            onGoalsUpdated={setGoals}
+          />
         </div>
       </div>
-      <div className="grid gap-4 md:gap-6 md:grid-cols-1 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         <div className="lg:col-span-1">
           <TaskManagement 
             traders={traders}
@@ -199,9 +208,6 @@ export default function DashboardPage() {
         </div>
         <div className="lg:col-span-1">
           <CalendarIntegration tasks={allTasks} />
-        </div>
-        <div className="lg:col-span-1">
-          <ReportingAndExporting traders={traders} />
         </div>
       </div>
     </div>

@@ -1,47 +1,78 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Target, CalendarDays, CheckCircle, Goal } from "lucide-react";
+import { Target, CalendarDays, CheckCircle, Goal, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { updateGoalsAction } from '@/app/(app)/tradehunter/actions';
+import type { BaseBranchId } from '@/types';
 
 interface DashboardStatsAndGoalsProps {
+  branchId: BaseBranchId;
   newLeadsCount: number;
   hotLeadsCount: number; 
-  activeTradersGoalInitial?: number; 
+  initialGoals: {
+    weeklyNewLeadsGoal?: number;
+    monthlyActiveTradersGoal?: number;
+  };
+  onGoalsUpdated: (goals: { weeklyNewLeadsGoal?: number; monthlyActiveTradersGoal?: number; }) => void;
 }
 
 export function DashboardStatsAndGoals({ 
+    branchId,
     newLeadsCount, 
     hotLeadsCount,
-    activeTradersGoalInitial = 0
+    initialGoals,
+    onGoalsUpdated
 }: DashboardStatsAndGoalsProps) {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [weeklyNewLeadsGoal, setWeeklyNewLeadsGoal] = useState<string>("");
-  const [monthlyActiveTradersGoal, setMonthlyActiveTradersGoal] = useState<string>(activeTradersGoalInitial > 0 ? String(activeTradersGoalInitial) : "");
+  const [monthlyActiveTradersGoal, setMonthlyActiveTradersGoal] = useState<string>("");
 
-  const handleSetGoals = () => {
-    const weeklyGoalNum = parseInt(weeklyNewLeadsGoal, 10);
-    const monthlyGoalNum = parseInt(monthlyActiveTradersGoal, 10);
+  useEffect(() => {
+    setWeeklyNewLeadsGoal(initialGoals.weeklyNewLeadsGoal?.toString() || "");
+    setMonthlyActiveTradersGoal(initialGoals.monthlyActiveTradersGoal?.toString() || "");
+  }, [initialGoals]);
 
-    if (weeklyNewLeadsGoal && (isNaN(weeklyGoalNum) || weeklyGoalNum < 0)) {
+
+  const handleSetGoals = async () => {
+    const weeklyGoalNum = weeklyNewLeadsGoal ? parseInt(weeklyNewLeadsGoal, 10) : undefined;
+    const monthlyGoalNum = monthlyActiveTradersGoal ? parseInt(monthlyActiveTradersGoal, 10) : undefined;
+
+    if (weeklyNewLeadsGoal && (isNaN(weeklyGoalNum!) || weeklyGoalNum! < 0)) {
         toast({ variant: "destructive", title: "Invalid Goal", description: "Weekly New Leads Goal must be a positive number." });
         return;
     }
-    if (monthlyActiveTradersGoal && (isNaN(monthlyGoalNum) || monthlyGoalNum < 0)) {
+    if (monthlyActiveTradersGoal && (isNaN(monthlyGoalNum!) || monthlyGoalNum! < 0)) {
         toast({ variant: "destructive", title: "Invalid Goal", description: "Monthly Active Traders Goal must be a positive number." });
         return;
     }
-    
-    toast({
-      title: "Goals Noted (Client-Side)",
-      description: "Goal saving and tracking functionality is coming soon!",
-      duration: 5000,
+
+    setIsLoading(true);
+    const result = await updateGoalsAction(branchId, {
+      weeklyNewLeadsGoal: weeklyGoalNum,
+      monthlyActiveTradersGoal: monthlyGoalNum,
     });
+    setIsLoading(false);
+    
+    if (result.success && result.data) {
+        toast({
+            title: "Goals Updated",
+            description: "Your new branch goals have been saved.",
+        });
+        onGoalsUpdated(result.data);
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Error Saving Goals",
+            description: result.error || "An unknown error occurred.",
+        });
+    }
   };
 
   return (
@@ -67,6 +98,7 @@ export function DashboardStatsAndGoals({
                 value={weeklyNewLeadsGoal}
                 onChange={(e) => setWeeklyNewLeadsGoal(e.target.value)}
                 className="text-base"
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -81,12 +113,14 @@ export function DashboardStatsAndGoals({
                 value={monthlyActiveTradersGoal}
                 onChange={(e) => setMonthlyActiveTradersGoal(e.target.value)}
                 className="text-base"
+                disabled={isLoading}
               />
             </div>
           </div>
           <div className="flex justify-end pt-2">
-            <Button onClick={handleSetGoals} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Goal className="mr-2 h-5 w-5" /> Set Goals (Coming Soon)
+            <Button onClick={handleSetGoals} className="bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Goal className="mr-2 h-5 w-5" />} 
+              {isLoading ? "Saving..." : "Set Goals"}
             </Button>
           </div>
       </CardContent>
