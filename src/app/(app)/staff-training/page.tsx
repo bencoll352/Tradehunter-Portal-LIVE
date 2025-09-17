@@ -772,11 +772,13 @@ export default function StaffTrainingPage() {
                 </CardContent>
             </Card>
             
-            <DiscTestSection />
-
             <TrainingMaterialPortal />
+
+            <DiscTestSection />
         </div>
     );
 }
+
+    
 
     
