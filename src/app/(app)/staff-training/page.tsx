@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode, BrainCircuit, ShieldAlert } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode, BrainCircuit, ShieldAlert, File, FileSpreadsheet } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -253,6 +253,33 @@ interface TrainingMaterial {
 
 const initialTrainingMaterials: TrainingMaterial[] = [
     {
+      id: "disc-test-pdf",
+      title: "DISC Personality Test (PDF)",
+      description: "Printable DISC assessment form.",
+      type: "PDF",
+      category: "Assessments",
+      tags: "disc, personality, test, assessment",
+      dateAdded: "September 9, 2025",
+    },
+    {
+      id: "disc-test-word",
+      title: "DISC Personality Test (Word)",
+      description: "Editable DISC assessment form in Word format.",
+      type: "DOCX",
+      category: "Assessments",
+      tags: "disc, personality, test, assessment",
+      dateAdded: "September 9, 2025",
+    },
+    {
+      id: "disc-test-excel",
+      title: "DISC Scoring Sheet (Excel)",
+      description: "Excel spreadsheet to automatically score DISC test results.",
+      type: "XLSX",
+      category: "Assessments",
+      tags: "disc, personality, test, assessment, scoring",
+      dateAdded: "September 9, 2025",
+    },
+    {
       id: "growth-mindset",
       title: "The Growth Mindset",
       description: "A PDF document on the importance of a growth mindset in sales.",
@@ -470,6 +497,7 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                                         <SelectItem value="Sales Playbook">Sales Playbook</SelectItem>
                                         <SelectItem value="Training Material">Training Material</SelectItem>
                                         <SelectItem value="Mindset">Mindset</SelectItem>
+                                        <SelectItem value="Assessments">Assessments</SelectItem>
                                         <SelectItem value="Product Guide">Product Guide</SelectItem>
                                         <SelectItem value="Image">Image</SelectItem>
                                         <SelectItem value="Other">Other</SelectItem>
@@ -591,6 +619,8 @@ function getFileIcon(type: string): React.ElementType {
     const fileType = type.toLowerCase();
     if (fileType.includes('pdf')) return FileCode;
     if (['png', 'jpg', 'jpeg', 'gif', 'svg'].some(ext => fileType.includes(ext))) return FileImage;
+    if (['doc', 'docx'].some(ext => fileType.includes(ext))) return File;
+    if (['xls', 'xlsx'].some(ext => fileType.includes(ext))) return FileSpreadsheet;
     return FileText;
 }
 
@@ -608,6 +638,28 @@ function TrainingMaterialPortal() {
         setSelectedMaterial(material);
         setIsViewOpen(true);
     };
+
+    const groupedMaterials = useMemo(() => {
+        return materials.reduce((acc, material) => {
+            const category = material.category || 'Other';
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(material);
+            return acc;
+        }, {} as Record<string, TrainingMaterial[]>);
+    }, [materials]);
+
+    const sortedCategories = Object.keys(groupedMaterials).sort((a, b) => {
+        // Custom sort order
+        const order = ['Assessments', 'Sales Playbook', 'Mindset'];
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+        if (indexA > -1 && indexB > -1) return indexA - indexB;
+        if (indexA > -1) return -1;
+        if (indexB > -1) return 1;
+        return a.localeCompare(b);
+    });
     
     return (
       <>
@@ -618,48 +670,55 @@ function TrainingMaterialPortal() {
                 Training Material Portal
             </CardTitle>
             <CardDescription className="text-base sm:text-lg text-muted-foreground">
-                Access training documents, playbooks, and other resources.
+                Access training documents, playbooks, assessments, and other resources.
             </CardDescription>
             </CardHeader>
-            <CardContent>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[40%]">Name</TableHead>
-                            <TableHead className="hidden sm:table-cell">Type</TableHead>
-                            <TableHead className="hidden md:table-cell">Category</TableHead>
-                            <TableHead className="hidden md:table-cell">Date Added</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {materials.map((material) => {
-                            const Icon = getFileIcon(material.type);
-                            return (
-                                <TableRow key={material.id}>
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                                            <span className="truncate">{material.title}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="hidden sm:table-cell">
-                                        <Badge variant="outline">{material.type}</Badge>
-                                    </TableCell>
-                                    <TableCell className="hidden md:table-cell">{material.category}</TableCell>
-                                    <TableCell className="hidden md:table-cell">{material.dateAdded}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
-                                            <Eye className="mr-0 sm:mr-2 h-4 w-4" />
-                                            <span className="hidden sm:inline">View</span>
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        )}
-                        </TableBody>
-                    </Table>
+            <CardContent className="pt-4">
+                 <div className="space-y-6">
+                    {sortedCategories.map(category => (
+                        <div key={category}>
+                            <h3 className="text-lg font-semibold mb-2 text-primary/90 border-b pb-1">{category}</h3>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[40%]">Name</TableHead>
+                                        <TableHead className="hidden sm:table-cell">Type</TableHead>
+                                        <TableHead className="hidden md:table-cell w-[30%]">Description</TableHead>
+                                        <TableHead className="hidden md:table-cell">Date Added</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                    {groupedMaterials[category].map((material) => {
+                                        const Icon = getFileIcon(material.type);
+                                        return (
+                                            <TableRow key={material.id}>
+                                                <TableCell className="font-medium">
+                                                    <div className="flex items-center gap-2">
+                                                        <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                                                        <span className="truncate">{material.title}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="hidden sm:table-cell">
+                                                    <Badge variant="outline">{material.type}</Badge>
+                                                </TableCell>
+                                                <TableCell className="hidden md:table-cell truncate max-w-xs">{material.description}</TableCell>
+                                                <TableCell className="hidden md:table-cell">{material.dateAdded}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
+                                                        <Eye className="mr-0 sm:mr-2 h-4 w-4" />
+                                                        <span className="hidden sm:inline">View</span>
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </CardContent>
             <CardFooter className="flex justify-end border-t pt-6">
@@ -711,3 +770,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
