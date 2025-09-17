@@ -780,7 +780,3 @@ export default function StaffTrainingPage() {
 }
 
     
-
-    
-
-    
