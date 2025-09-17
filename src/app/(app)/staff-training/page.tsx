@@ -770,3 +770,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
