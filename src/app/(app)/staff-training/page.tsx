@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -507,7 +508,9 @@ function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMat
                             )}
                         />
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                            <DialogClose asChild>
+                                <Button variant="ghost">Cancel</Button>
+                            </DialogClose>
                             <Button type="submit">Publish</Button>
                         </DialogFooter>
                     </form>
@@ -778,5 +781,7 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
 
     
