@@ -253,33 +253,6 @@ interface TrainingMaterial {
 
 const initialTrainingMaterials: TrainingMaterial[] = [
     {
-      id: "disc-test-pdf",
-      title: "DISC Personality Test (PDF)",
-      description: "Printable DISC assessment form.",
-      type: "PDF",
-      category: "Assessments",
-      tags: "disc, personality, test, assessment",
-      dateAdded: "September 9, 2025",
-    },
-    {
-      id: "disc-test-word",
-      title: "DISC Personality Test (Word)",
-      description: "Editable DISC assessment form in Word format.",
-      type: "DOCX",
-      category: "Assessments",
-      tags: "disc, personality, test, assessment",
-      dateAdded: "September 9, 2025",
-    },
-    {
-      id: "disc-test-excel",
-      title: "DISC Scoring Sheet (Excel)",
-      description: "Excel spreadsheet to automatically score DISC test results.",
-      type: "XLSX",
-      category: "Assessments",
-      tags: "disc, personality, test, assessment, scoring",
-      dateAdded: "September 9, 2025",
-    },
-    {
       id: "growth-mindset",
       title: "The Growth Mindset",
       description: "A PDF document on the importance of a growth mindset in sales.",
@@ -770,6 +743,8 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
 
     
 
