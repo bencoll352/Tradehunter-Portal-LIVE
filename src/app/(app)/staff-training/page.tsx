@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode, BrainCircuit, ShieldAlert, File, FileSpreadsheet } from "lucide-react";
+import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode, BrainCircuit, ShieldAlert, File, FileSpreadsheet, ClipboardUser, AlertTriangle } from "lucide-react";
 import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -703,6 +703,39 @@ function TrainingMaterialPortal() {
     )
 }
 
+function DiscTestSection() {
+    const discTestUrl = "https://disc-personality-test-302177537641.us-west1.run.app/";
+    return (
+        <Card className="shadow-lg w-full">
+            <CardHeader>
+                <div className="flex items-center gap-3">
+                    <ClipboardUser className="h-8 w-8 text-primary" />
+                    <div>
+                        <CardTitle className="text-2xl text-primary">DISC Personality Test</CardTitle>
+                        <CardDescription>
+                            Understand your sales style and how to interact with different customer types.
+                             <span className="block mt-1 text-xs text-muted-foreground italic">
+                                <AlertTriangle className="inline-block h-3 w-3 mr-1 text-amber-500" />
+                                Note: This is an external tool. Data and privacy are managed by the provider.
+                            </span>
+                        </CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="w-full h-[75vh] rounded-md overflow-hidden border border-border bg-muted/20">
+                    <iframe
+                        src={discTestUrl}
+                        title="DISC Personality Test"
+                        className="w-full h-full border-0"
+                        allowFullScreen
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                    />
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
 
 export default function StaffTrainingPage() {
     return (
@@ -738,14 +771,12 @@ export default function StaffTrainingPage() {
                     </Tabs>
                 </CardContent>
             </Card>
+            
+            <DiscTestSection />
 
             <TrainingMaterialPortal />
         </div>
     );
 }
-
-    
-
-    
 
     
