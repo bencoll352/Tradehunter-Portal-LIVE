@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle, ShieldCheck, DatabaseZap, TestTube2 } from "lucide-react";
+import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle, ShieldCheck, DatabaseZap } from "lucide-react";
 import { AppSidebarNav } from "./AppSidebarNav";
 import { usePathname } from 'next/navigation';
 import { Logo } from "@/components/icons/Logo";
@@ -104,6 +104,5 @@ const navItems = [
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
   { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
   { href: "/quality-control", icon: ShieldCheck, label: "Quality Control" },
-  { href: "/test", icon: TestTube2, label: "Test Page" },
   { href: "/how-to-use", icon: HelpCircle, label: "How to Use" },
 ];
