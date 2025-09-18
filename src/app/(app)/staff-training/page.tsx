@@ -240,491 +240,10 @@ function SpeechTrainerLink() {
     );
 }
 
-interface TrainingMaterial {
-    id: string;
-    title: string;
-    description?: string;
-    type: string;
-    category: string;
-    tags?: string;
-    dateAdded: string;
-    link?: string;
-    file?: File;
-    content?: React.ReactNode;
-}
-
-const initialTrainingMaterials: TrainingMaterial[] = [
-    {
-      id: "growth-mindset",
-      title: "The Growth Mindset",
-      description: "A PDF document on the importance of a growth mindset in sales.",
-      type: "PDF",
-      category: "Mindset",
-      tags: "growth, mindset, psychology",
-      dateAdded: "September 8, 2025",
-      content: (
-        <div className="prose prose-sm lg:prose-base max-w-none text-foreground p-4">
-            <h2 className="text-2xl font-bold text-primary mb-4">The Growth Mindset: A Visual Guide</h2>
-            <div className="text-sm space-y-1 mb-6 text-muted-foreground">
-                <p><strong>Authors:</strong> Dan Strutzel & Traci Shoblom</p>
-                <p><strong>Focus:</strong> Shifting from a fixed to a growth-oriented perspective to unlock potential.</p>
-            </div>
-
-            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg mb-8">
-                <h3 className="text-lg font-semibold mt-0">Executive Summary</h3>
-                <p className="mt-2">
-                    This guide contrasts the "Fixed Mindset" with the "Growth Mindset." A fixed mindset assumes abilities are static, leading to avoidance of challenges. A growth mindset sees abilities as developable through dedication, leading to resilience, a love of learning, and higher achievement. Adopting a growth mindset is critical for success in sales and personal development.
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Fixed Mindset Column */}
-                <div className="border border-red-500/30 rounded-lg p-4 bg-red-500/5">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="flex-shrink-0 bg-red-100 dark:bg-red-900/50 p-2 rounded-full">
-                            <ShieldAlert className="h-6 w-6 text-red-600 dark:text-red-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-red-700 dark:text-red-400">Fixed Mindset</h3>
-                    </div>
-                    <ul className="space-y-3 text-sm">
-                        <li className="flex items-start gap-2"><strong>Avoids:</strong> Challenges, for fear of failure.</li>
-                        <li className="flex items-start gap-2"><strong>Reacts:</strong> Gives up easily when faced with obstacles.</li>
-                        <li className="flex items-start gap-2"><strong>Views Effort:</strong> As fruitless or a sign of weakness.</li>
-                        <li className="flex items-start gap-2"><strong>Handles Criticism:</strong> Ignores or is defensive about feedback.</li>
-                        <li className="flex items-start gap-2"><strong>Sees Others' Success:</strong> As a threat or intimidating.</li>
-                    </ul>
-                </div>
-
-                {/* Growth Mindset Column */}
-                <div className="border border-green-500/30 rounded-lg p-4 bg-green-500/5">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="flex-shrink-0 bg-green-100 dark:bg-green-900/50 p-2 rounded-full">
-                            <BrainCircuit className="h-6 w-6 text-green-600 dark:text-green-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-green-700 dark:text-green-400">Growth Mindset</h3>
-                    </div>
-                    <ul className="space-y-3 text-sm">
-                        <li className="flex items-start gap-2"><strong>Embraces:</strong> Challenges as opportunities to grow.</li>
-                        <li className="flex items-start gap-2"><strong>Persists:</strong> Views setbacks as part of the learning process.</li>
-                        <li className="flex items-start gap-2"><strong>Views Effort:</strong> As the direct path to mastery.</li>
-                        <li className="flex items-start gap-2"><strong>Handles Criticism:</strong> Learns from it and seeks feedback.</li>
-                        <li className="flex items-start gap-2"><strong>Finds Inspiration:</strong> In the success of others.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-      )
-    },
-    {
-      id: "persuasion-mastery",
-      title: "Persuasion Mastery Programme",
-      description: "A 10-week comprehensive training programme in psychological influence tailored for UK sales contexts.",
-      type: "PDF",
-      category: "Sales Playbook",
-      tags: "persuasion, sales, techniques, Cialdini",
-      dateAdded: "September 8, 2025",
-      content: (
-        <div className="prose prose-sm lg:prose-base max-w-none text-foreground p-4">
-           <h2 className="text-2xl font-bold text-primary mb-4">Persuasion Mastery: Core Principles</h2>
-            <div className="p-4 border-l-4 border-primary bg-muted/50 rounded-r-lg mb-8">
-                <p className="mt-0 text-lg">
-                    Based on Dr. Robert Cialdini's groundbreaking work, these six principles are the pillars of ethical and effective influence. Mastering them is key to excelling in sales.
-                </p>
-            </div>
-            <div className="space-y-6">
-                <div>
-                    <h3 className="text-lg font-semibold text-accent">1. Reciprocation</h3>
-                    <p className="mt-1 text-muted-foreground">People feel obligated to give back to others who have given to them first. In sales, this means providing genuine value upfront (e.g., helpful advice, a small sample, useful market insight) before asking for anything in return.</p>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-accent">2. Commitment & Consistency</h3>
-                    <p className="mt-1 text-muted-foreground">People want to be consistent with what they have previously said or done. Start with small, easy commitments (e.g., agreeing to a short meeting, answering a simple question) and build from there. This makes it easier for them to say "yes" to larger requests later.</p>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-accent">3. Social Proof</h3>
-                    <p className="mt-1 text-muted-foreground">When people are uncertain, they look to the actions and behaviours of others to determine their own. Use testimonials, case studies, and mention popular products ("our best-selling cladding") to show that others are making similar choices.</p>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-accent">4. Liking</h3>
-                    <p className="mt-1 text-muted-foreground">People are more likely to be persuaded by those they like. Build genuine rapport by findin_g common ground, offering sincere compliments, and demonstrating that you are working together towards a common goal.</p>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-accent">5. Authority</h3>
-                    <p className="mt-1 text-muted-foreground">People tend to obey authority figures. Establish your credibility by highlighting your expertise, experience, and knowledge of the industry and products. Dress professionally and speak confidently.</p>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-accent">6. Scarcity</h3>
-                    <p className="mt-1 text-muted-foreground">People desire more of those things they can have less of. Use this ethically by highlighting genuine limited-time offers, exclusive products, or potential stock shortages. For example, "This is the last batch we'll have at this price."</p>
-                </div>
-            </div>
-        </div>
-      )
-    }
-];
-
-const contentFormSchema = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters." }),
-  description: z.string().optional(),
-  category: z.string().min(3, { message: "Category is required." }),
-  tags: z.string().optional(),
-  files: z.any().optional(),
-});
-type ContentFormValues = z.infer<typeof contentFormSchema>;
-
-
-function AddContentDialog({ onAddContent }: { onAddContent: (values: TrainingMaterial) => void }) {
-    const [open, setOpen] = useState(false);
-    const { toast } = useToast();
-    const form = useForm<ContentFormValues>({
-        resolver: zodResolver(contentFormSchema),
-        defaultValues: { title: "", description: "", category: "Sales Playbook", tags: "" },
-    });
-    const fileRef = form.register("files");
-
-    const onSubmit = (values: ContentFormValues) => {
-        const file = values.files?.[0];
-        if (!file) {
-            toast({
-                variant: 'destructive',
-                title: "File Required",
-                description: "Please select a file to upload.",
-            });
-            return;
-        }
-
-        const newMaterial: TrainingMaterial = {
-            id: `material_${Date.now()}_${file.name}`,
-            title: values.title || file.name,
-            description: values.description,
-            category: values.category,
-            tags: values.tags,
-            file: file,
-            type: file.type.split('/')[1]?.toUpperCase() || 'File',
-            dateAdded: format(new Date(), "MMMM d, yyyy"),
-        };
-        
-        onAddContent(newMaterial);
-
-        toast({
-            title: "Content Added",
-            description: `${newMaterial.title} has been added to the portal.`,
-        });
-        setOpen(false);
-        form.reset();
-    };
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add New Content
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Add New Content</DialogTitle>
-                    <DialogDescription>
-                        Add a new file to your content library.
-                    </DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Title</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g., Q3 Sales Playbook" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Textarea placeholder="A short description of the content." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="category"
-                            render={({ field }) => (
-                               <FormItem>
-                                <FormLabel>Category</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a category" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Sales Playbook">Sales Playbook</SelectItem>
-                                        <SelectItem value="Training Material">Training Material</SelectItem>
-                                        <SelectItem value="Mindset">Mindset</SelectItem>
-                                        <SelectItem value="Assessments">Assessments</SelectItem>
-                                        <SelectItem value="Product Guide">Product Guide</SelectItem>
-                                        <SelectItem value="Image">Image</SelectItem>
-                                        <SelectItem value="Other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="tags"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Tags</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Add tags, comma separated" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="files"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>File</FormLabel>
-                                    <FormControl>
-                                        <Input type="file" {...fileRef} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="ghost">Cancel</Button>
-                            </DialogClose>
-                            <Button type="submit">Publish</Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
-function ViewMaterialDialog({ material, open, onOpenChange }: { material: TrainingMaterial | null, open: boolean, onOpenChange: (open: boolean) => void }) {
-    if (!material) return null;
-
-    const MaterialContent = () => {
-        const [fileUrl, setFileUrl] = useState<string | null>(null);
-        const [isLoading, setIsLoading] = useState(true);
-
-        useEffect(() => {
-            let objectUrl: string | undefined;
-
-            if (material?.file) {
-                objectUrl = URL.createObjectURL(material.file);
-                setFileUrl(objectUrl);
-            } else if (material?.link) {
-                setFileUrl(material.link);
-            }
-            setIsLoading(false);
-
-            return () => {
-                if (objectUrl) {
-                    URL.revokeObjectURL(objectUrl);
-                }
-            };
-        }, [material]);
-
-        if (isLoading) {
-            return (
-                <div className="flex items-center justify-center h-full text-muted-foreground p-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-            );
-        }
-
-        if (material?.content) {
-            return <ScrollArea className="h-full"><div className="p-2">{material.content}</div></ScrollArea>;
-        }
-
-        if (fileUrl) {
-            const fileType = material?.file?.type || '';
-            const isPdf = fileType.includes('pdf') || material?.type?.toLowerCase() === 'pdf';
-            const isImage = fileType.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].some(ext => material?.type?.toLowerCase() === ext);
-
-            if (isPdf) {
-                return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
-            }
-            if (isImage) {
-                return <div className="w-full h-full flex items-center justify-center p-4"><img src={fileUrl} alt={material.title} className="max-w-full max-h-full object-contain" /></div>;
-            }
-
-            return (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
-                    <FileText className="h-16 w-16 mb-4" />
-                    <p className="font-semibold">Cannot preview this file type.</p>
-                    <p className="text-sm mt-1">File: {material.title}</p>
-                    <p className="text-sm">Type: {material.type}</p>
-                    <Button asChild variant="link" className="mt-4">
-                        <a href={fileUrl} download={material.title || 'download'}>Download File</a>
-                    </Button>
-                </div>
-            );
-        }
-
-        return (
-            <div className="flex items-center justify-center h-full text-muted-foreground p-6">
-                <p>No viewable content available for this item.</p>
-            </div>
-        );
-    };
-
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-                <DialogHeader className="p-4 sm:p-6 pb-2 border-b shrink-0">
-                    <DialogTitle>{material.title}</DialogTitle>
-                    {material.description && <DialogDescription>{material.description}</DialogDescription>}
-                </DialogHeader>
-                <div className="flex-grow overflow-auto">
-                   {open && <MaterialContent />}
-                </div>
-                <DialogFooter className="p-4 border-t bg-background shrink-0">
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-function getFileIcon(type: string): React.ElementType {
-    const fileType = type.toLowerCase();
-    if (fileType.includes('pdf')) return FileCode;
-    if (['png', 'jpg', 'jpeg', 'gif', 'svg'].some(ext => fileType.includes(ext))) return FileImage;
-    if (['doc', 'docx'].some(ext => fileType.includes(ext))) return File;
-    if (['xls', 'xlsx'].some(ext => fileType.includes(ext))) return FileSpreadsheet;
-    return FileText;
-}
-
-function TrainingMaterialPortal() {
-    const [materials, setMaterials] = useState<TrainingMaterial[]>(initialTrainingMaterials);
-    const [selectedMaterial, setSelectedMaterial] = useState<TrainingMaterial | null>(null);
-    const [isViewOpen, setIsViewOpen] = useState(false);
-    const { toast } = useToast();
-
-    const handleAddContent = (newMaterial: TrainingMaterial) => {
-        setMaterials(prev => [...prev, newMaterial]);
-    };
-
-    const handleViewMaterial = (material: TrainingMaterial) => {
-        setSelectedMaterial(material);
-        setIsViewOpen(true);
-    };
-
-    const groupedMaterials = useMemo(() => {
-        return materials.reduce((acc, material) => {
-            const category = material.category || 'Other';
-            if (!acc[category]) {
-                acc[category] = [];
-            }
-            acc[category].push(material);
-            return acc;
-        }, {} as Record<string, TrainingMaterial[]>);
-    }, [materials]);
-
-    const sortedCategories = Object.keys(groupedMaterials).sort((a, b) => {
-        // Custom sort order
-        const order = ['Assessments', 'Sales Playbook', 'Mindset'];
-        const indexA = order.indexOf(a);
-        const indexB = order.indexOf(b);
-        if (indexA > -1 && indexB > -1) return indexA - indexB;
-        if (indexA > -1) return -1;
-        if (indexB > -1) return 1;
-        return a.localeCompare(b);
-    });
-    
-    return (
-      <>
-        <Card className="shadow-lg">
-            <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl font-bold text-primary flex items-center gap-3">
-                <BookOpen className="h-6 w-6 sm:h-8 sm:w-8" />
-                Training Material Portal
-            </CardTitle>
-            <CardDescription className="text-base sm:text-lg text-muted-foreground">
-                Access training documents, playbooks, assessments, and other resources.
-            </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4">
-                 <div className="space-y-6">
-                    {sortedCategories.map(category => (
-                        <div key={category}>
-                            <h3 className="text-lg font-semibold mb-2 text-primary/90 border-b pb-1">{category}</h3>
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[40%]">Name</TableHead>
-                                        <TableHead className="hidden sm:table-cell">Type</TableHead>
-                                        <TableHead className="hidden md:table-cell w-[30%]">Description</TableHead>
-                                        <TableHead className="hidden md:table-cell">Date Added</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                    {groupedMaterials[category].map((material) => {
-                                        const Icon = getFileIcon(material.type);
-                                        return (
-                                            <TableRow key={material.id}>
-                                                <TableCell className="font-medium">
-                                                    <div className="flex items-center gap-2">
-                                                        <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                                                        <span className="truncate">{material.title}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="hidden sm:table-cell">
-                                                    <Badge variant="outline">{material.type}</Badge>
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell truncate max-w-xs">{material.description}</TableCell>
-                                                <TableCell className="hidden md:table-cell">{material.dateAdded}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <Button variant="outline" size="sm" onClick={() => handleViewMaterial(material)}>
-                                                        <Eye className="mr-0 sm:mr-2 h-4 w-4" />
-                                                        <span className="hidden sm:inline">View</span>
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </CardContent>
-            <CardFooter className="flex justify-end border-t pt-6">
-                <AddContentDialog onAddContent={handleAddContent} />
-            </CardFooter>
-        </Card>
-        <ViewMaterialDialog material={selectedMaterial} open={isViewOpen} onOpenChange={setIsViewOpen} />
-      </>
-    )
-}
 
 export default function StaffTrainingPage() {
     const discTestUrl = "https://disc-personality-test-302177537641.us-west1.run.app";
+    const trainingPortalUrl = "https://sales-training-portal-302177537641.us-west1.run.app/";
     return (
         <div className="space-y-8">
             <Card className="shadow-lg w-full flex flex-col h-full">
@@ -759,7 +278,38 @@ export default function StaffTrainingPage() {
                 </CardContent>
             </Card>
             
-            <TrainingMaterialPortal />
+             <Card className="shadow-lg w-full">
+                <CardHeader>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <BookOpen className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                    <div>
+                        <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Training Material Portal</CardTitle>
+                        <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
+                            Access training documents, playbooks, assessments, and other resources.
+                        </CardDescription>
+                    </div>
+                </div>
+                </CardHeader>
+                <CardContent className="flex justify-center items-center">
+                    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
+                        <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", "border-blue-500/50 text-blue-500 bg-blue-500/10")}>
+                            <BookOpen className="h-12 w-12" />
+                        </div>
+                        <CardTitle className="text-xl text-primary mb-1">Launch Training Portal</CardTitle>
+                        <div className="flex items-center gap-1.5 mb-2">
+                            <p className="text-sm font-semibold text-accent">External Application</p>
+                        </div>
+                        <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
+                           Access the central hub for all training documents, sales playbooks, assessments, and other essential resources.
+                        </CardDescription>
+                        <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
+                            <Link href={trainingPortalUrl} target="_blank" rel="noopener noreferrer">
+                                Launch Portal <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </Card>
+                </CardContent>
+            </Card>
 
             <Card className="shadow-lg w-full">
                 <CardHeader>
@@ -796,5 +346,7 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
 
     
