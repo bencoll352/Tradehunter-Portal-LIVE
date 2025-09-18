@@ -1,7 +1,8 @@
 
+
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -249,7 +250,9 @@ export default function StaffTrainingPage() {
             <Card className="shadow-lg w-full flex flex-col h-full">
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                        <div className="p-3 rounded-full bg-accent/10 border-2 border-accent/30">
+                            <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 text-accent" />
+                        </div>
                         <div>
                             <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Sales Training Centre</CardTitle>
                             <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
@@ -282,7 +285,9 @@ export default function StaffTrainingPage() {
                 <Card className="shadow-lg w-full">
                     <CardHeader>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <BookOpen className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                        <div className="p-3 rounded-full bg-blue-500/10 border-2 border-blue-500/30">
+                            <BookOpen className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500" />
+                        </div>
                         <div>
                             <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Training Material Portal</CardTitle>
                             <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
@@ -315,7 +320,9 @@ export default function StaffTrainingPage() {
                 <Card className="shadow-lg w-full">
                     <CardHeader>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                            <Users className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                             <div className="p-3 rounded-full bg-indigo-500/10 border-2 border-indigo-500/30">
+                                <Users className="h-8 w-8 sm:h-10 sm:w-10 text-indigo-500" />
+                            </div>
                             <div>
                                 <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">DISC Personality Test</CardTitle>
                                 <CardDescription className="text-base sm-text-lg text-muted-foreground mt-1">
