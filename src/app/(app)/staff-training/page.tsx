@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
@@ -525,42 +526,58 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
 
     const MaterialContent = () => {
         const [fileUrl, setFileUrl] = useState<string | null>(null);
+        const [isLoading, setIsLoading] = useState(true);
 
         useEffect(() => {
-            let objectUrl: string | null = null;
-            if (material.file) {
+            let objectUrl: string | undefined;
+
+            if (material?.file) {
                 objectUrl = URL.createObjectURL(material.file);
                 setFileUrl(objectUrl);
+            } else if (material?.link) {
+                setFileUrl(material.link);
             }
+            setIsLoading(false);
 
             return () => {
                 if (objectUrl) {
                     URL.revokeObjectURL(objectUrl);
                 }
             };
-        }, [material.file]);
+        }, [material]);
 
-        if (material.content) {
+        if (isLoading) {
+            return (
+                <div className="flex items-center justify-center h-full text-muted-foreground p-6">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+            );
+        }
+
+        if (material?.content) {
             return <ScrollArea className="h-full"><div className="p-2">{material.content}</div></ScrollArea>;
         }
 
         if (fileUrl) {
-            const isPdf = material.type.toLowerCase().includes('pdf') || material.file?.type === 'application/pdf';
-            const isImage = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].some(ext => material.type.toLowerCase().includes(ext) || material.file?.type.includes(ext));
+            const fileType = material?.file?.type || '';
+            const isPdf = fileType.includes('pdf') || material?.type?.toLowerCase() === 'pdf';
+            const isImage = fileType.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].some(ext => material?.type?.toLowerCase() === ext);
 
             if (isPdf) {
                 return <iframe src={fileUrl} className="w-full h-full border-0" title={material.title}></iframe>;
             }
             if (isImage) {
-                return <img src={fileUrl} alt={material.title} className="max-w-full h-auto mx-auto object-contain p-4" />;
+                return <div className="w-full h-full flex items-center justify-center p-4"><img src={fileUrl} alt={material.title} className="max-w-full max-h-full object-contain" /></div>;
             }
+
             return (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
+                    <FileText className="h-16 w-16 mb-4" />
                     <p className="font-semibold">Cannot preview this file type.</p>
                     <p className="text-sm mt-1">File: {material.title}</p>
                     <p className="text-sm">Type: {material.type}</p>
                     <Button asChild variant="link" className="mt-4">
-                        <a href={fileUrl} download={material.title}>Download File</a>
+                        <a href={fileUrl} download={material.title || 'download'}>Download File</a>
                     </Button>
                 </div>
             );
@@ -568,7 +585,7 @@ function ViewMaterialDialog({ material, open, onOpenChange }: { material: Traini
 
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground p-6">
-                 {material.file ? <Loader2 className="h-6 w-6 animate-spin" /> : <p>No viewable content available for this item.</p>}
+                <p>No viewable content available for this item.</p>
             </div>
         );
     };
@@ -750,7 +767,7 @@ export default function StaffTrainingPage() {
                         <Users className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
                         <div>
                             <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">DISC Personality Test</CardTitle>
-                            <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
+                            <CardDescription className="text-base sm-text-lg text-muted-foreground mt-1">
                                Gain insights into communication styles and improve team interactions.
                             </CardDescription>
                         </div>
@@ -779,3 +796,5 @@ export default function StaffTrainingPage() {
         </div>
     );
 }
+
+    
