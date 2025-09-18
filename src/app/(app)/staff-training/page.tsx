@@ -239,27 +239,40 @@ function SpeechTrainerLink() {
     );
 }
 
-function DiscTestLink() {
+function DiscTestSection() {
     return (
-        <div className="p-4 flex justify-center items-center h-full">
-             <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
-                <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", "border-indigo-500/50 text-indigo-500 bg-indigo-500/10")}>
-                    <Users className="h-12 w-12" />
+        <Card className="shadow-lg w-full">
+            <CardHeader>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <Users className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                    <div>
+                        <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">DISC Personality Test</CardTitle>
+                        <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
+                           Gain insights into communication styles and improve team interactions.
+                        </CardDescription>
+                    </div>
                 </div>
-                <CardTitle className="text-xl text-primary mb-1">DISC Personality Test</CardTitle>
-                <div className="flex items-center gap-1.5 mb-2">
-                    <p className="text-sm font-semibold text-accent">External Application</p>
-                </div>
-                <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
-                    Launch the DISC personality assessment tool to gain insights into communication styles and improve team interactions.
-                </CardDescription>
-                <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
-                    <Link href={discTestUrl} target="_blank" rel="noopener noreferrer">
-                        Launch DISC Test <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
-            </Card>
-        </div>
+            </CardHeader>
+            <CardContent className="flex justify-center items-center">
+                 <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
+                    <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", "border-indigo-500/50 text-indigo-500 bg-indigo-500/10")}>
+                        <Users className="h-12 w-12" />
+                    </div>
+                    <CardTitle className="text-xl text-primary mb-1">Launch DISC Test</CardTitle>
+                    <div className="flex items-center gap-1.5 mb-2">
+                        <p className="text-sm font-semibold text-accent">External Application</p>
+                    </div>
+                    <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
+                        Launch the DISC personality assessment tool to understand your sales style and how to better interact with customers and colleagues.
+                    </CardDescription>
+                    <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
+                        <Link href={discTestUrl} target="_blank" rel="noopener noreferrer">
+                            Launch DISC Test <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                </Card>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -747,15 +760,12 @@ export default function StaffTrainingPage() {
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col gap-4 overflow-hidden">
                     <Tabs defaultValue="internal-trainer" className="w-full flex-grow flex flex-col">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="internal-trainer">
                                 <User className="mr-2 h-4 w-4" /> Role-Play
                             </TabsTrigger>
                             <TabsTrigger value="speech-trainer">
                                 <Mic className="mr-2 h-4 w-4" /> Speech
-                            </TabsTrigger>
-                            <TabsTrigger value="disc-test">
-                                <Users className="mr-2 h-4 w-4" /> DISC Test
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="internal-trainer" className="flex-grow mt-4">
@@ -764,14 +774,13 @@ export default function StaffTrainingPage() {
                         <TabsContent value="speech-trainer" className="flex-grow mt-4">
                             <SpeechTrainerLink />
                         </TabsContent>
-                        <TabsContent value="disc-test" className="flex-grow mt-4">
-                            <DiscTestLink />
-                        </TabsContent>
                     </Tabs>
                 </CardContent>
             </Card>
             
             <TrainingMaterialPortal />
+
+            <DiscTestSection />
 
         </div>
     );
