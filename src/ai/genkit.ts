@@ -5,7 +5,7 @@
 
 import { genkit } from 'genkit';
 import { googleAI, gemini15Flash } from '@genkit-ai/googleai';
-import { file } from '@genkit-ai/core/plugins/file';
+import { file } from 'genkit/plugins';
 
 // Initialize Genkit with the Google AI plugin
 export const ai = genkit({
@@ -14,7 +14,7 @@ export const ai = genkit({
     // Log all traces to a local file.
     file({
       dir: '.genkit',
-      filename: 'traces.jsonl',
+      filename: 'traces.jsonl', 
       type: 'trace',
     }),
     file({

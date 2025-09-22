@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle, ShieldCheck, DatabaseZap } from "lucide-react";
+import { PanelLeft, LayoutDashboard, Database, Lightbulb, Calculator, UsersRound, Building2, GraduationCap, HelpCircle, ShieldCheck, DatabaseZap, Telescope } from "lucide-react";
 import { AppSidebarNav } from "./AppSidebarNav";
 import { usePathname } from 'next/navigation';
 import { Logo } from "@/components/icons/Logo";
@@ -13,6 +13,7 @@ const headerNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tradehunter", label: "Trader DB", icon: Database },
   { href: "/buildwise-intel", label: "Buildwise", icon: Lightbulb },
+  { href: "/competitor-insight", label: "Competitor", icon: Telescope },
   { href: "/estimator", label: "Estimator", icon: Calculator },
   { href: "/staff-training", label: "Staff Training", icon: GraduationCap },
   { href: "/smart-team", label: "Smart Team", icon: UsersRound },
@@ -101,6 +102,7 @@ const navItems = [
   { href: "/estimator", icon: Calculator, label: "Estimator" },
   { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
   { href: "/buildwise-intel", icon: Lightbulb, label: "Buildwise-Intel" },
+  { href: "/competitor-insight", icon: Telescope, label: "Competitor Insight" },
   { href: "/smart-team", icon: UsersRound, label: "Smart Team" },
   { href: "/staff-training", icon: GraduationCap, label: "Staff Training" },
   { href: "/quality-control", icon: ShieldCheck, label: "Quality Control" },
