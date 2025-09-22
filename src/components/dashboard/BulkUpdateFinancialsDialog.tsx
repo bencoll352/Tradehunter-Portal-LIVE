@@ -19,6 +19,8 @@ import type { BaseBranchId, ParsedFinancialData } from "@/types";
 import { UploadCloud, Loader2, FileText, XCircle, AlertTriangle, DollarSign } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Papa from "papaparse";
+import { bulkUpdateFinancialsAction } from "@/app/(app)/tradehunter/actions";
+
 
 interface BulkUpdateFinancialsDialogProps {
   branchId: BaseBranchId;
@@ -30,6 +32,15 @@ interface BulkUpdateFinancialsDialogProps {
 }
 
 const MAX_UPLOAD_LIMIT = 1000;
+
+const cleanAndParseNumber = (value: any): number | undefined => {
+    if (value === null || value === undefined || value === '') return undefined;
+    const stringValue = String(value).replace(/[^0-9.-]+/g, "");
+    if (stringValue === '') return undefined;
+    const numberValue = parseFloat(stringValue);
+    return isNaN(numberValue) ? undefined : numberValue;
+};
+
 
 export function BulkUpdateFinancialsDialog({ branchId, onBulkUpdate }: BulkUpdateFinancialsDialogProps) {
   const [open, setOpen] = useState(false);
@@ -90,13 +101,24 @@ export function BulkUpdateFinancialsDialog({ branchId, onBulkUpdate }: BulkUpdat
               const name = getRowValue(row, ["Name", "Trader Name", "Company Name"]);
               if (!name) return null;
 
-              return {
-                name,
-                totalAssets: getRowValue(row, ["Total Assets"]),
-                estimatedAnnualRevenue: getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]),
-                estimatedCompanyValue: getRowValue(row, ["Est. Company Value", "Estimated Company Value"]),
-                employeeCount: getRowValue(row, ["Employee Count", "Employees"]),
-              };
+              const data: ParsedFinancialData = { name };
+              
+              const totalAssets = cleanAndParseNumber(getRowValue(row, ["Total Assets"]));
+              const estimatedAnnualRevenue = cleanAndParseNumber(getRowValue(row, ["Est. Annual Revenue", "Estimated Annual Revenue"]));
+              const estimatedCompanyValue = cleanAndParseNumber(getRowValue(row, ["Est. Company Value", "Estimated Company Value"]));
+              const employeeCount = cleanAndParseNumber(getRowValue(row, ["Employee Count", "Employees"]));
+
+              if(totalAssets !== undefined) data.totalAssets = totalAssets;
+              if(estimatedAnnualRevenue !== undefined) data.estimatedAnnualRevenue = estimatedAnnualRevenue;
+              if(estimatedCompanyValue !== undefined) data.estimatedCompanyValue = estimatedCompanyValue;
+              if(employeeCount !== undefined) data.employeeCount = employeeCount;
+              
+              // Only include if there's at least one financial data point
+              if (Object.keys(data).length > 1) {
+                  return data;
+              }
+
+              return null;
             })
             .filter((d): d is ParsedFinancialData => d !== null);
           
@@ -176,7 +198,7 @@ export function BulkUpdateFinancialsDialog({ branchId, onBulkUpdate }: BulkUpdat
                 <div className="flex items-start gap-2 text-amber-600 dark:text-amber-500 p-3 bg-amber-500/10 rounded-md border border-amber-500/20">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs font-medium">
-                        The CSV must contain a 'Name' column that exactly matches the trader names in the database. Include headers for the financial columns you want to update (e.g., 'Total Assets', 'Est. Annual Revenue', 'Employee Count').
+                        The CSV must contain a 'Name' column that exactly matches the trader names in the database. Include headers for the financial columns you want to update (e.g., 'Est. Annual Revenue', 'Employees').
                     </p>
                 </div>
             </div>
@@ -224,3 +246,5 @@ export function BulkUpdateFinancialsDialog({ branchId, onBulkUpdate }: BulkUpdat
     </Dialog>
   );
 }
+
+    
