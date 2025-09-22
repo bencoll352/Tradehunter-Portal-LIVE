@@ -3,7 +3,7 @@
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getFirebaseAdmin } from './firebase-admin'; 
-import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task } from '@/types';
+import type { BaseBranchId, ParsedTraderData, Trader, TraderStatus, Task, ParsedFinancialData } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 import type { z } from 'zod';
 import { normalizePhoneNumber } from './utils';
@@ -358,6 +358,54 @@ export async function bulkAddTraders(branchId: BaseBranchId, tradersData: Parsed
     }
 }
 
+export async function bulkUpdateFinancials(
+  branchId: BaseBranchId,
+  financialData: ParsedFinancialData[]
+): Promise<{ updatedCount: number; notFoundCount: number }> {
+  const { firestore } = await getFirebaseAdmin();
+  const tradersCollection = await getTradersCollection(branchId);
+  const batch = firestore.batch();
+  let updatedCount = 0;
+  let notFoundCount = 0;
+
+  // Create a map of trader names to their document IDs for efficient lookup
+  const nameToIdMap = new Map<string, string>();
+  const snapshot = await tradersCollection.select('name').get();
+  snapshot.forEach(doc => {
+    const name = doc.data().name;
+    if (name) {
+      nameToIdMap.set(name.trim().toLowerCase(), doc.id);
+    }
+  });
+
+  for (const item of financialData) {
+    const traderId = nameToIdMap.get(item.name.trim().toLowerCase());
+
+    if (traderId) {
+      const traderRef = tradersCollection.doc(traderId);
+      const dataToUpdate: { [key: string]: any } = {};
+
+      if (item.totalAssets !== undefined) dataToUpdate.totalAssets = item.totalAssets;
+      if (item.estimatedAnnualRevenue !== undefined) dataToUpdate.estimatedAnnualRevenue = item.estimatedAnnualRevenue;
+      if (item.estimatedCompanyValue !== undefined) dataToUpdate.estimatedCompanyValue = item.estimatedCompanyValue;
+      if (item.employeeCount !== undefined) dataToUpdate.employeeCount = item.employeeCount;
+
+      if (Object.keys(dataToUpdate).length > 0) {
+        batch.update(traderRef, dataToUpdate);
+        updatedCount++;
+      }
+    } else {
+      notFoundCount++;
+    }
+  }
+
+  if (updatedCount > 0) {
+    await batch.commit();
+  }
+
+  return { updatedCount, notFoundCount };
+}
+
 
 export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: string[]): Promise<{ successCount: number; failureCount: number }> {
   try {
@@ -425,5 +473,3 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
-
-    

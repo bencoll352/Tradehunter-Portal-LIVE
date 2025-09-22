@@ -7,7 +7,7 @@ export const VALID_BRANCH_IDS = ["PURLEY", "LEATHERHEAD", "DORKING", "REDHILL", 
 export const VALID_LOGIN_IDS = [...VALID_BRANCH_IDS, "MANAGER"] as const;
 
 export type BranchId = typeof VALID_BRANCH_IDS[number];
-export type BranchLoginId = typeof VALID_LOGIN_IDS[number];
+export type BranchLoginId = typeof VALID_login_IDS[number];
 export type UserRole = "user" | "manager" | "unknown";
 export type BaseBranchId = Exclude<BranchLoginId, 'MANAGER'>;
 
@@ -150,6 +150,18 @@ export const ParsedTraderDataSchema = z.object({
 });
 
 export type ParsedTraderData = z.infer<typeof ParsedTraderDataSchema>;
+
+// Represents the data parsed from a CSV file for financial updates.
+export const ParsedFinancialDataSchema = z.object({
+  name: z.string(),
+  totalAssets: z.coerce.number().optional(),
+  estimatedAnnualRevenue: z.coerce.number().optional(),
+  estimatedCompanyValue: z.coerce.number().optional(),
+  employeeCount: z.coerce.number().optional(),
+});
+
+export type ParsedFinancialData = z.infer<typeof ParsedFinancialDataSchema>;
+
 
 export interface BulkDeleteTradersResult {
   successCount: number;

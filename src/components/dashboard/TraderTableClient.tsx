@@ -22,9 +22,10 @@ import { AddTraderDialog } from "./AddTraderDialog";
 import { EditTraderDialog } from "./EditTraderDialog";
 import { DeleteTraderDialog } from "./DeleteTraderDialog";
 import { BulkAddTradersDialog } from "./BulkAddTradersDialog";
+import { BulkUpdateFinancialsDialog } from "./BulkUpdateFinancialsDialog";
 import { Badge } from "@/components/ui/badge";
-import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult } from "@/types";
-import { ArrowUpDown, Trash2, SlidersHorizontal, ArrowUp, ArrowDown, Phone, Globe, ExternalLink } from "lucide-react";
+import type { Trader, BaseBranchId, ParsedTraderData, BulkDeleteTradersResult, ParsedFinancialData } from "@/types";
+import { ArrowUpDown, Trash2, SlidersHorizontal, ArrowUp, ArrowDown, Phone, Globe, ExternalLink, UploadCloud } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import type { z } from "zod";
@@ -33,6 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { bulkUpdateFinancialsAction } from "@/app/(app)/tradehunter/actions";
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
 type SortKey = keyof Trader | 'estimatedAnnualRevenue' | 'rating' | 'lastActivity' | 'name' | 'status' | 'callBackDate' | 'reviews';
@@ -183,6 +185,30 @@ export function TraderTableClient({
     setRowSelection({});
   };
 
+  const handleBulkFinancialsUpdate = async (financialData: ParsedFinancialData[]) => {
+    const result = await bulkUpdateFinancialsAction(branchId, financialData);
+    if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Bulk Update Failed',
+        description: result.error,
+        duration: 10000,
+      });
+    } else {
+      let summaryMessages = [];
+      if (result.updatedCount > 0) summaryMessages.push(`${result.updatedCount} trader(s) updated successfully.`);
+      if (result.notFoundCount > 0) summaryMessages.push(`${result.notFoundCount} trader(s) could not be found by name.`);
+      if (summaryMessages.length === 0) summaryMessages.push("No traders were updated.");
+      
+      toast({
+        title: 'Bulk Update Processed',
+        description: <div className="flex flex-col gap-1">{summaryMessages.map((msg, i) => <span key={i}>{msg}</span>)}</div>,
+        duration: 10000,
+      });
+    }
+    return result;
+  };
+
   const selectedRowCount = Object.values(rowSelection).filter(Boolean).length;
 
   const toggleAllRowsSelected = (checked: boolean) => {
@@ -246,7 +272,7 @@ export function TraderTableClient({
                 </SelectContent>
                 </Select>
             </div>
-            <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end">
+            <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end flex-wrap justify-end">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">
@@ -279,6 +305,10 @@ export function TraderTableClient({
                 Delete ({selectedRowCount})
                 </Button>
             )}
+             <BulkUpdateFinancialsDialog
+              branchId={branchId}
+              onBulkUpdate={handleBulkFinancialsUpdate}
+            />
             <BulkAddTradersDialog
                 branchId={branchId}
                 onBulkAdd={onBulkAdd}
@@ -344,7 +374,7 @@ export function TraderTableClient({
                       {columnVisibility.phone && <TableCell className="whitespace-nowrap">{trader.phone ?? '-'}</TableCell>}
                       {columnVisibility.ownerName && <TableCell className="truncate max-w-40">{trader.ownerName ?? '-'}</TableCell>}
                       {columnVisibility.ownerProfileLink && <TableCell>{trader.ownerProfileLink ? <a href={trader.ownerProfileLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1"><ExternalLink className="h-4 w-4"/>Profile</a> : '-'}</TableCell>}
-                      {columnVisibility.mainCategory && <TableCell className="truncate max-w-40">{trader.mainCategory ?? '-'}</TableCell>}
+                      {columnVisibility.mainCategory && <TableCell className="truncate max-w-40">{trader.mainCategory ?? null}</TableCell>}
                       {columnVisibility.categories && <TableCell className="truncate max-w-48">{trader.categories ?? '-'}</TableCell>}
                       {columnVisibility.workdayTiming && <TableCell className="truncate max-w-40">{trader.workdayTiming ?? '-'}</TableCell>}
                       {columnVisibility.address && <TableCell className="truncate max-w-48">{trader.address ?? '-'}</TableCell>}
@@ -385,5 +415,3 @@ export function TraderTableClient({
     </Card>
   );
 }
-
-    

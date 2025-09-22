@@ -9,13 +9,14 @@ import {
   deleteTrader,
   bulkAddTraders,
   bulkDeleteTraders,
+  bulkUpdateFinancials,
   createTask,
   updateTask,
   deleteTask,
   updateGoals,
   getGoals,
 } from '@/lib/trader-service';
-import type { BaseBranchId, ParsedTraderData, Trader, Task } from '@/types';
+import type { BaseBranchId, ParsedTraderData, Trader, Task, ParsedFinancialData } from '@/types';
 import { traderFormSchema } from '@/components/dashboard/TraderForm';
 
 type TraderFormValues = z.infer<typeof traderFormSchema>;
@@ -126,6 +127,27 @@ export async function bulkAddTradersAction(
     return { data: null, error: error.message };
   }
 }
+
+/**
+ * Bulk updates trader financials from a parsed CSV file.
+ */
+export async function bulkUpdateFinancialsAction(
+  branchId: BaseBranchId,
+  financialData: ParsedFinancialData[]
+): Promise<{
+  updatedCount: number;
+  notFoundCount: number;
+  error: string | null;
+}> {
+  try {
+    const result = await bulkUpdateFinancials(branchId, financialData);
+    return { ...result, error: null };
+  } catch (error: any) {
+    console.error('[Action Error: bulkUpdateFinancialsAction]', error);
+    return { updatedCount: 0, notFoundCount: 0, error: error.message };
+  }
+}
+
 
 /**
  * Bulk deletes traders by their IDs.
