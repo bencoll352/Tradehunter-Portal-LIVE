@@ -80,6 +80,9 @@ export function TraderTableClient({
     { id: 'name', label: 'Name' },
     { id: 'status', label: 'Status' },
     { id: 'lastActivity', label: 'Last Activity' },
+    { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
+    { id: 'estimatedCompanyValue', label: 'Est. Company Value' },
+    { id: 'employeeCount', label: 'Employees' },
     { id: 'callBackDate', label: 'Call-Back Date' },
     { id: 'description', label: 'Description' },
     { id: 'rating', label: 'Google Rating' },
@@ -93,9 +96,6 @@ export function TraderTableClient({
     { id: 'workdayTiming', label: 'Workday Timing' },
     { id: 'address', label: 'Address' },
     { id: 'notes', label: 'Notes' },
-    { id: 'estimatedAnnualRevenue', label: 'Est. Annual Revenue' },
-    { id: 'estimatedCompanyValue', label: 'Est. Company Value' },
-    { id: 'employeeCount', label: 'Employees' },
   ];
 
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({
@@ -366,6 +366,9 @@ export function TraderTableClient({
                       {columnVisibility.name && <TableCell className="font-medium truncate max-w-40">{trader.name}</TableCell>}
                       {columnVisibility.status && <TableCell><Badge variant={trader.status === 'Call-Back' ? 'destructive' : 'secondary'}>{trader.status}</Badge></TableCell>}
                       {columnVisibility.lastActivity && <TableCell className="whitespace-nowrap">{trader.lastActivity ? format(parseISO(trader.lastActivity), "dd/MM/yyyy") : '-'}</TableCell>}
+                      {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
+                      {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
+                      {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
                       {columnVisibility.callBackDate && <TableCell className="whitespace-nowrap">{trader.callBackDate ? format(parseISO(trader.callBackDate), "dd/MM/yyyy") : '-'}</TableCell>}
                       {columnVisibility.description && <TableCell className="truncate max-w-48">{trader.description ?? '-'}</TableCell>}
                       {columnVisibility.rating && <TableCell className="text-center">{typeof trader.rating === 'number' ? trader.rating.toFixed(1) : (typeof trader.rating === 'string' ? parseFloat(trader.rating).toFixed(1) : '-')}</TableCell>}
@@ -379,9 +382,6 @@ export function TraderTableClient({
                       {columnVisibility.workdayTiming && <TableCell className="truncate max-w-40">{trader.workdayTiming ?? '-'}</TableCell>}
                       {columnVisibility.address && <TableCell className="truncate max-w-48">{trader.address ?? '-'}</TableCell>}
                       {columnVisibility.notes && <TableCell className="truncate max-w-48">{trader.notes ?? '-'}</TableCell>}
-                      {columnVisibility.estimatedAnnualRevenue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedAnnualRevenue)}</TableCell>}
-                      {columnVisibility.estimatedCompanyValue && <TableCell className="text-right whitespace-nowrap">{formatCurrency(trader.estimatedCompanyValue)}</TableCell>}
-                      {columnVisibility.employeeCount && <TableCell className="text-center">{trader.employeeCount ?? '-'}</TableCell>}
 
                       <TableCell className="text-right">
                           <div className="flex items-center justify-end">
@@ -415,3 +415,5 @@ export function TraderTableClient({
     </Card>
   );
 }
+
+    
