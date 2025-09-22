@@ -1,11 +1,10 @@
-
 'use server';
 /**
  * @fileOverview Centralised Genkit configuration and AI model exports.
  */
 
 import { genkit } from 'genkit';
-import { googleAI, geminiPro } from '@genkit-ai/googleai';
+import { googleAI, gemini15Flash } from '@genkit-ai/googleai';
 
 // Initialize Genkit with the Google AI plugin
 export const ai = genkit({
@@ -32,4 +31,4 @@ export const ai = genkit({
   }
 });
 
-export { geminiPro };
+export { gemini15Flash };

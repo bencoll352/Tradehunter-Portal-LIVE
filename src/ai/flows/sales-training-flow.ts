@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A sales training AI agent that simulates customer interactions.
@@ -8,7 +7,7 @@
  * - SalesTrainingOutput - The return type for the salesTrainingAgent function.
  */
 
-import { ai, geminiPro } from '@/ai/genkit';
+import { ai, gemini15Flash } from '@/ai/genkit';
 import { z } from 'zod';
 
 // Define the shape of individual messages in the history
@@ -39,7 +38,7 @@ export async function salesTrainingAgent(input: SalesTrainingInput): Promise<Sal
 // Define the Genkit prompt
 const salesTrainingPrompt = ai.definePrompt({
     name: 'salesTrainingPrompt',
-    model: geminiPro,
+    model: gemini15Flash,
     input: { schema: SalesTrainingInputSchema },
     output: { schema: SalesTrainingOutputSchema },
     prompt: `
