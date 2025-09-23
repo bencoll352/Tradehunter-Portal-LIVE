@@ -110,7 +110,6 @@ const safeToISOString = (value: any): string | null => {
     if (value instanceof Timestamp) {
         return value.toDate().toISOString();
     }
-    // Handle Firestore Timestamps from the client SDK (which are objects with toDate)
     if (typeof value === 'object' && value !== null && typeof (value as any).toDate === 'function') {
         return (value as any).toDate().toISOString();
     }
@@ -121,11 +120,9 @@ const safeToISOString = (value: any): string | null => {
                 return date.toISOString();
             }
         } catch(e) {
-            // Ignore invalid date strings
             return null;
         }
     }
-    // For any other type, return null
     return null;
 }
 
@@ -434,8 +431,19 @@ export async function bulkDeleteTraders(branchId: BaseBranchId, traderIds: strin
 export async function createTask(branchId: BaseBranchId, taskData: Omit<Task, 'id'>): Promise<Task> {
   try {
     const tasksCollection = await getTasksCollection(branchId, taskData.traderId);
-    const docRef = await tasksCollection.add(taskData);
-    return { id: docRef.id, ...taskData } as Task;
+    const docRef = await tasksCollection.add({
+        ...taskData,
+        dueDate: Timestamp.fromDate(new Date(taskData.dueDate)),
+    });
+    const newDoc = await docRef.get();
+    const data = newDoc.data();
+    return { 
+        id: docRef.id, 
+        traderId: taskData.traderId,
+        title: data!.title,
+        dueDate: safeToISOString(data!.dueDate)!,
+        completed: data!.completed,
+    };
   } catch (error: any) {
     console.error('[TRADER_SERVICE_ERROR:createTask]', error);
     throw new Error(`Could not create task. Reason: ${error.message}`);
@@ -451,15 +459,24 @@ export async function updateTask(
     try {
         if (!traderId) throw new Error('traderId is required to update a task.');
         const taskRef = (await getTasksCollection(branchId, traderId)).doc(taskId);
-        await taskRef.update(taskData);
+
+        const dataToUpdate: {[key: string]: any} = { ...taskData };
+        if (taskData.dueDate) {
+            dataToUpdate.dueDate = Timestamp.fromDate(new Date(taskData.dueDate));
+        }
+
+        await taskRef.update(dataToUpdate);
         const updatedDoc = await taskRef.get();
         const updatedData = updatedDoc.data();
         if (!updatedData) throw new Error('Failed to retrieve updated task data.');
+
         return { 
             id: taskId, 
             traderId: traderId,
-            ...updatedData 
-        } as Task;
+            title: updatedData.title,
+            dueDate: safeToISOString(updatedData.dueDate)!,
+            completed: updatedData.completed,
+        };
     } catch (error: any) {
         console.error('[TRADER_SERVICE_ERROR:updateTask]', error);
         throw new Error(`Could not update task. Reason: ${error.message}`);
@@ -475,3 +492,5 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
+
+    
