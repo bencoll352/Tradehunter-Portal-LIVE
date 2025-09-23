@@ -41,7 +41,7 @@ interface Message {
     content: string;
 }
 
-const apexSalesTrainerUrl = "https://apex-sales-trainer-302177537641.us-west1.run.app/";
+const salesCoachUrl = "https://tradehunter-sales-coach-302177537641.us-west1.run.app";
 
 
 function InternalTrainer() {
@@ -217,23 +217,23 @@ function InternalTrainer() {
     );
 }
 
-function SpeechTrainerLink() {
+function SalesCoachLink() {
     return (
         <div className="p-4 flex justify-center items-center h-full">
              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full max-w-sm mx-auto">
                 <div className={cn("flex items-center justify-center h-24 w-24 rounded-full border-4 mb-4", "border-teal-500/50 text-teal-500 bg-teal-500/10")}>
                     <Mic className="h-12 w-12" />
                 </div>
-                <CardTitle className="text-xl text-primary mb-1">Apex Speech Trainer</CardTitle>
+                <CardTitle className="text-xl text-primary mb-1">TradeHunter Sales Coach</CardTitle>
                 <div className="flex items-center gap-1.5 mb-2">
                     <p className="text-sm font-semibold text-accent">External Application</p>
                 </div>
                 <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
-                    Launch the full-featured Speech Sales Trainer application in a new window for advanced, voice-based simulations and scenarios.
+                    Launch the full-featured Sales Coach application in a new window for advanced, voice-based simulations and scenarios.
                 </CardDescription>
                 <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
-                    <Link href={apexSalesTrainerUrl} target="_blank" rel="noopener noreferrer">
-                        Launch Trainer <ArrowRight className="ml-2 h-4 w-4" />
+                    <Link href={salesCoachUrl} target="_blank" rel="noopener noreferrer">
+                        Launch Coach <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                 </Button>
             </Card>
@@ -275,7 +275,7 @@ export default function StaffTrainingPage() {
                             <InternalTrainer />
                         </TabsContent>
                         <TabsContent value="speech-trainer" className="flex-grow mt-4">
-                            <SpeechTrainerLink />
+                            <SalesCoachLink />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

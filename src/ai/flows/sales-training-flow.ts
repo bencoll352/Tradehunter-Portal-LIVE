@@ -7,9 +7,10 @@
  * - SalesTrainingOutput - The return type for the salesTrainingAgent function.
  */
 
-import { defineFlow, definePrompt } from '@genkit-ai/core';
-import { gemini15Flash } from '@genkit-ai/googleai';
+import { defineFlow } from '@genkit-ai/core';
+import { definePrompt } from '@genkit-ai/ai';
 import { z } from 'zod';
+import { gemini15Flash } from '../genkit';
 
 // Define the shape of individual messages in the history
 const MessageSchema = z.object({
@@ -27,51 +28,53 @@ export type SalesTrainingInput = z.infer<typeof SalesTrainingInputSchema>;
 
 // Define the output schema for the sales training agent
 export const SalesTrainingOutputSchema = z.object({
-  response: z.string().describe('The AI agent\'s response in character, based on the scenario.'),
+  response: z.string().describe("The AI agent's response in character, based on the scenario."),
 });
 export type SalesTrainingOutput = z.infer<typeof SalesTrainingOutputSchema>;
 
-// Exported wrapper function to be called by the server action
-export async function salesTrainingAgent(input: SalesTrainingInput): Promise<SalesTrainingOutput> {
-  return salesTrainingFlow(input);
-}
-
-// Define the Genkit prompt
-const salesTrainingPrompt = definePrompt({
+const salesTrainingPrompt = definePrompt(
+  {
     name: 'salesTrainingPrompt',
-    model: gemini15Flash,
-    input: { schema: SalesTrainingInputSchema },
-    output: { schema: SalesTrainingOutputSchema },
-    prompt: `
-        You are a sales training assistant. Your task is to role-play as a customer based on a provided scenario.
-        You must stay in character and respond to the user (the sales trainee) as the customer would.
+    inputSchema: SalesTrainingInputSchema,
+    outputSchema: SalesTrainingOutputSchema,
+  },
+  (input) => `
+    You are a sales training assistant. Your task is to role-play as a customer based on a provided scenario.
+    You must stay in character and respond to the user (the sales trainee) as the customer would.
 
-        **Scenario:**
-        {{scenario}}
+    **Scenario:**
+    ${input.scenario}
 
-        **Conversation History:**
-        {{#each history}}
-            **{{role}}**: {{content}}
-        {{/each}}
+    **Conversation History:**
+    ${input.history.map((message) => `**${message.role}**: ${message.content}`).join('\n')}
 
-        **Trainee's Latest Message:**
-        {{userMessage}}
+    **Trainee's Latest Message:**
+    ${input.userMessage}
 
-        **Your Task:**
-        Generate the next response from the perspective of the customer described in the scenario. Be realistic and engaging.
-    `,
-});
-
+    **Your Task:**
+    Generate the next response from the perspective of the customer described in the scenario. Be realistic and engaging.
+`
+);
 
 // Define the Genkit flow
-const salesTrainingFlow = defineFlow(
+export const salesTrainingFlow = defineFlow(
   {
     name: 'salesTrainingFlow',
     inputSchema: SalesTrainingInputSchema,
     outputSchema: SalesTrainingOutputSchema,
   },
   async (input) => {
-    const { output } = await salesTrainingPrompt(input);
-    return output!;
+
+    const llmResponse = await salesTrainingPrompt.generate({
+        input: input,
+        model: gemini15Flash,
+    });
+
+    return llmResponse.output()!;
   }
 );
+
+// Exported wrapper function to be called by the server action
+export async function salesTrainingAgent(input: SalesTrainingInput): Promise<SalesTrainingOutput> {
+  return salesTrainingFlow(input);
+}
