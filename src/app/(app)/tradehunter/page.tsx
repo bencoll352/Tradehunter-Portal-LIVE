@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { type BaseBranchId, type Trader, type ParsedTraderData, type BulkDeleteTradersResult, getBranchInfo, type BranchInfo, type BranchLoginId } from "@/types";
@@ -122,12 +122,12 @@ export default function TradeHunterDashboardPage() {
       return false;
     }
     const result = await addTraderAction(currentBaseBranchId, values);
-    if (result.data) {
+    if (result && result.data) {
       await fetchTraders();
       toast({ title: "Success", description: `${result.data.name} added.`});
       return true;
     }
-    toast({ variant: "destructive", title: "Error Adding Trader", description: result.error || "Failed to add trader." });
+    toast({ variant: "destructive", title: "Error Adding Trader", description: result?.error || "Failed to add trader." });
     return false;
   };
 
@@ -137,12 +137,12 @@ export default function TradeHunterDashboardPage() {
       return false;
     }
     const result = await updateTraderAction(currentBaseBranchId, traderId, values);
-    if (result.data) {
+    if (result && result.data) {
       await fetchTraders();
       toast({ title: "Success", description: `${result.data.name} updated.`});
       return true;
     }
-    toast({ variant: "destructive", title: "Error Updating Trader", description: result.error || "Failed to update trader." });
+    toast({ variant: "destructive", title: "Error Updating Trader", description: result?.error || "Failed to update trader." });
     return false;
   };
 
@@ -152,13 +152,14 @@ export default function TradeHunterDashboardPage() {
       return false;
     }
     const result = await deleteTraderAction(currentBaseBranchId, traderId);
-    if (result.success) {
+    if (result && result.success) {
       await fetchTraders();
       toast({ title: "Success", description: "Trader deleted." });
+      return true;
     } else {
-       toast({ variant: "destructive", title: "Error Deleting Trader", description: result.error || "Failed to delete trader." });
+       toast({ variant: "destructive", title: "Error Deleting Trader", description: result?.error || "Failed to delete trader." });
+       return false;
     }
-    return result.success;
   };
 
  const handleBulkAdd = async (tradersToCreate: ParsedTraderData[]): Promise<{ data: Trader[] | null; error: string | null; }> => {
@@ -170,6 +171,12 @@ export default function TradeHunterDashboardPage() {
     
     const result = await bulkAddTradersAction(currentBaseBranchId, tradersToCreate); 
     
+    if (!result) {
+        const error = "Bulk add operation failed unexpectedly.";
+        toast({ variant: "destructive", title: "Bulk Upload Failed", description: error, duration: 10000 });
+        return { data: null, error };
+    }
+
     if (result.error) {
       toast({
         variant: "destructive",
@@ -195,7 +202,7 @@ export default function TradeHunterDashboardPage() {
       });
       await fetchTraders(); 
     } 
-    return { data: result.data, error: null };
+    return { data: result.data, error: result.error };
   };
 
   const handleBulkDelete = async (traderIds: string[]): Promise<BulkDeleteTradersResult> => {
@@ -203,9 +210,17 @@ export default function TradeHunterDashboardPage() {
       return { successCount: 0, failureCount: traderIds.length, error: "Invalid or missing Branch ID/Role." };
     }
     const result = await bulkDeleteTradersAction(currentBaseBranchId, traderIds);
+    if (!result) {
+        toast({ variant: "destructive", title: "Error", description: "Bulk delete operation failed." });
+        return { successCount: 0, failureCount: traderIds.length, error: "Bulk delete operation failed." };
+    }
     if (result.successCount > 0) {
       await fetchTraders();
     }
+    toast({
+        title: "Bulk Delete Processed",
+        description: `${result.successCount} traders deleted successfully. ${result.failureCount} failed.`,
+    });
     return result;
   };
 
@@ -217,7 +232,6 @@ export default function TradeHunterDashboardPage() {
     );
   }
   
-  // This is the new logic to handle the manager view.
   if (currentUserRole === 'manager' && !currentBaseBranchId) {
     return (
       <div className="space-y-6">
@@ -234,7 +248,6 @@ export default function TradeHunterDashboardPage() {
     )
   }
   
-  // Fallback for any other unauthenticated or error state.
   if (!currentBaseBranchId && !isLoading) { 
       return (
         <Card>
