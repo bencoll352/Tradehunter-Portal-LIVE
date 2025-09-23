@@ -110,19 +110,18 @@ const safeToISOString = (value: any): string | null => {
     if (value instanceof Timestamp) {
         return value.toDate().toISOString();
     }
-    if (typeof value === 'object' && value !== null && typeof (value as any).toDate === 'function') {
-        return (value as any).toDate().toISOString();
+     // Handle cases where the value might have a toDate method (like Firestore Timestamps on the client)
+    if (typeof value.toDate === 'function') {
+        return value.toDate().toISOString();
     }
+    // Handle cases where it's already an ISO string
     if (typeof value === 'string') {
-        try {
-            const date = new Date(value);
-            if (!isNaN(date.getTime())) {
-                return date.toISOString();
-            }
-        } catch(e) {
-            return null;
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+            return date.toISOString();
         }
     }
+    
     return null;
 }
 
