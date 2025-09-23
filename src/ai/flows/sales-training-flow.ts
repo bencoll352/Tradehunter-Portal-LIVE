@@ -7,7 +7,8 @@
  * - SalesTrainingOutput - The return type for the salesTrainingAgent function.
  */
 
-import { ai, gemini15Flash } from '@/ai/genkit';
+import { defineFlow, definePrompt } from '@genkit-ai/core';
+import { gemini15Flash } from '@genkit-ai/googleai';
 import { z } from 'zod';
 
 // Define the shape of individual messages in the history
@@ -36,7 +37,7 @@ export async function salesTrainingAgent(input: SalesTrainingInput): Promise<Sal
 }
 
 // Define the Genkit prompt
-const salesTrainingPrompt = ai.definePrompt({
+const salesTrainingPrompt = definePrompt({
     name: 'salesTrainingPrompt',
     model: gemini15Flash,
     input: { schema: SalesTrainingInputSchema },
@@ -63,7 +64,7 @@ const salesTrainingPrompt = ai.definePrompt({
 
 
 // Define the Genkit flow
-const salesTrainingFlow = ai.defineFlow(
+const salesTrainingFlow = defineFlow(
   {
     name: 'salesTrainingFlow',
     inputSchema: SalesTrainingInputSchema,

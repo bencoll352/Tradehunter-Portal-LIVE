@@ -3,9 +3,8 @@
  * @fileOverview Centralised Genkit configuration and AI model exports.
  */
 
-import { genkit } from 'genkit';
+import { genkit, file } from '@genkit-ai/core';
 import { googleAI, gemini15Flash } from '@genkit-ai/googleai';
-import { file } from 'genkit/plugins';
 
 // Initialize Genkit with the Google AI plugin
 export const ai = genkit({

@@ -1,147 +1,113 @@
 
-"use client";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { ArrowRight, Bot, Search, Users, BarChart2, Lightbulb, FileText, Library } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { UsersRound, AlertTriangle, Loader2, type LucideIcon, Mountain, Compass, ArrowRight, MessageSquareQuote, Target } from "lucide-react"; 
-import { getBranchInfo, type BranchInfo, type BranchLoginId } from '@/types';
-import { cn } from '@/lib/utils';
-import type { SVGProps } from 'react';
+const smartTeamFeatures = [
+  {
+    title: "Market Analysis",
+    description: "Leverage AI to analyze market trends, identify opportunities, and generate strategic reports for your branch.",
+    icon: BarChart2,
+    href: "/smart-team/market-analysis",
+    color: "text-sky-500",
+    bgColor: "bg-sky-500/10",
+    borderColor: "border-sky-500/50",
+  },
+  {
+    title: "Competitor Insights",
+    description: "Analyze competitor strategies and market positioning to gain a competitive edge.",
+    icon: Library, // Using Library icon as Users is already in use
+    href: "/smart-team/competitor-insights",
+    color: "text-purple-500",
+    bgColor: "bg-purple-500/10",
+    borderColor: "border-purple-500/50",
+  },
+  {
+    title: "Prospecting AI",
+    description: "Identify and qualify high-potential leads with an AI-powered prospecting assistant.",
+    icon: Search,
+    href: "/smart-team/prospecting-ai",
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+    borderColor: "border-emerald-500/50",
 
-const StrategyNavigatorIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        {...props}
-    >
-        <path d="M12 22s-8-4.5-8-11.5a8 8 0 0 1 16 0c0 7-8 11.5-8 11.5z"></path>
-        <circle cx="12" cy="10.5" r="3.5"></circle>
-        <path d="m14.5 8.5-4 4"></path>
-    </svg>
-);
-
-
-interface RosterCardProps {
-  title: string;
-  role: string;
-  description: string;
-  href: string;
-  icon: React.ElementType; 
-  iconStyle: string;
-}
-
-const RosterCard = ({ title, role, description, href, icon: Icon, iconStyle }: RosterCardProps) => (
-  <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center p-6 border-border hover:border-primary/30 h-full">
-    <div className={cn("flex items-center justify-center h-20 w-20 sm:h-24 sm:w-24 rounded-full border-4 mb-4", iconStyle)}>
-      <Icon className="h-10 w-10 sm:h-12 sm:w-12" />
-    </div>
-    <CardTitle className="text-xl text-primary mb-1">{title}</CardTitle>
-    <div className="flex items-center gap-1.5 mb-2">
-      <p className="text-sm font-semibold text-accent">{role}</p>
-    </div>
-    <CardDescription className="text-muted-foreground italic mb-6 flex-grow">
-      "{description}"
-    </CardDescription>
-    <Button asChild className="w-full mt-auto bg-primary hover:bg-primary/90">
-      <Link href={href}>
-        Launch Tool <ArrowRight className="ml-2 h-4 w-4" />
-      </Link>
-    </Button>
-  </Card>
-);
-
-const assistants: RosterCardProps[] = [
-    {
-        title: "Summit Coach",
-        role: "Performance Coach",
-        description: "Analyse performance data and provide actionable coaching insights to elevate your team.",
-        href: "/smart-team/summit-coach",
-        icon: Mountain,
-        iconStyle: "border-purple-500/50 text-purple-500 bg-purple-500/10",
-    },
-    {
-        title: "Sales Navigator",
-        role: "Lead Generation Tool",
-        description: "Find and qualify high-quality leads, so you can focus on closing deals.",
-        href: "/smart-team/sales-navigator",
-        icon: Compass,
-        iconStyle: "border-emerald-500/50 text-emerald-500 bg-emerald-500/10",
-    },
-    {
-        title: "Sales & Strategy Navigator",
-        role: "Strategic Analyst",
-        description: "Comprehensive analysis, market intelligence, and strategic planning.",
-        href: "/smart-team/sales-strategy-navigator",
-        icon: StrategyNavigatorIcon,
-        iconStyle: "border-blue-500/50 text-blue-500 bg-blue-500/10",
-    },
-    {
-        title: "Outreach Pro",
-        role: "Sales Assistant",
-        description: "Craft compelling outreach messages and manage targeted sales campaigns.",
-        href: "/smart-team/outreach-pro",
-        icon: MessageSquareQuote,
-        iconStyle: "border-sky-500/50 text-sky-500 bg-sky-500/10",
-    },
-]
-
+  },
+  {
+    title: "Objection Handling Coach",
+    description: "Sharpen your skills by practicing with an AI that simulates real-world customer objections.",
+    icon: Bot,
+    href: "/smart-team/objection-handling",
+    color: "text-rose-500",
+    bgColor: "bg-rose-500/10",
+    borderColor: "border-rose-500/50",
+  },
+  {
+    title: "Content Idea Generator",
+    description: "Stuck for ideas? Generate engaging content for your blog, social media, or email campaigns.",
+    icon: Lightbulb,
+    href: "/smart-team/content-generator",
+    color: "text-amber-500",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-500/50",
+  },
+  {
+    title: "Automated Reporting",
+    description: "Generate daily, weekly, or monthly performance reports automatically for your branch.",
+    icon: FileText,
+    href: "/smart-team/automated-reporting",
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-500/10",
+    borderColor: "border-indigo-500/50",
+  },
+];
 
 export default function SmartTeamPage() {
-  const [branchInfo, setBranchInfo] = useState<BranchInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const initializeData = async () => {
-      if (typeof window !== 'undefined') {
-        const storedLoggedInId = localStorage.getItem('loggedInId') as BranchLoginId | null;
-        const info = getBranchInfo(storedLoggedInId);
-        setBranchInfo(info);
-        setIsLoading(false); 
-      }
-    };
-    initializeData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="ml-2">Loading user information...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6"> 
+    <div className="space-y-8">
       <Card className="shadow-lg w-full">
         <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-2">
-            <UsersRound className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="p-3 rounded-full bg-accent/10 border-2 border-accent/30">
+              <Users className="h-10 w-10 text-accent" />
+            </div>
             <div>
               <CardTitle className="text-2xl sm:text-3xl font-bold text-primary">Smart Team Hub</CardTitle>
               <CardDescription className="text-base sm:text-lg text-muted-foreground mt-1">
-                Meet your Smart assistants, here to help you succeed.
+                Your centralized AI-powered toolkit for sales, marketing, and branch management.
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {assistants.map((assistant) => (
-                <RosterCard key={assistant.title} {...assistant} />
-            ))}
-          </div>
-        </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {smartTeamFeatures.map((feature) => (
+          <Link href={feature.href} key={feature.title}>
+            <Card className="group shadow-md hover:shadow-xl transition-all duration-300 h-full flex flex-col border-border/20 hover:border-primary/30">
+              <CardHeader className="flex-shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className={cn("p-3 rounded-md", feature.bgColor)}>
+                    <feature.icon className={cn("w-6 h-6", feature.color)} />
+                  </div>
+                  <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
+                    {feature.title}
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col justify-between">
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  {feature.description}
+                </p>
+                <div className="flex justify-end items-center text-sm font-medium text-primary/80 group-hover:text-primary transition-colors">
+                  Explore
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
   );
-}
+} 

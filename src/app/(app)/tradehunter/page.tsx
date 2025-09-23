@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
@@ -48,14 +47,14 @@ export default function TradeHunterDashboardPage() {
     setIsLoading(true);
     try {
       const result = await getTradersAction(currentBaseBranchId);
-      if (result.data) {
+      if (result && result.data) {
         setTraders(result.data);
       } else {
         setTraders([]);
         toast({ 
           variant: "destructive", 
           title: "Error Fetching Data", 
-          description: result.error || "Could not load trader data for an unknown reason.",
+          description: result?.error || "Could not load trader data for an unknown reason.",
           duration: 10000,
         });
       }
@@ -75,10 +74,7 @@ export default function TradeHunterDashboardPage() {
       const info = getBranchInfo(storedLoggedInId);
       setBranchInfo(info);
       
-      // This is the critical check.
-      // If a valid baseBranchId exists, proceed to fetch data.
-      // Otherwise (e.g., for a 'MANAGER' login), stop loading.
-      if (info.baseBranchId) {
+      if (info && info.baseBranchId) {
           // fetchTraders will be called by the next useEffect
       } else {
           setIsLoading(false);
@@ -295,7 +291,3 @@ export default function TradeHunterDashboardPage() {
     </div>
   );
 }
-
-    
-
-    

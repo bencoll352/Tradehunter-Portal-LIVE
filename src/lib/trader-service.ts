@@ -110,6 +110,7 @@ const safeToISOString = (value: any): string | null => {
     if (value instanceof Timestamp) {
         return value.toDate().toISOString();
     }
+    // Handle Firestore Timestamps from the client SDK (which are objects with toDate)
     if (typeof value === 'object' && value !== null && typeof (value as any).toDate === 'function') {
         return (value as any).toDate().toISOString();
     }
@@ -120,9 +121,11 @@ const safeToISOString = (value: any): string | null => {
                 return date.toISOString();
             }
         } catch(e) {
+            // Ignore invalid date strings
             return null;
         }
     }
+    // For any other type, return null
     return null;
 }
 
@@ -166,12 +169,11 @@ async function mapSnapshotToTraders(snapshot: admin.firestore.QuerySnapshot): Pr
         };
     });
 
-    const lastActivity = safeToISOString(data.lastActivity) || new Date(0).toISOString();
     traders.push({
       id: traderId,
       name: data.name || 'N/A',
       status: data.status || 'Inactive',
-      lastActivity: lastActivity,
+      lastActivity: safeToISOString(data.lastActivity) || new Date(0).toISOString(),
       description: data.description ?? null,
       reviews: data.reviews ?? null,
       rating: data.rating ?? null,
@@ -473,5 +475,3 @@ export async function deleteTask(branchId: BaseBranchId, traderId: string, taskI
     throw new Error(`Could not delete task. Reason: ${error.message}`);
   }
 }
-
-    

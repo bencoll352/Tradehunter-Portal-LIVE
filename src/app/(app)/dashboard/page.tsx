@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,15 +29,17 @@ export default function DashboardPage() {
         getGoalsAction(baseBranchId),
       ]);
 
-      if (tradersResult.data) {
+      if (tradersResult && tradersResult.data) {
         setTraders(tradersResult.data);
       } else {
-        toast({ variant: "destructive", title: "Error Loading Data", description: tradersResult.error || "Could not load trader data." });
+        toast({ variant: "destructive", title: "Error Loading Trader Data", description: tradersResult?.error || "Could not load trader data." });
       }
 
-      if (goalsResult.data) {
+      if (goalsResult && goalsResult.data) {
         setGoals(goalsResult.data);
-      } // We don't need a toast if goals fail, it's not critical.
+      } else {
+        console.warn("Could not load goals:", goalsResult?.error || "An unknown error occurred.");
+      }
 
     } catch (error) {
       console.error("Failed to fetch initial data:", error);
@@ -54,7 +56,7 @@ export default function DashboardPage() {
         const info = getBranchInfo(storedLoggedInId);
         setBranchInfo(info);
 
-        if (info.baseBranchId) {
+        if (info && info.baseBranchId) {
           fetchTradersAndGoals(info.baseBranchId);
         } else {
           setIsLoading(false);
