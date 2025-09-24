@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { ArrowRight, Mountain, Compass, Target, Send, Users } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const smartTeamFeatures = [
   {
