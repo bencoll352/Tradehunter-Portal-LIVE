@@ -1,11 +1,13 @@
 
 'use server';
 
-import { salesTrainingAgent, type SalesTrainingInput, type SalesTrainingOutput } from '@/ai/flows/sales-training-flow';
+import { getSalesTrainingResponse } from '@/ai/flows/sales-training-flow';
+import type { SalesTrainingInput, SalesTrainingOutput } from '@/ai/flows/sales-training-flow-schema';
+
 
 export async function getSalesTrainingResponseAction(input: SalesTrainingInput): Promise<SalesTrainingOutput> {
     try {
-        const result = await salesTrainingAgent(input);
+        const result = await getSalesTrainingResponse(input);
         return result;
     } catch (error) {
         console.error("Error in sales training agent:", error);
