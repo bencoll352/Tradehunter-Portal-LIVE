@@ -1,9 +1,17 @@
-'use server';
-import {genkit, ai} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import { gemini15Flash as genkitGemini15Flash } from '@genkit-ai/googleai';
+import { configureGenkit } from '@genkit-ai/core';
+import { googleAI } from '@genkit-ai/googleai';
 
-genkit({
-  plugins: [googleAI()],
+configureGenkit({
+  plugins: [
+    googleAI(),
+  ],
+  logLevel: 'debug',
+  enableTracingAndMetrics: true,
 });
 
-export {ai};
+export const gemini15Flash = {
+    ...genkitGemini15Flash,
+    name: 'gemini-1.5-flash',
+    description: 'Google\'s fast and versatile multimodal model.',
+};

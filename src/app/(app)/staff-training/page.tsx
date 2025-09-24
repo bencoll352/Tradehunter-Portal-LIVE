@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { GraduationCap, Send, User, Loader2, RefreshCw, ArrowRight, Eye, FileText, PlusCircle, BookOpen, Mic, FileImage, FileCode, BrainCircuit, ShieldAlert, File, FileSpreadsheet, ClipboardUser, AlertTriangle, Users } from "lucide-react";
-import { getSalesTrainingResponseAction } from './actions';
+// import { getSalesTrainingResponseAction } from './actions';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,29 +91,29 @@ function InternalTrainer() {
         setCurrentMessage("");
         setIsLoading(true);
 
-        try {
-            const result = await getSalesTrainingResponseAction({
-                scenario,
-                history: messages,
-                userMessage: currentMessage,
-            });
+        // try {
+        //     const result = await getSalesTrainingResponseAction({
+        //         scenario,
+        //         history: messages,
+        //         userMessage: currentMessage,
+        //     });
 
-            if (result.response.startsWith("An error occurred")) {
-                toast({ variant: "destructive", title: "Agent Error", description: result.response });
-            } else {
-                const agentResponse: Message = { role: 'model', content: result.response };
-                setMessages(prev => [...prev, agentResponse]);
-            }
-        } catch (error) {
-            console.error("Failed to get response from agent:", error);
-            toast({
-                variant: "destructive",
-                title: "Request Failed",
-                description: "Could not get a response from the training agent. Please try again.",
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        //     if (result.response.startsWith("An error occurred")) {
+        //         toast({ variant: "destructive", title: "Agent Error", description: result.response });
+        //     } else {
+        //         const agentResponse: Message = { role: 'model', content: result.response };
+        //         setMessages(prev => [...prev, agentResponse]);
+        //     }
+        // } catch (error) {
+        //     console.error("Failed to get response from agent:", error);
+        //     toast({
+        //         variant: "destructive",
+        //         title: "Request Failed",
+        //         description: "Could not get a response from the training agent. Please try again.",
+        //     });
+        // } finally {
+        //     setIsLoading(false);
+        // }
     };
     
     return (
