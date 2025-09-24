@@ -1,16 +1,9 @@
 'use server';
-/**
- * @fileOverview Centralised Genkit configuration and AI model exports.
- */
+import {genkit, ai} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 
-import { configureGenkit } from '@genkit-ai/core';
-import { googleAI, gemini15Flash } from '@genkit-ai/googleai';
-
-// Initialize Genkit with the Google AI plugin
-configureGenkit({
-  plugins: [
-    googleAI(),
-  ],
+genkit({
+  plugins: [googleAI()],
 });
 
-export { gemini15Flash };
+export {ai};
