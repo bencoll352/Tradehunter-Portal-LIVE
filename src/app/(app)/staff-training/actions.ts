@@ -1,7 +1,7 @@
+
 'use server';
 
 import { salesTrainingAgent, type SalesTrainingInput, type SalesTrainingOutput } from '@/ai/flows/sales-training-flow';
-import { testFlow } from '@/ai/flows/test-flow';
 
 export async function getSalesTrainingResponseAction(input: SalesTrainingInput): Promise<SalesTrainingOutput> {
     try {
@@ -14,8 +14,4 @@ export async function getSalesTrainingResponseAction(input: SalesTrainingInput):
         }
         return { response: "An unknown error occurred while getting the agent's response." };
     }
-}
-
-export async function getTestResponseAction(input: string): Promise<string> {
-    return testFlow(input);
 }
